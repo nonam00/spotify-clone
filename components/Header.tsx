@@ -8,7 +8,7 @@ import { twMerge } from "tailwind-merge";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 import Button from "./Button";
-import useAuthModal from "@/hooks/useAuthModule";
+import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 import toast from "react-hot-toast";
 
