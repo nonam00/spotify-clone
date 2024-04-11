@@ -53,9 +53,11 @@ const UploadModal = () => {
         return;
       }
 
+      // guid generation
       const uniqueId = uniqid();
       
-      //Upload song
+      // TODO: replace with own API
+      // Upload song
       const {
         data: songData,
         error: songError

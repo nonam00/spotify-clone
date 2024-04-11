@@ -9,6 +9,7 @@ const useLoadImage = (song: Song) => {
     return null;
   }
 
+  // TODO: replace with own API
   const { data: imageData } = supabaseClient
     .storage
     .from("images")

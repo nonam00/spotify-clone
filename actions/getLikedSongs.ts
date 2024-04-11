@@ -12,7 +12,8 @@ const getLikedSongs = async (): Promise<Song[]> => {
       user
     }
   } = await supabase.auth.getUser();
-    
+  
+  // TODO: replace with own API
   const { data, error } = await supabase
     .from('liked_songs')
     .select('*, songs(*)')
