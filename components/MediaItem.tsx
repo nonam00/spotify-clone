@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import useLoadImage from "@/hooks/useLoadImage";
-import { Song } from "@/types";
+import { Song } from "@/types/types";
 
 interface MediaItemProps {
   data: Song
@@ -20,7 +20,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
     if (onClick) {
       return onClick(data.id);
     }
-
     // default turn on player
   }
   return (

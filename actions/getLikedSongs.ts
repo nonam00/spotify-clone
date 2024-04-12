@@ -1,8 +1,9 @@
-import { Song } from "@/types";
+import { Song } from "@/types/types";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
     
 const getLikedSongs = async (): Promise<Song[]> => {
+  // TODO: replace with own API
   const supabase = createServerComponentClient({
     cookies: cookies
   });
@@ -13,7 +14,6 @@ const getLikedSongs = async (): Promise<Song[]> => {
     }
   } = await supabase.auth.getUser();
   
-  // TODO: replace with own API
   const { data, error } = await supabase
     .from('liked_songs')
     .select('*, songs(*)')

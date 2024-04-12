@@ -1,9 +1,10 @@
-import { Song } from "@/types";
+import { Song } from "@/types/types";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
 
 const getSongsByUserId = async () => {
+  // TODO: replace with own API
   const supabase = createServerComponentClient({
     cookies: cookies
   });
@@ -18,7 +19,6 @@ const getSongsByUserId = async () => {
     return [];
   }
 
-  // TODO: replace with own API
   const { data, error } = await supabase
     .from('songs')
     .select('*')
