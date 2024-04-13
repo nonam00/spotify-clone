@@ -25,12 +25,13 @@ const Slider: React.FC<SliderProps> = ({
         touch-none
         w-full
         h-10
+        cursor-pointer
       "
       defaultValue={[1]}
       value={[value]}
       onValueChange={handleChange}
       max={1}
-      step={0.1}
+      step={0.01}
       aria-label="Volume"
     >
       <RadixSlider.Track

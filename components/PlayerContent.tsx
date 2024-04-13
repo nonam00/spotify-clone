@@ -62,6 +62,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     player.setId(previousSong);
   };
 
+  // TODO: replace with native <audio> component
   // songUrl doesn't updates dinamicly
   const [play, { pause, sound }] = useSound(
     songUrl,
