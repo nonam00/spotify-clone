@@ -7,5 +7,6 @@
         public string AvatarUrl { get; set; }
         public string BillingAddress { get; set; }
         public string PaymentMethod { get; set; }
+        public IList<LikedSong> LikedSongs { get; } = new List<LikedSong>();
     }
 }
