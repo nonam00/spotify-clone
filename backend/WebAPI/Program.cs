@@ -53,7 +53,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(config =>
+    app.UseSwaggerUI();/*config =>
     {
         foreach (var description in app.DescribeApiVersions())
         {
@@ -62,7 +62,7 @@ if (app.Environment.IsDevelopment())
                 description.GroupName.ToUpperInvariant());
             config.RoutePrefix = string.Empty;
         }
-    });
+    });*/
 }
 
 app.UseCustomExceptionHandler();
