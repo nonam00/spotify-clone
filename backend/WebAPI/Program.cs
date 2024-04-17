@@ -10,7 +10,7 @@ using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Addding and configurating AutoMapper
+// Adding and configurating AutoMapper
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
