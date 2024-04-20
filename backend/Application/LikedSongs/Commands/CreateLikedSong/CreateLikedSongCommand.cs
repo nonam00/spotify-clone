@@ -1,6 +1,10 @@
-﻿namespace Application.LikedSongs.Commands.CreateLikedSong
+﻿using MediatR;
+
+namespace Application.LikedSongs.Commands.CreateLikedSong
 {
-    public class CreateLikedSongCommand
+    public class CreateLikedSongCommand : IRequest<Guid>
     {
+        public Guid UserId { get; set; }
+        public Guid SongId { get; set; }
     }
 }

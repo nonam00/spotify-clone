@@ -12,7 +12,7 @@ namespace Application.LikedSongs.Queries.GetLikedSongList
         public string Title { get; set; }
         public string Author { get; set; }
 
-        // paths may be needed
+        // TODO: add file paths
 
         public void Mappings(Profile profile)
         {
