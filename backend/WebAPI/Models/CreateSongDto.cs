@@ -1,4 +1,4 @@
-using AutoMapper;
+    using AutoMapper;
 using System.ComponentModel.DataAnnotations;
 
 using Application.Common.Mappings;
@@ -30,5 +30,4 @@ namespace WebAPI.Models
                     opt => opt.MapFrom(dto => dto.ImagePath));
         }
     }
-
 }

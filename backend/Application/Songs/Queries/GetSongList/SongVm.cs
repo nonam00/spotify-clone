@@ -9,18 +9,22 @@ namespace Application.Songs.Queries.GetSongList
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
+        public string SongPath { get; set; }
+        public string ImagePath { get; set; }
 
-        // TODO: add file paths
-
-        public void Mappings(Profile profile)
+        public void Mapping(Profile profile)
         {
             profile.CreateMap<Song, SongVm>()
                 .ForMember(songVm => songVm.Id,
                     opt => opt.MapFrom(song => song.Id))
                 .ForMember(songVm => songVm.Title,
                     opt => opt.MapFrom(song => song.Title))
-                .ForMember(songVm => songVm.Id,
-                    opt => opt.MapFrom(song => song.Author));
+                .ForMember(songVm => songVm.Author,
+                    opt => opt.MapFrom(song => song.Author))
+                .ForMember(songVm => songVm.SongPath,
+                    opt => opt.MapFrom(song => song.SongPath))
+                .ForMember(songVm => songVm.ImagePath,
+                    opt => opt.MapFrom(song => song.ImagePath));
         }
     }
 }

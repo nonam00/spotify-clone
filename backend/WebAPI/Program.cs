@@ -38,7 +38,12 @@ builder.Services.AddCors(options =>
 
 // TODO: adding and configuration authentication by JWT Tokens
 
-// TODO: adding and Configuration API Versioning
+// Adding and Configuration API Versioning
+builder.Services.AddApiVersioning()
+                .AddApiExplorer(options =>
+                {
+                    options.GroupNameFormat = "'v'VVV";
+                });
 
 // Adding Swagger for testing http requests
 if (builder.Environment.IsDevelopment())
@@ -53,7 +58,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI();/*config =>
+    app.UseSwaggerUI(config =>
     {
         foreach (var description in app.DescribeApiVersions())
         {
@@ -62,7 +67,7 @@ if (app.Environment.IsDevelopment())
                 description.GroupName.ToUpperInvariant());
             config.RoutePrefix = string.Empty;
         }
-    });*/
+    });
 }
 
 app.UseCustomExceptionHandler();
