@@ -7,12 +7,31 @@ namespace WebAPI.Controllers
     [Route("{version:apiVersion}/files")]
     public class FilesController : BaseController
     {
+        private readonly string _songsPath;
+        private readonly string _imagesPath;
+
+        public FilesController()
+        {
+            _songsPath = Directory.GetCurrentDirectory() + "/Files/Songs/";
+            _imagesPath = Directory.GetCurrentDirectory() + "/Files/Images/";
+
+            if (!Directory.Exists(_songsPath))
+            {
+                Directory.CreateDirectory(_songsPath);
+            }
+
+            if (!Directory.Exists(_imagesPath))
+            {
+                Directory.CreateDirectory(_imagesPath);
+            }
+        }
+
         [HttpPost("upload/song")]
         public async Task<IActionResult> UploadSongFile(IFormFile song)
         {
             if (song != null)
             {
-                string path = "/Files/Songs/" + song.FileName;
+                string path = _songsPath + song.FileName;
 
                 using (var fs = new FileStream(path, FileMode.Create))
                 {
@@ -28,7 +47,7 @@ namespace WebAPI.Controllers
         {
             if (image != null)
             {
-                string path = "/Files/Images/" + image.FileName;
+                string path = _imagesPath + image.FileName;
 
                 using (var fs = new FileStream(path, FileMode.Create))
                 {
@@ -42,7 +61,7 @@ namespace WebAPI.Controllers
         [HttpGet("get/song")]
         public async Task<IActionResult> GetSongFile(string path)
         {
-            byte[] content = await System.IO.File.ReadAllBytesAsync("Files/Songs/" + path);
+            byte[] content = await System.IO.File.ReadAllBytesAsync(_songsPath + path);
 
             return File(content, "audio/*", path);
         }
@@ -50,7 +69,7 @@ namespace WebAPI.Controllers
         [HttpGet("get/image")]
         public async Task<IActionResult> GetImageFile(string path)
         {
-            byte[] content = await System.IO.File.ReadAllBytesAsync("Files/Images/" + path);
+            byte[] content = await System.IO.File.ReadAllBytesAsync(_imagesPath + path);
 
             return File(content, "audio/*", path);
         }

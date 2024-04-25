@@ -50,13 +50,13 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <param name="createSongDto">createSongDto object</param>
         /// <returns>Returns id (guid)</returns>
-        /// <respose code="200">Success</respose>
-        /// <response code="401">If the user is unathorized</response>
+        /// <respose code="201">Success</respose>
+        /// <response code="401">If the user is unauthorized</response>
         //[Authorize]
         [HttpPost("post")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Guid>> AddNewSong([FromBody] CreateSongDto createSongDto)
+        public async Task<ActionResult<Guid>> UploadNewSong([FromBody] CreateSongDto createSongDto)
         {
             var command = _mapper.Map<CreateSongCommand>(createSongDto);
             command.UserId = UserId;
