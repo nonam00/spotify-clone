@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.LikedSongs.Queries.GetLikedSongList;
@@ -19,8 +20,9 @@ namespace WebAPI.Controllers
 
         // TODO: documentation
         [HttpGet("get")]
-        //[Authorize]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
         {
             var query = new GetLikedSongListQuery
@@ -33,8 +35,9 @@ namespace WebAPI.Controllers
 
         // TODO: documentation
         [HttpPost("like")]
-        //[Authorize]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateLiked(
             [FromBody] CreateLikedSongDto likedDto)
         {
@@ -46,8 +49,9 @@ namespace WebAPI.Controllers
 
         // TODO: documentation
         [HttpDelete("delete/{songId}")]
-        //[Authorize]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteLiked(Guid songId)
         {
             var command = new DeleteLikedSongCommand

@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using System.Text;
 
 using Application;
 using Application.Interfaces;
@@ -39,7 +43,36 @@ builder.Services.AddCors(options =>
     });
 });
 
-// TODO: adding and configuration authentication by JWT Tokens
+// Adding and configuration authentication by JWT Tokens
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    builder.Configuration
+                        .GetSection(nameof(JwtOptions))
+                        .Get<JwtOptions>()!
+                        .SecretKey))
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["cookies"];
+
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Adding and Configuration API Versioning
 builder.Services.AddApiVersioning()
@@ -78,9 +111,15 @@ app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 
-// TODO: add auth
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Strict,
+    HttpOnly = HttpOnlyPolicy.Always,
+    Secure = CookieSecurePolicy.Always
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

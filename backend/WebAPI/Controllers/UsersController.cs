@@ -17,6 +17,7 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult<Guid>> Register([FromBody] RegisterDto registerDto)
         {
             var command = _mapper.Map<CreateUserCommand>(registerDto);
@@ -30,7 +31,9 @@ namespace WebAPI.Controllers
         {
             var query = _mapper.Map<LoginQuery>(loginDto);
             var token = await Mediator.Send(query);
-            Console.WriteLine(token);
+
+            HttpContext.Response.Cookies.Append("cookies", token);
+
             return Ok(token);
         }
     }

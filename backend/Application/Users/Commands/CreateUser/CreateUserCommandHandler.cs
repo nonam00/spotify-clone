@@ -20,6 +20,13 @@ namespace Application.Users.Commands.CreateUser
         public async Task<Guid> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
+            var check = _dbContext.Users.FirstOrDefault(u => u.Email == request.Email);
+
+            if (check != null)
+            {
+                throw new Exception("User with this email already exits");
+            }
+
             var hashedPassword = _passwordHasher.Generate(request.Password);
 
             var user = new User()
