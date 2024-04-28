@@ -8,19 +8,20 @@ using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 
 using WebAPI.Models;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
     [ApiVersionNeutral]
     [Produces("application/json")]
     [Route("{version:apiVersion}/liked")]
+    [Authorize]
     public class LikedController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;
 
         // TODO: documentation
         [HttpGet("get")]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
@@ -35,7 +36,6 @@ namespace WebAPI.Controllers
 
         // TODO: documentation
         [HttpPost("like")]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateLiked(
@@ -49,7 +49,6 @@ namespace WebAPI.Controllers
 
         // TODO: documentation
         [HttpDelete("delete/{songId}")]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteLiked(Guid songId)

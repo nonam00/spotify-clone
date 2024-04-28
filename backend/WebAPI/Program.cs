@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
 
@@ -11,6 +13,7 @@ using Application.Common.Mappings;
 using Infrastructure;
 using Persistence;
 
+using WebAPI;
 using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,8 +48,10 @@ builder.Services.AddCors(options =>
 
 // Adding and configuration authentication by JWT Tokens
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    .AddJwtBearer("Bearer", options =>
     {
+        var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+
         options.TokenValidationParameters = new()
         {
             ValidateIssuer = false,
@@ -54,11 +59,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    builder.Configuration
-                        .GetSection(nameof(JwtOptions))
-                        .Get<JwtOptions>()!
-                        .SecretKey))
+                Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
         };
 
         options.Events = new JwtBearerEvents
@@ -67,12 +68,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 context.Token = context.Request.Cookies["cookies"];
 
-                return Task.CompletedTask;
+                return Task.CompletedTask;  
             }
         };
-    });
 
-builder.Services.AddAuthorization();
+        options.RequireHttpsMetadata = false;
+    });
 
 // Adding and Configuration API Versioning
 builder.Services.AddApiVersioning()
@@ -84,6 +85,7 @@ builder.Services.AddApiVersioning()
 // Adding Swagger for testing http requests
 if (builder.Environment.IsDevelopment())
 {
+    builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
     builder.Services.AddSwaggerGen();
 }
 

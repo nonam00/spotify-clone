@@ -15,6 +15,6 @@ namespace WebAPI.Controllers
 
         internal Guid UserId => !User.Identity!.IsAuthenticated
             ? Guid.Empty
-            : Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            : Guid.Parse(User.Claims.First(c => c.Type == "userId").Value);
     }
 }
