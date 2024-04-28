@@ -4,6 +4,7 @@ using Application;
 using Application.Interfaces;
 using Application.Common.Mappings;
 
+using Infrastructure;
 using Persistence;
 
 using WebAPI.Middleware;
@@ -20,12 +21,14 @@ builder.Services.AddAutoMapper(config =>
 // Adding application level via dependency injection
 builder.Services.AddApplication();
 
+builder.Services.AddInfrastructure(builder.Configuration);
+
 // Adding persistence (data base) level via dependency injection
 builder.Services.AddPersistence(builder.Configuration);
 
 builder.Services.AddControllers();
 
-// Setting cors policy for local responds
+// Setting CORS policy for local responds
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", policy =>

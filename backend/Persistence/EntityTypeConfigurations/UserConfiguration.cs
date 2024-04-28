@@ -10,6 +10,7 @@ namespace Persistence.EntityTypeConfigurations
         {
             builder.HasKey(u => u.Id);
             builder.HasIndex(u => u.Id).IsUnique();
+            builder.HasIndex(u => u.Email).IsUnique();
         }
     }
 }

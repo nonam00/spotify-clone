@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 using Application.Common.Behaviors;
+using Application.Interfaces.Auth;
 
 namespace Application
 {
