@@ -1,13 +1,9 @@
-﻿using Application.Interfaces;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Application.Interfaces;
 
 namespace Application.LikedSongs.Queries.GetLikedSongList
 {
@@ -30,7 +26,7 @@ namespace Application.LikedSongs.Queries.GetLikedSongList
                 .Where(liked => liked.UserId == request.UserId)
                 .OrderByDescending(liked => liked.CreatedAt)
                 .ProjectTo<LikedSongVm>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return new LikedSongListVm { LikedSongs = songsQuery };
         }

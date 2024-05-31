@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 
-using Domain;
 using Application.Common.Mappings;
-using Application.Songs.Queries.GetSongList;
+using Domain;
 
-namespace Application.LikedSongs.Queries.GetLikedSongList
+namespace Application.LikedSongs.Queries
 {
     public class LikedSongVm : IMapWith<LikedSong>
     {
