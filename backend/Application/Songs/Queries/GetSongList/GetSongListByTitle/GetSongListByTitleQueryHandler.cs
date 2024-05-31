@@ -23,7 +23,7 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
         {
             var songsQuery = await _dbContext.Songs
                 .Where(song => song.Title.StartsWith(request.SearchString)) // TODO: replace with regex
-                .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
+                .ProjectTo<SongVm>(_mapper.ConfigurationProvider) 
                 .ToListAsync(cancellationToken);
 
             return new SongListVm { Songs = songsQuery };

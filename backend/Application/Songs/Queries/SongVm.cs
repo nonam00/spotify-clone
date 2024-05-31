@@ -2,7 +2,7 @@
 using Application.Common.Mappings;
 using AutoMapper;
 
-namespace Application.Songs.Queries.GetSongList
+namespace Application.Songs.Queries
 {
     public class SongVm : IMapWith<Song>
     {
