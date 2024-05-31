@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.Users.Commands.CreateUser;
+using Application.Users.Queries;
 using Application.Users.Queries.Login;
+using Application.Users.Queries.GetUserInfo;
 
 using WebAPI.Models;
-using Asp.Versioning;
 
 namespace WebAPI.Controllers
 {
@@ -25,16 +27,28 @@ namespace WebAPI.Controllers
             return Ok(userId);
         }
 
-        [HttpGet("login")]
+        [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<string>> Login([FromQuery] LoginDto loginDto)
+        public async Task<ActionResult<UserVm>> Login([FromBody] LoginDto loginDto)
         {
             var query = _mapper.Map<LoginQuery>(loginDto);
-            var token = await Mediator.Send(query);
+            var userVm = await Mediator.Send(query);
 
-            HttpContext.Response.Cookies.Append("cookies", token);
+            HttpContext.Response.Cookies.Append("token", userVm.AccessToken);
 
-            return Ok(token);
+            return Ok(userVm);
+        }
+
+        [HttpGet("info")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<UserInfo>> GetUserInfo()
+        {
+            var query = new GetUserInfoQuery()
+            {
+                UserId = UserId
+            };
+            var info = await Mediator.Send(query);
+            return Ok(info);
         }
     }
 }
