@@ -20,7 +20,6 @@ const Box: React.FC<BoxProps> = ({
     )}>
       {children}
     </div>
-  
   );
 }
  
