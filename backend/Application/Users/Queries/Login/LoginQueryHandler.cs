@@ -1,33 +1,38 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using MediatR;
 
+using Domain;
 using Application.Interfaces.Auth;
 using Application.Interfaces;
 
 namespace Application.Users.Queries.Login
 {
-    public class LoginQueryHandler : IRequestHandler<LoginQuery, string>
+    public class LoginQueryHandler : IRequestHandler<LoginQuery, UserVm>
     {
         private readonly ISongsDbContext _dbContext;
+        private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtProvider _jwtProvider;
 
         public LoginQueryHandler(
             ISongsDbContext dbContext,
+            IMapper mapper,
             IPasswordHasher passwordHasher,
             IJwtProvider jwtProvider)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtProvider = jwtProvider;
         }
 
-        public async Task<string> Handle(LoginQuery request,
+        public async Task<UserVm> Handle(LoginQuery request,
             CancellationToken cancellationToken)
         {
             var user = await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
+                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
             if(user == null)
             {
@@ -43,7 +48,13 @@ namespace Application.Users.Queries.Login
 
             var token = _jwtProvider.GenerateToken(user);
 
-            return token;
+            var userVm = new UserVm()
+            {
+                AccessToken = token,
+                UserInfo = _mapper.Map<User, UserInfo>(user)
+            };
+
+            return userVm;
         }
     }
 }
