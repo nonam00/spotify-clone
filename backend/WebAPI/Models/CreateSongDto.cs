@@ -1,4 +1,4 @@
-    using AutoMapper;
+using AutoMapper;
 using System.ComponentModel.DataAnnotations;
 
 using Application.Common.Mappings;

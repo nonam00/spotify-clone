@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Songs.Commands.CreateSong;
 using Application.Songs.Queries.GetSongList;
 using Application.Songs.Queries.GetSongList.GetSongListByTitle;
+using Application.Songs.Queries.GetSongList.GetAllSongs;
+using Application.Songs.Queries.GetSongById;
+using Application.Songs.Queries;
 
 using WebAPI.Models;
 
@@ -16,6 +19,27 @@ namespace WebAPI.Controllers
     public class SongsController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;
+
+        [HttpGet("get/all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<SongListVm>> GetAllSongs()
+        {
+            var query = new GetAllSongsQuery();
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
+
+        [HttpGet("get/{songId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<SongVm>> GetSongById(Guid songId)
+        {
+            var query = new GetSongByIdQuery
+            {
+                SongId = songId
+            };
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
 
         /// <summary>
         /// Gets songs satisfying the search request
@@ -34,7 +58,6 @@ namespace WebAPI.Controllers
             {
                 SearchString = searchString
             };
-
             var vm = await Mediator.Send(query);
             return Ok(vm);
         }
