@@ -1,27 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSessionContext, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import useAuthModal from "@/hooks/useAuthModal";
-
+import { useUser } from "@/hooks/useUser";
 import Modal from "./Modal";
 
 const AuthModal = () => {
-  const supabaseClient = useSupabaseClient();
   const router = useRouter();
-  const { session } = useSessionContext(); 
-  const { onClose, isOpen} = useAuthModal();
+  const { onClose, isOpen } = useAuthModal();
+  const user = useUser();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");  
 
   useEffect(() => {
-    if(session) {
+    if(user.isAuth) {
       router.refresh();
       onClose();
     }
-  }, [session, router, onClose]);
+  }, [user.isAuth, router, onClose]);
 
 
   const onChange = (open: boolean) => {
@@ -29,7 +27,8 @@ const AuthModal = () => {
       onClose();
     }
   }
-
+  
+  // TODO: styles for auth form
   return (
     <Modal
       title="Welcome back"
@@ -37,23 +36,26 @@ const AuthModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <Auth
-        theme="dark"
-        magicLink
-        providers={["github"]}
-        supabaseClient={supabaseClient}
-        appearance={{
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                brand: '#404040',
-                brandAccent: '#22c55e'
-              }
-            }
-          }
-        }} 
+      <input
+        onChange={(e) => setEmail(e.target.value)}
+        value={email}
+        type="text"
+        placeholder="email"
       />
+      <input
+        onChange={(e) => setPassword(e.target.value)}
+        value={password}
+        type="password"
+        placeholder="password"
+      />
+      <button
+        onClick={async () => await user.login(email, password)}
+      >
+        Login
+      </button>
+      <button onClick={async () => await user.register(email, password)}>
+        Register
+      </button>
     </Modal>
   );
 };
