@@ -1,21 +1,32 @@
-import { useSupabaseClient} from "@supabase/auth-helpers-react";
+import $api from "@/api/http";
 
 import { Song } from "@/types/types";
+import { useEffect, useState } from "react";
 
 const useLoadImage = (song: Song) => {
-  // TODO: replace with own API
-  const supabaseClient = useSupabaseClient();
+  const [href, setHref] = useState<string | null>(null);
+  const path = song.imagePath;
+  useEffect(() => {
+    if (!song) {
+      return;
+    }
+    const getUrl = async() => {
+      try {
+        await $api.get(`/files/get/image/${path}`, {
+          responseType: "blob"
+        })
+        .then(response => {
+          setHref(URL.createObjectURL(response.data));
+        });
+      } catch(error) {
+        console.log(error);
+      }
+    }
 
-  if (!song) {
-    return null;
-  }
+    getUrl();
+  }, [song, path]);
 
-  const { data: imageData } = supabaseClient
-    .storage
-    .from("images")
-    .getPublicUrl(song.image_path);
-  
-  return imageData.publicUrl;
+  return href;
 };
 
 export default useLoadImage;

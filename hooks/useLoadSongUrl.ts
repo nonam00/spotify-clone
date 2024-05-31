@@ -1,20 +1,31 @@
+import { useState, useEffect } from "react";
+
+import $api from "@/api/http";
 import { Song } from "@/types/types";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 const useLoadSongUrl = (song: Song) => {
-  // TODO: replace with own API
-  const supabaseClient = useSupabaseClient();
+  const [href, setHref] = useState<string | null>(null);
+  useEffect(() => {
+    if (!song) {
+      return;
+    }
+    const getUrl = async() => {
+      try {
+        await $api.get(`/files/get/song/${song.songPath}`, {
+          responseType: "blob"
+        })
+        .then(response => {
+          setHref(URL.createObjectURL(response.data));
+        });
+      } catch(error) {
+        console.log(error);
+      }
+    }
 
-  if (!song) {
-    return '';
-  }
+    getUrl();
+  }, [song]);
 
-  const { data: songData } = supabaseClient
-    .storage
-    .from('songs')
-    .getPublicUrl(song.song_path);
-
-  return songData.publicUrl;
+  return href;
 }
 
 export default useLoadSongUrl;
