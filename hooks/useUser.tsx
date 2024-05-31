@@ -1,15 +1,16 @@
-import { User } from "@supabase/auth-helpers-nextjs";
-import { useSessionContext, useUser as useSupaUser } from "@supabase/auth-helpers-react";
 import { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
-import { Subscription, UserDetails } from "@/types/types";
+import AuthService from "@/api/services/AuthService";
+import { UserDetails } from "@/types/types";
 
 type UserContextType = {
-  accessToken: string | null
-  user: User | null;
+  isAuth: boolean
   userDetails: UserDetails | null;
   isLoading: boolean;
-  subscription: Subscription | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(
@@ -21,57 +22,69 @@ export interface Props {
 }
 
 export const MyUserContextProvider = (props: Props) => {
-  const {
-    session,
-    isLoading: isLoadingUser,
-    supabaseClient: supabase
-  } = useSessionContext();
-  const user = useSupaUser();
-  const accessToken = session?.access_token ?? null;
+  const [isAuth, setIsAuth] = useState<boolean>(false); 
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
 
-  const getUserDetails = async () => supabase.from('users').select('*').single();
-  const getSubscription = async () =>
-    supabase
-      .from('subscriptions')
-      .select('*, prices(*, products(*))' )
-      .in('status', ['trialing', 'active'])
-      .single();
+  const login = async (email: string, password: string) => {
+    try {
+      const { data } = await AuthService.login(email, password);
+      Cookies.set("token", data.accessToken);
+      setIsAuth(true);
+      setUserDetails(data.user);
+    } catch (e: any) {
+      console.log(e.message);     
+    }
+  }
+
+  const register = async (email: string, password: string) => {
+    try {
+      const response = await AuthService.registration(email, password);
+      console.log(response);
+    } catch (e: any) {
+      console.log(e.response?.data?.message);     
+    }
+  }
+
+  const logout = async () => {
+    try {
+      Cookies.remove("token");
+      setIsAuth(false);
+      setUserDetails(null); 
+    } catch (e: any) {
+      console.log(e?.message);     
+    }
+  }
 
   useEffect(() => {
-    if(user && !isLoadingData && !userDetails && !subscription) {
+    const accessToken = Cookies.get("token");
+    if (!isAuth && accessToken !== null && accessToken !== undefined) {
       setIsLoadingData(true);
-
-      Promise.allSettled([getUserDetails(), getSubscription()]).then(
-        (results) => {
-          const userDetailsPromise = results[0];
-          const subscriptionPromise = results[1];
-
-          if(userDetailsPromise.status === 'fulfilled') {
-            setUserDetails(userDetailsPromise.value.data as UserDetails);
-          }
-
-          if(subscriptionPromise.status === 'fulfilled') {
-            setSubscription(subscriptionPromise.value.data as Subscription);
-          }
-          
-          setIsLoadingData(false);
+      Promise.allSettled([AuthService.getUserInfo()]).then(
+        async (result) => {
+          try {
+            localStorage.setItem("token", accessToken);
+            const response = await AuthService.getUserInfo();
+            setUserDetails(response.data.user);
+            setIsAuth(true);
+        } catch(e: any) {
+          console.log(e?.message);
         }
-      );
-    } else if (!user && !isLoadingUser && !isLoadingData) {
-      setUserDetails(null);
-      setSubscription(null);
+       }
+      )
+      setIsLoadingData(false);
     }
-  }, [user, isLoadingUser]);
+
+    
+  }, [isAuth, isLoadingData]);
 
   const value = {
-    accessToken,
-    user,
+    isAuth,
     userDetails,
-    isLoading: isLoadingUser || isLoadingData,
-    subscription
+    isLoading: isLoadingData,
+    login,
+    register,
+    logout
   };
 
   return <UserContext.Provider value={value} {...props} />;
@@ -85,4 +98,3 @@ export const useUser = () => {
 
   return context;
 };
-
