@@ -27,38 +27,51 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("upload/song")]
-        public async Task<IActionResult> UploadSongFile(IFormFile song)
+        public async Task<ActionResult> UploadSongFile(IFormFile song)
         {
             if (song != null)
             {
-                string path = _songsPath + song.FileName;
-
-                using (var fs = new FileStream(path, FileMode.Create))
+                string fileName = Guid.NewGuid().ToString() + song.FileName;
+                try
                 {
-                    await song.CopyToAsync(fs);
+                    using (var fs = new FileStream(_songsPath + fileName, FileMode.Create))
+                    {
+                        await song.CopyToAsync(fs);
+                    }
+                    return Ok(fileName);
+                }
+                catch (Exception exception)
+                {
+                    return StatusCode(500);
                 }
             }
+            return BadRequest();
 
-            return Ok();
         }
 
         [HttpPost("upload/image")]
-        public async Task<IActionResult> UploadImageFile(IFormFile image)
+        public async Task<ActionResult> UploadImageFile(IFormFile image)
         {
             if (image != null)
             {
-                string path = _imagesPath + image.FileName;
-
-                using (var fs = new FileStream(path, FileMode.Create))
+                string fileName = Guid.NewGuid().ToString() + image.FileName;
+                try
                 {
-                    await image.CopyToAsync(fs);
+                    using (var fs = new FileStream(_imagesPath + fileName, FileMode.Create))
+                    {
+                        await image.CopyToAsync(fs);
+                    }
+                    return Ok(fileName);
                 }
-                return Ok();
+                catch (Exception exception)
+                {
+                    return StatusCode(500);
+                }
             }
             return BadRequest();
         }
 
-        [HttpGet("get/song")]
+        [HttpGet("get/song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
         {
             byte[] content = await System.IO.File.ReadAllBytesAsync(_songsPath + path);
@@ -66,12 +79,12 @@ namespace WebAPI.Controllers
             return File(content, "audio/*", path);
         }
 
-        [HttpGet("get/image")]
+        [HttpGet("get/image/{path}")]
         public async Task<IActionResult> GetImageFile(string path)
         {
             byte[] content = await System.IO.File.ReadAllBytesAsync(_imagesPath + path);
 
-            return File(content, "audio/*", path);
+            return File(content, "image/*", path);
         }
 
     }
