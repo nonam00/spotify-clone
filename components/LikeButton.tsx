@@ -1,13 +1,17 @@
 "use client";
 
-import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/navigation";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import Cookie from "js-cookie";
+
+import $api from "@/api/http";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
+
+import { Song } from "@/types/types";
 
 interface LikeButtonProps {
   songId: string
@@ -17,69 +21,67 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   songId
 }) => {
   const router = useRouter();
-  const { supabaseClient } = useSessionContext();
   
   const authModal = useAuthModal();
-  const { user } = useUser();
+  const user = useUser();
 
   const [isLiked, setIsLiked] = useState<boolean>(false);
   
   useEffect(() => {
-    if(!user?.id) {
+    if(!user.isAuth) {
       return;
     }
 
     const fetchData = async () => {
-      const { data, error } = await supabaseClient
-        .from('liked_songs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('song_id', songId)
-        .single();
-
-      if (!error && data) {
-        setIsLiked(true);
+      try {
+        const { data } = await $api.get<Song>(`/liked/get/${songId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookie.get("token")}`
+          }
+        });
+        if (data) {
+          setIsLiked(true);
+        }
+      } catch(error) {
+        console.log(error);
       }
     };
 
     fetchData();
-  }, [songId, supabaseClient, user?.id]);
+  }, [songId, user.isAuth]);
 
   const Icon = isLiked? AiFillHeart : AiOutlineHeart;
 
   const handleLike = async () => {
-    if (!user) {
+    if (!user.isAuth) {
       return authModal.onOpen()
     }
 
     if (isLiked) {
-      const { error } = await supabaseClient
-        .from('liked_songs')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('song_id', songId);
-
-      if (error) {
-        toast(error.message);
-      } else {
+      try {
+        await $api.delete(`/liked/delete/${songId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookie.get("token")}`
+          }
+        })
         setIsLiked(false);
+        toast("Like deleted");
+      } catch(error: any) {
+        toast(error?.message);
       }
     } else {
-      const { error } = await supabaseClient
-        .from('liked_songs')
-        .insert({
-          song_id: songId,
-          user_id: user.id
+      try {
+        const { data } = await $api.post<string>(`/liked/like/${songId}`, {
+          headers: {
+            Authorization: `Bearer ${Cookie.get("token")}`
+          }
         });
-
-      if (error) {
-        toast(error.message);
-      } else {
         setIsLiked(true);
         toast.success('Liked');
+      } catch (error: any) {
+        toast(error?.message);
       }
     }
-
     router.refresh();
   }
   return (
