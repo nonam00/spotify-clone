@@ -10,6 +10,7 @@ namespace Persistence
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
+            // getting connection string from api configuration and the password for database from user secret file
             var connectionString = configuration.GetConnectionString("PostgresDb") + configuration["DbPassword"];
 
             services.AddDbContext<SongsDbContext>(options =>

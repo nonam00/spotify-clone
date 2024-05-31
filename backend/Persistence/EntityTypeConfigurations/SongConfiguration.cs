@@ -10,9 +10,6 @@ namespace Persistence.EntityTypeConfigurations
         public void Configure(EntityTypeBuilder<Song> builder)
         {
             builder.HasKey(song => song.Id);
-            builder.HasIndex(song => song.Id).IsUnique();
-
-            // TODO: configure foreign relations, cascade update and delete relations
         }
     }
 }
