@@ -1,6 +1,6 @@
 ﻿namespace WebAPI.Middleware
 {
-    public static class CustomExceptionHandlerMiddlewareExtentions
+    public static class CustomExceptionHandlerMiddlewareExtensions
     {
         public static IApplicationBuilder UseCustomExceptionHandler(
             this IApplicationBuilder builder)

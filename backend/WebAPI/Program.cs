@@ -25,12 +25,13 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile(new AssemblyMappingProfile(typeof(ISongsDbContext).Assembly));
 });
 
-// Adding application level via dependency injection
+// Adding application layer via dependency injection
 builder.Services.AddApplication();
 
+// Adding infrastructure layer via dependency injection
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Adding persistence (data base) level via dependency injection
+// Adding persistence layer via dependency injection
 builder.Services.AddPersistence(builder.Configuration);
 
 builder.Services.AddControllers();
@@ -40,9 +41,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:3000", "http://localhost:1")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -50,10 +52,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer("Bearer", options =>
     {
+        // Getting options for JWT cript from configuration (user secret)
         var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
 
         options.TokenValidationParameters = new()
         {
+            // TODO: replace with real issuer and real audience 
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateLifetime = true,
@@ -61,7 +65,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
         };
-
+        
+        // Saving JWT token into cookies
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -115,9 +120,9 @@ app.UseCors("MyPolicy");
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    MinimumSameSitePolicy = SameSiteMode.Strict,
+    MinimumSameSitePolicy = SameSiteMode.None,
     HttpOnly = HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.Always
+    Secure = CookieSecurePolicy.SameAsRequest
 });
 
 app.UseAuthentication();
