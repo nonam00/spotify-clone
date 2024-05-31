@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.LikedSongs.Queries.GetLikedSongList;
+using Application.LikedSongs.Queries.GetLikedSong;
 using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 
-using WebAPI.Models;
-using System.Security.Claims;
+using Application.LikedSongs.Queries;
 
 namespace WebAPI.Controllers
 {
@@ -34,15 +34,31 @@ namespace WebAPI.Controllers
             return Ok(vm);
         }
 
+        [HttpGet("get/{songId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LikedSongVm?>> GetLikedSong(Guid songId)
+        {
+            var query = new GetLikedSongQuery()
+            {
+                UserId = UserId,
+                SongId = songId
+            };
+            var vm = await Mediator.Send(query);
+            return vm;
+        }
+
         // TODO: documentation
-        [HttpPost("like")]
+        [HttpPost("like/{songId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> CreateLiked(
-            [FromBody] CreateLikedSongDto likedDto)
+        public async Task<IActionResult> CreateLiked(Guid songId)
         {
-            var command = _mapper.Map<CreateLikedSongCommand>(likedDto);
-            command.UserId = UserId;
+            var command = new CreateLikedSongCommand
+            {
+                UserId = UserId,
+                SongId = songId
+            };
             var likedId = await Mediator.Send(command);
             return Ok(likedId);
         }
