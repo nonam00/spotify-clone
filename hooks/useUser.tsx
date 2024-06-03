@@ -29,7 +29,6 @@ export const MyUserContextProvider = (props: Props) => {
   const login = async (email: string, password: string) => {
     try {
       const { data } = await AuthService.login(email, password);
-      Cookies.set("token", data.accessToken);
       setIsAuth(true);
       setUserDetails(data.user);
     } catch (e: any) {
@@ -95,6 +94,5 @@ export const useUser = () => {
   if (context === undefined) {
     throw new Error(`useUser must be used within a MyUserContextProvider.`);
   }
-
   return context;
 };

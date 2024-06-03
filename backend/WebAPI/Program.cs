@@ -71,7 +71,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["cookies"];
+                context.Token = context.Request.Cookies["token"];
 
                 return Task.CompletedTask;  
             }
@@ -121,7 +121,7 @@ app.UseCors("MyPolicy");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
-    HttpOnly = HttpOnlyPolicy.Always,
+    HttpOnly = HttpOnlyPolicy.None,
     Secure = CookieSecurePolicy.SameAsRequest
 });
 
