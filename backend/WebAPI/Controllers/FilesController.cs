@@ -27,11 +27,25 @@ namespace WebAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Uploads the song file
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     POST /upload/song
+        /// 
+        /// </remarks>
+        /// <response code="200">Success</response>
+        /// <response code="401">If user is unauthorized</response>
         [Authorize]
         [HttpPost("upload/song")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> UploadSongFile(IFormFile song)
         {
             if (song != null)
@@ -54,6 +68,18 @@ namespace WebAPI.Controllers
 
         }
 
+        /// <summary>
+        /// Uploads the image file
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     POST /upload/image
+        /// 
+        /// </remarks>
+        /// <response code="200">Success</response>
+        /// <response code="401">If user is unauthorized</response>
         [Authorize]
         [HttpPost("upload/image")]
         [Produces("application/json")]
@@ -78,6 +104,19 @@ namespace WebAPI.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Gets the song file by path
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     GET /get/song/{path}
+        /// 
+        /// </remarks>
+        /// <param name="path">Filename</param>
+        /// <response code="200">Success</response>
+        /// <response code="401">If user is unauthorized</response>
         [Authorize]
         [HttpGet("get/song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
@@ -87,6 +126,18 @@ namespace WebAPI.Controllers
             return File(content, "audio/*", path);
         }
 
+        /// <summary>
+        /// Gets the image file by path
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     GET /get/image/{path}
+        /// 
+        /// </remarks>
+        /// <param name="path">Filename</param>
+        /// <response code="200">Success</response>
         [HttpGet("get/image/{path}")]
         public async Task<IActionResult> GetImageFile(string path)
         {

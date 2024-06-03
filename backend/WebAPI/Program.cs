@@ -91,7 +91,12 @@ builder.Services.AddApiVersioning()
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(config =>
+    {
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        config.IncludeXmlComments(xmlPath);
+    });
 }
 
 var app = builder.Build();

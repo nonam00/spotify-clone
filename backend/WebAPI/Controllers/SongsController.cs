@@ -21,6 +21,17 @@ namespace WebAPI.Controllers
     {
         private readonly IMapper _mapper = mapper;
 
+        /// <summary>
+        /// Gets ALL songs data
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /get/all
+        /// 
+        /// </remarks>
+        /// <returns>Returns SongListVm</returns>
+        /// <response code="200">Success</response>
         [HttpGet("get/all")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetAllSongs()
@@ -30,6 +41,18 @@ namespace WebAPI.Controllers
             return Ok(vm);
         }
 
+        /// <summary>
+        /// Gets certain song by ID
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /get/{songId}
+        /// 
+        /// </remarks>
+        /// <param name="songId">Song ID</param>
+        /// <returns>Returns SongVm</returns>
+        /// <response code="200">Success</response>
         [HttpGet("get/{songId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongVm>> GetSongById(Guid songId)
@@ -46,11 +69,14 @@ namespace WebAPI.Controllers
         /// Gets songs satisfying the search request
         /// </summary>
         /// <remarks>
-        /// GET /search/hysteria
+        /// Sample request:
+        /// 
+        ///     GET /search/hysteria
+        /// 
         /// </remarks>
         /// <param name="searchString">User search query by song title</param>
         /// <returns>Returns SongListVm</returns>
-        /// <respose code="200">Success</respose>
+        /// <response code="200">Success</response>
         [HttpGet("search/{searchString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetSongListByTitle(string searchString)
@@ -67,14 +93,19 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <remarks>
         /// Sample request:
-        /// POST /post
-        /// {
+        /// 
+        ///     POST /post
+        ///     {
+        ///         title: "Hysteria"
+        ///         author: "Muse"
+        ///         songPath: "hysteria.flac"
+        ///         imagePath: "absolution.jpeg"
+        ///     }
         ///     
-        /// }
         /// </remarks>
         /// <param name="createSongDto">createSongDto object</param>
-        /// <returns>Returns id (guid)</returns>
-        /// <respose code="201">Success</respose>
+        /// <returns>Returns created song ID</returns>
+        /// <response code="201">Success</response>
         /// <response code="401">If the user is unauthorized</response>
         [Authorize]
         [HttpPost("post")]
