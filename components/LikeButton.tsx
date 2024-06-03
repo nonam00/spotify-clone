@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import Cookie from "js-cookie";
+import Cookies from "js-cookie";
 
 import $api from "@/api/http";
 
@@ -36,7 +36,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       try {
         const { data } = await $api.get<Song>(`/liked/get/${songId}`, {
           headers: {
-            Authorization: `Bearer ${Cookie.get("token")}`
+            Authorization: `Bearer ${Cookies.get("token")}`,
           }
         });
         if (data) {
@@ -61,26 +61,26 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       try {
         await $api.delete(`/liked/delete/${songId}`, {
           headers: {
-            Authorization: `Bearer ${Cookie.get("token")}`
+            Authorization: `Bearer ${Cookies.get("token")}`
           }
-        })
+        });
         setIsLiked(false);
         toast("Like deleted");
       } catch(error: any) {
         toast(error?.message);
       }
     } else {
-      try {
-        const { data } = await $api.post<string>(`/liked/like/${songId}`, {
+        await fetch(`https:localhost:7025/1/liked/like/${songId}`, {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${Cookie.get("token")}`
+            "Authorization": `Bearer ${Cookies.get("token")}`
           }
-        });
-        setIsLiked(true);
-        toast.success('Liked');
-      } catch (error: any) {
-        toast(error?.message);
-      }
+        })
+          .then(() => {
+            setIsLiked(true);
+            toast.success('Liked');
+          })
+          .catch((error: Error) => toast(error.message));
     }
     router.refresh();
   }

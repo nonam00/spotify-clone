@@ -12,10 +12,10 @@ using Application.LikedSongs.Queries;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [ApiVersionNeutral]
     [Produces("application/json")]
     [Route("{version:apiVersion}/liked")]
-    [Authorize]
     public class LikedController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;

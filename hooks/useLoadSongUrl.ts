@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
-import $api from "@/api/http";
 import { Song } from "@/types/types";
 
 const useLoadSongUrl = (song: Song) => {
@@ -10,18 +10,20 @@ const useLoadSongUrl = (song: Song) => {
       return;
     }
     const getUrl = async() => {
-      try {
-        await $api.get(`/files/get/song/${song.songPath}`, {
-          responseType: "blob"
+      await fetch(`https:localhost:7025/1/files/get/song/${song.songPath}`, {
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${Cookies.get("token")}`
+        }
+      })
+        .then((response) => response.blob())
+        .then((response) => {
+          setHref(URL.createObjectURL(response));
         })
-        .then(response => {
-          setHref(URL.createObjectURL(response.data));
+        .catch((error: Error) => {
+          console.log(error.message)
         });
-      } catch(error) {
-        console.log(error);
       }
-    }
-
     getUrl();
   }, [song]);
 

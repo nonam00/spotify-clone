@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
+import Cookie from "js-cookie";
 import $api from "@/api/http";
 
 import { useUser } from "@/hooks/useUser";
@@ -57,12 +57,12 @@ const UploadModal = () => {
       // TODO:cache control
       // Upload song file
       try {
-        const { data } = await $api.post("/files/upload/song",{ song: songFile }, {
+        const { data } = await $api.post("/files/upload/song", { song: songFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
         });
-        setSongPath(data);
+        setSongPath(data.path);
       } catch (e){
         setIsLoading(false);
         return toast.error('Failed song upload.')
@@ -75,7 +75,7 @@ const UploadModal = () => {
             "Content-Type": "multipart/form-data"
           }
         });
-        setImagePath(data);
+        setImagePath(data.path);
       } catch {
         setIsLoading(false);
         return toast.error('Failed image upload.')
@@ -88,6 +88,10 @@ const UploadModal = () => {
           author: values.author,
           imagePath: imagePath,
           songPath: songPath
+        }, {
+          headers: {
+            Authorization: `Bearer ${Cookie.get("token")}`
+          }
         });
       } catch {
         setIsLoading(false);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 using Application.Songs.Commands.CreateSong;
 using Application.Songs.Queries.GetSongList;
@@ -75,10 +76,10 @@ namespace WebAPI.Controllers
         /// <returns>Returns id (guid)</returns>
         /// <respose code="201">Success</respose>
         /// <response code="401">If the user is unauthorized</response>
-        //[Authorize]
+        [Authorize]
         [HttpPost("post")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<Guid>> UploadNewSong([FromBody] CreateSongDto createSongDto)
         {
             var command = _mapper.Map<CreateSongCommand>(createSongDto);

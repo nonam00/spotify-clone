@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -26,7 +27,11 @@ namespace WebAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("upload/song")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [Produces("application/json")]
         public async Task<ActionResult> UploadSongFile(IFormFile song)
         {
             if (song != null)
@@ -38,9 +43,9 @@ namespace WebAPI.Controllers
                     {
                         await song.CopyToAsync(fs);
                     }
-                    return Ok(fileName);
+                    return Ok(new { path = fileName });
                 }
-                catch (Exception exception)
+                catch
                 {
                     return StatusCode(500);
                 }
@@ -49,7 +54,9 @@ namespace WebAPI.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("upload/image")]
+        [Produces("application/json")]
         public async Task<ActionResult> UploadImageFile(IFormFile image)
         {
             if (image != null)
@@ -61,9 +68,9 @@ namespace WebAPI.Controllers
                     {
                         await image.CopyToAsync(fs);
                     }
-                    return Ok(fileName);
+                    return Ok(new { path = fileName });
                 }
-                catch (Exception exception)
+                catch
                 {
                     return StatusCode(500);
                 }
@@ -71,6 +78,7 @@ namespace WebAPI.Controllers
             return BadRequest();
         }
 
+        [Authorize]
         [HttpGet("get/song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
         {
@@ -86,6 +94,5 @@ namespace WebAPI.Controllers
 
             return File(content, "image/*", path);
         }
-
     }
 }
