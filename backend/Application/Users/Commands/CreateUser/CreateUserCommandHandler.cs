@@ -1,6 +1,7 @@
-﻿using Domain;
-using MediatR;
+﻿using MediatR;
 
+using Domain;
+using Application.Common.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Auth;
 
@@ -24,7 +25,7 @@ namespace Application.Users.Commands.CreateUser
 
             if (check != null)
             {
-                throw new Exception("User with this email already exits");
+                throw new LoginException("User with this email already exits");
             }
 
             var hashedPassword = _passwordHasher.Generate(request.Password);

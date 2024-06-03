@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 using Domain;
+
+using Application.Common.Exceptions;
 using Application.Interfaces.Auth;
 using Application.Interfaces;
 
@@ -36,14 +38,14 @@ namespace Application.Users.Queries.Login
 
             if(user == null)
             {
-                throw new Exception("User doesn't exits");
+                throw new LoginException("Wrong email or password");
             }
 
             var result = _passwordHasher.Verify(request.Password, user.PasswordHash);
 
-            if(result == false)
+            if(!result)
             {
-                throw new Exception("Wrong password");
+                throw new LoginException("Wrong email or password");
             }
 
             var token = _jwtProvider.GenerateToken(user);

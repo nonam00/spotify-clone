@@ -2,6 +2,8 @@
 using System.Net;
 using System.Text.Json;
 
+using Application.Common.Exceptions;
+
 namespace WebAPI.Middleware
 {
     public class CustomExceptionHandlerMiddleware(RequestDelegate next)
@@ -30,6 +32,10 @@ namespace WebAPI.Middleware
                 case ValidationException validationException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonSerializer.Serialize(validationException.Errors);
+                    break;
+                case LoginException loginException:
+                    code = HttpStatusCode.BadRequest;
+                    result = JsonSerializer.Serialize(new { error = exception.Message });
                     break;
             }
 
