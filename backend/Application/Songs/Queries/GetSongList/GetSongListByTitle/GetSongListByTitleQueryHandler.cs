@@ -22,7 +22,7 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
             CancellationToken cancellationToken)
         {
             var songsQuery = await _dbContext.Songs
-                .Where(song => song.Title.StartsWith(request.SearchString)) // TODO: replace with regex
+                .Where(song => EF.Functions.Like(song.Title, $"%{request.SearchString}%"))
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider) 
                 .ToListAsync(cancellationToken);
 
