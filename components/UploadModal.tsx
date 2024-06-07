@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import uniqid from "uniqid"
+import Cookie from "js-cookie";
+import $api from "@/api/http";
 
 import { useUser } from "@/hooks/useUser";
 import useUploadModal from "@/hooks/useUploadModal";
@@ -15,10 +15,11 @@ import Input from "./Input";
 import Button from "./Button";
 
 const UploadModal = () => {
-  const [isLoading, setIsLoading] = useState<boolean>()
+  const [isLoading, setIsLoading] = useState<boolean>();
+  const [songPath, setSongPath] = useState<string>("");
+  const [imagePath, setImagePath] = useState<string>("");
   const uploadModal = useUploadModal();
-  const { user } = useUser();
-  const supabaseClient = useSupabaseClient();
+  const user = useUser();
   const router = useRouter();
 
   const {
@@ -48,62 +49,53 @@ const UploadModal = () => {
       const imageFile = values.image?.[0];
       const songFile = values.song?.[0];
 
-      if(!imageFile || !songFile || !user) {
+      if(!imageFile || !songFile || !user.isAuth) {
         toast.error('Missing required fields');
         return;
       }
-
-      // guid generation
-      const uniqueId = uniqid();
       
-      // TODO: replace with own API
-      // Upload song
-      const {
-        data: songData,
-        error: songError
-      } = await supabaseClient
-        .storage
-        .from('songs')
-        .upload(`song-${values.title}-${uniqueId}`, songFile, {
-          cacheControl: '3600',
-          upsert: false
+      // TODO:cache control
+      // Upload song file
+      try {
+        const { data } = await $api.post("/files/upload/song", { song: songFile }, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
         });
-      
-      if(songError) {
+        setSongPath(data.path);
+      } catch (e){
         setIsLoading(false);
         return toast.error('Failed song upload.')
       }
 
-      // Upload image
-      const {
-        data: imageData,
-        error: imageError
-      } = await supabaseClient
-        .storage
-        .from('images')
-        .upload(`image-${values.title}-${uniqueId}`, imageFile, {
-          cacheControl: '3600',
-          upsert: false
+      // Upload image file
+      try {
+        const { data } = await $api.post("/files/upload/image", { image: imageFile }, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
         });
-      
-      if(imageError) {
+        setImagePath(data.path);
+      } catch {
         setIsLoading(false);
         return toast.error('Failed image upload.')
       }
 
-      const { error: supabaseError } = await supabaseClient
-        .from('songs')
-        .insert({
-          user_id: user.id,
+      // TODO: fix sending request before files uploaded
+      try {
+        const { data } = await $api.post<string>("/songs/post", {
           title: values.title,
           author: values.author,
-          image_path: imageData.path,
-          song_path: songData.path
+          imagePath: imagePath,
+          songPath: songPath
+        }, {
+          headers: {
+            Authorization: `Bearer ${Cookie.get("token")}`
+          }
         });
-
-      if(supabaseError) {
+      } catch {
         setIsLoading(false);
-        return toast.error(supabaseError.message);
+        return toast.error("Failed song info upload");
       }
 
       router.refresh();
@@ -111,7 +103,7 @@ const UploadModal = () => {
       toast.success('Song created!');
       reset();
       uploadModal.onClose();  
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong');
     } finally {
       setIsLoading(false);

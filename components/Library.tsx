@@ -21,12 +21,12 @@ const Library: React.FC<LibraryProps> = ({
 }) => {
   const authModal = useAuthModal();
   const uploadModal = useUploadModal();
-  const { user } = useUser();
+  const { isAuth } = useUser();
 
   const onPlay = useOnPlay(songs);
 
   const onClick = () => {
-    if(!user) {
+    if (!isAuth) {
       return authModal.onOpen();
     }
 

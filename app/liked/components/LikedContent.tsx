@@ -19,15 +19,15 @@ const LikedContent: React.FC<LikedContentProps> = ({
   songs
 }) => {
   const router = useRouter();
-  const { isLoading, user } = useUser();
+  const { isLoading, isAuth } = useUser();
 
   const onPlay = useOnPlay(songs);
   
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !isAuth) {
       router.replace('/');
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isAuth, router]);
 
   if (songs.length === 0) {
     return (

@@ -1,20 +1,33 @@
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+
 import { Song } from "@/types/types";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 const useLoadSongUrl = (song: Song) => {
-  // TODO: replace with own API
-  const supabaseClient = useSupabaseClient();
+  const [href, setHref] = useState<string | null>(null);
+  useEffect(() => {
+    if (!song) {
+      return;
+    }
+    const getUrl = async() => {
+      await fetch(`https:localhost:7025/1/files/get/song/${song.songPath}`, {
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${Cookies.get("token")}`
+        }
+      })
+        .then((response) => response.blob())
+        .then((response) => {
+          setHref(URL.createObjectURL(response));
+        })
+        .catch((error: Error) => {
+          console.log(error.message)
+        });
+      }
+    getUrl();
+  }, [song]);
 
-  if (!song) {
-    return '';
-  }
-
-  const { data: songData } = supabaseClient
-    .storage
-    .from('songs')
-    .getPublicUrl(song.song_path);
-
-  return songData.publicUrl;
+  return href;
 }
 
 export default useLoadSongUrl;
