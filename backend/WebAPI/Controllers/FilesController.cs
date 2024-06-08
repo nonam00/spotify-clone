@@ -34,13 +34,13 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     POST /upload/song
+        ///     POST /song
         /// 
         /// </remarks>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpPost("upload/song")]
+        [HttpPost("song")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         [Produces("application/json")]
@@ -75,13 +75,13 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     POST /upload/image
+        ///     POST /image
         /// 
         /// </remarks>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpPost("upload/image")]
+        [HttpPost("image")]
         [Produces("application/json")]
         public async Task<ActionResult> UploadImageFile(IFormFile image)
         {
@@ -111,14 +111,14 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     GET /get/song/{path}
+        ///     GET /song/{path}
         /// 
         /// </remarks>
         /// <param name="path">Filename</param>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpGet("get/song/{path}")]
+        [HttpGet("song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
         {
             byte[] content = await System.IO.File.ReadAllBytesAsync(_songsPath + path);
@@ -138,7 +138,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <param name="path">Filename</param>
         /// <response code="200">Success</response>
-        [HttpGet("get/image/{path}")]
+        [HttpGet("image/{path}")]
         public async Task<IActionResult> GetImageFile(string path)
         {
             byte[] content = await System.IO.File.ReadAllBytesAsync(_imagesPath + path);

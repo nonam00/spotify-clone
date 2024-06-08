@@ -12,7 +12,7 @@ const useLoadImage = (song: Song) => {
     }
     const getUrl = async() => {
       try {
-        await $api.get(`/files/get/image/${path}`, {
+        await $api.get(`/files/image/${path}`, {
           responseType: "blob"
         })
         .then(response => {

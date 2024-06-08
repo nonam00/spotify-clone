@@ -10,7 +10,7 @@ const useLoadSongUrl = (song: Song) => {
       return;
     }
     const getUrl = async() => {
-      await fetch(`https:localhost:7025/1/files/get/song/${song.songPath}`, {
+      await fetch(`https:localhost:7025/1/files/song/${song.songPath}`, {
         method: 'GET',
         headers: {
           "Authorization": `Bearer ${Cookies.get("token")}`

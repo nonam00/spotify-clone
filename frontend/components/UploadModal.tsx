@@ -57,7 +57,7 @@ const UploadModal = () => {
       // TODO:cache control
       // Upload song file
       try {
-        const { data } = await $api.post("/files/upload/song", { song: songFile }, {
+        const { data } = await $api.post("/files/song", { song: songFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
@@ -70,7 +70,7 @@ const UploadModal = () => {
 
       // Upload image file
       try {
-        const { data } = await $api.post("/files/upload/image", { image: imageFile }, {
+        const { data } = await $api.post("/files/image", { image: imageFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
