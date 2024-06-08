@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
+
+import Button from "./Button";
 import Modal from "./Modal";
 
 const AuthModal = () => {
@@ -28,7 +30,6 @@ const AuthModal = () => {
     }
   }
   
-  // TODO: styles for auth form
   return (
     <Modal
       title="Welcome back"
@@ -36,26 +37,55 @@ const AuthModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <input
-        onChange={(e) => setEmail(e.target.value)}
-        value={email}
-        type="text"
-        placeholder="email"
-      />
-      <input
-        onChange={(e) => setPassword(e.target.value)}
-        value={password}
-        type="password"
-        placeholder="password"
-      />
-      <button
-        onClick={async () => await user.login(email, password)}
-      >
-        Login
-      </button>
-      <button onClick={async () => await user.register(email, password)}>
-        Register
-      </button>
+      <div className="
+        flex
+        flex-col
+        items-center
+        justify-center
+      ">
+        <input
+          onChange={(e) => setEmail(e.target.value)}
+          value={email}
+          type="text"
+          placeholder="email"
+          className="
+            my-3
+            p-2
+            w-full
+            rounded-md
+          "
+        />
+        <input
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+          type="password"
+          placeholder="password"
+          className="
+            my-3
+            p-2
+            w-full
+            rounded-md
+          "
+        />
+        <Button
+          onClick={async () => await user.login(email, password)}
+          className="mt-7 mb-3"
+        >
+          Login
+        </Button>
+        <Button
+          onClick={async () => await user.register(email, password)}
+          className="
+            my-3
+            hover:bg-neutral-700
+            bg-transparent
+            text-neutral-300
+            font-medium
+          " 
+        >
+          Register
+        </Button>
+      </div>
     </Modal>
   );
 };
