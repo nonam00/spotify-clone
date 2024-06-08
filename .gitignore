@@ -10,8 +10,12 @@
 /coverage
 
 # next.js
-/.next/
+**/.next/
 /out/
+
+# bun files
+
+**/bun.lockb
 
 # production
 /build
