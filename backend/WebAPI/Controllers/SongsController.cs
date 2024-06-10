@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 
 using Application.Songs.Commands.CreateSong;
 using Application.Songs.Queries.GetSongList;
+using Application.Songs.Queries.GetSongList.GetSongListByAny;
 using Application.Songs.Queries.GetSongList.GetSongListByTitle;
+using Application.Songs.Queries.GetSongList.GetSongListByAuthor;
 using Application.Songs.Queries.GetSongList.GetAllSongs;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries;
@@ -74,10 +76,33 @@ namespace WebAPI.Controllers
         ///     GET /search/hysteria
         /// 
         /// </remarks>
+        /// <param name="searchString">User search query by song title and author</param>
+        /// <returns>Returns SongListVm</returns>
+        /// <response code="200">Success</response>
+        public async Task<ActionResult<SongListVm>> GetSongListByAnyInfo(string searchString)
+        {
+            var query = new GetSongListByAnyQuery
+            {
+                SearchString = searchString
+            };
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
+
+
+        /// <summary>
+        /// Gets songs satisfying the search request
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /search/title/hysteria
+        /// 
+        /// </remarks>
         /// <param name="searchString">User search query by song title</param>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
-        [HttpGet("search/{searchString}")]
+        [HttpGet("search/title/{searchString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetSongListByTitle(string searchString)
         {
@@ -88,6 +113,32 @@ namespace WebAPI.Controllers
             var vm = await Mediator.Send(query);
             return Ok(vm);
         }
+
+
+        /// <summary>
+        /// Gets songs satisfying the search request
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /search/author/muse
+        /// 
+        /// </remarks>
+        /// <param name="searchString">User search query by song author</param>
+        /// <returns>Returns SongListVm</returns>
+        /// <response code="200">Success</response>
+        [HttpGet("search/author/{searchString}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<SongListVm>> GetSongListByAuthor(string searchString)
+        {
+            var query = new GetSongListByAuthorQuery
+            {
+                SearchString = searchString
+            };
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
+
         /// <summary>
         /// Creates new song 
         /// </summary>
