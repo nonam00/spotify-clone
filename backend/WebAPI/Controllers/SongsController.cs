@@ -79,6 +79,9 @@ namespace WebAPI.Controllers
         /// <param name="searchString">User search query by song title and author</param>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
+
+        [HttpGet("search/{searchString}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetSongListByAnyInfo(string searchString)
         {
             var query = new GetSongListByAnyQuery

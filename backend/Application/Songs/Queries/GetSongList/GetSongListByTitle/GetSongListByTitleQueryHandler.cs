@@ -22,8 +22,10 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
             CancellationToken cancellationToken)
         {
             var songsQuery = await _dbContext.Songs
-                .Where(song => EF.Functions.Like(song.Title, $"%{request.SearchString}%"))
-                .ProjectTo<SongVm>(_mapper.ConfigurationProvider) 
+                .Where(song => EF.Functions.TrigramsSimilarity(song.Title, request.SearchString) > 0.1)
+                .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Title, request.SearchString))
+                .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
+                .Take(20)
                 .ToListAsync(cancellationToken);
 
             return new SongListVm { Songs = songsQuery };

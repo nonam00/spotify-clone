@@ -22,10 +22,11 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByAuthor
             CancellationToken cancellationToken)
         {
             var songsQuery = await _dbContext.Songs
-                .Where(song => EF.Functions.Like(song.Title, $"%{request.SearchString}%"))
+                .Where(song => EF.Functions.TrigramsSimilarity(song.Author, request.SearchString) > 0.1)
+                .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Author, request.SearchString))
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
+                .Take(20)
                 .ToListAsync(cancellationToken);
-
             return new SongListVm { Songs = songsQuery };
         }
     }
