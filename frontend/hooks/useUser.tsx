@@ -39,7 +39,6 @@ export const MyUserContextProvider = (props: Props) => {
   const register = async (email: string, password: string) => {
     try {
       const response = await AuthService.registration(email, password);
-      console.log(response);
     } catch (e: any) {
       console.log(e.response?.data?.message);     
     }
@@ -57,15 +56,17 @@ export const MyUserContextProvider = (props: Props) => {
 
   useEffect(() => {
     const accessToken = Cookies.get("token");
-    if (!isAuth && accessToken !== null && accessToken !== undefined) {
+    if (!isAuth && accessToken !== undefined) {
       setIsLoadingData(true);
       Promise.allSettled([AuthService.getUserInfo()]).then(
-        async (result) => {
+        async (results) => {
           try {
-            localStorage.setItem("token", accessToken);
-            const response = await AuthService.getUserInfo();
-            setUserDetails(response.data.user);
-            setIsAuth(true);
+            if (results[0].status === "fulfilled") {
+              setUserDetails(results[0].value.data?.user);
+              setIsAuth(true);
+            } else {
+              throw new Error("Error on loading data")
+            }
         } catch(e: any) {
           console.log(e?.message);
         }
