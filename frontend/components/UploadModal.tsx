@@ -16,8 +16,6 @@ import Button from "./Button";
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
-  const [songPath, setSongPath] = useState<string>("");
-  const [imagePath, setImagePath] = useState<string>("");
   const uploadModal = useUploadModal();
   const user = useUser();
   const router = useRouter();
@@ -45,9 +43,10 @@ const UploadModal = () => {
   const onSubmit: SubmitHandler<FieldValues> = async (values) => {
     try {
       setIsLoading(true);
-
       const imageFile = values.image?.[0];
       const songFile = values.song?.[0];
+      let songFilePath = "";
+      let imageFilePath = "";
 
       if(!imageFile || !songFile || !user.isAuth) {
         toast.error('Missing required fields');
@@ -57,12 +56,13 @@ const UploadModal = () => {
       // TODO:cache control
       // Upload song file
       try {
-        const { data } = await $api.post("/files/song", { song: songFile }, {
+        await $api.post("/files/song", { song: songFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
+        }).then((response) => {
+          songFilePath = response.data.path;
         });
-        setSongPath(data.path);
       } catch (e){
         setIsLoading(false);
         return toast.error('Failed song upload.')
@@ -70,24 +70,27 @@ const UploadModal = () => {
 
       // Upload image file
       try {
-        const { data } = await $api.post("/files/image", { image: imageFile }, {
+        await $api.post("/files/image", { image: imageFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
-        });
-        setImagePath(data.path);
+        }).then((response) => {
+          imageFilePath = response.data.path;
+        })
       } catch {
         setIsLoading(false);
         return toast.error('Failed image upload.')
       }
-
+      if (imageFilePath === "" || songFilePath === "") {
+        return toast.error('Failed image or song upload');
+      }
       // TODO: fix sending request before files uploaded
       try {
-        const { data } = await $api.post<string>("/songs/post", {
+        await $api.post<string>("/songs/post", {
           title: values.title,
           author: values.author,
-          imagePath: imagePath,
-          songPath: songPath
+          imagePath: imageFilePath,
+          songPath: songFilePath
         }, {
           headers: {
             Authorization: `Bearer ${Cookie.get("token")}`
