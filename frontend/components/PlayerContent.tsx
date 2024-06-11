@@ -26,6 +26,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   const player = usePlayer();
   const [volume, setVolume] = useState<number>(1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [delay, setDelay] = useState<NodeJS.Timeout>();
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
@@ -68,19 +70,24 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     songUrl,
     {
       volume: volume,
-      onplay: () => setIsPlaying(true),
+      onplay: () => {
+        setIsPlaying(true);
+        setDelay(timeout);
+      },
       onend: () => {
         setIsPlaying(false);
         onPlayNext();
       },
-      onpause: () => setIsPlaying(false),
+      onpause: () => {
+        setIsPlaying(false)
+        clearTimeout(delay);
+      },
       format: ['flac', 'mp3', 'wav','.m4a','.aac','.ogg'] 
     }
   );
 
   useEffect(() => {
     sound?.play();
-
     return () => {
       sound?.unload();
     }
@@ -99,6 +106,22 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       setVolume(1);
     } else {
       setVolume(0);
+    }
+  }
+
+  const timeout: NodeJS.Timeout = setTimeout(() => {
+    updateProgress();
+ }, 1000);
+
+  const updateProgress = () => {
+    const seek: number = sound?.seek() ?? 0;
+    const duration: number = sound?.duration() ?? 1;
+    setProgress(seek / duration);
+  }
+
+  const setCurrent = (value: number) => {
+    if(sound) {
+      sound.seek(sound.duration() * value)
     }
   }
 
@@ -141,54 +164,62 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       </div>
       
       {/* Normal view */}
-      <div
-        className="
-          hidden
-          h-full
-          md:flex
-          justify-center
-          items-center
-          w-full
-          max-w-[722px]
-          gap-x-6
-        "
-      >
-        <AiFillStepBackward
-          onClick={onPlayPrevious}
-          size={30}
-          className="
-            text-neutral-400
-            cursor-pointer
-            hover:text-white
-            transition
-          "
-        />
+      <div className="flex flex-col">
         <div
-          onClick={handlePlay}
           className="
-            flex
-            items-center
+            hidden
+            h-full
+            md:flex
             justify-center
-            h-10
-            w-10
-            rounded-full
-            bg-white
-            p-1
-            cursor-pointer
+            items-center
+            w-full
+            max-w-[722px]
+            gap-x-6
           "
         >
-          <Icon size={30} className="text-black" />
+          <AiFillStepBackward
+            onClick={onPlayPrevious}
+            size={25}
+            className="
+              text-neutral-400
+              cursor-pointer
+              hover:text-white
+              transition
+            "
+          />
+          <div
+            onClick={handlePlay}
+            className="
+              flex
+              items-center
+              justify-center
+              h-8
+              w-8
+              rounded-full
+              bg-white
+              p-1
+              cursor-pointer
+            "
+          >
+            <Icon size={25} className="text-black" />
+          </div>
+          <AiFillStepForward
+            onClick={onPlayNext}
+            size={25}
+            className="
+              text-neutral-400
+              cursor-pointer
+              hover:text-white
+              transition
+            "
+          />
         </div>
-        <AiFillStepForward
-          onClick={onPlayNext}
-          size={30}
-          className="
-            text-neutral-400
-            cursor-pointer
-            hover:text-white
-            transition
-          "
-        />
+        <div className="hidden md:flex">
+          <Slider
+            value={progress}
+            onChange={(value) => {setCurrent(value)}}
+           />
+        </div>
       </div>
 
       <div className="hidden md:flex w-full justify-end pr-2">

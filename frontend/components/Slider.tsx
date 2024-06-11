@@ -40,7 +40,7 @@ const Slider: React.FC<SliderProps> = ({
           relative
           grow
           rounded-full
-          h-[3px]
+          h-[3.1px]
         "
       >
         <RadixSlider.Range
