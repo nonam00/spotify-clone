@@ -73,6 +73,30 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
+        /// Clears the user's cookies, resulting in a logout
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /logout
+        /// 
+        /// </remarks>
+        /// <response code="205">Success</response>
+        /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
+        [Authorize]
+        [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status205ResetContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Logout()
+        {
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+            return StatusCode(205);
+        }
+
+        /// <summary>
         /// Gets info about user using jwt token
         /// </summary>
         /// <remarks>
@@ -85,6 +109,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
         [Authorize]
+        //[ValidateAntiForgeryToken]
         [HttpGet("info")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

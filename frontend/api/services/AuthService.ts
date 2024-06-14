@@ -1,6 +1,5 @@
 import { AuthResponse } from "../AuthResponse";
 import { AxiosResponse } from 'axios';
-import Cookie from "js-cookie";
 
 import $api from "../http";
 
@@ -13,11 +12,10 @@ export default class AuthService {
     return $api.post('/users/register', {email, password})
   }
 
+  static async logout(): Promise<AxiosResponse> {
+    return $api.post("/users/logout");
+  }
   static async getUserInfo(): Promise<AxiosResponse<AuthResponse>> {
-    return $api.get('/users/info', {
-      headers: {
-        Authorization: `Bearer ${Cookie.get("token")}`
-      }
-    });
+    return $api.get('/users/info');
   }
 }

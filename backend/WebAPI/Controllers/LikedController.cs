@@ -13,6 +13,7 @@ using Application.LikedSongs.Queries;
 namespace WebAPI.Controllers
 {
     [Authorize]
+    //[AutoValidateAntiforgeryToken]
     [ApiVersionNeutral]
     [Produces("application/json")]
     [Route("{version:apiVersion}/liked")]

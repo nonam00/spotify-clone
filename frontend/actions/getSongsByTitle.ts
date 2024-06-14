@@ -11,7 +11,6 @@ const getSongsByTitle = async (title: string): Promise<Song[]> => {
   }
   try {
     const { data } = await $api.get(`songs/search/${title}`)
-    console.log(data);
     return data?.songs;
   } catch (error) {
     console.log(error);

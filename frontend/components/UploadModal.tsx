@@ -91,10 +91,6 @@ const UploadModal = () => {
           author: values.author,
           imagePath: imageFilePath,
           songPath: songFilePath
-        }, {
-          headers: {
-            Authorization: `Bearer ${Cookie.get("token")}`
-          }
         });
       } catch {
         setIsLoading(false);

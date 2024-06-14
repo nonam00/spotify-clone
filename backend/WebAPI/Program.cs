@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -34,14 +35,13 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Adding persistence layer via dependency injection
 builder.Services.AddPersistence(builder.Configuration);
 
-builder.Services.AddControllers();
-
 // Setting CORS policy for local responds
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:1")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:1",
+                  "https://localhost:3000", "https://localhost:1")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -49,10 +49,16 @@ builder.Services.AddCors(options =>
 });
 
 // Adding and configuration authentication by JWT Tokens
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer("Bearer", options =>
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
-        // Getting options for JWT cript from configuration (user secret)
+        // Getting options for JWT crypt from configuration (user secret)
         var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
 
         options.TokenValidationParameters = new()
@@ -66,19 +72,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
         };
         
-        // Saving JWT token into cookies
+        // Getting JWT token from request cookies
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
                 context.Token = context.Request.Cookies["token"];
-
                 return Task.CompletedTask;  
             }
         };
 
         options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
     });
+
+// Configurating XSRF protection
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "x-xsrf-token";
+});
+
+// Not only controllers because of XSRF protection working principle
+builder.Services.AddControllersWithViews(); 
 
 // Adding and Configuration API Versioning
 builder.Services.AddApiVersioning()
@@ -126,12 +141,26 @@ app.UseCors("MyPolicy");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
-    HttpOnly = HttpOnlyPolicy.None,
+    HttpOnly = HttpOnlyPolicy.Always,
     Secure = CookieSecurePolicy.SameAsRequest
+});
+
+// Adding authentication middleware
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Cookies["token"];
+    if (!string.IsNullOrEmpty(token))
+        context.Request.Headers.Append("Authorization", "Bearer " + token);
+
+    await next();
 });
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Adding XSRF protection
+var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
+app.UseXsrfProtection(antiforgery);
 
 app.MapControllers();
 
