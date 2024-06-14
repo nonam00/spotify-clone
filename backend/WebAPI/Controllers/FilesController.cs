@@ -40,6 +40,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
+        //[ValidateAntiForgeryToken]
         [HttpPost("song")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
@@ -81,6 +82,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
+        //[ValidateAntiForgeryToken]
         [HttpPost("image")]
         [Produces("application/json")]
         public async Task<ActionResult> UploadImageFile(IFormFile image)
@@ -118,6 +120,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
+        //[ValidateAntiForgeryToken]
         [HttpGet("song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
         {

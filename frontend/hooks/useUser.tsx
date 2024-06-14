@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 import AuthService from "@/api/services/AuthService";
 import { UserDetails } from "@/types/types";
@@ -38,7 +37,7 @@ export const MyUserContextProvider = (props: Props) => {
 
   const register = async (email: string, password: string) => {
     try {
-      const response = await AuthService.registration(email, password);
+      await AuthService.registration(email, password);
     } catch (e: any) {
       console.log(e.response?.data?.message);     
     }
@@ -46,7 +45,7 @@ export const MyUserContextProvider = (props: Props) => {
 
   const logout = async () => {
     try {
-      Cookies.remove("token");
+      await AuthService.logout();
       setIsAuth(false);
       setUserDetails(null); 
     } catch (e: any) {
@@ -55,8 +54,7 @@ export const MyUserContextProvider = (props: Props) => {
   }
 
   useEffect(() => {
-    const accessToken = Cookies.get("token");
-    if (!isAuth && accessToken !== undefined) {
+    if (!isAuth) {
       setIsLoadingData(true);
       Promise.allSettled([AuthService.getUserInfo()]).then(
         async (results) => {
@@ -74,8 +72,6 @@ export const MyUserContextProvider = (props: Props) => {
       )
       setIsLoadingData(false);
     }
-
-    
   }, [isAuth, isLoadingData]);
 
   const value = {

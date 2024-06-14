@@ -34,11 +34,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
     const fetchData = async () => {
       try {
-        const { data } = await $api.get<Song>(`/liked/get/${songId}`, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          }
-        });
+        const { data } = await $api.get<Song>(`/liked/get/${songId}`);
         if (data) {
           setIsLiked(true);
         }
@@ -59,11 +55,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
     if (isLiked) {
       try {
-        await $api.delete(`/liked/delete/${songId}`, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`
-          }
-        });
+        await $api.delete(`/liked/delete/${songId}`);
         setIsLiked(false);
         toast("Like deleted");
       } catch(error: any) {
@@ -71,10 +63,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       }
     } else {
         await fetch(`https:localhost:7025/1/liked/like/${songId}`, {
-          method: 'POST',
-          headers: {
-            "Authorization": `Bearer ${Cookies.get("token")}`
-          }
+          method: 'POST'
         })
           .then(() => {
             setIsLiked(true);

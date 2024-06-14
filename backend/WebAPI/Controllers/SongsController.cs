@@ -162,6 +162,7 @@ namespace WebAPI.Controllers
         /// <response code="201">Success</response>
         /// <response code="401">If the user is unauthorized</response>
         [Authorize]
+       // [ValidateAntiForgeryToken]
         [HttpPost("post")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

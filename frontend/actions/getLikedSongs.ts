@@ -5,15 +5,13 @@ import { Song } from "@/types/types";
 import { cookies } from "next/headers";
 
 const getLikedSongs = async (): Promise<Song[]> => {
-  // TODO: replace with safe methods
-  const token = cookies().get("token");
-  if(!token) {
-    return [];
-  }
   try {
     const { data } = await $api.get("/liked/get/", {
       headers: {
-        Authorization: `Bearer ${token.value}`
+        // needs to input manualy because of server actions 
+        Cookie: cookies().getAll().map((cookie) => (
+          `${cookie.name}=${cookie.value};`
+        ))
       }
     });
     if(!(data?.likedSongs)) {

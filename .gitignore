@@ -1,5 +1,5 @@
 # server files
-/backend/webapi/files/*
+/backend/WebAPI/Files/*
 
 # dependencies
 /node_modules
