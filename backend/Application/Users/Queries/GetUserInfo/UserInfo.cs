@@ -1,8 +1,9 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
+
 using Domain;
 
-namespace Application.Users.Queries
+namespace Application.Users.Queries.GetUserInfo
 {
     public class UserInfo : IMapWith<User>
     {

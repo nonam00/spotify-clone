@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-import AuthService from "@/api/services/AuthService";
 import { UserDetails } from "@/types/types";
+import $api from "@/api/http";
 
 type UserContextType = {
   isAuth: boolean
@@ -26,28 +27,62 @@ export const MyUserContextProvider = (props: Props) => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
   const login = async (email: string, password: string) => {
-    try {
-      const { data } = await AuthService.login(email, password);
-      setIsAuth(true);
-      setUserDetails(data.user);
-    } catch (e: any) {
-      console.log(e.message);     
-    }
+    await $api.post("/users/login/", { email, password })
+      .then(async () => {
+        await $api.get("/users/info/") 
+          .then((response) => {
+            setIsAuth(true);
+            setUserDetails(response.data);
+            toast.success("Logged In")    
+          })
+          .catch(error => console.log(error.message))
+      })
+      .catch((error) => {
+        if (error.response.status === 400) {
+          if(error.response.data.error) {
+            toast.error(error.response.data.error);
+          }
+          for(const field in error.response.data.errors) {
+            error.response.data.errors[field].forEach((e: any) => {
+              toast.error(`${field}: ${e}`);
+            });
+          }
+        }
+        else if (error.response.status !== 200) {
+          toast(error.response.data.message);
+        }
+      });
   }
 
   const register = async (email: string, password: string) => {
-    try {
-      await AuthService.registration(email, password);
-    } catch (e: any) {
-      console.log(e.response?.data?.message);     
-    }
+    await $api.post("/users/register/", { email, password })
+      .then(async () => {
+        await $api.get("users/info/") 
+          .then((response) => {
+            setIsAuth(true);
+            setUserDetails(response.data);
+          })
+          .catch(error => console.log(error.message))
+      })
+      .catch((error) => {
+        if (error.response.status === 400) {
+          for(const field in error.response.data.errors) {
+            error.response.data.errors[field].forEach((e: any) => {
+              toast(`${field}: ${e}`);
+            });
+          }
+        }
+        else if (error.response.status !== 200) {
+          toast(error.response.data.message);
+        }
+      });
   }
 
   const logout = async () => {
     try {
-      await AuthService.logout();
+      await $api.post("users/logout/");
       setIsAuth(false);
-      setUserDetails(null); 
+      setUserDetails(null);
     } catch (e: any) {
       console.log(e?.message);     
     }
@@ -56,7 +91,7 @@ export const MyUserContextProvider = (props: Props) => {
   useEffect(() => {
     if (!isAuth) {
       setIsLoadingData(true);
-      Promise.allSettled([AuthService.getUserInfo()]).then(
+      Promise.allSettled([$api.get("users/info")]).then(
         async (results) => {
           try {
             if (results[0].status === "fulfilled") {

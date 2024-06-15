@@ -3,7 +3,6 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.Users.Commands.CreateUser;
-using Application.Users.Queries;
 using Application.Users.Queries.Login;
 using Application.Users.Queries.GetUserInfo;
 
@@ -58,18 +57,18 @@ namespace WebAPI.Controllers
         /// 
         /// </remarks>
         /// <param name="loginDto">LoginDto object</param>
-        /// <returns>Returns access token and user data</returns>
+        /// <returns>Returns access token in cookies</returns>
         /// <response code="200">Success</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserVm>> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var query = _mapper.Map<LoginQuery>(loginDto);
-            var userVm = await Mediator.Send(query);
+            var accessToken = await Mediator.Send(query);
 
-            HttpContext.Response.Cookies.Append("token", userVm.AccessToken);
+            HttpContext.Response.Cookies.Append("token", accessToken);
 
-            return Ok(userVm);
+            return Ok();
         }
 
         /// <summary>

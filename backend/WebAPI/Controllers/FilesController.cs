@@ -124,6 +124,10 @@ namespace WebAPI.Controllers
         [HttpGet("song/{path}")]
         public async Task<IActionResult> GetSongFile(string path)
         {
+            if(!System.IO.File.Exists(_songsPath + path))
+            {
+              return BadRequest();
+            }
             byte[] content = await System.IO.File.ReadAllBytesAsync(_songsPath + path);
 
             return File(content, "audio/*", path);
@@ -136,7 +140,7 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     GET /get/image/{path}
+        ///     GET /image/{path}
         /// 
         /// </remarks>
         /// <param name="path">Filename</param>
@@ -144,6 +148,10 @@ namespace WebAPI.Controllers
         [HttpGet("image/{path}")]
         public async Task<IActionResult> GetImageFile(string path)
         {
+            if(!System.IO.File.Exists(_imagesPath + path))
+            {
+              return BadRequest();
+            }
             byte[] content = await System.IO.File.ReadAllBytesAsync(_imagesPath + path);
 
             return File(content, "image/*", path);

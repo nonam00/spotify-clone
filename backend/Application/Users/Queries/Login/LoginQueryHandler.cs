@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-
-using Domain;
 
 using Application.Common.Exceptions;
 using Application.Interfaces.Auth;
@@ -10,26 +7,23 @@ using Application.Interfaces;
 
 namespace Application.Users.Queries.Login
 {
-    public class LoginQueryHandler : IRequestHandler<LoginQuery, UserVm>
+    public class LoginQueryHandler : IRequestHandler<LoginQuery, string>
     {
         private readonly ISongsDbContext _dbContext;
-        private readonly IMapper _mapper;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtProvider _jwtProvider;
 
         public LoginQueryHandler(
             ISongsDbContext dbContext,
-            IMapper mapper,
             IPasswordHasher passwordHasher,
             IJwtProvider jwtProvider)
         {
             _dbContext = dbContext;
-            _mapper = mapper;
             _passwordHasher = passwordHasher;
             _jwtProvider = jwtProvider;
         }
 
-        public async Task<UserVm> Handle(LoginQuery request,
+        public async Task<string> Handle(LoginQuery request,
             CancellationToken cancellationToken)
         {
             var user = await _dbContext.Users
@@ -50,13 +44,7 @@ namespace Application.Users.Queries.Login
 
             var token = _jwtProvider.GenerateToken(user);
 
-            var userVm = new UserVm()
-            {
-                AccessToken = token,
-                UserInfo = _mapper.Map<User, UserInfo>(user)
-            };
-
-            return userVm;
+            return token;
         }
     }
 }

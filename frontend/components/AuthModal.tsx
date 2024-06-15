@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
@@ -28,6 +29,18 @@ const AuthModal = () => {
     if(!open) {
       onClose();
     }
+  }
+
+  const upload = async (func: any) => {
+    if(!email) {
+      toast.error("The email field must be filled in");
+      return;
+    }
+    if (!password) {
+      toast.error("The password field must be filled in");
+      return;
+    }
+    await func(email, password);
   }
   
   return (
@@ -68,13 +81,13 @@ const AuthModal = () => {
           "
         />
         <Button
-          onClick={async () => await user.login(email, password)}
+          onClick={async () => await upload(user.login)}
           className="mt-7 mb-3"
         >
           Login
         </Button>
         <Button
-          onClick={async () => await user.register(email, password)}
+          onClick={async () => await upload(user.register)}
           className="
             my-3
             hover:bg-neutral-700
