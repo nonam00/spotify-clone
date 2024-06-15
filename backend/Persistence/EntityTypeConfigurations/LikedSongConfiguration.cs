@@ -13,14 +13,17 @@ namespace Persistence.EntityTypeConfigurations
             builder.HasIndex(song => new { song.UserId, song.SongId }).IsUnique();
 
             builder.HasOne(liked => liked.Song)
-                .WithMany(song => song.Liked)
-                .HasForeignKey(liked => liked.SongId)
-                .OnDelete(DeleteBehavior.Cascade);
+                   .WithMany()
+                   .HasForeignKey(liked => liked.SongId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(song => song.User)
-                .WithMany(user => user.LikedSongs)
-                .HasForeignKey(likedSong => likedSong.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                   .WithMany(user => user.LikedSongs)
+                   .HasForeignKey(likedSong => likedSong.UserId)
+                   .OnDelete(DeleteBehavior.Cascade);
+        
+            builder.Property(song => song.CreatedAt)
+                   .HasDefaultValueSql("CURRENT_DATE");
         }
     }
 }

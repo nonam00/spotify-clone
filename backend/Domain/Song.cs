@@ -8,9 +8,7 @@
         public string SongPath { get; set; } = null!;
         public string ImagePath { get; set; } = null!;
         public string Author { get; set; } = null!;
-        public Guid UserId { get; set; }
-        public User User { get; set; } = null!;
-        public IList<LikedSong> Liked { get; } = new List<LikedSong>();
-
+        public Guid? UserId { get; set; }
+        public User? User { get; }
     }
 }
