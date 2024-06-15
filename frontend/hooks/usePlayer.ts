@@ -1,4 +1,3 @@
-// TODO: replace Zustand library with Redux
 import { create } from "zustand";
 
 interface PlayerStore {

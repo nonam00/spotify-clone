@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import Cookie from "js-cookie";
+
 import $api from "@/api/http";
 
 import { useUser } from "@/hooks/useUser";
