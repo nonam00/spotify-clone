@@ -10,6 +10,14 @@ namespace Persistence.EntityTypeConfigurations
         public void Configure(EntityTypeBuilder<Song> builder)
         {
             builder.HasKey(song => song.Id);
+            
+            builder.HasOne(song => song.User)
+                   .WithMany()
+                   .HasForeignKey(song => song.UserId)
+                   .OnDelete(DeleteBehavior.SetNull);
+        
+            builder.Property(song => song.CreatedAt)
+                   .HasDefaultValueSql("CURRENT_DATE");
         }
     }
 }
