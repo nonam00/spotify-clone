@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 using Domain;
 using Application.Common.Exceptions;
@@ -21,7 +22,8 @@ namespace Application.Users.Commands.CreateUser
         public async Task<Guid> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
-            var check = _dbContext.Users.FirstOrDefault(u => u.Email == request.Email);
+            var check = await _dbContext.Users
+              .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
             if (check != null)
             {
