@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import Cookies from "js-cookie";
 
 import $api from "@/api/http";
 
@@ -63,7 +62,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       }
     } else {
         await fetch(`https:localhost:7025/1/liked/like/${songId}`, {
-          method: 'POST'
+          method: 'POST',
+          credentials: 'include'
         })
           .then(() => {
             setIsLiked(true);
