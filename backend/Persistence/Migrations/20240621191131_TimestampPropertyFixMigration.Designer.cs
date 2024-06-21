@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(SongsDbContext))]
-    [Migration("20240621003528_TimestampFixeMigration")]
-    partial class TimestampFixeMigration
+    [Migration("20240621191131_TimestampPropertyFixMigration")]
+    partial class TimestampPropertyFixMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Playlist", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -85,6 +86,9 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_playlists");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_playlists_user_id");
 
                     b.ToTable("playlists", (string)null);
                 });
@@ -228,10 +232,10 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.User", null)
                         .WithMany("Playlists")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_playlists_users_id");
+                        .HasConstraintName("fk_playlists_users_user_id");
                 });
 
             modelBuilder.Entity("Domain.PlaylistSong", b =>

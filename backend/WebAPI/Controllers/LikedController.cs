@@ -87,7 +87,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <param name="songId">ID of song ot like</param>
         /// <returns>Returns Guid</returns>
-        /// <response code="200">Success</response>
+        /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [HttpPost("like/{songId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -114,7 +114,7 @@ namespace WebAPI.Controllers
         /// 
         /// </remarks>
         /// <param name="songId">Id of song to delete liked data</param>
-        /// <response code="200">Success</response>
+        /// <response code="204">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [HttpDelete("delete/{songId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

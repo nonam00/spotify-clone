@@ -14,7 +14,7 @@ namespace Persistence.EntityTypeConfigurations
             
             builder.HasMany(u => u.Playlists)
                    .WithOne()
-                   .HasForeignKey(p => p.Id)
+                   .HasForeignKey(p => p.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
