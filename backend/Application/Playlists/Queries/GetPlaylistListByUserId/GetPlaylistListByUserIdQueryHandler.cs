@@ -27,8 +27,9 @@ namespace Application.Playlists.Queries.GetPlaylistListByUserId
         {
             var list = await _dbContext.Playlists
               .Where(p => p.UserId == request.UserId)
-              .ProjectTo<PlaylistVm>(_mapper.ConfigurationProvider)
               .Take(10)
+              .OrderBy(p => p.CreatedAt)
+              .ProjectTo<PlaylistVm>(_mapper.ConfigurationProvider)
               .ToListAsync(cancellationToken);
 
             return new PlaylistListVm { Playlists = list };

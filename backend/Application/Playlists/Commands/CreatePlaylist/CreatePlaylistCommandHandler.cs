@@ -22,7 +22,7 @@ namespace Application.Playlists.Commands.CreatePlaylist
             {
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
-                Title = $"Playlist №{count + 1}"
+                Title = $"Playlist #{count + 1}"
             };
             
             await _dbContext.Playlists.AddAsync(playlist, cancellationToken);

@@ -36,7 +36,7 @@ namespace Application.Playlists.Commands.UpdatePlaylist
                 playlist.ImagePath = request.ImagePath;
             }
             
-            playlist.CreatedAt = DateTime.Now;
+            playlist.CreatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
