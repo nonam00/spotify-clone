@@ -10,10 +10,13 @@ namespace Persistence.EntityTypeConfigurations
         public void Configure(EntityTypeBuilder<Playlist> builder)
         {
             builder.HasKey(p => p.Id);
-
+            
             builder.HasMany(p => p.Songs)
                    .WithMany()
                    .UsingEntity<PlaylistSong>();
+
+            builder.Property(p => p.CreatedAt)
+                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }
