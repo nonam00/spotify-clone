@@ -1,13 +1,14 @@
 import $api from "@/api/http";
 
-import { Song } from "@/types/types";
+import { Playlist, Song } from "@/types/types";
 import { useEffect, useState } from "react";
 
-const useLoadImage = (song: Song) => {
+const useLoadImage = (item: Song | Playlist | undefined) => {
   const [href, setHref] = useState<string | null>(null);
-  const path = song.imagePath;
+  const path = item? item.imagePath : null;
+  
   useEffect(() => {
-    if (!song) {
+    if (!item || !item.imagePath) {
       return;
     }
     const getUrl = async() => {
@@ -24,7 +25,7 @@ const useLoadImage = (song: Song) => {
     }
 
     getUrl();
-  }, [song, path]);
+  }, [item, path]);
 
   return href;
 };
