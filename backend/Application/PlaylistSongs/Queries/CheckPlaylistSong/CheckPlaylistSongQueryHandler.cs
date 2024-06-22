@@ -14,6 +14,7 @@ namespace Application.PlaylistSongs.Queries.CheckPlaylistSong
             CancellationToken cancellationToken)
         {
             var _ps = await _dbContext.PlaylistSongs
+                .AsNoTracking()
                 .Where(ps => ps.PlaylistId == request.PlaylistId &&
                              ps.SongId == request.SongId)
                 .FirstOrDefaultAsync(cancellationToken);

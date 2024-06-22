@@ -13,31 +13,15 @@ namespace Application.Playlists.Commands.UpdatePlaylist
         public async Task Handle(UpdatePlaylistCommand request,
             CancellationToken cancellationToken)
         {
-            var playlist = await _dbContext.Playlists
-                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
-
-            if (playlist is null)
-            {
-                throw new Exception("Playlist with such ID doesn't exists");
-            }
-
-            if (request.Title != null && request.Title.Trim() != string.Empty)
-            {
-                playlist.Title = request.Title.Trim();
-            }
-
-            if (request.Description != null && request.Description.Trim() != string.Empty)
-            {
-                playlist.Description = request.Description.Trim();
-            }
-
-            if (request.ImagePath != null && request.ImagePath != string.Empty)
-            {
-                playlist.ImagePath = request.ImagePath;
-            }
-            
-            playlist.CreatedAt = DateTime.UtcNow;
-
+            await _dbContext.Playlists
+                .Where(p => p.Id == request.Id)
+                .ExecuteUpdateAsync(p => p
+                    .SetProperty(u => u.Title, u => request.Title ?? u.Title)
+                    .SetProperty(u => u.Description, u => request.Description ?? u.Description)
+                    .SetProperty(u => u.ImagePath, u => request.ImagePath ?? u.ImagePath)
+                    .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
+                    cancellationToken);
+                    
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }

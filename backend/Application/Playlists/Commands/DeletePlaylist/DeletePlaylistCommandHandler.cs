@@ -6,7 +6,7 @@ using Application.Interfaces;
 namespace Application.Playlists.Commands.DeletePlaylist
 {
     public class DeletePlaylistCommandHandler(ISongsDbContext dbContext)
-      : IRequestHandler<DeletePlaylistCommand>
+        : IRequestHandler<DeletePlaylistCommand>
     {
         private readonly ISongsDbContext _dbContext = dbContext;
 
@@ -14,12 +14,8 @@ namespace Application.Playlists.Commands.DeletePlaylist
             CancellationToken cancellationToken)
         {
             var playlist = await _dbContext.Playlists
-              .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
-
-            if (playlist is null)
-            {
-                throw new Exception("Playlist with such ID doesn't exists");
-            }
+                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+                ?? throw new Exception("Playlist with such ID doesn't exists");
 
             _dbContext.Playlists.Remove(playlist);
             await _dbContext.SaveChangesAsync(cancellationToken);

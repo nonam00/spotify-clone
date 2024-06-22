@@ -7,14 +7,16 @@ using Application.Interfaces;
 namespace Application.Playlists.Commands.CreatePlaylist
 {
     public class CreatePlaylistCommandHandler(ISongsDbContext dbContext)
-      : IRequestHandler<CreatePlaylistCommand, Guid>
+        : IRequestHandler<CreatePlaylistCommand, Guid>
     {
         private readonly ISongsDbContext _dbContext = dbContext;
 
-        public async Task<Guid> Handle(CreatePlaylistCommand request,
+        public async Task<Guid> Handle(
+            CreatePlaylistCommand request,
             CancellationToken cancellationToken)
         {
             var count = await _dbContext.Playlists
+                .AsNoTracking()
                 .Where(p => p.UserId == request.UserId)
                 .CountAsync(cancellationToken);
 

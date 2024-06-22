@@ -8,27 +8,20 @@ using Application.Interfaces.Auth;
 
 namespace Application.Users.Commands.CreateUser
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
+    public class CreateUserCommandHandler(
+        ISongsDbContext dbContext, IPasswordHasher passwordHasher)
+        : IRequestHandler<CreateUserCommand, Guid>
     {
-        private readonly ISongsDbContext _dbContext;
-        private readonly IPasswordHasher _passwordHasher;
-
-        public CreateUserCommandHandler(ISongsDbContext dbContext, IPasswordHasher passwordHasher)
-        {
-            _dbContext = dbContext;
-            _passwordHasher = passwordHasher;
-        }
+        private readonly ISongsDbContext _dbContext = dbContext;
+        private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
         public async Task<Guid> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
-            var check = await _dbContext.Users
-              .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
-
-            if (check != null)
-            {
-                throw new LoginException("User with this email already exits");
-            }
+            var ckeck = await _dbContext.Users
+              .AsNoTracking()
+              .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
+              ?? throw new LoginException("User with this email already exits");
 
             var hashedPassword = _passwordHasher.Generate(request.Password);
 

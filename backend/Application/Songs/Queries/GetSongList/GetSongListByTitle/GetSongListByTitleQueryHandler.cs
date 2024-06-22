@@ -7,21 +7,17 @@ using Application.Interfaces;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
 {
-    public class GetSongListByTitleQueryHandler : IRequestHandler<GetSongListByTitleQuery, SongListVm>
+    public class GetSongListByTitleQueryHandler(ISongsDbContext dbContext, IMapper mapper)
+        : IRequestHandler<GetSongListByTitleQuery, SongListVm>
     {
-        private readonly ISongsDbContext _dbContext;
-        private readonly IMapper _mapper;
-
-        public GetSongListByTitleQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        {
-            _dbContext = dbContext;
-            _mapper = mapper;
-        }
+        private readonly ISongsDbContext _dbContext = dbContext;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<SongListVm> Handle(GetSongListByTitleQuery request,
             CancellationToken cancellationToken)
         {
             var songsQuery = await _dbContext.Songs
+                .AsNoTracking()
                 .Where(song => EF.Functions.TrigramsSimilarity(song.Title, request.SearchString) > 0.1)
                 .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Title, request.SearchString))
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)

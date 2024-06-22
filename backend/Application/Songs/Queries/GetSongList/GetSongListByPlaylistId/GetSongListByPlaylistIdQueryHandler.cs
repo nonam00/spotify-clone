@@ -7,25 +7,18 @@ using Application.Interfaces;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId
 {
-    public class GetSongListByPlaylistIdQueryHandler
-      : IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
+    public class GetSongListByPlaylistIdQueryHandler(ISongsDbContext dbContext, IMapper mapper)
+        : IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
     {
-        private readonly ISongsDbContext _dbContext;
-        private readonly IMapper _mapper;
-
-        public GetSongListByPlaylistIdQueryHandler(
-            ISongsDbContext dbContext,
-            IMapper mapper)
-        {
-            _dbContext = dbContext;
-            _mapper = mapper;
-        }
+        private readonly ISongsDbContext _dbContext = dbContext;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<SongListVm> Handle(
             GetSongListByPlaylistIdQuery request,
             CancellationToken cancellationToken)
         {
             var songs = await _dbContext.PlaylistSongs
+              .AsNoTracking()
               .Where(ps => ps.PlaylistId == request.PlaylistId)
               .OrderByDescending(ps => ps.CreatedAt)
               .Select(ps => ps.Song)
