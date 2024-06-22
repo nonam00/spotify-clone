@@ -27,7 +27,7 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId
         {
             var songs = await _dbContext.PlaylistSongs
               .Where(ps => ps.PlaylistId == request.PlaylistId)
-              .OrderBy(ps => ps.CreatedAt)
+              .OrderByDescending(ps => ps.CreatedAt)
               .Select(ps => ps.Song)
               .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
               .ToListAsync(cancellationToken);
