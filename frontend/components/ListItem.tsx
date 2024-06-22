@@ -17,7 +17,7 @@ const ListItem: React.FC<ListItemProps> = ({
   href,
   playlist
 }) => {
-  const image = useLoadImage(playlist);
+  const image = useLoadImage(playlist) ?? "/images/playlist.webp";
   const router = useRouter();
   
   const onClick = () => {
@@ -51,7 +51,7 @@ const ListItem: React.FC<ListItemProps> = ({
         <Image
           className="object-cover"
           fill
-          src={image ?? "/images/liked.png"}
+          src={playlist? image : "/images/liked.png"}
           alt="Image"
         />
       </div>

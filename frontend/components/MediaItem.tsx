@@ -47,7 +47,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
       >
         <Image
           fill
-          src={imageUrl || '/images/liked.png'}
+          src={imageUrl || '/images/playlist.webp'}
           alt="Media Item"
           className="object-cover"
         />

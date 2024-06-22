@@ -23,8 +23,8 @@ const PlaylistImage: React.FC<PlaylistImageProps> = ({
     <Image
       fill
       alt="Playlist"
-      className="object-cover rounded-xl"
-      src={href ?? "/images/liked.png"}
+      className="object-cover rounded-xl hover:opacity-75 transition"
+      src={href ?? "/images/playlist.webp"}
       onClick={onClick}
     />
   )
