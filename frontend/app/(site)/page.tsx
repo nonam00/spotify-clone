@@ -1,4 +1,6 @@
 import getSongs from "@/actions/getSongs";
+import getUserPlaylists from "@/actions/getUserPlaylists";
+
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";
 import PageContent from "./components/PageContent";
@@ -7,6 +9,7 @@ export const revalidate = 0;
 
 export default async function Home() {
   const songs = await getSongs();
+  const playlists = await getUserPlaylists();
 
   return (
     <div className="
@@ -40,10 +43,17 @@ export default async function Home() {
             "
           >
             <ListItem
-              image="/images/liked.png"
               name="Liked Songs"
               href="/liked"
             />
+            {playlists.map((p) => (
+              <ListItem
+                key = {p.id}
+                name={p.title}
+                playlist={p}
+                href={`/playlist?id=${p.id}`}
+              />
+            ))}
           </div>
         </div>
       </Header>

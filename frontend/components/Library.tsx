@@ -3,37 +3,48 @@
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
-import { Song } from "@/types/types";
+import { Playlist } from "@/types/types";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import useUploadModal from "@/hooks/useUploadModal";
 import { useUser } from "@/hooks/useUser";
-import useOnPlay from "@/hooks/useOnPlay";
 
 import MediaItem from "./MediaItem";
+import { useRouter } from "next/navigation";
+import $api from "@/api/http";
 
 interface LibraryProps {
-  songs: Song[];
+  playlists: Playlist[];
 }
 
 const Library: React.FC<LibraryProps> = ({
-  songs
+  playlists
 }) => {
   const authModal = useAuthModal();
   const uploadModal = useUploadModal();
   const { isAuth } = useUser();
+  const router = useRouter();
 
-  const onPlay = useOnPlay(songs);
-
-  const onClick = () => {
+  const onUploadClick = () => {
     if (!isAuth) {
       return authModal.onOpen();
     }
 
-    //TODO: Check for subscrition
-
     return uploadModal.onOpen();
   };
+
+  const onPlaylistClick = () => {
+    if (!isAuth) {
+      return authModal.onOpen();
+    }
+    $api.post("/playlists/")
+      .then(response => {
+        if (response.status >= 200 && response.status < 400) {
+          router.push(`/playlist?id=${response.data}`)
+          router.refresh();
+        }
+      })
+  }
 
   return (
     <div className="flex flex-col">
@@ -65,7 +76,7 @@ const Library: React.FC<LibraryProps> = ({
           </p>
         </div>
         <AiOutlinePlus
-          onClick={onClick}
+          onClick={onUploadClick}
           size={20}
           className="
             text-neutral-400
@@ -75,6 +86,17 @@ const Library: React.FC<LibraryProps> = ({
           "
         />
       </div>
+      <button
+        onClick={onPlaylistClick}
+        className="
+          text-neutral-400
+          font-medium
+          text-md
+        "
+      >
+        Create Playlist 
+      </button>
+
       <div className="
         flex
         flex-col
@@ -82,11 +104,11 @@ const Library: React.FC<LibraryProps> = ({
         mt-4
         px-3
       ">
-        {songs.map((song) => (
+        {playlists.map((playlist) => (
           <MediaItem
-            onClick={(id: string) => onPlay(id)}
-            key={song.id}
-            data={song}
+            onClick={(id: string) => router.push(`/playlist?id=${id}`)}
+            key={playlist.id}
+            data={playlist}
           />
         ))}
       </div>
