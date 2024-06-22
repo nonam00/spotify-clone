@@ -18,7 +18,6 @@ const PlaylistImage: React.FC<PlaylistImageProps> = ({
   const onClick = () => {
     playlistModal.setPlaylist(playlist);
     playlistModal.onOpen();
-    console.log(playlistModal.id);
   }
   return (
     <Image
