@@ -16,9 +16,11 @@ namespace Application.Playlists.Commands.UpdatePlaylist
             await _dbContext.Playlists
                 .Where(p => p.Id == request.Id)
                 .ExecuteUpdateAsync(p => p
-                    .SetProperty(u => u.Title, u => request.Title ?? u.Title)
-                    .SetProperty(u => u.Description, u => request.Description ?? u.Description)
-                    .SetProperty(u => u.ImagePath, u => request.ImagePath ?? u.ImagePath)
+                    .SetProperty(u => u.Title, request.Title)
+                    .SetProperty(u => u.Description,
+                        request.Description != "" ? request.Description : null )
+                    .SetProperty(u => u.ImagePath,
+                        u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
                     .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
                     cancellationToken);
                     

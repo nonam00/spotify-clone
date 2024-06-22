@@ -19,9 +19,9 @@ namespace WebAPI.Models
                 .ForMember(c => c.Title,
                     opt => opt.MapFrom(dto => dto.Title))
                 .ForMember(c => c.Description,
-                    opt => opt.MapFrom(dto => dto.Description))
+                    opt => opt.MapFrom(dto => dto.Description ?? null))
                 .ForMember(c => c.ImagePath,
-                    opt => opt.MapFrom(dto => dto.ImagePath));
+                    opt => opt.MapFrom(dto => dto.ImagePath ?? null));
         }
     }
 }

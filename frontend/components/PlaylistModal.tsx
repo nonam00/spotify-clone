@@ -13,6 +13,7 @@ import usePlaylistModal from "@/hooks/usePlaylistModal";
 import Modal from "./Modal";  
 import Input from "./Input";
 import Button from "./Button";
+import { Description } from "@radix-ui/react-dialog";
 
 const PlaylistModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
@@ -73,7 +74,7 @@ const PlaylistModal = () => {
       try {
         await $api.put<string>(`/playlists/${playlistModal.id}`, {
           title: values.title,
-          description: values.description,
+          description: values.description ?? null,
           imagePath: imageFilePath,
         });
       } catch {
