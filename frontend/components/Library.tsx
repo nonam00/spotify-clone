@@ -1,17 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
 import { Playlist } from "@/types/types";
 
 import useAuthModal from "@/hooks/useAuthModal";
-import useUploadModal from "@/hooks/useUploadModal";
+import useCreateModal from "@/hooks/useCreateModal";
 import { useUser } from "@/hooks/useUser";
 
 import MediaItem from "./MediaItem";
 import { useRouter } from "next/navigation";
-import $api from "@/api/http";
 
 interface LibraryProps {
   playlists: Playlist[];
@@ -21,30 +21,17 @@ const Library: React.FC<LibraryProps> = ({
   playlists
 }) => {
   const authModal = useAuthModal();
-  const uploadModal = useUploadModal();
+  const createModal = useCreateModal();
   const { isAuth } = useUser();
   const router = useRouter();
 
-  const onUploadClick = () => {
+  const onCreateClick = () => {
     if (!isAuth) {
       return authModal.onOpen();
     }
 
-    return uploadModal.onOpen();
+    return createModal.onOpen();
   };
-
-  const onPlaylistClick = () => {
-    if (!isAuth) {
-      return authModal.onOpen();
-    }
-    $api.post("/playlists/")
-      .then(response => {
-        if (response.status >= 200 && response.status < 400) {
-          router.push(`/playlist?id=${response.data}`)
-          router.refresh();
-        }
-      })
-  }
 
   return (
     <div className="flex flex-col">
@@ -76,7 +63,7 @@ const Library: React.FC<LibraryProps> = ({
           </p>
         </div>
         <AiOutlinePlus
-          onClick={onUploadClick}
+          onClick={onCreateClick}
           size={20}
           className="
             text-neutral-400
@@ -86,17 +73,6 @@ const Library: React.FC<LibraryProps> = ({
           "
         />
       </div>
-      <button
-        onClick={onPlaylistClick}
-        className="
-          text-neutral-400
-          font-medium
-          text-md
-        "
-      >
-        Create Playlist 
-      </button>
-
       <div className="
         flex
         flex-col
@@ -104,6 +80,46 @@ const Library: React.FC<LibraryProps> = ({
         mt-4
         px-3
       ">
+        <div
+          onClick={() => router.push("/liked")}
+          className="
+            flex
+            items-center
+            gap-x-3
+            cursor-pointer
+            hover:bg-neutral-800/50
+            w-full
+            p-2
+            rounded-md  
+          "
+        >
+          <div
+            className="
+              relative
+              rounded-md
+              min-h-[48px]
+              min-w-[48px]
+              overflow-hidden
+            "
+          >
+            <Image
+              fill
+              src="/images/liked.png"
+              alt="Media Item"
+              className="object-cover"
+            />
+          </div>
+          <div className="
+            flex
+            flex-col
+            gap-y-1
+            overflow-hidden
+          ">
+            <p className="text-white trancate">
+              Liked Songs 
+            </p>
+          </div>
+        </div>
         {playlists.map((playlist) => (
           <MediaItem
             onClick={(id: string) => router.push(`/playlist?id=${id}`)}
@@ -115,4 +131,5 @@ const Library: React.FC<LibraryProps> = ({
     </div>
   );
 }
+
 export default Library;

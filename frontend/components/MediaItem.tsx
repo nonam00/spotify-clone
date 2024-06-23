@@ -65,7 +65,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
           {(data as Song)?.author}
         </p>
       </div>
-  </div>
+    </div>
   );
 }
  
