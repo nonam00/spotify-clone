@@ -10,7 +10,15 @@ import useDebounce from "@/hooks/useDebounce";
 
 import Input from "./Input";
 
-const SearchInput = () => {
+interface SearchInputProps {
+  pageUrl: string
+  types: boolean
+}
+
+const SearchInput: React.FC<SearchInputProps> = ({
+  pageUrl,
+  types
+}) => {
   const router = useRouter();
   const [value, setValue] = useState<string>("");
   const debouncedValue = useDebounce<string>(value, 500);
@@ -27,12 +35,12 @@ const SearchInput = () => {
     };
 
     const url = qs.stringifyUrl({
-      url: "/search",
+      url: pageUrl,
       query: query
     });
 
     router.push(url);
-  }, [debouncedValue, debouncedType, router]);
+  }, [debouncedValue, debouncedType, router, pageUrl]);
 
   return (
     <div>
@@ -41,6 +49,7 @@ const SearchInput = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
+      {types? 
       <div
         className="
           flex 
@@ -107,6 +116,7 @@ const SearchInput = () => {
           By Author
         </button>
       </div>
+      : <></>}
     </div>
   );
 }
