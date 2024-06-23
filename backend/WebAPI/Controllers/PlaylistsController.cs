@@ -17,6 +17,10 @@ using Application.PlaylistSongs.Queries.CheckPlaylistSong;
 using Application.PlaylistSongs.Commands.CreatePlaylistSong;
 using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 
+using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlaylistId;
+using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySearchStringAndPlaylistId;
+using Application.LikedSongs.Queries.GetLikedSongList;
+
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
@@ -147,6 +151,36 @@ namespace WebAPI.Controllers
             };
             await Mediator.Send(command);
             return NoContent();
+        }
+
+        [HttpGet("{playlistId}/liked/")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LikedSongListVm>> GetLikedSongs(Guid playlistId)
+        {
+            var query = new GetLikedSongListByPlaylistIdQuery
+            {
+                UserId = UserId,
+                PlaylistId = playlistId
+            };
+            var vm = await Mediator.Send(query);
+            return vm;
+        }
+
+        [HttpGet("{playlistId}/liked/{searchString}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<LikedSongListVm>> GetLikedSongsBySearchString(
+            Guid playlistId, string searchString)
+        {
+            var query = new GetLikedSongListBySearchStringAndPlaylistIdQuery
+            {
+                UserId = UserId,
+                PlaylistId = playlistId,
+                SearchString = searchString
+            };
+            var vm = await Mediator.Send(query);
+            return vm;
         }
     }
 }
