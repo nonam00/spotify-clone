@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Application.LikedSongs.Queries.GetLikedSongList.GetFullLikedSongList;
 using Application.LikedSongs.Queries.GetLikedSongList;
 using Application.LikedSongs.Queries.GetLikedSong;
 using Application.LikedSongs.Commands.CreateLikedSong;
@@ -39,7 +40,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
         {
-            var query = new GetLikedSongListQuery
+            var query = new GetFullLikedSongListQuery
             {
                 UserId = UserId
             };
