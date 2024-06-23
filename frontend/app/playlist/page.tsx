@@ -86,7 +86,7 @@ const Playlist = async ({searchParams}: SearchProps) => {
           </div>
         </div>
       </Header>
-      <PlaylistContent songs={songs}/>
+      <PlaylistContent id={searchParams.id} songs={songs}/>
     </div>
   );
 }

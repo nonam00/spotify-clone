@@ -12,10 +12,12 @@ import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
 
 interface PlaylistContentProps {
+  id: string,
   songs: Song[];
 }
 
 const PlaylistContent: React.FC<PlaylistContentProps> = ({
+  id,
   songs
 }) => {
   const router = useRouter();
@@ -41,6 +43,11 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         items-center
         md:items-start
       ">
+      <button
+        onClick={() => router.push(`/add/?id=${id}`)}
+      >
+        Add
+      </button>
         There are no songs in this playlist.
       </div>
     )
