@@ -6,6 +6,7 @@ import AuthModal from "@/components/AuthModal";
 import CreateModal from "@/components/CreateModal";
 import UploadModal from "@/components/UploadModal";
 import PlaylistModal from "@/components/PlaylistModal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -24,6 +25,7 @@ const ModalProvider = () => {
       <CreateModal /> 
       <UploadModal />
       <PlaylistModal />
+      <ConfirmModal />
     </>
   )
 }
