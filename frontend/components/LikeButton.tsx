@@ -58,10 +58,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       await $api.delete(`/liked/delete/${songId}`)
         .then(() => {
           setIsLiked(false);
-          toast("Like deleted");
+          toast.success("Like deleted");
         })
         .catch((error: AxiosError) => {
-          toast("An error occurred while deleting the song from your favorites");
+          toast.error("An error occurred while deleting the song from your favorites");
           console.log(error.response?.data);
         });
 
@@ -75,7 +75,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             toast.success('Liked');
           })
           .catch((error: AxiosError) => {
-            toast("An error occurred while adding the song to the favorites");
+            toast.error("An error occurred while adding the song to the favorites");
             console.log(error.message);
           });
     }
