@@ -22,7 +22,6 @@ namespace Application.LikedSongs.Commands.CreateLikedSong
             await _dbContext.LikedSongs.AddAsync(likedSong, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
             
-            // TODO: replace with key
             return likedSong.UserId.ToString() + likedSong.SongId.ToString();
         }
     }

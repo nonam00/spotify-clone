@@ -15,7 +15,6 @@ using Application.Playlists.Commands.DeletePlaylist;
 using Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
 using Application.Songs.Queries.GetSongList;
 
-using Application.PlaylistSongs.Queries.CheckPlaylistSong;
 using Application.PlaylistSongs.Commands.CreatePlaylistSong;
 using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 
@@ -228,38 +227,6 @@ namespace WebAPI.Controllers
             };
             var vm = await Mediator.Send(query);
             return vm;
-        }
-        
-        /// <summary>
-        /// Checks if the song is in the playlist
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///   GET /{playlistId}/songs/{songId}
-        ///
-        /// </remarks>
-        /// <param name="playlistId">
-        /// ID of the playlist in which the song is checked for
-        /// </param>
-        /// <param name="songId">
-        /// ID of the song that is checked to see if it is in the playlist
-        /// </param>
-        /// <returns> Returns bool</returns>
-        /// <response code="204">Success</response>
-        /// <response code="401">If the user is unauthorized</response>
-        [HttpGet("{playlistId}/songs/{songId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<bool>> CheckPlaylistSong(Guid playlistId, Guid songId)
-        {
-            var query = new CheckPlaylistSongQuery
-            {
-                PlaylistId = playlistId,
-                SongId = songId
-            };
-            var check = await Mediator.Send(query);
-            return check;
         }
 
         /// <summary>

@@ -7,7 +7,8 @@ using Application.Interfaces;
 
 namespace Application.LikedSongs.Queries.GetLikedSongList.GetFullLikedSongList
 {
-    public class GetFullLikedSongListQueryHandler(ISongsDbContext dbContext, IMapper mapper)
+    public class GetFullLikedSongListQueryHandler(
+        ISongsDbContext dbContext, IMapper mapper)
         : IRequestHandler<GetFullLikedSongListQuery, LikedSongListVm>
     {
         private readonly ISongsDbContext _dbContext = dbContext;

@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.LikedSongs.Queries.GetLikedSongList.GetFullLikedSongList;
+using Application.LikedSongs.Queries.CheckLikedSong;
 using Application.LikedSongs.Queries.GetLikedSongList;
-using Application.LikedSongs.Queries.GetLikedSong;
 using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 
-using Application.LikedSongs.Queries;
 
 namespace WebAPI.Controllers
 {
@@ -49,7 +48,7 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// Gets certain liked song data for certain user
+        /// Checks for like
         /// </summary>
         /// <remarks>
         /// 
@@ -58,22 +57,22 @@ namespace WebAPI.Controllers
         ///     GET /{songId}
         /// 
         /// </remarks>
-        /// <param name="songId">Liked song data id</param>
+        /// <param name="songId">ID of tiked song</param>
         /// <returns>Returns LikedSongVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [HttpGet("{songId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LikedSongVm?>> GetLikedSong(Guid songId)
+        public async Task<IActionResult> GetLikedSong(Guid songId)
         {
-            var query = new GetLikedSongQuery()
+            var query = new CheckLikedSongQuery()
             {
                 UserId = UserId,
                 SongId = songId
             };
-            var vm = await Mediator.Send(query);
-            return vm;
+            var check = await Mediator.Send(query);
+            return check? Ok(check) : Ok();
         }
 
         /// <summary>
@@ -114,7 +113,9 @@ namespace WebAPI.Controllers
         ///     DELETE /{songId}
         /// 
         /// </remarks>
-        /// <param name="songId">Id of song to delete liked data</param>
+        /// <param name="songId">
+        /// Id of the song to remove from user favorites 
+        /// </param>
         /// <response code="204">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [HttpDelete("{songId}")]
