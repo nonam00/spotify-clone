@@ -21,8 +21,7 @@ namespace Application.LikedSongs.Queries.GetLikedSong
                 .Where(l => l.SongId == request.SongId &&
                             l.UserId == request.UserId)
                 .ProjectTo<LikedSongVm>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new Exception("Liked with such key not found");
+                .FirstOrDefaultAsync(cancellationToken);
 
             return liked;
         }

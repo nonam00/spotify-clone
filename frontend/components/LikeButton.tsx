@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 import $api from "@/api/http";
@@ -32,15 +33,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     const fetchData = async () => {
-      try {
-        const { data } = await $api.get<Song>(`/liked/get/${songId}`);
-        if (data) {
-          setIsLiked(true);
-        }
-      } catch(error) {
-        console.log(error);
-      }
-    };
+      await $api.get<Song>(`/liked/get/${songId}`)
+        .then((response) => {
+          if (response.status >= 200 && response.status < 400 && response.data) {
+            setIsLiked(true);
+          }
+        })
+        .catch((error: AxiosError) => {
+          console.log(error.response?.data);
+        });
+    }
 
     fetchData();
   }, [songId, user.isAuth]);
@@ -53,15 +55,18 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     if (isLiked) {
-      try {
-        await $api.delete(`/liked/delete/${songId}`);
-        setIsLiked(false);
-        toast("Like deleted");
-      } catch(error: any) {
-        toast(error?.message);
-      }
+      await $api.delete(`/liked/delete/${songId}`)
+        .then(() => {
+          setIsLiked(false);
+          toast("Like deleted");
+        })
+        .catch((error: AxiosError) => {
+          toast("An error occurred while deleting the song from your favorites");
+          console.log(error.response?.data);
+        });
+
     } else {
-        await fetch(`https:localhost:7025/1/liked/like/${songId}`, {
+        await fetch(`https://localhost:7025/1/liked/like/${songId}`, {
           method: 'POST',
           credentials: 'include'
         })
@@ -69,7 +74,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             setIsLiked(true);
             toast.success('Liked');
           })
-          .catch((error: Error) => toast(error.message));
+          .catch((error: AxiosError) => {
+            toast("An error occurred while adding the song to the favorites");
+            console.log(error.message);
+          });
     }
     router.refresh();
   }
