@@ -32,12 +32,20 @@ const AuthModal = () => {
   }
 
   const upload = async (func: any) => {
-    if(!email) {
+    if (!email) {
       toast.error("The email field must be filled in");
+      return;
+    }
+    if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      toast.error("Non valid email");
       return;
     }
     if (!password) {
       toast.error("The password field must be filled in");
+      return;
+    }
+    if (password.length < 8) {
+      toast.error("The password length must be greater than 8");
       return;
     }
     await func(email, password);

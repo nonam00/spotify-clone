@@ -14,5 +14,6 @@ namespace Domain
         //[Column(TypeName = "jsonb")]
         public string? PaymentMethod { get; set; }
         public IList<LikedSong> LikedSongs { get; } = new List<LikedSong>();
+        public IList<Playlist> Playlists { get; } = new List<Playlist>();
     }
 }

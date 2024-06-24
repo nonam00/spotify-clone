@@ -1,38 +1,36 @@
 "use client";
 
+import Image from "next/image";
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
-import { Song } from "@/types/types";
+import { Playlist } from "@/types/types";
 
 import useAuthModal from "@/hooks/useAuthModal";
-import useUploadModal from "@/hooks/useUploadModal";
+import useCreateModal from "@/hooks/useCreateModal";
 import { useUser } from "@/hooks/useUser";
-import useOnPlay from "@/hooks/useOnPlay";
 
 import MediaItem from "./MediaItem";
+import { useRouter } from "next/navigation";
 
 interface LibraryProps {
-  songs: Song[];
+  playlists: Playlist[];
 }
 
 const Library: React.FC<LibraryProps> = ({
-  songs
+  playlists
 }) => {
   const authModal = useAuthModal();
-  const uploadModal = useUploadModal();
+  const createModal = useCreateModal();
   const { isAuth } = useUser();
+  const router = useRouter();
 
-  const onPlay = useOnPlay(songs);
-
-  const onClick = () => {
+  const onCreateClick = () => {
     if (!isAuth) {
       return authModal.onOpen();
     }
 
-    //TODO: Check for subscrition
-
-    return uploadModal.onOpen();
+    return createModal.onOpen();
   };
 
   return (
@@ -65,7 +63,7 @@ const Library: React.FC<LibraryProps> = ({
           </p>
         </div>
         <AiOutlinePlus
-          onClick={onClick}
+          onClick={onCreateClick}
           size={20}
           className="
             text-neutral-400
@@ -82,15 +80,56 @@ const Library: React.FC<LibraryProps> = ({
         mt-4
         px-3
       ">
-        {songs.map((song) => (
+        <div
+          onClick={() => router.push("/liked")}
+          className="
+            flex
+            items-center
+            gap-x-3
+            cursor-pointer
+            hover:bg-neutral-800/50
+            w-full
+            p-2
+            rounded-md  
+          "
+        >
+          <div
+            className="
+              relative
+              rounded-md
+              min-h-[48px]
+              min-w-[48px]
+              overflow-hidden
+            "
+          >
+            <Image
+              fill
+              src="/images/liked.png"
+              alt="Media Item"
+              className="object-cover"
+            />
+          </div>
+          <div className="
+            flex
+            flex-col
+            gap-y-1
+            overflow-hidden
+          ">
+            <p className="text-white trancate">
+              Liked Songs 
+            </p>
+          </div>
+        </div>
+        {playlists.map((playlist) => (
           <MediaItem
-            onClick={(id: string) => onPlay(id)}
-            key={song.id}
-            data={song}
+            onClick={(id: string) => router.push(`/playlist?id=${id}`)}
+            key={playlist.id}
+            data={playlist}
           />
         ))}
       </div>
     </div>
   );
 }
+
 export default Library;

@@ -32,15 +32,18 @@ namespace WebAPI.Controllers
         ///     
         /// </remarks>
         /// <param name="registerDto">RegisterDto object</param>
-        /// <returns>Returns new user ID</returns>
-        /// <response code="200">Success</response>
+        /// <returns>Returns access token in cookies</returns>
+        /// <response code="201">Success</response>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<ActionResult<Guid>> Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             var command = _mapper.Map<CreateUserCommand>(registerDto);
-            var userId = await Mediator.Send(command);
-            return Ok(userId);
+            var accessToken = await Mediator.Send(command);
+
+            HttpContext.Response.Cookies.Append("token", accessToken);
+
+            return Ok();
         }
 
         /// <summary>

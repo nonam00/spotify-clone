@@ -1,30 +1,32 @@
-import $api from "@/api/http";
-
-import { Song } from "@/types/types";
 import { useEffect, useState } from "react";
 
-const useLoadImage = (song: Song) => {
+import $api from "@/api/http";
+import { Playlist, Song } from "@/types/types";
+
+const useLoadImage = (item: Song | Playlist | undefined) => {
   const [href, setHref] = useState<string | null>(null);
-  const path = song.imagePath;
+  const path = item? item.imagePath : null;
+
   useEffect(() => {
-    if (!song) {
+    if (!item || !item.imagePath) {
+      setHref(null);
       return;
     }
     const getUrl = async() => {
-      try {
-        await $api.get(`/files/image/${path}`, {
-          responseType: "blob"
-        })
+      await $api.get(`/files/image/${path}`, {
+        responseType: "blob"
+      })
         .then(response => {
           setHref(URL.createObjectURL(response.data));
+        })
+        .catch(error => {
+          setHref(null);
+          console.log(error);
         });
-      } catch(error) {
-        console.log(error);
-      }
     }
 
     getUrl();
-  }, [song, path]);
+  }, [item, path]);
 
   return href;
 };

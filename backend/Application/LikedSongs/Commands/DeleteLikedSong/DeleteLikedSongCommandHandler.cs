@@ -4,24 +4,19 @@ using MediatR;
 
 namespace Application.LikedSongs.Commands.DeleteLikedSong
 {
-    public class DeleteLikedSongCommandHandler : IRequestHandler<DeleteLikedSongCommand>
+    public class DeleteLikedSongCommandHandler(ISongsDbContext dbContext)
+        : IRequestHandler<DeleteLikedSongCommand>
     {
-        private readonly ISongsDbContext _dbContext;
+        private readonly ISongsDbContext _dbContext = dbContext;
 
-        public DeleteLikedSongCommandHandler(ISongsDbContext dbContext) =>
-            _dbContext = dbContext;
-
-        public async Task Handle(DeleteLikedSongCommand request, CancellationToken cancellationToken)
+        public async Task Handle(DeleteLikedSongCommand request,
+            CancellationToken cancellationToken)
         {
-            var entity = await _dbContext.LikedSongs
-                .FindAsync([request.UserId, request.SongId], cancellationToken);
+            var liked = await _dbContext.LikedSongs
+                .FindAsync([request.UserId, request.SongId], cancellationToken)
+                ?? throw new Exception(nameof(LikedSong));
 
-            if(entity is null)
-            {
-                throw new Exception(nameof(LikedSong));
-            }
-
-            _dbContext.LikedSongs.Remove(entity);
+            _dbContext.LikedSongs.Remove(liked);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }

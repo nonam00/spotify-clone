@@ -1,12 +1,13 @@
 "use server";
 
+import { cookies } from "next/headers";
+
 import $api from "@/api/http";
 import { Song } from "@/types/types";
-import { cookies } from "next/headers";
 
 const getLikedSongs = async (): Promise<Song[]> => {
   try {
-    const { data } = await $api.get("/liked/get/", {
+    const { data } = await $api.get("/liked/", {
       headers: {
         // needs to input manualy because of server actions 
         Cookie: cookies().getAll().map((cookie) => (

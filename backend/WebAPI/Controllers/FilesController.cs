@@ -37,7 +37,7 @@ namespace WebAPI.Controllers
         ///     POST /song
         /// 
         /// </remarks>
-        /// <response code="200">Success</response>
+        /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
         //[ValidateAntiForgeryToken]
@@ -79,7 +79,7 @@ namespace WebAPI.Controllers
         ///     POST /image
         /// 
         /// </remarks>
-        /// <response code="200">Success</response>
+        /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
         //[ValidateAntiForgeryToken]

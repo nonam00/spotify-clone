@@ -61,11 +61,15 @@ export const MyUserContextProvider = (props: Props) => {
           .then((response) => {
             setIsAuth(true);
             setUserDetails(response.data);
+            toast.success("Logged In")    
           })
           .catch(error => console.log(error.message))
       })
       .catch((error) => {
         if (error.response.status === 400) {
+          if(error.response.data.error) {
+            toast.error(error.response.data.error);
+          }
           for(const field in error.response.data.errors) {
             error.response.data.errors[field].forEach((e: any) => {
               toast(`${field}: ${e}`);

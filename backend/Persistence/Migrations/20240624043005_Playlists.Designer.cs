@@ -12,15 +12,15 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(SongsDbContext))]
-    [Migration("20240428151319_auth")]
-    partial class auth
+    [Migration("20240624043005_Playlists")]
+    partial class Playlists
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -36,7 +36,9 @@ namespace Persistence.Migrations
                         .HasColumnName("song_id");
 
                     b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 863, DateTimeKind.Utc).AddTicks(1798))
                         .HasColumnName("created_at");
 
                     b.HasKey("UserId", "SongId")
@@ -52,6 +54,70 @@ namespace Persistence.Migrations
                     b.ToTable("liked_songs", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Playlist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(7809))
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text")
+                        .HasColumnName("image_path");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_playlists");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_playlists_user_id");
+
+                    b.ToTable("playlists", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.PlaylistSong", b =>
+                {
+                    b.Property<Guid>("PlaylistId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("playlist_id");
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("song_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(8777))
+                        .HasColumnName("created_at");
+
+                    b.HasKey("PlaylistId", "SongId")
+                        .HasName("pk_playlist_songs");
+
+                    b.HasIndex("SongId")
+                        .HasDatabaseName("ix_playlist_songs_song_id");
+
+                    b.ToTable("playlist_songs", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Song", b =>
                 {
                     b.Property<Guid>("Id")
@@ -65,7 +131,9 @@ namespace Persistence.Migrations
                         .HasColumnName("author");
 
                     b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 862, DateTimeKind.Utc).AddTicks(3660))
                         .HasColumnName("created_at");
 
                     b.Property<string>("ImagePath")
@@ -83,16 +151,12 @@ namespace Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_songs");
-
-                    b.HasIndex("Id")
-                        .IsUnique()
-                        .HasDatabaseName("ix_songs_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_songs_user_id");
@@ -140,17 +204,13 @@ namespace Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_email");
 
-                    b.HasIndex("Id")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_id");
-
                     b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("Domain.LikedSong", b =>
                 {
                     b.HasOne("Domain.Song", "Song")
-                        .WithMany("Liked")
+                        .WithMany()
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -159,7 +219,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.User", "User")
                         .WithMany("LikedSongs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_liked_songs_users_user_id");
 
@@ -168,26 +228,53 @@ namespace Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Playlist", b =>
+                {
+                    b.HasOne("Domain.User", null)
+                        .WithMany("Playlists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlists_users_user_id");
+                });
+
+            modelBuilder.Entity("Domain.PlaylistSong", b =>
+                {
+                    b.HasOne("Domain.Playlist", "Playlist")
+                        .WithMany()
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlist_songs_playlists_playlist_id");
+
+                    b.HasOne("Domain.Song", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlist_songs_songs_song_id");
+
+                    b.Navigation("Playlist");
+
+                    b.Navigation("Song");
+                });
+
             modelBuilder.Entity("Domain.Song", b =>
                 {
                     b.HasOne("Domain.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
+                        .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_songs_users_user_id");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Song", b =>
-                {
-                    b.Navigation("Liked");
-                });
-
             modelBuilder.Entity("Domain.User", b =>
                 {
                     b.Navigation("LikedSongs");
+
+                    b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618
         }

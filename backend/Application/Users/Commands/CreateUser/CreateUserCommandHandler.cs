@@ -1,29 +1,31 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 using Domain;
+
 using Application.Common.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Auth;
 
 namespace Application.Users.Commands.CreateUser
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
+    public class CreateUserCommandHandler(
+        ISongsDbContext dbContext,
+        IPasswordHasher passwordHasher,
+        IJwtProvider jwtProvider)
+        : IRequestHandler<CreateUserCommand, string>
     {
-        private readonly ISongsDbContext _dbContext;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly ISongsDbContext _dbContext = dbContext;
+        private readonly IPasswordHasher _passwordHasher = passwordHasher;
+        private readonly IJwtProvider _jwtProvider = jwtProvider;
 
-        public CreateUserCommandHandler(ISongsDbContext dbContext, IPasswordHasher passwordHasher)
-        {
-            _dbContext = dbContext;
-            _passwordHasher = passwordHasher;
-        }
-
-        public async Task<Guid> Handle(CreateUserCommand request,
+        public async Task<string> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
-            var check = _dbContext.Users.FirstOrDefault(u => u.Email == request.Email);
-
-            if (check != null)
+            if(await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Email == request.Email)
+                .AnyAsync(cancellationToken))
             {
                 throw new LoginException("User with this email already exits");
             }
@@ -40,7 +42,9 @@ namespace Application.Users.Commands.CreateUser
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return user.Id;
+            var token = _jwtProvider.GenerateToken(user);
+
+            return token;
         }
     }
 }

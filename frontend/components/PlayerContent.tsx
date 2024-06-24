@@ -28,12 +28,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [delay, setDelay] = useState<NodeJS.Timeout>();
-
+  const [currentString, setCurrentString] = useState<string>("");
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
   // set next song index
   const onPlayNext = () => {
+    pause();
+    clearTimeout(delay);
     if (player.ids.length === 0) {
       return;
     }
@@ -50,6 +52,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
   // set previous song index
   const onPlayPrevious = () => {
+    pause();
+    clearTimeout(delay);
     if (player.ids.length === 0) {
       return;
     }
@@ -111,18 +115,32 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
   const timeout: NodeJS.Timeout = setTimeout(() => {
     updateProgress();
- }, 1000);
+ }, 100);
 
   const updateProgress = () => {
     const seek: number = sound?.seek() ?? 0;
     const duration: number = sound?.duration() ?? 1;
     setProgress(seek / duration);
+    setCurrentString(getCurrentTimeString(duration));
   }
 
   const setCurrent = (value: number) => {
     if(sound) {
       sound.seek(sound.duration() * value)
     }
+  }
+
+  const getCurrentTimeString = (duration: number) => {
+    const minutes = progress * duration / 60 >> 0;
+    const seconds = progress * duration % 60 >> 0;
+    return `${minutes}:${seconds >= 10? seconds : `0${seconds}`}`; 
+  }
+
+  const getDurationString = () => {
+    const duration: number = sound?.duration() ?? 1;
+    const minutes = duration / 60 >> 0;
+    const seconds = duration % 60 >> 0;
+    return `${minutes}:${seconds >= 10? seconds : `0${seconds}`}`; 
   }
 
   return (
@@ -214,11 +232,21 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
             "
           />
         </div>
-        <div className="hidden md:flex">
+        <div className="hidden md:flex md:flex-row items-center gap-x-3">
+          <p className="flex align-middle items-center text-sm">
+            {sound? currentString : ""}
+          </p>
           <Slider
             value={progress}
-            onChange={(value) => {setCurrent(value)}}
+            onChange={(value) => {
+              clearTimeout(delay);
+              setCurrent(value);
+              setDelay(delay);
+            }}
            />
+          <p className="flex align-middle items-center text-sm">
+            {sound? getDurationString() : ""}
+          </p>
         </div>
       </div>
 
