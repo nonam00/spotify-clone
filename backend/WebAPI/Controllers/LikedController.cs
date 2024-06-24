@@ -87,13 +87,13 @@ namespace WebAPI.Controllers
         /// 
         /// </remarks>
         /// <param name="songId">ID of song ot like</param>
-        /// <returns>Returns Guid</returns>
+        /// <returns>Returns string</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [HttpPost("{songId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Guid>> CreateLiked(Guid songId)
+        public async Task<ActionResult<string>> CreateLiked(Guid songId)
         {
             var command = new CreateLikedSongCommand
             {

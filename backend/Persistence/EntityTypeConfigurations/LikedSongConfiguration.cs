@@ -17,13 +17,13 @@ namespace Persistence.EntityTypeConfigurations
                    .HasForeignKey(liked => liked.SongId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(song => song.User)
+            builder.HasOne(liked => liked.User)
                    .WithMany(user => user.LikedSongs)
                    .HasForeignKey(likedSong => likedSong.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
-        
-            builder.Property(song => song.CreatedAt)
-                   .HasDefaultValue(DateTime.UtcNow);
+
+            builder.Property(liked => liked.CreatedAt)
+                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }

@@ -18,7 +18,6 @@ namespace Application.Songs.Commands.CreateSong
                 UserId = request.UserId,
                 Title = request.Title,
                 Author = request.Author,
-                CreatedAt = DateTime.UtcNow,
                 SongPath = request.SongPath,
                 ImagePath = request.ImagePath
             };

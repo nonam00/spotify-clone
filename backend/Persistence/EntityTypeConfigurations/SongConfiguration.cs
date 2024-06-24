@@ -17,7 +17,7 @@ namespace Persistence.EntityTypeConfigurations
                    .OnDelete(DeleteBehavior.SetNull);
         
             builder.Property(song => song.CreatedAt)
-                   .HasDefaultValue(DateTime.UtcNow);
+                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }
