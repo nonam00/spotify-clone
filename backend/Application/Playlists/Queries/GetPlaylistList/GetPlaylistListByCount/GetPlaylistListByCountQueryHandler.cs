@@ -5,29 +5,28 @@ using Microsoft.EntityFrameworkCore;
 
 using Application.Interfaces;
 
-namespace Application.Playlists.Queries.GetPlaylistListByUserId
+namespace Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount
 {
-    public class GetPlaylistListByUserIdQueryHandler(
+    public class GetPlaylistListByCountQueryHandler(
         ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetPlaylistListByUserIdQuery, PlaylistListVm>
+        : IRequestHandler<GetPlaylistListByCountQuery, PlaylistListVm>
     {
         private readonly ISongsDbContext _dbContext = dbContext;
         private readonly IMapper _mapper = mapper;
 
         public async Task<PlaylistListVm> Handle(
-            GetPlaylistListByUserIdQuery request,
+            GetPlaylistListByCountQuery request,
             CancellationToken cancellationToken)
         {
-            var list = await _dbContext.Playlists
+            var playlists = await _dbContext.Playlists
                 .AsNoTracking()
                 .Where(p => p.UserId == request.UserId)
-                .Take(10)
                 .OrderByDescending(p => p.CreatedAt)
                 .ProjectTo<PlaylistVm>(_mapper.ConfigurationProvider)
+                .Take(request.Count)
                 .ToListAsync(cancellationToken);
 
-            return new PlaylistListVm { Playlists = list };
+            return new PlaylistListVm { Playlists = playlists };
         }
     }
 }
-
