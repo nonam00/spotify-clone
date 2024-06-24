@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 using Domain;
 using Application.Interfaces;
@@ -17,8 +18,12 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
             var ps = new PlaylistSong
             {
                 PlaylistId = request.PlaylistId,
-                SongId = request.SongId
+                SongId = request.SongId,
             };
+
+            await _dbContext.Playlists
+              .Where(p => p.Id == request.PlaylistId)
+              .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow));
 
             await _dbContext.PlaylistSongs.AddAsync(ps, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,4 @@
-namespace Application.Playlists.Queries.GetPlaylistListByUserId
+namespace Application.Playlists.Queries.GetPlaylistList
 {
     public class PlaylistListVm
     {

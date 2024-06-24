@@ -1,8 +1,8 @@
 ﻿using MediatR;
 
-namespace Application.LikedSongs.Commands.CreateLikedSong
+namespace Application.LikedSongs.Queries.CheckLikedSong
 {
-    public class CreateLikedSongCommand : IRequest<string>
+    public class CheckLikedSongQuery : IRequest<bool>
     {
         public Guid UserId { get; set; }
         public Guid SongId { get; set; }

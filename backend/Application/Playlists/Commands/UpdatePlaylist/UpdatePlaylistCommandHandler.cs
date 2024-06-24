@@ -18,7 +18,7 @@ namespace Application.Playlists.Commands.UpdatePlaylist
                 .ExecuteUpdateAsync(p => p
                     .SetProperty(u => u.Title, request.Title)
                     .SetProperty(u => u.Description,
-                        request.Description != "" ? request.Description : null )
+                        request.Description != "" ? request.Description : null)
                     .SetProperty(u => u.ImagePath,
                         u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
                     .SetProperty(u => u.CreatedAt, DateTime.UtcNow),

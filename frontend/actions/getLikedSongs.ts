@@ -7,7 +7,7 @@ import { Song } from "@/types/types";
 
 const getLikedSongs = async (): Promise<Song[]> => {
   try {
-    const { data } = await $api.get("/liked/", {
+    const { data } = await $api.get("/users/songs/", {
       headers: {
         // needs to input manualy because of server actions 
         Cookie: cookies().getAll().map((cookie) => (

@@ -1,8 +1,8 @@
-﻿using Application.Interfaces;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using Application.Interfaces;
 
 namespace Persistence
 {
@@ -20,7 +20,8 @@ namespace Persistence
             });
 
             services.AddScoped<ISongsDbContext>(provider =>
-                provider.GetService<SongsDbContext>());
+                provider.GetService<SongsDbContext>()
+                ?? throw new Exception("Can't get db context service"));
 
             return services;
         }

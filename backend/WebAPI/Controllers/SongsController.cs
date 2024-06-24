@@ -24,17 +24,17 @@ namespace WebAPI.Controllers
         private readonly IMapper _mapper = mapper;
 
         /// <summary>
-        /// Gets ALL songs data
+        /// Gets songs
         /// </summary>
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET /get/all
+        ///     GET /
         /// 
         /// </remarks>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
-        [HttpGet("get/all")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetAllSongs()
         {
@@ -49,13 +49,13 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET /get/{songId}
+        ///     GET /{songId}
         /// 
         /// </remarks>
         /// <param name="songId">Song ID</param>
         /// <returns>Returns SongVm</returns>
         /// <response code="200">Success</response>
-        [HttpGet("get/{songId}")]
+        [HttpGet("{songId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongVm>> GetSongById(Guid songId)
         {
@@ -76,10 +76,11 @@ namespace WebAPI.Controllers
         ///     GET /search/hysteria
         /// 
         /// </remarks>
-        /// <param name="searchString">User search query by song title and author</param>
+        /// <param name="searchString">
+        /// User search query by song title and author
+        /// </param>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
-
         [HttpGet("search/{searchString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongListVm>> GetSongListByAnyInfo(string searchString)
@@ -102,7 +103,9 @@ namespace WebAPI.Controllers
         ///     GET /search/title/hysteria
         /// 
         /// </remarks>
-        /// <param name="searchString">User search query by song title</param>
+        /// <param name="searchString">
+        /// User search query by song title
+        /// </param>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
         [HttpGet("search/title/{searchString}")]
@@ -127,7 +130,9 @@ namespace WebAPI.Controllers
         ///     GET /search/author/muse
         /// 
         /// </remarks>
-        /// <param name="searchString">User search query by song author</param>
+        /// <param name="searchString">
+        /// User search query by song author
+        /// </param>
         /// <returns>Returns SongListVm</returns>
         /// <response code="200">Success</response>
         [HttpGet("search/author/{searchString}")]
@@ -148,7 +153,7 @@ namespace WebAPI.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     POST /post
+        ///     POST /
         ///     {
         ///         title: "Hysteria"
         ///         author: "Muse"
@@ -163,7 +168,7 @@ namespace WebAPI.Controllers
         /// <response code="401">If the user is unauthorized</response>
         [Authorize]
        // [ValidateAntiForgeryToken]
-        [HttpPost("post")]
+        [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<Guid>> UploadNewSong([FromBody] CreateSongDto createSongDto)

@@ -1,5 +1,5 @@
 import getSongs from "@/actions/getSongs";
-import getUserPlaylists from "@/actions/getUserPlaylists";
+import getUserPlaylistsByQuantity from "@/actions/getUserPlaylistsByQuantity";
 
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";
@@ -9,7 +9,7 @@ export const revalidate = 0;
 
 export default async function Home() {
   const songs = await getSongs();
-  const playlists = await getUserPlaylists();
+  const playlists = await getUserPlaylistsByQuantity(7);
 
   return (
     <div className="
