@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using Domain;
+
 using Application.Common.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Auth;
@@ -9,13 +10,16 @@ using Application.Interfaces.Auth;
 namespace Application.Users.Commands.CreateUser
 {
     public class CreateUserCommandHandler(
-        ISongsDbContext dbContext, IPasswordHasher passwordHasher)
-        : IRequestHandler<CreateUserCommand, Guid>
+        ISongsDbContext dbContext,
+        IPasswordHasher passwordHasher,
+        IJwtProvider jwtProvider)
+        : IRequestHandler<CreateUserCommand, string>
     {
         private readonly ISongsDbContext _dbContext = dbContext;
         private readonly IPasswordHasher _passwordHasher = passwordHasher;
+        private readonly IJwtProvider _jwtProvider = jwtProvider;
 
-        public async Task<Guid> Handle(CreateUserCommand request,
+        public async Task<string> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
             if(await _dbContext.Users
@@ -38,7 +42,9 @@ namespace Application.Users.Commands.CreateUser
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return user.Id;
+            var token = _jwtProvider.GenerateToken(user);
+
+            return token;
         }
     }
 }

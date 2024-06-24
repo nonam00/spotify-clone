@@ -56,14 +56,14 @@ export const MyUserContextProvider = (props: Props) => {
 
   const register = async (email: string, password: string) => {
     await $api.post("/users/register/", { email, password })
-      //.then(async () => {
-        //await $api.get("users/info/") 
-          //.then((response) => {
-            //setIsAuth(true);
-            //setUserDetails(response.data);
-          //})
-          //.catch(error => console.log(error.message))
-      //})
+      .then(async () => {
+        await $api.get("users/info/") 
+          .then((response) => {
+            setIsAuth(true);
+            setUserDetails(response.data);
+          })
+          .catch(error => console.log(error.message))
+      })
       .catch((error) => {
         if (error.response.status === 400) {
           if(error.response.data.error) {
