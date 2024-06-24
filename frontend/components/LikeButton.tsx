@@ -33,7 +33,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     const fetchData = async () => {
-      await $api.get<Song>(`/liked/${songId}`)
+      await $api.get<Song>(`users/songs/${songId}`)
         .then((response) => {
           if (response.status >= 200 && response.status < 400 && response.data) {
             setIsLiked(true);
@@ -55,7 +55,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     if (isLiked) {
-      await $api.delete(`/liked/${songId}`)
+      await $api.delete(`/users/songs/${songId}`)
         .then(() => {
           setIsLiked(false);
           toast.success("Like deleted");
@@ -66,7 +66,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         });
 
     } else {
-        await fetch(`https://localhost:7025/1/liked/${songId}`, {
+        await fetch(`https://localhost:7025/1/users/songs/${songId}`, {
           method: 'POST',
           credentials: 'include'
         })
