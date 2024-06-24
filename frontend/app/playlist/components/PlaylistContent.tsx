@@ -3,12 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FaPlay } from "react-icons/fa";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 
 import { Song } from "@/types/types"; 
 
 import MediaItem from "@/components/MediaItem";
 import LikeButton from "@/components/LikeButton";
 import RemoveButton from "@/components/RemoveButton";
+import DeletePlaylistButton from "@/components/DeletePlaylistButton";
 
 import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
@@ -34,27 +36,49 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
     }
   }, [isLoading, isAuth, router]);
 
+  const onPlayClick = () => {
+    if (songs.length === 0) {
+      return;
+    }
+    onPlay(songs[0].id);
+  }
   return (
     <div>
-      <div className="flex flex-row align-middle gap-y-5 items-start p-6">
-        <div
+      <div className="flex flex-row align-middle gap-y-2 items-center justify-start px-6 py-3">
+        <button
+          onClick={onPlayClick}
           className="
             transition
             rounded-full
             flex
             items-center
-            justify-center
+            justify-start
             bg-green-500
-            p-4
+            p-5
             drop-shadow-md
             right-5
             hover:scale-110
-        "
-      >
-        <FaPlay className="text-black"/>
+          "
+        >
+          <FaPlay className="text-black" size="20"/>
+        </button>
+        <div className="flex-grow"/>
+        <button
+          onClick={() => { router.push(`/add?id=${id}`) }}
+          className="
+            flex
+            flex-end
+            mx-5
+            rounded-full
+            hover:scale-105
+          "
+        >
+          <AiOutlinePlusCircle className="text-neutral-400" size="35"/>
+        </button>
+        <DeletePlaylistButton playlistId={id}/>
       </div>
-      </div>
-      <div className="flex flex-col align-middle gap-y-2 w-full p-6">
+      <div className="h-0.5 bg-neutral-800/40 w-full"/>
+      <div className="flex flex-col align-middle gap-y-5 w-full p-6">
         {songs.length === 0?
           <div className="
             flex
