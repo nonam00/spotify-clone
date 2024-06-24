@@ -1,17 +1,18 @@
 ## Description
 
-As a beginner developer, I'm excited to present my Spotify clone web application, a simple yet functional platform for streaming music online. Built using Next.js and .NET Core, this application offers a user-friendly interface and essential features for music lovers, including the ability to upload and share their own content.
+As a beginner developer, I'm excited to present my Spotify clone web application, a simple yet functional platform for streaming music online. Built using Next.js and .NET Core, this application offers a user-friendly interface and essential features for music lovers, including the ability to upload and share their own content. This application provides a foundation for building a comprehensive music streaming platform.
 
 #### Key Features:
 
 - **Basic Search and Filtering**: Find specific songs, and user-uploaded content using our basic search and filtering options.
+- **Playlists**: Organize your favorite tracks into personalized playlists. 
 - **User Uploads**: Upload your own music tracks and share them with the community.
 
 ---
 
 ## Getting Started
 
-#### First, run WebAPI for the backend:
+#### First, run web API for the backend:
 
 User secret json file is required to run. *(contact me to get it)*.
 
