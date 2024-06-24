@@ -1,16 +1,17 @@
-﻿using Domain;
+﻿using AutoMapper;
+
+using Domain;
 using Application.Common.Mappings;
-using AutoMapper;
 
 namespace Application.Songs.Queries
 {
     public class SongVm : IMapWith<Song>
     {
         public Guid Id { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string SongPath { get; set; }
-        public string ImagePath { get; set; }
+        public string Title { get; set; } = null!;
+        public string Author { get; set; } = null!;
+        public string SongPath { get; set; } = null!;
+        public string ImagePath { get; set; } = null!;
 
         public void Mapping(Profile profile)
         {

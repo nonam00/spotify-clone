@@ -33,7 +33,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <param name="registerDto">RegisterDto object</param>
         /// <returns>Returns new user ID</returns>
-        /// <response code="200">Success</response>
+        /// <response code="201">Success</response>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult<Guid>> Register([FromBody] RegisterDto registerDto)

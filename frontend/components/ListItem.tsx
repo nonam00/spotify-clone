@@ -1,26 +1,30 @@
 "use client";
 
+import useLoadImage from "@/hooks/useLoadImage";
+import { Playlist } from "@/types/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaPlay } from "react-icons/fa";
 
 interface ListItemProps {
-  image: string;
   name: string;
   href: string;
+  playlist?: Playlist
 }
 
 const ListItem: React.FC<ListItemProps> = ({
-  image,
   name,
   href,
+  playlist
 }) => {
+  const image = useLoadImage(playlist) ?? "/images/playlist.webp";
   const router = useRouter();
-
+  
   const onClick = () => {
     //Add auth before push
     router.push(href);
   }
+    
 
   return ( 
     <button
@@ -47,7 +51,7 @@ const ListItem: React.FC<ListItemProps> = ({
         <Image
           className="object-cover"
           fill
-          src={image}
+          src={playlist? image : "/images/liked.png"}
           alt="Image"
         />
       </div>

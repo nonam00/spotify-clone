@@ -3,10 +3,10 @@
 import Image from "next/image";
 
 import useLoadImage from "@/hooks/useLoadImage";
-import { Song } from "@/types/types";
+import { Playlist, Song } from "@/types/types";
 
 interface MediaItemProps {
-  data: Song
+  data: Song | Playlist;
   onClick?: (id: string) => void;
 }
 
@@ -47,7 +47,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
       >
         <Image
           fill
-          src={imageUrl || '/images/liked.png'}
+          src={imageUrl || '/images/playlist.webp'}
           alt="Media Item"
           className="object-cover"
         />
@@ -62,7 +62,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
           {data.title}
         </p>
         <p className="text-neutral-400 text-sm truncate">
-          {data.author}
+          {(data as Song)?.author}
         </p>
       </div>
     </div>
