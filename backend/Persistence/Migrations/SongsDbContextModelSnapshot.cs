@@ -35,8 +35,8 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 863, DateTimeKind.Utc).AddTicks(1798))
+                        .HasColumnName("created_at");
 
                     b.HasKey("UserId", "SongId")
                         .HasName("pk_liked_songs");
@@ -61,8 +61,8 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(7809))
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -103,8 +103,8 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(8777))
+                        .HasColumnName("created_at");
 
                     b.HasKey("PlaylistId", "SongId")
                         .HasName("pk_playlist_songs");
@@ -130,8 +130,8 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValue(new DateTime(2024, 6, 24, 4, 30, 3, 862, DateTimeKind.Utc).AddTicks(3660))
+                        .HasColumnName("created_at");
 
                     b.Property<string>("ImagePath")
                         .IsRequired()

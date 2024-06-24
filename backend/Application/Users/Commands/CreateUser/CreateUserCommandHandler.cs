@@ -18,10 +18,13 @@ namespace Application.Users.Commands.CreateUser
         public async Task<Guid> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
-            var ckeck = await _dbContext.Users
-              .AsNoTracking()
-              .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
-              ?? throw new LoginException("User with this email already exits");
+            if(await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Email == request.Email)
+                .AnyAsync(cancellationToken))
+            {
+                throw new LoginException("User with this email already exits");
+            }
 
             var hashedPassword = _passwordHasher.Generate(request.Password);
 

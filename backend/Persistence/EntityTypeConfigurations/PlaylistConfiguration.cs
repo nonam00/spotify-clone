@@ -16,7 +16,7 @@ namespace Persistence.EntityTypeConfigurations
                    .UsingEntity<PlaylistSong>();
 
             builder.Property(p => p.CreatedAt)
-                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                   .HasDefaultValue(DateTime.UtcNow);
         }
     }
 }

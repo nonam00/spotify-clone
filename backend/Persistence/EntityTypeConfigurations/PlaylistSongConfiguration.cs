@@ -12,7 +12,7 @@ namespace Persistence.EntityTypeConfigurations
       builder.HasKey(ps => new { ps.PlaylistId, ps.SongId });
 
       builder.Property(ps => ps.CreatedAt)
-             .HasDefaultValueSql("CURRENT_TIMESTAMP");
+             .HasDefaultValue(DateTime.UtcNow);
 
       builder.HasOne(ps => ps.Playlist)
              .WithMany()
