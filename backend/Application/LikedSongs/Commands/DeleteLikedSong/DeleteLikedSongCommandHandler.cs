@@ -1,6 +1,8 @@
-﻿using Application.Interfaces;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+
 using Domain;
-using MediatR;
+using Application.Interfaces;
 
 namespace Application.LikedSongs.Commands.DeleteLikedSong
 {
@@ -12,12 +14,15 @@ namespace Application.LikedSongs.Commands.DeleteLikedSong
         public async Task Handle(DeleteLikedSongCommand request,
             CancellationToken cancellationToken)
         {
-            var liked = await _dbContext.LikedSongs
-                .FindAsync([request.UserId, request.SongId], cancellationToken)
-                ?? throw new Exception(nameof(LikedSong));
-
-            _dbContext.LikedSongs.Remove(liked);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            var deletedRows = await _dbContext.LikedSongs
+                .Where(l => l.UserId == request.UserId && 
+                            l.SongId == request.SongId)
+                .ExecuteDeleteAsync(cancellationToken);
+            
+            if (deletedRows != 1)
+            {
+                throw new Exception(nameof(LikedSong));
+            }
         }
     }
 }

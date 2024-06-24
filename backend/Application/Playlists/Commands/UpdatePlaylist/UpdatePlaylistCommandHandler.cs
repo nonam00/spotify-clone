@@ -23,8 +23,6 @@ namespace Application.Playlists.Commands.UpdatePlaylist
                         u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
                     .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
                     cancellationToken);
-                    
-            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }
