@@ -61,6 +61,7 @@ export const MyUserContextProvider = (props: Props) => {
           .then((response) => {
             setIsAuth(true);
             setUserDetails(response.data);
+            toast.success("Logged In")    
           })
           .catch(error => console.log(error.message))
       })

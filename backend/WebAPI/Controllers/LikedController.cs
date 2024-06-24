@@ -29,13 +29,13 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     GET /get
+        ///     GET /
         /// 
         /// </remarks>
         /// <returns>Returns LikedSongListVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpGet("get")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
@@ -55,14 +55,14 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     GET /get/{songId}
+        ///     GET /{songId}
         /// 
         /// </remarks>
         /// <param name="songId">Liked song data id</param>
         /// <returns>Returns LikedSongVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpGet("get/{songId}")]
+        [HttpGet("{songId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongVm?>> GetLikedSong(Guid songId)
@@ -83,14 +83,14 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     POST /like/{songId}
+        ///     POST /{songId}
         /// 
         /// </remarks>
         /// <param name="songId">ID of song ot like</param>
         /// <returns>Returns Guid</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpPost("like/{songId}")]
+        [HttpPost("{songId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<Guid>> CreateLiked(Guid songId)
@@ -111,13 +111,13 @@ namespace WebAPI.Controllers
         /// 
         /// Sample request:
         /// 
-        ///     DELETE /delete/{songId}
+        ///     DELETE /{songId}
         /// 
         /// </remarks>
         /// <param name="songId">Id of song to delete liked data</param>
         /// <response code="204">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpDelete("delete/{songId}")]
+        [HttpDelete("{songId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteLiked(Guid songId)
