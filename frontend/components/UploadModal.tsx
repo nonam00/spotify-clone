@@ -86,7 +86,7 @@ const UploadModal = () => {
       }
       // TODO: fix sending request before files uploaded
       try {
-        await $api.post<string>("/songs/post", {
+        await $api.post("/songs", {
           title: values.title,
           author: values.author,
           imagePath: imageFilePath,

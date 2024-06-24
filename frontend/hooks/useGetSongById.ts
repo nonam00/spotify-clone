@@ -18,7 +18,7 @@ const useGetSongById = (id?: string) => {
     const fetchSong = async () => {
       let data;
       try {
-        const response = await $api.get<Song>(`/songs/get/${id}`);
+        const response = await $api.get<Song>(`/songs/${id}`);
         data = response.data;
       } catch(error: any) {
         setIsLoading(false);
