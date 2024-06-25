@@ -14,12 +14,13 @@ namespace Application.Playlists.Commands.DeletePlaylist
             CancellationToken cancellationToken)
         {
             var deletedRows = await _dbContext.Playlists
-                .Where(p => p.Id == request.Id)
+                .Where(p => p.UserId == request.UserId &&
+                            p.Id == request.PlaylistId)
                 .ExecuteDeleteAsync(cancellationToken);
 
             if (deletedRows != 1)
             {
-                throw new Exception("Playlist with such ID doesn't exists");
+                throw new Exception("Playlist with such ID doesn't exist");
             }
         }
     }

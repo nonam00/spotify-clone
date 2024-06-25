@@ -7,7 +7,8 @@ namespace Application.Playlists.Commands.DeletePlaylist
     {
         public DeletePlaylistCommandValidator()
         {
-            RuleFor(c => c.Id).NotEqual(Guid.Empty);
+            RuleFor(c => c.UserId).NotEqual(Guid.Empty);
+            RuleFor(c => c.PlaylistId).NotEqual(Guid.Empty);
         }
     }
 }

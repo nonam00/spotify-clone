@@ -15,18 +15,33 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
             CreatePlaylistSongCommand request,
             CancellationToken cancellationToken)
         {
+            bool check = await _dbContext.Playlists
+                .Where(p => p.UserId == request.UserId &&
+                            p.Id == request.PlaylistId)
+                .AnyAsync(cancellationToken);
+
+            if (!check)
+            {
+                throw new Exception("Playlist with such ID doen't exist or doesn't belong to the current user");
+            }
+
             var ps = new PlaylistSong
             {
                 PlaylistId = request.PlaylistId,
                 SongId = request.SongId,
             };
 
-            await _dbContext.Playlists
+            await _dbContext.PlaylistSongs.AddAsync(ps, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            int updatedRows = await _dbContext.Playlists
               .Where(p => p.Id == request.PlaylistId)
               .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow));
 
-            await _dbContext.PlaylistSongs.AddAsync(ps, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            if (updatedRows != 1)
+            {
+                throw new Exception("Playlist with such ID doesn't exist");
+            }
 
             return ps.PlaylistId.ToString() + ps.SongId.ToString();
         }
