@@ -169,7 +169,8 @@ namespace WebAPI.Controllers
             [FromBody] UpdatePlaylistDto updatePlaylistDto)
         {
             var command = _mapper.Map<UpdatePlaylistCommand>(updatePlaylistDto);
-            command.Id = playlistId;
+            command.UserId = UserId;
+            command.PlaylistId = playlistId;
             await Mediator.Send(command);
             return NoContent();
         }
@@ -195,7 +196,8 @@ namespace WebAPI.Controllers
         {
             var command = new DeletePlaylistCommand
             {
-                Id = playlistId
+                UserId = UserId,
+                PlaylistId = playlistId
             };
             await Mediator.Send(command);
             return NoContent();
@@ -254,6 +256,7 @@ namespace WebAPI.Controllers
         {
             var command = new CreatePlaylistSongCommand
             {
+                UserId = UserId,
                 PlaylistId = playlistId,
                 SongId = songId,
             };
@@ -285,6 +288,7 @@ namespace WebAPI.Controllers
         {
             var command = new DeletePlaylistSongCommand
             {
+                UserId = UserId,
                 PlaylistId = playlistId,
                 SongId = songId
             };

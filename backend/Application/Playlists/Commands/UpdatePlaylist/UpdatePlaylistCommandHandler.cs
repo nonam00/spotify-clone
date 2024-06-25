@@ -13,8 +13,9 @@ namespace Application.Playlists.Commands.UpdatePlaylist
         public async Task Handle(UpdatePlaylistCommand request,
             CancellationToken cancellationToken)
         {
-            await _dbContext.Playlists
-                .Where(p => p.Id == request.Id)
+            int updatedRows = await _dbContext.Playlists
+                .Where(p => p.UserId == request.UserId &&
+                            p.Id == request.PlaylistId)
                 .ExecuteUpdateAsync(p => p
                     .SetProperty(u => u.Title, request.Title)
                     .SetProperty(u => u.Description,
@@ -23,6 +24,11 @@ namespace Application.Playlists.Commands.UpdatePlaylist
                         u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
                     .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
                     cancellationToken);
+
+            if (updatedRows != 1)
+            {
+                throw new Exception("Playlist with such ID doesn't exist");
+            }
         }
     }
 }

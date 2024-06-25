@@ -14,18 +14,25 @@ namespace Application.PlaylistSongs.Commands.DeletePlaylistSong
             CancellationToken cancellationToken)
         {
             var deletedRows = await _dbContext.PlaylistSongs
-                .Where(ps => ps.PlaylistId == request.PlaylistId &&
+                .Where(ps => ps.Playlist.UserId == request.UserId &&
+                             ps.PlaylistId == request.PlaylistId &&
                              ps.SongId == request.SongId)
                 .ExecuteDeleteAsync(cancellationToken);
             
             if (deletedRows != 1) 
             {
-                throw new Exception("Playlist song with such key doesn't exists");
+                throw new Exception("Relation between playlist and song with such key doesn't exist");
             }
 
-            await _dbContext.Playlists
-                .Where(p => p.Id == request.PlaylistId)
+            int updatedRows = await _dbContext.Playlists
+                .Where(p => p.UserId == request.UserId &&
+                            p.Id == request.PlaylistId)
                 .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow));
+
+            if (updatedRows != 1)
+            {
+                throw new Exception("Playlist with such ID doesn't exist");
+            }
         }
     }
 }
