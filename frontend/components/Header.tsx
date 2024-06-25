@@ -137,7 +137,8 @@ const Header: React.FC<HeaderProps> = ({
                 Logout
               </Button>
               <Button
-                onClick={() => router.push('/account')}
+                // TODO: replace with actual account details page
+                onClick={() => {}} 
                 className="bg-white"
               >
                 <FaUserAlt />
