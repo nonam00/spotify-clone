@@ -8,6 +8,7 @@ using Application.Songs.Queries.GetSongList;
 using Application.Songs.Queries.GetSongList.GetSongListByAny;
 using Application.Songs.Queries.GetSongList.GetSongListByTitle;
 using Application.Songs.Queries.GetSongList.GetSongListByAuthor;
+using Application.Songs.Queries.GetSongList.GetNewestSongList;
 using Application.Songs.Queries.GetSongList.GetAllSongs;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries;
@@ -39,6 +40,26 @@ namespace WebAPI.Controllers
         public async Task<ActionResult<SongListVm>> GetAllSongs()
         {
             var query = new GetAllSongsQuery();
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
+
+        /// <summary>
+        /// Gets newest songs
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET /newest
+        /// 
+        /// </remarks>
+        /// <returns>Returns SongListVm</returns>
+        /// <response code="200">Success</response>
+        [HttpGet("newest")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<SongListVm>> GetNewestSongs()
+        {
+            var query = new GetNewestSongListQuery();
             var vm = await Mediator.Send(query);
             return Ok(vm);
         }
