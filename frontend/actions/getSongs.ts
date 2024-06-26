@@ -5,7 +5,7 @@ import $api from "@/api/http";
 
 const getSongs = async (): Promise<Song[]> => {
   try {
-    const { data } = await $api.get("/songs");
+    const { data } = await $api.get("/songs/newest");
     return (data?.songs) || [];
   } catch (error) {
     console.log(error);
