@@ -7,8 +7,9 @@ import toast from "react-hot-toast";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 
-import Button from "./Button";
 import Modal from "./Modal";
+import Input from "./Input";
+import Button from "./Button";
 
 const AuthModal = () => {
   const router = useRouter();
@@ -64,40 +65,30 @@ const AuthModal = () => {
         items-center
         justify-center
       ">
-        <input
+        <Input
           onChange={(e) => setEmail(e.target.value)}
           value={email}
-          type="text"
-          placeholder="email"
-          className="
-            my-3
-            p-2
-            w-full
-            rounded-md
-          "
+          type="email"
+          placeholder="Email"
+          className="my-3 py-2 text-base"
         />
-        <input
+        <Input
           onChange={(e) => setPassword(e.target.value)}
           value={password}
           type="password"
-          placeholder="password"
-          className="
-            my-3
-            p-2
-            w-full
-            rounded-md
-          "
+          placeholder="Password"
+          className="text-base py-2"
         />
         <Button
           onClick={async () => await upload(user.login)}
-          className="mt-7 mb-3"
+          className="mt-10 mb-3"
         >
           Login
         </Button>
         <Button
           onClick={async () => await upload(user.register)}
           className="
-            my-3
+            my-2
             hover:bg-neutral-700
             bg-transparent
             text-neutral-300
