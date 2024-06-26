@@ -13,11 +13,11 @@ interface PlaylistImageProps {
 const PlaylistImage: React.FC<PlaylistImageProps> = ({
   playlist
 }) => {
-  const playlistModal = usePlaylistModal();
+  const { setPlaylist, onOpen } = usePlaylistModal();
   const href = useLoadImage(playlist);
   const onClick = () => {
-    playlistModal.setPlaylist(playlist);
-    playlistModal.onOpen();
+    setPlaylist(playlist);
+    onOpen();
   }
   return (
     <Image

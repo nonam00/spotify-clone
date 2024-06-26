@@ -29,7 +29,6 @@ const Library: React.FC<LibraryProps> = ({
     if (!isAuth) {
       return authModal.onOpen();
     }
-
     return createModal.onOpen();
   };
 
@@ -51,7 +50,7 @@ const Library: React.FC<LibraryProps> = ({
             gap-x-2
           "
         >
-          <TbPlaylist className="text-neutral-400"size={26} />
+          <TbPlaylist className="text-neutral-400" size={26} />
           <p
             className="
               text-neutral-400

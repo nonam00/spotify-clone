@@ -1,7 +1,7 @@
-import $api from '@/api/http';
 import { useEffect, useState, useMemo } from "react"
-import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
+import $api from '@/api/http';
 import { Song } from "@/types/types";
 
 const useGetSongById = (id?: string) => {
@@ -16,16 +16,15 @@ const useGetSongById = (id?: string) => {
     setIsLoading(true);
 
     const fetchSong = async () => {
-      let data;
-      try {
-        const response = await $api.get<Song>(`/songs/${id}`);
-        data = response.data;
-      } catch(error: any) {
-        setIsLoading(false);
-        return toast.error(error.message);
-      }
-      setSong(data as Song);
-      setIsLoading(false);
+      await $api.get<Song>(`/songs/${id}`)
+        .then((response) => {
+          setSong(response.data as Song);
+          setIsLoading(false);
+        })
+        .catch((error: AxiosError) => {
+          setIsLoading(false);
+          console.log(error.response?.data);
+        });
     }
     
     fetchSong();

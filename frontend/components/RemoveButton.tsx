@@ -38,7 +38,13 @@ const RemoveButton: React.FC<RemoveButtonProps> = ({
         transition
       "
     >
-      <AiOutlineCloseCircle color="ee6969" size={25}/>
+      <AiOutlineCloseCircle
+        className="
+          text-neutral-400
+          hover:text-red-500
+        "
+        size={25}
+      />
     </button>
   )
 }

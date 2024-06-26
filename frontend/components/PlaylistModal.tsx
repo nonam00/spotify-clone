@@ -13,12 +13,11 @@ import usePlaylistModal from "@/hooks/usePlaylistModal";
 import Modal from "./Modal";  
 import Input from "./Input";
 import Button from "./Button";
-import { Description } from "@radix-ui/react-dialog";
 
 const PlaylistModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
   const playlistModal = usePlaylistModal();
-  const user = useUser();
+  const { isAuth } = useUser();
   const router = useRouter();
   
   const {
@@ -46,7 +45,13 @@ const PlaylistModal = () => {
       const imageFile = values.image?.[0];
       let imageFilePath = "";
 
-      if(!user.isAuth) {
+      if (!isAuth) {
+        toast.error("The user is not authorized!");
+        playlistModal.onClose();
+        return;
+      }
+
+      if(!values.title) {
         toast.error('Missing required fields');
         return;
       }
@@ -54,33 +59,30 @@ const PlaylistModal = () => {
       // TODO:cache control
       // Upload image file
       if (imageFile) {
-      try {
-          await $api.post("/files/image", { image: imageFile }, {
+        await $api.post("/files/image", { image: imageFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
-        }).then((response) => {
-          imageFilePath = response.data.path;
         })
-      } catch {
-        setIsLoading(false);
-        return toast.error('Failed image upload.')
-      }
+          .then(response => imageFilePath = response.data.path)
+          .catch(() => {
+            setIsLoading(false);
+            return toast.error("An error occurred while uploading image file.");
+          });
       }
       if (imageFilePath === "") {
         imageFilePath = playlistModal.imagePath;
       }
-      // TODO: fix sending request before files uploaded
-      try {
-        await $api.put<string>(`/playlists/${playlistModal.id}`, {
-          title: values.title,
-          description: values.description ?? null,
-          imagePath: imageFilePath,
+
+      await $api.put(`/playlists/${playlistModal.id}`, {
+        title: values.title,
+        description: values.description ?? null,
+        imagePath: imageFilePath,
+      })
+        .catch(() => {
+          setIsLoading(false);
+          return toast.error("An error occurred while updating the playlist info");
         });
-      } catch {
-        setIsLoading(false);
-        return toast.error("Failed song info upload");
-      }
 
       router.refresh();
       setIsLoading(false);
