@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
@@ -18,7 +17,6 @@ interface LikeButtonProps {
 const LikeButton: React.FC<LikeButtonProps> = ({
   songId
 }) => {
-  const router = useRouter();
   const authModal = useAuthModal();
   const { isAuth } = useUser();
   const [isLiked, setIsLiked] = useState<boolean>(false);
@@ -39,11 +37,8 @@ const LikeButton: React.FC<LikeButtonProps> = ({
           console.log(error.response?.data);
         });
     }
-
     fetchData();
-  }, [songId, isAuth]);
-
-  const Icon = isLiked? AiFillHeart : AiOutlineHeart;
+  }, [songId, isAuth, isLiked]);
 
   const handleLike = async () => {
     if (!isAuth) {
@@ -75,14 +70,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             console.log(error.message);
           });
     }
-    router.refresh();
   }
   return (
     <button
       onClick={handleLike}
       className="hover:opacity-75 transition"
     >
-      <Icon color={isLiked ? '22c55e' : 'white'} size={25}/>
+      { isLiked
+        ? <AiFillHeart color="22c55e" size={25}/>
+        : <AiOutlineHeart color="white" size={25}/>
+      }
     </button>
   );
 }
