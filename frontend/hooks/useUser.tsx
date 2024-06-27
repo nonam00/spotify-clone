@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 
 import { UserDetails } from "@/types/types";
 import $api from "@/api/http";
+import { AxiosError } from "axios";
 
 type UserContextType = {
   isAuth: boolean
@@ -35,9 +36,11 @@ export const MyUserContextProvider = (props: Props) => {
             setUserDetails(response.data);
             toast.success("Logged In")    
           })
-          .catch(error => console.log(error.message))
+          .catch((error: AxiosError) => {
+            console.log(error.response?.data);
+          });
       })
-      .catch((error) => {
+      .catch((error: any) => {
         if (error.response.status === 400) {
           if(error.response.data.error) {
             toast.error(error.response.data.error);
@@ -63,7 +66,9 @@ export const MyUserContextProvider = (props: Props) => {
             setUserDetails(response.data);
             toast.success("Logged In")    
           })
-          .catch(error => console.log(error.message))
+          .catch((error: AxiosError) => {
+            console.log(error.response?.data);
+          });
       })
       .catch((error) => {
         if (error.response.status === 400) {
@@ -83,13 +88,14 @@ export const MyUserContextProvider = (props: Props) => {
   }
 
   const logout = async () => {
-    try {
-      await $api.post("users/logout/");
-      setIsAuth(false);
-      setUserDetails(null);
-    } catch (e: any) {
-      console.log(e?.message);     
-    }
+    await $api.post("users/logout/")
+      .then(() => {
+        setIsAuth(false);
+        setUserDetails(null);
+      })
+      .catch((error: AxiosError) => {
+        console.log(error.response?.data);     
+      });
   }
 
   useEffect(() => {

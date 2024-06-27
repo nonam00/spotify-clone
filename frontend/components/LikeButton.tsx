@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
@@ -11,8 +10,6 @@ import $api from "@/api/http";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 
-import { Song } from "@/types/types";
-
 interface LikeButtonProps {
   songId: string
 }
@@ -20,20 +17,17 @@ interface LikeButtonProps {
 const LikeButton: React.FC<LikeButtonProps> = ({
   songId
 }) => {
-  const router = useRouter();
-  
   const authModal = useAuthModal();
-  const user = useUser();
-
+  const { isAuth } = useUser();
   const [isLiked, setIsLiked] = useState<boolean>(false);
   
   useEffect(() => {
-    if(!user.isAuth) {
+    if(!isAuth) {
       return;
     }
 
     const fetchData = async () => {
-      await $api.get<Song>(`users/songs/${songId}`)
+      await $api.get(`users/songs/${songId}`)
         .then((response) => {
           if (response.status >= 200 && response.status < 400 && response.data) {
             setIsLiked(true);
@@ -43,14 +37,11 @@ const LikeButton: React.FC<LikeButtonProps> = ({
           console.log(error.response?.data);
         });
     }
-
     fetchData();
-  }, [songId, user.isAuth]);
-
-  const Icon = isLiked? AiFillHeart : AiOutlineHeart;
+  }, [songId, isAuth, isLiked]);
 
   const handleLike = async () => {
-    if (!user.isAuth) {
+    if (!isAuth) {
       return authModal.onOpen()
     }
 
@@ -79,17 +70,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             console.log(error.message);
           });
     }
-    router.refresh();
   }
   return (
     <button
       onClick={handleLike}
-      className="
-        hover:opacity-75
-        transition
-      "
+      className="hover:opacity-75 transition"
     >
-      <Icon color={isLiked ? '22c55e' : 'white'} size={25}/>
+      { isLiked
+        ? <AiFillHeart color="22c55e" size={25}/>
+        : <AiOutlineHeart color="white" size={25}/>
+      }
     </button>
   );
 }

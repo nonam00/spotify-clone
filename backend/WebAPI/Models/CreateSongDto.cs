@@ -9,13 +9,13 @@ namespace WebAPI.Models
     public class CreateSongDto : IMapWith<CreateSongCommand>
     {
         [Required]
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
         [Required]
-        public string Author { get; set; }
+        public string Author { get; set; } = null!;
         [Required]
-        public string SongPath { get; set; }
+        public string SongPath { get; set; } = null!;
         [Required]
-        public string ImagePath { get; set; }
+        public string ImagePath { get; set; } = null!;
         
         public void Mapping(Profile profile)
         {

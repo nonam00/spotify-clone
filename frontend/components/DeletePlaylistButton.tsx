@@ -41,7 +41,7 @@ const DeletePlaylistButton: React.FC<DeletePlaylistButtonProps> = ({
       onClick={onClick}
       className="flex flex-end hover:opacity-75"
     >
-      <FaTrash className="text-neutral-400" size="24"/>
+      <FaTrash className="text-neutral-400 hover:text-red-500" size="24"/>
     </button>
   )
 }

@@ -29,7 +29,8 @@ namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySear
                             EF.Functions.TrigramsSimilarity(l.Song.Author, request.SearchString) > 0.1)
                 .OrderBy(l => EF.Functions.TrigramsSimilarityDistance(l.Song.Title, request.SearchString))
                     .ThenBy(l => EF.Functions.TrigramsSimilarityDistance(l.Song.Author, request.SearchString))
-                .Take(20)
+                    .ThenByDescending(song => song.CreatedAt)
+                .Take(30)
                 .ProjectTo<LikedSongVm>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
         

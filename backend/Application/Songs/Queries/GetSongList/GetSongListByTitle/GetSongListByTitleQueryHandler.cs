@@ -20,6 +20,7 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
                 .AsNoTracking()
                 .Where(song => EF.Functions.TrigramsSimilarity(song.Title, request.SearchString) > 0.1)
                 .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Title, request.SearchString))
+                    .ThenByDescending(song => song.CreatedAt)
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
                 .Take(20)
                 .ToListAsync(cancellationToken);

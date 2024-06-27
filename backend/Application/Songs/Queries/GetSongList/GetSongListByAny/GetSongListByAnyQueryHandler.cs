@@ -22,8 +22,9 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByAny
                                EF.Functions.TrigramsSimilarity(song.Author, request.SearchString) > 0.1)
                 .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Title, request.SearchString))
                     .ThenBy(song => EF.Functions.TrigramsSimilarityDistance(song.Author, request.SearchString))
+                    .ThenByDescending(song => song.CreatedAt)
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-                .Take(20)
+                .Take(50)
                 .ToListAsync(cancellationToken);
 
             return new SongListVm { Songs = songs };

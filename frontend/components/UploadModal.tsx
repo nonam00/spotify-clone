@@ -17,7 +17,7 @@ import Button from "./Button";
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
   const uploadModal = useUploadModal();
-  const user = useUser();
+  const { isAuth } = useUser();
   const router = useRouter();
 
   const {
@@ -47,55 +47,57 @@ const UploadModal = () => {
       const songFile = values.song?.[0];
       let songFilePath = "";
       let imageFilePath = "";
+      
+      if (!isAuth) {
+        toast.error("The user is not authorized!");
+        uploadModal.onClose();
+        return;
+      }
 
-      if(!imageFile || !songFile || !user.isAuth) {
+      if(!imageFile || !songFile) {
         toast.error('Missing required fields');
         return;
       }
       
       // TODO:cache control
       // Upload song file
-      try {
-        await $api.post("/files/song", { song: songFile }, {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        }).then((response) => {
-          songFilePath = response.data.path;
+      await $api.post("/files/song", { song: songFile }, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+        .then(response => songFilePath = response.data.path)
+        .catch(() => {
+          setIsLoading(false);
+          return toast.error("An error occurred while uploading song file.")
         });
-      } catch (e){
-        setIsLoading(false);
-        return toast.error('Failed song upload.')
-      }
 
       // Upload image file
-      try {
-        await $api.post("/files/image", { image: imageFile }, {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        }).then((response) => {
-          imageFilePath = response.data.path;
-        })
-      } catch {
-        setIsLoading(false);
-        return toast.error('Failed image upload.')
-      }
+      await $api.post("/files/image", { image: imageFile }, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+        .then(response => imageFilePath = response.data.path)
+        .catch(() => {
+          setIsLoading(false);
+          return toast.error("An error occurred while uploading image file.")
+        });
+
       if (imageFilePath === "" || songFilePath === "") {
-        return toast.error('Failed image or song upload');
+        return toast.error("An error occurred while uploading files.")
       }
       // TODO: fix sending request before files uploaded
-      try {
-        await $api.post("/songs", {
-          title: values.title,
-          author: values.author,
-          imagePath: imageFilePath,
-          songPath: songFilePath
+      await $api.post("/songs", {
+        title: values.title,
+        author: values.author,
+        imagePath: imageFilePath,
+        songPath: songFilePath
+      })
+        .catch(() => {
+          setIsLoading(false);
+          return toast.error("An error occurred while uploading song information");
         });
-      } catch {
-        setIsLoading(false);
-        return toast.error("Failed song info upload");
-      }
 
       router.refresh();
       setIsLoading(false);

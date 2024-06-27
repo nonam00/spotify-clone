@@ -24,10 +24,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   songUrl
 }) => {
   const player = usePlayer();
-  const [volume, setVolume] = useState<number>(1);
+  const [volume, setVolume] = useState<number>(1); // value for configurrating volume from slider
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [delay, setDelay] = useState<NodeJS.Timeout>();
+  const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
+  const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar
   const [currentString, setCurrentString] = useState<string>("");
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
@@ -68,7 +68,6 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     player.setId(previousSong);
   };
 
-  // TODO: replace with native <audio> component
   // songUrl doesn't updates dinamicly
   const [play, { pause, sound }] = useSound(
     songUrl,
@@ -97,13 +96,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }, [sound]);
 
-  const handlePlay = () => {
-    if (!isPlaying) {
-      play();
-    } else {
-      pause();
-    }
-  }
+  const handlePlay = () => !isPlaying? play() : pause();
 
   const toggleMute = () => {
     if (volume === 0) {
@@ -125,9 +118,11 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   }
 
   const setCurrent = (value: number) => {
+    clearTimeout(delay)
     if(sound) {
       sound.seek(sound.duration() * value)
     }
+    setDelay(delay);
   }
 
   const getCurrentTimeString = (duration: number) => {
@@ -238,11 +233,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           </p>
           <Slider
             value={progress}
-            onChange={(value) => {
-              clearTimeout(delay);
-              setCurrent(value);
-              setDelay(delay);
-            }}
+            onChange={(value) => setCurrent(value)}
            />
           <p className="flex align-middle items-center text-sm">
             {sound? getDurationString() : ""}

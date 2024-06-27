@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { twMerge } from "tailwind-merge";
+import toast from "react-hot-toast";
 import { HiHome, HiSearch } from "react-icons/hi";
 import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { FaUserAlt } from "react-icons/fa";
-import { twMerge } from "tailwind-merge";
 
-import Button from "./Button";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
-import toast from "react-hot-toast";
+
+import Button from "./Button";
 
 interface HeaderProps {
   children: React.ReactNode;
