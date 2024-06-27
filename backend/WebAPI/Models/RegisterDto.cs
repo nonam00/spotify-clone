@@ -10,9 +10,9 @@ namespace WebAPI.Models
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
         public void Mapping(Profile profile)
         {
