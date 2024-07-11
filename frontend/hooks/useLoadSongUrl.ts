@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 
 import { Song } from "@/types/types";
+import { API_URL } from "@/api/http";
 
 const useLoadSongUrl = (song: Song) => {
   const [href, setHref] = useState<string | null>(null);
@@ -10,14 +10,12 @@ const useLoadSongUrl = (song: Song) => {
       return;
     }
     const getUrl = async() => {
-      await fetch(`https://localhost:7025/1/files/song/${song.songPath}`, {
+      await fetch(`${API_URL}files/song/${song.songPath}`, {
         method: 'GET',
         credentials: "include"
       })
-        .then((response) => response.blob())
-        .then((response) => {
-          setHref(URL.createObjectURL(response));
-        })
+        .then((response) => response.text())
+        .then((response) => setHref(response))
         .catch((error: Error) => {
           console.log(error.message)
         });
