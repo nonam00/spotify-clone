@@ -149,8 +149,11 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.Use(async (context, next) =>
 {
     var token = context.Request.Cookies["token"];
+
     if (!string.IsNullOrEmpty(token))
+    {
         context.Request.Headers.Append("Authorization", "Bearer " + token);
+    }
 
     await next();
 });

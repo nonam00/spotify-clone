@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
-import $api from "@/api/http";
+import $api, { API_URL } from "@/api/http";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
@@ -57,7 +57,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         });
 
     } else {
-        await fetch(`https://localhost:7025/1/users/songs/${songId}`, {
+        await fetch(`${API_URL}/1/users/songs/${songId}`, {
           method: 'POST',
           credentials: 'include'
         })
