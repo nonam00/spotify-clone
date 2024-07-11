@@ -2,159 +2,119 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Application.Files.Commands.UploadFile;
+using Application.Files.Commands.DeleteFile;
+
 namespace WebAPI.Controllers
 {
     [ApiVersionNeutral]
     [Route("{version:apiVersion}/files")]
-    public class FilesController : BaseController
+    public class FilesController(IConfiguration configuration) : BaseController
     {
-        private readonly string _songsPath;
-        private readonly string _imagesPath;
-
-        public FilesController()
-        {
-            _songsPath = Directory.GetCurrentDirectory() + "/Files/Songs/";
-            _imagesPath = Directory.GetCurrentDirectory() + "/Files/Images/";
-
-            if (!Directory.Exists(_songsPath))
-            {
-                Directory.CreateDirectory(_songsPath);
-            }
-
-            if (!Directory.Exists(_imagesPath))
-            {
-                Directory.CreateDirectory(_imagesPath);
-            }
-        }
+        private readonly string _fullBucketUrl =
+            configuration["AwsOptions:ServiceURL"]!
+                .Insert(8, (configuration["AwsOptions:BucketName"]! + "."));
 
         /// <summary>
-        /// Uploads the song file
+        /// Uploads the file
         /// </summary>
         /// <remarks>
         /// 
         /// Sample request:
         /// 
-        ///     POST /song
+        ///     POST /
         /// 
         /// </remarks>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
         //[ValidateAntiForgeryToken]
-        [HttpPost("song")]
+        [HttpPost]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult> UploadSongFile(IFormFile song)
+        public async Task<ActionResult> UploadFile(IFormFile file)
         {
-            if (song != null)
+            var command = new UploadFileCommand
             {
-                string fileName = Guid.NewGuid().ToString() + song.FileName;
-                try
-                {
-                    using (var fs = new FileStream(_songsPath + fileName, FileMode.Create))
-                    {
-                        await song.CopyToAsync(fs);
-                    }
-                    return Ok(new { path = fileName });
-                }
-                catch
-                {
-                    return StatusCode(500);
-                }
-            }
-            return BadRequest();
-
+                FileStream = file.OpenReadStream(),
+                ContentType = file.ContentType.Split("/")[0]
+            };
+            var path = await Mediator.Send(command);
+            return Ok(new { path = path });
         }
 
         /// <summary>
-        /// Uploads the image file
+        /// Proxies access to songs in AWS S3
         /// </summary>
         /// <remarks>
         /// 
         /// Sample request:
         /// 
-        ///     POST /image
+        ///     GET /song/{filename}
         /// 
         /// </remarks>
-        /// <response code="201">Success</response>
-        /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        //[ValidateAntiForgeryToken]
-        [HttpPost("image")]
-        [Produces("application/json")]
-        public async Task<ActionResult> UploadImageFile(IFormFile image)
-        {
-            if (image != null)
-            {
-                string fileName = Guid.NewGuid().ToString() + image.FileName;
-                try
-                {
-                    using (var fs = new FileStream(_imagesPath + fileName, FileMode.Create))
-                    {
-                        await image.CopyToAsync(fs);
-                    }
-                    return Ok(new { path = fileName });
-                }
-                catch
-                {
-                    return StatusCode(500);
-                }
-            }
-            return BadRequest();
-        }
-
-        /// <summary>
-        /// Gets the song file by path
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// Sample request:
-        /// 
-        ///     GET /song/{path}
-        /// 
-        /// </remarks>
-        /// <param name="path">Filename</param>
+        /// <param name="filename">Filename</param>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
         //[ValidateAntiForgeryToken]
-        [HttpGet("song/{path}")]
-        public async Task<IActionResult> GetSongFile(string path)
+        [HttpGet("song/{filename}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetSongFile(string filename)
         {
-            if(!System.IO.File.Exists(_songsPath + path))
-            {
-              return BadRequest();
-            }
-            byte[] content = await System.IO.File.ReadAllBytesAsync(_songsPath + path);
-
-            return File(content, "audio/*", path);
+            return Ok(_fullBucketUrl + "audio/" + filename);
         }
 
         /// <summary>
-        /// Gets the image file by path
+        /// Proxies access to images in AWS S3
         /// </summary>
         /// <remarks>
         /// 
         /// Sample request:
         /// 
-        ///     GET /image/{path}
+        ///     GET /image/{filename}
         /// 
         /// </remarks>
-        /// <param name="path">Filename</param>
+        /// <param name="filename">Filename</param>
         /// <response code="200">Success</response>
-        [HttpGet("image/{path}")]
-        public async Task<IActionResult> GetImageFile(string path)
+        [HttpGet("image/{filename}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetImageFile(string filename)
         {
-            if(!System.IO.File.Exists(_imagesPath + path))
-            {
-              return BadRequest();
-            }
-            byte[] content = await System.IO.File.ReadAllBytesAsync(_imagesPath + path);
+            return Redirect(_fullBucketUrl + "image/" + filename);
+        }
 
-            return File(content, "image/*", path);
+        /// <summary>
+        /// Deletes file from AWS S3
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     DELETE /{type}/{filename}
+        /// 
+        /// </remarks>
+        /// <param name="type">File Content Type</param>
+        /// <param name="filename">Filename</param>
+        /// <response code="200">Success</response>
+        [Authorize]
+        [HttpDelete("{type}/{filename}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> DeleteFile(string type, string filename)
+        {
+            string file = $"{type}/{filename}";
+            Console.WriteLine(file);
+            var command = new DeleteFileCommand
+            {
+                FileName = file
+            };
+            await Mediator.Send(command);
+            return NoContent();
         }
     }
 }
