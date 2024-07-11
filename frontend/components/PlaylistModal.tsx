@@ -59,7 +59,7 @@ const PlaylistModal = () => {
       // TODO:cache control
       // Upload image file
       if (imageFile) {
-        await $api.post("/files/image", { image: imageFile }, {
+        await $api.post("/files", { file: imageFile }, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
@@ -69,6 +69,13 @@ const PlaylistModal = () => {
             setIsLoading(false);
             return toast.error("An error occurred while uploading image file.");
           });
+        if (playlistModal.imagePath) {
+          await $api.delete(`/files/image/${playlistModal.imagePath}`)
+            .catch(() => {
+              setIsLoading(false);
+              return toast.error("An error occurred while deleting old image file.");
+            })
+        }
       }
       if (imageFilePath === "") {
         imageFilePath = playlistModal.imagePath;

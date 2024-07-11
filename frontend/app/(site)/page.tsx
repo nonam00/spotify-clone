@@ -4,6 +4,7 @@ import getUserPlaylistsByQuantity from "@/actions/getUserPlaylistsByQuantity";
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";
 import PageContent from "./components/PageContent";
+import { API_URL } from "@/api/http";
 
 export const revalidate = 0;
 
@@ -45,13 +46,16 @@ export default async function Home() {
             <ListItem
               name="Liked Songs"
               href="/liked"
+              image="/images/liked.png"
             />
             {playlists.map((p) => (
               <ListItem
                 key = {p.id}
                 name={p.title}
-                playlist={p}
                 href={`/playlist?id=${p.id}`}
+                image={p.imagePath
+                  ? `${API_URL}/files/image/${p.imagePath}`
+                  : "/images/playlist.webp"}
               />
             ))}
           </div>

@@ -59,9 +59,8 @@ const UploadModal = () => {
         return;
       }
       
-      // TODO:cache control
       // Upload song file
-      await $api.post("/files/song", { song: songFile }, {
+      await $api.post("/files", { file: songFile }, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -73,7 +72,7 @@ const UploadModal = () => {
         });
 
       // Upload image file
-      await $api.post("/files/image", { image: imageFile }, {
+      await $api.post("/files", { file: imageFile }, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -87,7 +86,7 @@ const UploadModal = () => {
       if (imageFilePath === "" || songFilePath === "") {
         return toast.error("An error occurred while uploading files.")
       }
-      // TODO: fix sending request before files uploaded
+
       await $api.post("/songs", {
         title: values.title,
         author: values.author,

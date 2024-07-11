@@ -20,8 +20,7 @@ namespace Persistence
             });
 
             services.AddScoped<ISongsDbContext>(provider =>
-                provider.GetService<SongsDbContext>()
-                ?? throw new Exception("Can't get db context service"));
+                provider.GetRequiredService<SongsDbContext>());
 
             return services;
         }

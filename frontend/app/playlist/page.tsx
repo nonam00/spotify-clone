@@ -3,7 +3,7 @@ import getSongsByPlaylistId from "@/actions/getSongsByPlaylistId";
 
 import Header from "@/components/Header"
 import PlaylistContent from "./components/PlaylistContent";
-import PlaylistImage from "@/components/PlaylistImage";
+import PlaylistImage from "./components/PlaylistImage";
 
 export const revalidate = 0;
 
