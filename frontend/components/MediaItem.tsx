@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 
-import useLoadImage from "@/hooks/useLoadImage";
 import { Playlist, Song } from "@/types/types";
+import { API_URL } from "@/api/http";
 
 interface MediaItemProps {
   data: Song | Playlist;
@@ -14,8 +14,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
   data,
   onClick
 }) => {
-  const imageUrl = useLoadImage(data);
-
   const handleClick = () => {
     if (onClick) {
       return onClick(data.id);
@@ -47,8 +45,12 @@ const MediaItem: React.FC<MediaItemProps> = ({
       >
         <Image
           fill
-          src={imageUrl || '/images/playlist.webp'}
+          src={data.imagePath
+            ? `${API_URL}/files/image/${data.imagePath}`
+            : '/images/playlist.webp'
+          }
           alt="Media Item"
+          unoptimized
           className="object-cover"
         />
       </div>
