@@ -60,7 +60,7 @@ const UploadModal = () => {
       }
       
       // Upload song file
-      await $api.post("/files", { file: songFile }, {
+      await $api.post("/files/song", { song: songFile }, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -72,7 +72,7 @@ const UploadModal = () => {
         });
 
       // Upload image file
-      await $api.post("/files", { file: imageFile }, {
+      await $api.post("/files/image", { image: imageFile }, {
         headers: {
           "Content-Type": "multipart/form-data"
         }

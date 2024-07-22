@@ -29,6 +29,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
   const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar
   const [currentString, setCurrentString] = useState<string>("");
+
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
@@ -85,7 +86,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
         setIsPlaying(false)
         clearTimeout(delay);
       },
-      format: ['flac', 'mp3', 'wav','.m4a','.aac','.ogg'] 
+      format: ['flac', 'mp3', 'wav','.m4a','.aac','.ogg'],
+      html5: true,
     }
   );
 
