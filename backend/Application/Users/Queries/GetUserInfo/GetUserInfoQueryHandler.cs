@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,11 +16,12 @@ namespace Application.Users.Queries.GetUserInfo
         {
             var user = await _dbContext.Users
                 .AsNoTracking()
-                .ProjectTo<UserInfo>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
                 ?? throw new Exception("Nonvalid current user id");
 
-            return user;
+            var userVm = _mapper.Map<UserInfo>(user);
+
+            return userVm;
         }
     }
 }
