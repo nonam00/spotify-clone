@@ -52,7 +52,7 @@ export default async function Home() {
               <ListItem
                 key = {p.id}
                 name={p.title}
-                href={`/playlist?id=${p.id}`}
+                href={`/${p.id}`}
                 image={p.imagePath
                   ? `${API_URL}/files/image/${p.imagePath}`
                   : "/images/playlist.webp"}

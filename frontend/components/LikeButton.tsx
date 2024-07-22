@@ -57,7 +57,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         });
 
     } else {
-        await fetch(`${API_URL}/1/users/songs/${songId}`, {
+        await fetch(`${API_URL}/users/songs/${songId}`, {
           method: 'POST',
           credentials: 'include'
         })

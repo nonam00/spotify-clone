@@ -1,3 +1,5 @@
+import { redirect }  from "next/navigation";
+
 import getPlaylistById from "@/actions/getPlaylistById";
 import getSongsByPlaylistId from "@/actions/getSongsByPlaylistId";
 
@@ -7,16 +9,18 @@ import PlaylistImage from "./components/PlaylistImage";
 
 export const revalidate = 0;
 
-interface SearchProps {
-  searchParams: {
+interface PlaylistProps {
+  params: {
     id: string
   }
 }
 
-const Playlist = async ({searchParams}: SearchProps) => {
-  const playlist = await getPlaylistById(searchParams.id);
+const Playlist = async ({
+  params: { id },
+}: PlaylistProps) => {
+  const playlist = await getPlaylistById(id);
   if (!playlist) {
-    throw new Error("No playlist has been found!");
+    redirect("/");
   }
   const songs = await getSongsByPlaylistId(playlist.id);
   
@@ -86,7 +90,7 @@ const Playlist = async ({searchParams}: SearchProps) => {
           </div>
         </div>
       </Header>
-      <PlaylistContent id={searchParams.id} songs={songs}/>
+      <PlaylistContent id={id} songs={songs}/>
     </div>
   );
 }

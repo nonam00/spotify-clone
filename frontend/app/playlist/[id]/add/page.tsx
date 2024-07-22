@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import getLikedSongsForPlaylist from "@/actions/getLikedSongsForPlaylist";
 import getPlaylistById from "@/actions/getPlaylistById";
 
@@ -7,19 +8,24 @@ import SearchInput from "@/components/SearchInput";
 
 export const revalidate = 0;
 
-interface SearchProps {
+interface AddParams {
+  params: {
+    id: string
+  }
   searchParams: {
-    id: string;
     searchString: string;
   }
 }
 
-const Add = async ({searchParams}: SearchProps) => {
-  const playlist = await getPlaylistById(searchParams.id);
+const Add = async ({
+  params: { id },
+  searchParams: { searchString },
+}: AddParams) => {
+  const playlist = await getPlaylistById(id);
   if (!playlist) {
-    throw new Error("No playlist has been found!");
+    redirect("/");
   }
-  const songs = await getLikedSongsForPlaylist(playlist.id, searchParams.searchString ?? "");
+  const songs = await getLikedSongsForPlaylist(playlist.id, searchString ?? "");
 
   return (
     <div
@@ -37,7 +43,7 @@ const Add = async ({searchParams}: SearchProps) => {
           <h1 className="text-white text-3xl font-semibold">
             Select songs from your favorites to add to your playlist
           </h1>
-          <SearchInput pageUrl={`/add/?id=${searchParams.id}`} types={false}/>
+          <SearchInput pageUrl={`/playlist/${id}/add/`} types={false}/>
         </div>
       </Header>
       <AddContent playlistId={playlist.id} songs={songs} />

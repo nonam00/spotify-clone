@@ -16,12 +16,10 @@ const ListItem: React.FC<ListItemProps> = ({
   image
 }) => {
   const router = useRouter();
-  
   const onClick = () => {
     //Add auth before push
-    router.push(href);
+    router.push(`/playlist${href}`);
   }
-    
 
   return ( 
     <button

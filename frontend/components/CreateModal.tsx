@@ -43,7 +43,7 @@ const CreateModal = () => {
       .then(response => {
         if (response.status >= 200 && response.status < 400) {
           onClose()
-          router.push(`/playlist?id=${response.data}`)
+          router.push(`/playlist/${response.data}`)
           router.refresh();
         }
       })

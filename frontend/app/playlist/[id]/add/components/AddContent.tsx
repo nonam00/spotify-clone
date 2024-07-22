@@ -1,19 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 import $api from "@/api/http";
 import MediaItem from "@/components/MediaItem";
 import { Song } from "@/types/types";
-import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 
-interface SearchContentProps {
+interface AddContentProps {
   playlistId: string,
   songs: Song[];
 }
 
-const AddContent: React.FC<SearchContentProps> = ({
+const AddContent: React.FC<AddContentProps> = ({
   playlistId,
   songs
 }) => {
