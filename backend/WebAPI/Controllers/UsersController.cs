@@ -97,10 +97,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout()
         {
-            foreach (var cookie in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(cookie);
-            }
+            await Task.Run(() => Parallel.ForEach(Request.Cookies.Keys, Response.Cookies.Delete));
             return StatusCode(205);
         }
 
