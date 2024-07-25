@@ -27,7 +27,6 @@ using WebAPI.Models;
 namespace WebAPI.Controllers
 {
     [Authorize]
-    //[AutoValidateAntiforgeryToken]
     [ApiVersionNeutral]
     [Produces("application/json")]
     [Route("{version:apiVersion}/playlists")]
