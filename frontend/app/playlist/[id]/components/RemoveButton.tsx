@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
 import toast from "react-hot-toast";
-import { AiOutlineCloseCircle } from "react-icons/ai"; 
+import { AiOutlineCloseCircle } from "react-icons/ai";
 
-import $api from "@/api/http";
+import removeSongFromPlaylist from "@/services/playlists/removeSongFromPlaylist";
 
 interface RemoveButtonProps {
   playlistId: string
@@ -19,15 +18,14 @@ const RemoveButton: React.FC<RemoveButtonProps> = ({
   const router = useRouter();
 
   const handleRemove = async () => {
-    await $api.delete(`/playlists/${playlistId}/songs/${songId}`)
-      .then(() => {
-        router.refresh();
-        toast.success("The song removed from the playlist");
-      })
-      .catch((error: AxiosError) => {
-        toast.error("An error occurred while removing the song from the playlist");
-        console.log(error.response?.data);
-      });
+    const response = await removeSongFromPlaylist(playlistId, songId);
+
+    if (response.ok) {
+      router.refresh();
+      toast.success("The song removed from the playlist");
+    } else {
+      toast.error("An error occurred while removing the song from the playlist");
+    }
   }
 
   return (

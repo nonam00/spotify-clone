@@ -1,11 +1,11 @@
-import getSongsByAny from "@/actions/getSongsByAny"
-import getSongsByTitle from "@/actions/getSongsByTitle";
-import getSongsByAuthor from "@/actions/getSongsByAuthor";
+import getSongsByAny from "@/actions/songs/search/getSongsByAny"
+import getSongsByTitle from "@/actions/songs/search/getSongsByTitle";
+import getSongsByAuthor from "@/actions/songs/search/getSongsByAuthor";
+import getSongs from "@/actions/songs/getSongs";
 
 import Header from "@/components/Header";
 import SearchInput from "@/components/SearchInput";
 import SearchContent from "./components/SearchContent";
-import getSongs from "@/actions/getSongs";
 
 interface SearchProps {
   searchParams: {

@@ -1,8 +1,8 @@
 "use server"
 
-import $api from '@/api/http';
+import { API_URL } from '@/api/http';
 import { Song } from "@/types/types";
-import getSongs from "./getSongs";
+import getSongs from "../getSongs";
 
 const getSongsByTitle = async (title: string): Promise<Song[]> => {
   if (!title) {
@@ -10,8 +10,14 @@ const getSongsByTitle = async (title: string): Promise<Song[]> => {
     return allSongs;
   }
   try {
-    const { data } = await $api.get(`songs/search/title/${title}`)
-    return data?.songs;
+    const response = await fetch(`${API_URL}/songs/search/title/${title}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data);
+    }
+
+    return data.songs;
   } catch (error) {
     console.log(error);
     return [];

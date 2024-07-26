@@ -2,11 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 
-import $api from "@/api/http";
 import MediaItem from "@/components/MediaItem";
 import { Song } from "@/types/types";
+import addSongToPlaylist from "@/services/playlists/addSongToPlaylist";
 
 interface AddContentProps {
   playlistId: string,
@@ -36,28 +35,27 @@ const AddContent: React.FC<AddContentProps> = ({
     )
   }
 
-  const onAddClick = (songId: string) => {
-    $api.post(`/playlists/${playlistId}/songs/${songId}`)
-      .then(() => {
-        router.refresh();
-        toast.success("Song added to playlist")
-      })
-      .catch((error: AxiosError) => {
-        console.log(error.response?.data);
-        toast.error("Failed");
-      });
+  const onAddClick = async (songId: string) => {
+    const response = await addSongToPlaylist(playlistId, songId);
+
+    if (response.ok) {
+      router.refresh();
+      toast.success("Song added to playlist")
+    } else {
+      toast.error("Failed");
+    }
   }
 
-  return ( 
+  return (
     <div className="flex flex-col gap-y-2 w-full px-6">
       {songs.map((song) => (
-        <div 
+        <div
           key={song.id}
           className="flex items-center gap-x-4 w-full"
         >
           <div className="flex-1">
             <MediaItem
-              onClick={(id: string) => {onAddClick(id)}}
+              onClick={(id: string) => { onAddClick(id) }}
               data={song}
             />
           </div>
@@ -66,5 +64,5 @@ const AddContent: React.FC<AddContentProps> = ({
     </div>
   );
 }
- 
+
 export default AddContent;

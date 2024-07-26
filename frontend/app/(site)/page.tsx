@@ -1,5 +1,5 @@
-import getSongs from "@/actions/getSongs";
-import getUserPlaylistsByQuantity from "@/actions/getUserPlaylistsByQuantity";
+import getSongs from "@/actions/songs/getSongs";
+import getUserPlaylistsByQuantity from "@/actions/playlists/getUserPlaylistsByQuantity";
 
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";

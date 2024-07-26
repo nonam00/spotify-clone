@@ -9,7 +9,7 @@ import { Song } from "@/types/types";
 
 import MediaItem from "@/components/MediaItem";
 import LikeButton from "@/components/LikeButton";
-import DeletePlaylistButton from "@/components/DeletePlaylistButton";
+import DeletePlaylistButton from "./DeletePlaylistButton";
 import RemoveButton from "./RemoveButton";
 
 import { useUser } from "@/hooks/useUser";

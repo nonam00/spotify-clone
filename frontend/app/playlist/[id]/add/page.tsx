@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import getLikedSongsForPlaylist from "@/actions/getLikedSongsForPlaylist";
-import getPlaylistById from "@/actions/getPlaylistById";
+import getLikedSongsForPlaylist from "@/actions/liked/getLikedSongsForPlaylist";
+import getPlaylistById from "@/actions/playlists/getPlaylistById";
 
 import Header from "@/components/Header"
 import AddContent from "./components/AddContent";
