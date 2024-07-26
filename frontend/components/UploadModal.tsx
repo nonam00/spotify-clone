@@ -5,14 +5,14 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import $api from "@/api/http";
-
 import { useUser } from "@/hooks/useUser";
 import useUploadModal from "@/hooks/useUploadModal";
 
-import Modal from "./Modal";  
+import Modal from "./Modal";
 import Input from "./Input";
 import Button from "./Button";
+import uploadSong from "@/services/songs/uploadSong";
+import uploadFile from "@/services/files/uploadFile";
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
@@ -34,7 +34,7 @@ const UploadModal = () => {
   });
 
   const onChange = (open: boolean) => {
-    if(!open) {
+    if (!open) {
       reset();
       uploadModal.onClose();
     }
@@ -47,62 +47,66 @@ const UploadModal = () => {
       const songFile = values.song?.[0];
       let songFilePath = "";
       let imageFilePath = "";
-      
+
       if (!isAuth) {
         toast.error("The user is not authorized!");
         uploadModal.onClose();
         return;
       }
 
-      if(!imageFile || !songFile) {
+      if (!imageFile || !songFile) {
         toast.error('Missing required fields');
         return;
       }
-      
+
       // Upload song file
-      await $api.post("/files/song", { song: songFile }, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      })
-        .then(response => songFilePath = response.data.path)
-        .catch(() => {
-          setIsLoading(false);
-          return toast.error("An error occurred while uploading song file.")
-        });
+      const songForm = new FormData();
+      songForm.append("song", songFile);
+
+      const songUploadResponse = await uploadFile(songForm, "song");
+      if (!songUploadResponse.ok) {
+        const songPath = await songUploadResponse.json();
+        songFilePath = songPath;
+      } else {
+        setIsLoading(false);
+        return toast.error("An error occurred while uploading song file.");
+      }
 
       // Upload image file
-      await $api.post("/files/image", { image: imageFile }, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      })
-        .then(response => imageFilePath = response.data.path)
-        .catch(() => {
-          setIsLoading(false);
-          return toast.error("An error occurred while uploading image file.")
-        });
+      const imageForm = new FormData();
+      imageForm.append("image", imageFile);
+
+      const imageUploadResponse = await uploadFile(imageForm, "image");
+
+      if (!imageUploadResponse.ok) {
+        const imagePath = await imageUploadResponse.json();
+        imageFilePath = imagePath;
+      } else {
+        setIsLoading(false);
+        return toast.error("An error occurred while uploading image file.");
+      }
 
       if (imageFilePath === "" || songFilePath === "") {
         return toast.error("An error occurred while uploading files.")
       }
 
-      await $api.post("/songs", {
-        title: values.title,
-        author: values.author,
-        imagePath: imageFilePath,
-        songPath: songFilePath
-      })
-        .catch(() => {
-          setIsLoading(false);
-          return toast.error("An error occurred while uploading song information");
-        });
+      const response = await uploadSong(
+        values.title,
+        values.author,
+        imageFilePath,
+        songFilePath
+      );
+
+      if (!response.ok) {
+        setIsLoading(false);
+        return toast.error("An error occurred while uploading song information");
+      }
 
       router.refresh();
       setIsLoading(false);
       toast.success('Song created!');
       reset();
-      uploadModal.onClose();  
+      uploadModal.onClose();
     } catch {
       toast.error('Something went wrong');
     } finally {
@@ -157,7 +161,7 @@ const UploadModal = () => {
             {...register('image', { required: true })}
           />
         </div>
-        <Button 
+        <Button
           disabled={isLoading}
           type="submit"
           className="my-4"
@@ -168,5 +172,5 @@ const UploadModal = () => {
     </Modal>
   );
 }
- 
+
 export default UploadModal;

@@ -5,21 +5,23 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import $api from "@/api/http";
-
 import { useUser } from "@/hooks/useUser";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 
-import Modal from "./Modal";  
+import Modal from "./Modal";
 import Input from "./Input";
 import Button from "./Button";
+
+import uploadFile from "@/services/files/uploadFile";
+import deleteFile from "@/services/files/deleteFile";
+import updatePlaylist from "@/services/playlists/updatePlaylist";
 
 const PlaylistModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
   const playlistModal = usePlaylistModal();
   const { isAuth } = useUser();
   const router = useRouter();
-  
+
   const {
     register,
     handleSubmit,
@@ -33,7 +35,7 @@ const PlaylistModal = () => {
   });
 
   const onChange = (open: boolean) => {
-    if(!open) {
+    if (!open) {
       reset();
       playlistModal.onClose();
     }
@@ -51,51 +53,56 @@ const PlaylistModal = () => {
         return;
       }
 
-      if(!values.title) {
+      if (!values.title) {
         toast.error('Missing required fields');
         return;
       }
-      
+
       // TODO:cache control
       // Upload image file
       if (imageFile) {
-        await $api.post("/files", { file: imageFile }, {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        })
-          .then(response => imageFilePath = response.data.path)
-          .catch(() => {
+        const imageForm = new FormData();
+        imageForm.append("image", imageFile);
+
+        const imageUploadResponse = await uploadFile(imageForm, "image");
+
+        if (!imageUploadResponse.ok) {
+          const imagePath = await imageUploadResponse.json();
+          imageFilePath = imagePath;
+
+          const imageDeleteResponse = await deleteFile(playlistModal.imagePath);
+
+          if (!imageDeleteResponse.ok) {
             setIsLoading(false);
-            return toast.error("An error occurred while uploading image file.");
-          });
-        if (playlistModal.imagePath) {
-          await $api.delete(`/files/image/${playlistModal.imagePath}`)
-            .catch(() => {
-              setIsLoading(false);
-              return toast.error("An error occurred while deleting old image file.");
-            })
+            return toast.error("An error occurred while deleting old image file.");
+          }
+        } else {
+          setIsLoading(false);
+          return toast.error("An error occurred while uploading image file.")
         }
       }
+
       if (imageFilePath === "") {
         imageFilePath = playlistModal.imagePath;
       }
 
-      await $api.put(`/playlists/${playlistModal.id}`, {
-        title: values.title,
-        description: values.description ?? null,
-        imagePath: imageFilePath,
-      })
-        .catch(() => {
-          setIsLoading(false);
-          return toast.error("An error occurred while updating the playlist info");
-        });
+      const updateResponse = await updatePlaylist(
+        playlistModal.id,
+        values.title,
+        values.description ?? null,
+        imageFilePath
+      );
+
+      if (!updateResponse.ok) {
+        setIsLoading(false);
+        return toast.error("An error occurred while updating the playlist info");
+      }
 
       router.refresh();
       setIsLoading(false);
       toast.success('Playlist information saved!');
       reset();
-      playlistModal.onClose();  
+      playlistModal.onClose();
     } catch {
       toast.error('Something went wrong');
     } finally {
@@ -123,7 +130,7 @@ const PlaylistModal = () => {
         <Input
           id="description"
           disabled={isLoading}
-          {...register('description', { required: false})}
+          {...register('description', { required: false })}
           placeholder="Playlist Description"
         />
         <div>
@@ -145,5 +152,5 @@ const PlaylistModal = () => {
     </Modal>
   );
 }
- 
+
 export default PlaylistModal;

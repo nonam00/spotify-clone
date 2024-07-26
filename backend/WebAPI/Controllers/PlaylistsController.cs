@@ -165,7 +165,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> UpdatePlaylist(Guid playlistId,
-            [FromBody] UpdatePlaylistDto updatePlaylistDto)
+            UpdatePlaylistDto updatePlaylistDto)
         {
             var command = _mapper.Map<UpdatePlaylistCommand>(updatePlaylistDto);
             command.UserId = UserId;

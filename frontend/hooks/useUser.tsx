@@ -2,8 +2,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { UserDetails } from "@/types/types";
-import $api from "@/api/http";
-import { AxiosError } from "axios";
+import loginRequest from "@/services/auth/login";
+import getUserInfo from "@/services/auth/getUserInfo";
+import registerRequest from "@/services/auth/register";
+import logoutRequest from "@/services/auth/logout";
 
 type UserContextType = {
   isAuth: boolean
@@ -23,98 +25,74 @@ export interface Props {
 }
 
 export const MyUserContextProvider = (props: Props) => {
-  const [isAuth, setIsAuth] = useState<boolean>(false); 
+  const [isAuth, setIsAuth] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
   const login = async (email: string, password: string) => {
-    await $api.post("/users/login/", { email, password })
-      .then(async () => {
-        await $api.get("/users/info/") 
-          .then((response) => {
-            setIsAuth(true);
-            setUserDetails(response.data);
-            toast.success("Logged In")    
-          })
-          .catch((error: AxiosError) => {
-            console.log(error.response?.data);
-          });
-      })
-      .catch((error: any) => {
-        if (error.response.status === 400) {
-          if(error.response.data.error) {
-            toast.error(error.response.data.error);
-          }
-          for(const field in error.response.data.errors) {
-            error.response.data.errors[field].forEach((e: any) => {
-              toast.error(`${field}: ${e}`);
-            });
-          }
+    const response = await loginRequest(email, password);
+
+    if (response.ok) {
+      await getInfo();
+    } else {
+      const data = await response.json();
+      if (response.status === 400) {
+        if (data.error) {
+          toast.error(data.error);
         }
-        else if (error.response.status !== 200) {
-          toast(error.response.data.message);
-        }
-      });
+        for (const field in data.errors) {
+          data.errors[field].forEach((e: any) => toast.error(`${field}: ${e}`)
+          )
+        };
+      } else {
+        toast.error(data.message);
+      }
+    }
   }
 
   const register = async (email: string, password: string) => {
-    await $api.post("/users/register/", { email, password })
-      .then(async () => {
-        await $api.get("users/info/") 
-          .then((response) => {
-            setIsAuth(true);
-            setUserDetails(response.data);
-            toast.success("Logged In")    
-          })
-          .catch((error: AxiosError) => {
-            console.log(error.response?.data);
-          });
-      })
-      .catch((error) => {
-        if (error.response.status === 400) {
-          if(error.response.data.error) {
-            toast.error(error.response.data.error);
-          }
-          for(const field in error.response.data.errors) {
-            error.response.data.errors[field].forEach((e: any) => {
-              toast(`${field}: ${e}`);
-            });
-          }
+    const response = await registerRequest(email, password);
+
+    if (response.ok) {
+      await getInfo();
+    } else {
+      const data = await response.json();
+      if (response.status === 400) {
+        if (data.error) {
+          toast.error(data.error);
         }
-        else if (error.response.status !== 200) {
-          toast(error.response.data.message);
-        }
-      });
+        for (const field in data.errors) {
+          data.errors[field].forEach((e: any) => toast(`${field}: ${e}`)
+          )
+        };
+      }
+      else {
+        toast(data.message);
+      }
+    }
+  }
+
+  const getInfo = async () => {
+    const infoResponse = await getUserInfo();
+    if (infoResponse.ok) {
+      setIsAuth(true);
+      setUserDetails(await infoResponse.json());
+      toast.success("Logged in");
+    }
   }
 
   const logout = async () => {
-    await $api.post("users/logout/")
-      .then(() => {
-        setIsAuth(false);
-        setUserDetails(null);
-      })
-      .catch((error: AxiosError) => {
-        console.log(error.response?.data);     
-      });
+    const response = await logoutRequest();
+    if (response.ok) {
+      setIsAuth(false);
+      setUserDetails(null);
+    }
   }
 
   useEffect(() => {
     if (!isAuth) {
       setIsLoadingData(true);
-      Promise.allSettled([$api.get("users/info")]).then(
-        async (results) => {
-          try {
-            if (results[0].status === "fulfilled") {
-              setUserDetails(results[0].value.data?.user);
-              setIsAuth(true);
-            } else {
-              throw new Error("Error on loading data")
-            }
-        } catch(e: any) {
-          console.log(e?.message);
-        }
-       }
-      )
+      getInfo();
       setIsLoadingData(false);
     }
   }, [isAuth, isLoadingData]);

@@ -2,13 +2,13 @@
 
 import { toast } from "react-hot-toast";
 import { useEffect, useState } from "react";
-import { AxiosError } from "axios";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-
-import $api, { API_URL } from "@/api/http";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
+import checkLikedSong from "@/services/liked/checkLikedSong";
+import addLikedSong from "@/services/liked/addLikedSong";
+import deleteLikedSong from "@/services/liked/deleteLikedSong";
 
 interface LikeButtonProps {
   songId: string
@@ -20,22 +20,20 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const authModal = useAuthModal();
   const { isAuth } = useUser();
   const [isLiked, setIsLiked] = useState<boolean>(false);
-  
+
   useEffect(() => {
-    if(!isAuth) {
+    if (!isAuth) {
       return;
     }
 
     const fetchData = async () => {
-      await $api.get(`users/songs/${songId}`)
-        .then((response) => {
-          if (response.status >= 200 && response.status < 400 && response.data) {
-            setIsLiked(true);
-          }
-        })
-        .catch((error: AxiosError) => {
-          console.log(error.response?.data);
-        });
+      const response = await checkLikedSong(songId);
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setIsLiked(true);
+        }
+      }
     }
     fetchData();
   }, [songId, isAuth, isLiked]);
@@ -46,29 +44,21 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     if (isLiked) {
-      await $api.delete(`/users/songs/${songId}`)
-        .then(() => {
-          setIsLiked(false);
-          toast.success("Like deleted");
-        })
-        .catch((error: AxiosError) => {
-          toast.error("An error occurred while deleting the song from your favorites");
-          console.log(error.response?.data);
-        });
-
+      const response = await deleteLikedSong(songId);
+      if (response.ok) {
+        setIsLiked(false)
+        toast.success("Like deleted")
+      } else {
+        toast.error("An error occurred while deleting the song from your favorites");
+      }
     } else {
-        await fetch(`${API_URL}/users/songs/${songId}`, {
-          method: 'POST',
-          credentials: 'include'
-        })
-          .then(() => {
-            setIsLiked(true);
-            toast.success('Liked');
-          })
-          .catch((error: AxiosError) => {
-            toast.error("An error occurred while adding the song to the favorites");
-            console.log(error.message);
-          });
+      const response = await addLikedSong(songId); 
+      if (response.ok) {
+        setIsLiked(true);
+        toast.success('Liked');
+      } else {
+        toast.error("An error occurred while adding the song to the favorites");
+      }
     }
   }
   return (
@@ -76,12 +66,12 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       onClick={handleLike}
       className="hover:opacity-75 transition"
     >
-      { isLiked
-        ? <AiFillHeart color="22c55e" size={25}/>
-        : <AiOutlineHeart color="white" size={25}/>
+      {isLiked
+        ? <AiFillHeart color="22c55e" size={25} />
+        : <AiOutlineHeart color="white" size={25} />
       }
     </button>
   );
 }
- 
+
 export default LikeButton;
