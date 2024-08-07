@@ -118,6 +118,25 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
+        /// Proxies access to images in AWS S3
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// Sample request:
+        /// 
+        ///     GET /image/{filename}
+        /// 
+        /// </remarks>
+        /// <param name="filename">Filename</param>
+        /// <response code="200">Success</response>
+        [HttpGet("image/{filename}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult GetImageFile(string filename)
+        {
+            return Redirect(_fullBucketUrl + "image/" + filename);
+        }
+
+        /// <summary>
         /// Deletes a file from AWS S3
         /// </summary>
         /// <remarks>
