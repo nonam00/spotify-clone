@@ -5,16 +5,18 @@ import useGetSongById from "@/hooks/useGetSongById";
 import useLoadSongUrl from "@/hooks/useLoadSongUrl";
 
 import PlayerContent from "./PlayerContent";
+import { API_URL } from "@/api/http";
 
 const Player = () => {
   const player = usePlayer();
   const { song } = useGetSongById(player.activeId);
+  //const songUrl = useLoadSongUrl(song!); 
 
-  const songUrl = useLoadSongUrl(song!);
-
-  if(!song || !songUrl || !player.activeId) {
+  if(!song || !player.activeId) {
     return null;
   }
+
+  const songUrl = `${API_URL}/files/song/${song.songPath}`;
   
   return (
     <div

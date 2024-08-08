@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import $api from "@/api/http";
-
 import { useUser } from "@/hooks/useUser";
 import useAuthModal from "@/hooks/useAuthModal";
 import useCreateModal from "@/hooks/useCreateModal";
 import useUploadModal from "@/hooks/useUploadModal";
+
+import createPlaylist from "@/services/playlists/createPlaylist";
 
 import Button from "./Button";
 import Modal from "./Modal";
@@ -34,23 +34,22 @@ const CreateModal = () => {
     }
   }
 
-  const onPlaylistClick = () => {
+  const onPlaylistClick = async () => {
     if (!isAuth) {
       onClose();
       return authModal.onOpen();
     }
-    $api.post("/playlists/")
-      .then(response => {
-        if (response.status >= 200 && response.status < 400) {
-          onClose()
-          router.push(`/playlist?id=${response.data}`)
-          router.refresh();
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        toast("Failed on creating playlist");
-      });
+
+    const response = await createPlaylist();
+    
+    if (response.ok) {
+      const id = await response.text();
+      onClose();
+      router.push(`/playlist/${id}`);
+      router.refresh();
+    } else {
+      toast("Failed on creating playlist");
+    }
   }
 
   const onUploadClick = () => {

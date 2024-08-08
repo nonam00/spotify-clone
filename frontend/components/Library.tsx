@@ -80,7 +80,7 @@ const Library: React.FC<LibraryProps> = ({
         px-3
       ">
         <div
-          onClick={() => router.push("/liked")}
+          onClick={() => router.push("/playlist/liked")}
           className="
             flex
             items-center
@@ -121,7 +121,7 @@ const Library: React.FC<LibraryProps> = ({
         </div>
         {playlists.map((playlist) => (
           <MediaItem
-            onClick={(id: string) => router.push(`/playlist?id=${id}`)}
+            onClick={(id: string) => router.push(`/playlist/${id}`)}
             key={playlist.id}
             data={playlist}
           />

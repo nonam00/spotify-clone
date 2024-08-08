@@ -7,7 +7,6 @@ namespace Application.Users.Queries.GetUserInfo
 {
     public class UserInfo : IMapWith<User>
     {
-        public Guid Id { get; set; }
         public string Email { get; set; } = null!;
         public string? FullName { get; set; }
         public string? AvatarUrl { get; set; }
@@ -16,8 +15,6 @@ namespace Application.Users.Queries.GetUserInfo
         public void Mapping(Profile profile)
         {
             profile.CreateMap<User, UserInfo>()
-                .ForMember(vm => vm.Id,
-                    opt => opt.MapFrom(u => u.Id))
                 .ForMember(vm => vm.Email,
                     opt => opt.MapFrom(u => u.Email))
                 .ForMember(vm => vm.FullName,

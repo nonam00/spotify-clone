@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
-import { AxiosError } from "axios";
 
-import $api from '@/api/http';
 import { Song } from "@/types/types";
+import { API_URL } from "@/api/http";
 
 const useGetSongById = (id?: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -16,17 +15,16 @@ const useGetSongById = (id?: string) => {
     setIsLoading(true);
 
     const fetchSong = async () => {
-      await $api.get<Song>(`/songs/${id}`)
-        .then((response) => {
-          setSong(response.data as Song);
-          setIsLoading(false);
-        })
-        .catch((error: AxiosError) => {
-          setIsLoading(false);
-          console.log(error.response?.data);
-        });
+      const response = await fetch(`${API_URL}/songs/${id}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setSong(data as Song);
+      }
+
+      setIsLoading(false);
     }
-    
+
     fetchSong();
   }, [id]);
 

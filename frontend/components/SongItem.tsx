@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 
-import useLoadImage from "@/hooks/useLoadImage";
 import { Song } from "@/types/types";
-
 import PlayButton from "@/components/PlayButton";
+import { API_URL } from "@/api/http";
 
 interface SongItemProps {
   data: Song;
@@ -16,7 +15,6 @@ const SongItem: React.FC<SongItemProps> = ({
   data,
   onClick
 }) => {
-  const imagePath = useLoadImage(data);
   return (
     <div
       onClick={() => onClick(data.id)}
@@ -49,9 +47,10 @@ const SongItem: React.FC<SongItemProps> = ({
       >
         <Image 
           className="object-cover"
-          src={imagePath || ""}
+          src={`${API_URL}/files/image/${data.imagePath}`}
           fill
           alt="Image"
+          unoptimized
         />
       </div>
       <div className="flex flex-col items-start w-full pt-4 gap-y-1">

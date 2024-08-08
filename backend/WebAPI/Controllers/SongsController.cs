@@ -188,11 +188,10 @@ namespace WebAPI.Controllers
         /// <response code="201">Success</response>
         /// <response code="401">If the user is unauthorized</response>
         [Authorize]
-       // [ValidateAntiForgeryToken]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<Guid>> UploadNewSong([FromBody] CreateSongDto createSongDto)
+        public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto)
         {
             var command = _mapper.Map<CreateSongCommand>(createSongDto);
             command.UserId = UserId;

@@ -4,6 +4,6 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByTitle
 {
     public class GetSongListByTitleQuery : IRequest<SongListVm>
     {
-        public string SearchString { get; set; }
+        public string SearchString { get; set; } = null!;
     }
 }

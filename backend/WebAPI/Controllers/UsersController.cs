@@ -42,12 +42,17 @@ namespace WebAPI.Controllers
         /// <response code="201">Success</response>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register(RegisterDto registerDto)
         {
             var command = _mapper.Map<CreateUserCommand>(registerDto);
             var accessToken = await Mediator.Send(command);
 
-            HttpContext.Response.Cookies.Append("token", accessToken);
+            HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                MaxAge = TimeSpan.FromHours(12)
+            });
 
             return Ok();
         }
@@ -70,12 +75,17 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
             var query = _mapper.Map<LoginQuery>(loginDto);
             var accessToken = await Mediator.Send(query);
 
-            HttpContext.Response.Cookies.Append("token", accessToken);
+            HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                MaxAge = TimeSpan.FromHours(12)
+            });
 
             return Ok();
         }
@@ -97,10 +107,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout()
         {
-            foreach (var cookie in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(cookie);
-            }
+            await Task.Run(() => Parallel.ForEach(Request.Cookies.Keys, Response.Cookies.Delete));
             return StatusCode(205);
         }
 
@@ -117,7 +124,6 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
         [Authorize]
-        //[ValidateAntiForgeryToken]
         [HttpGet("info")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
