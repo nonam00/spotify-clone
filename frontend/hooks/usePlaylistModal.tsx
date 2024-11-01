@@ -1,10 +1,7 @@
 import { create } from "zustand";
-import { Playlist } from "@/types/types";
+import { ModalStore, Playlist } from "@/types/types";
 
-interface PlaylistModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+interface PlaylistModalStore extends ModalStore {
   id: string;
   title: string;
   description: string;

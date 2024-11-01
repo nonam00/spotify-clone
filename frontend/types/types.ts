@@ -19,3 +19,10 @@ export interface Playlist {
   description?: string;
   imagePath?: string;
 };
+
+// for modal components
+export interface ModalStore {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+};

@@ -1,10 +1,7 @@
 import { create } from "zustand";
+import { ModalStore } from "@/types/types";
 
-interface AuthModalStore {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-};
+interface AuthModalStore extends ModalStore {};
 
 const useAuthModal = create<AuthModalStore>((set) => ({
   isOpen: false,
