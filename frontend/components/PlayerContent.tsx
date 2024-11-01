@@ -19,55 +19,33 @@ interface PlayerContentProps {
   songUrl: string;
 }
 
+type changeSongType = "previous" | "next";
+
 const PlayerContent: React.FC<PlayerContentProps> = ({
   song,
   songUrl
 }) => {
-  const player = usePlayer();
+  const { setNextId, setPreviousId } = usePlayer();
   const [volume, setVolume] = useState<number>(1); // value for configurrating volume from slider
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
   const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar
-  const [currentString, setCurrentString] = useState<string>("");
+  const [currentString, setCurrentString] = useState<string>(""); // variable for displaying current play time of track
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
-  // set next song index
-  const onPlayNext = () => {
+  // handling player prev and next buttons 
+  const handleChangeSong = (changeType: changeSongType) => {
     pause();
     clearTimeout(delay);
-    if (player.ids.length === 0) {
-      return;
+
+    if (changeType == "next") {
+      setNextId();
+    } else if (changeType == "previous") {
+      setPreviousId();
     }
-
-    const currentIndex = player.ids.findIndex((id) => id === player.activeId);
-    const nextSong = player.ids[currentIndex + 1];
-
-    if (!nextSong) {
-      return player.setId(player.ids[0]);
-    }
-
-    player.setId(nextSong);
-  };
-
-  // set previous song index
-  const onPlayPrevious = () => {
-    pause();
-    clearTimeout(delay);
-    if (player.ids.length === 0) {
-      return;
-    }
-
-    const currentIndex = player.ids.findIndex((id) => id === player.activeId);
-    const previousSong = player.ids[currentIndex - 1];
-
-    if (!previousSong) {
-      return player.setId(player.ids[player.ids.length - 1]);
-    }
-
-    player.setId(previousSong);
-  };
+  }
 
   // songUrl doesn't updates dinamicly
   const [play, { pause, sound }] = useSound(
@@ -80,13 +58,13 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
       },
       onend: () => {
         setIsPlaying(false);
-        onPlayNext();
+        handleChangeSong("next");
       },
       onpause: () => {
         setIsPlaying(false)
         clearTimeout(delay);
       },
-      format: ['flac', 'mp3', 'wav','.m4a','.aac','.ogg'],
+      format: ['flac', 'mp3', 'wav','m4a','aac','ogg'],
       html5: true,
     }
   );
@@ -100,17 +78,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
 
   const handlePlay = () => !isPlaying? play() : pause();
 
-  const toggleMute = () => {
-    if (volume === 0) {
-      setVolume(1);
-    } else {
-      setVolume(0);
-    }
-  }
-
-  const timeout: NodeJS.Timeout = setTimeout(() => {
-    updateProgress();
- }, 100);
+  const toggleMute = () => volume === 0 ? setVolume(1) : setVolume(0);
 
   const updateProgress = () => {
     const seek: number = sound?.seek() ?? 0;
@@ -119,20 +87,25 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     setCurrentString(getCurrentTimeString(duration));
   }
 
+  const timeout = setTimeout(updateProgress, 100);
+
+  // updating timeout after 
   const setCurrent = (value: number) => {
-    clearTimeout(delay)
-    if(sound) {
+    clearTimeout(delay);
+    if (sound) {
       sound.seek(sound.duration() * value)
     }
-    setDelay(delay);
+    setDelay(timeout);
   }
 
+  // parsing current p;laying time to human-readable format 
   const getCurrentTimeString = (duration: number) => {
     const minutes = progress * duration / 60 >> 0;
     const seconds = progress * duration % 60 >> 0;
     return `${minutes}:${seconds >= 10? seconds : `0${seconds}`}`; 
   }
 
+  // parsing track duration to human-readable format
   const getDurationString = () => {
     const duration: number = sound?.duration() ?? 1;
     const minutes = duration / 60 >> 0;
@@ -193,7 +166,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
           "
         >
           <AiFillStepBackward
-            onClick={onPlayPrevious}
+            onClick={() => handleChangeSong("previous")}
             size={25}
             className="
               text-neutral-400
@@ -219,7 +192,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
             <Icon size={25} className="text-black" />
           </div>
           <AiFillStepForward
-            onClick={onPlayNext}
+            onClick={() => handleChangeSong("next")}
             size={25}
             className="
               text-neutral-400

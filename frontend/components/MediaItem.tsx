@@ -1,3 +1,4 @@
+// component for user playlists in sidebar library or songs list in home page 
 "use client";
 
 import Image from "next/image";
