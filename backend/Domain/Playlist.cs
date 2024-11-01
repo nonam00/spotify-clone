@@ -8,6 +8,6 @@ namespace Domain
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<Song> Songs { get; set; } = new List<Song>();
+        public IList<Song> Songs { get; set; } = new List<Song>();
     }
 }

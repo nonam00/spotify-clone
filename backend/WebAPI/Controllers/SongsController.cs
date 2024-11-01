@@ -76,7 +76,7 @@ namespace WebAPI.Controllers
         /// <param name="songId">Song ID</param>
         /// <returns>Returns SongVm</returns>
         /// <response code="200">Success</response>
-        [HttpGet("{songId}")]
+        [HttpGet("{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongVm>> GetSongById(Guid songId)
         {

@@ -6,11 +6,6 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'localhost:7025',
         pathname: '**'
-      },
-      {
-        protocol: 'https',
-        hostname: 'spotify-clone-bucket.s3.cloud.ru',
-        pathname: '**'
       }
     ]
   }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.Extensions.Primitives;
 
 namespace WebAPI.Middleware
 {
@@ -9,11 +10,10 @@ namespace WebAPI.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Headers.ContainsKey("X-Xsrf-Token") && 
-                context.Request.Headers["X-Xsrf-Token"] == "")
+            if (context.Request.Headers.TryGetValue("X-Xsrf-Token", out StringValues value) &&
+value == "")
             {
                 var token = _antiforgery.GetTokens(context).RequestToken!;
-                Console.WriteLine(token);
                 context.Response.Cookies.Append(".AspNetCore.Xsrf", token, new CookieOptions
                 {
                     HttpOnly = false,

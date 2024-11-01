@@ -16,7 +16,7 @@ import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
 
 interface PlaylistContentProps {
-  id: string,
+  id: string;
   songs: Song[];
 }
 

@@ -5,10 +5,10 @@ interface PlaylistModalStore {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
-  id: string,
-  title: string,
-  description: string,
-  imagePath: string,
+  id: string;
+  title: string;
+  description: string;
+  imagePath: string;
   setPlaylist: (playlist: Playlist) => void;
 };
 

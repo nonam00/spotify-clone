@@ -57,12 +57,12 @@ namespace WebAPI
                                 Id = $"AuthToken {apiVersion}"
                             }
                         },
-                        new string[] { }
+                        []
                     }
                 });
 
                 options.CustomOperationIds(apiDescription =>
-                    apiDescription.TryGetMethodInfo(out MethodInfo methodInfo)
+                    apiDescription.TryGetMethodInfo(out var methodInfo)
                         ? methodInfo.Name
                         : null);
             }

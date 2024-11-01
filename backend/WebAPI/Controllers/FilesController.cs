@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
         public FilesController(IConfiguration configuration)
         {
             _fullBucketUrl = configuration["AwsOptions:ServiceURL"]!
-                .Insert(8, (configuration["AwsOptions:BucketName"]! + "."));
+                .Insert(8, configuration["AwsOptions:BucketName"]! + ".");
 
             _songsPath = Directory.GetCurrentDirectory() + "/Files/Songs/";
 
@@ -48,15 +48,10 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> UploadSongFile(IFormFile song)
         {
-            if (song is null)
-            {
-                return BadRequest();
-            }
-
+            var fileName = Guid.NewGuid() + song.FileName;
             try
             {
-                string fileName = Guid.NewGuid().ToString() + song.FileName;
-                using (var fs = new FileStream(_songsPath + fileName, FileMode.Create))
+                await using (var fs = new FileStream(_songsPath + fileName, FileMode.Create))
                 {
                     await song.CopyToAsync(fs);
                 }
@@ -92,6 +87,7 @@ namespace WebAPI.Controllers
             };
             var path = await Mediator.Send(command);
             return Ok(new { path = path });
+            //return Ok();
         }
 
         /// <summary>
@@ -107,14 +103,12 @@ namespace WebAPI.Controllers
         /// <param name="path">Filename</param>
         /// <response code="200">Success</response>
         [HttpGet("song/{path}")]
-        public IActionResult GetSongFile(string path)
+        public Task<IActionResult> GetSongFile(string path)
         {
-            string fullPath = _songsPath + path;
-            if (!System.IO.File.Exists(fullPath))
-            {
-                return BadRequest();
-            }
-            return PhysicalFile(fullPath, "application/ostet-stream", enableRangeProcessing: true);
+            var fullPath = _songsPath + path;
+            return !System.IO.File.Exists(fullPath)
+                ? Task.FromResult<IActionResult>(BadRequest())
+                : Task.FromResult<IActionResult>(PhysicalFile(fullPath, "application/ostet-stream", true));
         }
 
         /// <summary>
@@ -131,9 +125,10 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         [HttpGet("image/{filename}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetImageFile(string filename)
+        public Task<IActionResult> GetImageFile(string filename)
         {
-            return Redirect(_fullBucketUrl + "image/" + filename);
+            return Task.FromResult<IActionResult>(Redirect(_fullBucketUrl + "image/" + filename));
+            //return Ok();
         }
 
         /// <summary>
@@ -154,10 +149,9 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteFile(string filename)
         {
-            string file = $"image/{filename}";
             var command = new DeleteFileCommand
             {
-                FileName = file
+                FileName = $"image/{filename}"
             };
             await Mediator.Send(command);
             return NoContent();

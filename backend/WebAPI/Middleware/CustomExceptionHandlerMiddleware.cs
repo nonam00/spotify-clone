@@ -8,7 +8,7 @@ namespace WebAPI.Middleware
 {
     public class CustomExceptionHandlerMiddleware(RequestDelegate next)
     {
-        public readonly RequestDelegate _next = next;
+        private readonly RequestDelegate _next = next;
 
         public async Task Invoke(HttpContext context)
         {
@@ -33,7 +33,7 @@ namespace WebAPI.Middleware
                     code = HttpStatusCode.BadRequest;
                     result = JsonSerializer.Serialize(validationException.Errors);
                     break;
-                case LoginException loginException:
+                case LoginException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonSerializer.Serialize(new { error = exception.Message });
                     break;
@@ -42,7 +42,7 @@ namespace WebAPI.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
 
-            if (result == String.Empty)
+            if (result == string.Empty)
             {
                 result = JsonSerializer.Serialize(new { error = exception.Message });
             }

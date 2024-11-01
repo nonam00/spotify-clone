@@ -6,7 +6,7 @@ namespace Application.Songs.Queries.GetSongList.GetSongListByAny
     {
         public GetSongListByAnyQueryValidator()
         {
-            RuleFor(query => query.SearchString.Trim()).NotEqual(String.Empty);
+            RuleFor(query => query.SearchString.Trim()).NotEqual(string.Empty);
         }
     }
 }

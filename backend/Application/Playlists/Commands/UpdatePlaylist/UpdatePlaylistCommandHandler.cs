@@ -6,7 +6,7 @@ using Application.Interfaces;
 namespace Application.Playlists.Commands.UpdatePlaylist
 {
     public class UpdatePlaylistCommandHandler(ISongsDbContext dbContext)
-      : IRequestHandler<UpdatePlaylistCommand>
+        : IRequestHandler<UpdatePlaylistCommand>
     {
         private readonly ISongsDbContext _dbContext = dbContext;
 

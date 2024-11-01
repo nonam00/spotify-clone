@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { API_URL } from '@/api/http';
 import { Song } from "@/types/types";

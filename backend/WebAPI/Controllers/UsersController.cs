@@ -129,7 +129,7 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<UserInfo>> GetUserInfo()
         {
-            var query = new GetUserInfoQuery()
+            var query = new GetUserInfoQuery
             {
                 UserId = UserId
             };
@@ -174,17 +174,17 @@ namespace WebAPI.Controllers
         ///     GET /songs/{songId}
         /// 
         /// </remarks>
-        /// <param name="songId">ID of tiked song</param>
+        /// <param name="songId">ID of liked song</param>
         /// <returns>Returns LikedSongVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpGet("songs/{songId}")]
+        [HttpGet("songs/{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetLikedSong(Guid songId)
         {
-            var query = new CheckLikedSongQuery()
+            var query = new CheckLikedSongQuery
             {
                 UserId = UserId,
                 SongId = songId
@@ -208,7 +208,7 @@ namespace WebAPI.Controllers
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpPost("songs/{songId}")]
+        [HttpPost("songs/{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<string>> CreateLiked(Guid songId)
@@ -238,7 +238,7 @@ namespace WebAPI.Controllers
         /// <response code="204">Success</response>
         /// <response code="401">If user is unauthorized</response>
         [Authorize]
-        [HttpDelete("songs/{songId}")]
+        [HttpDelete("songs/{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteLiked(Guid songId)

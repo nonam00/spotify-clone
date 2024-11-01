@@ -8,7 +8,7 @@ import registerRequest from "@/services/auth/register";
 import logoutRequest from "@/services/auth/logout";
 
 type UserContextType = {
-  isAuth: boolean
+  isAuth: boolean;
   userDetails: UserDetails | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -41,8 +41,7 @@ export const MyUserContextProvider = (props: Props) => {
           toast.error(data.error);
         }
         for (const field in data.errors) {
-          data.errors[field].forEach((e: any) => toast.error(`${field}: ${e}`)
-          )
+          data.errors[field].forEach((e: any) => toast.error(`${field}: ${e}`))
         };
       } else {
         toast.error(data.message);

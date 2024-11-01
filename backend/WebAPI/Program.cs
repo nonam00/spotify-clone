@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Antiforgery;
+//using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -60,7 +60,7 @@ builder.Services.AddAuthentication(options =>
         // Getting options for JWT crypt from configuration (user secret)
         var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
 
-        options.TokenValidationParameters = new()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             // TODO: replace with real issuer and real audience 
             ValidateIssuer = false,

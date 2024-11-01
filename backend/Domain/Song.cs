@@ -9,6 +9,6 @@
         public string ImagePath { get; set; } = null!;
         public string Author { get; set; } = null!;
         public Guid? UserId { get; set; }
-        public User? User { get; }
+        public User? User { get; set; }
     }
 }
