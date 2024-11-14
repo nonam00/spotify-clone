@@ -22,7 +22,7 @@ const DeletePlaylistButton: React.FC<DeletePlaylistButtonProps> = ({
 
     if (response.ok) {
       router.push("/");
-      toast.success("The playlist was succesfully deleted")
+      toast.success("The playlist was successfully deleted")
     } else {
       toast.error("An error occurred while deleting the playlist");
     }

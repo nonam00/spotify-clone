@@ -7,7 +7,7 @@ interface PlaylistModalStore extends ModalStore {
   description: string;
   imagePath: string;
   setPlaylist: (playlist: Playlist) => void;
-};
+}
 
 const usePlaylistModal = create<PlaylistModalStore>((set) => ({
   isOpen: false,

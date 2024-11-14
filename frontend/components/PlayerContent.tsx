@@ -26,7 +26,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   songUrl
 }) => {
   const { setNextId, setPreviousId } = usePlayer();
-  const [volume, setVolume] = useState<number>(1); // value for configurrating volume from slider
+  const [volume, setVolume] = useState<number>(1); // value for configurating volume from slider
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
   const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar
@@ -47,7 +47,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }
 
-  // songUrl doesn't updates dinamicly
+  // songUrl doesn't updates dynamically
   const [play, { pause, sound }] = useSound(
     songUrl,
     {

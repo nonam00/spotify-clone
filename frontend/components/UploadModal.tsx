@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import { useState } from "react";
+import {useRouter} from "next/navigation";
+import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
+import {useState} from "react";
 import toast from "react-hot-toast";
 
-import { useUser } from "@/hooks/useUser";
+import {useUser} from "@/hooks/useUser";
 import useUploadModal from "@/hooks/useUploadModal";
 
 import Modal from "./Modal";
@@ -65,8 +65,7 @@ const UploadModal = () => {
 
       const songUploadResponse = await uploadFile(songForm, "song");
       if (!songUploadResponse.ok) {
-        const songPath = await songUploadResponse.json();
-        songFilePath = songPath;
+        songFilePath = await songUploadResponse.json();
       } else {
         setIsLoading(false);
         return toast.error("An error occurred while uploading song file.");
@@ -79,8 +78,7 @@ const UploadModal = () => {
       const imageUploadResponse = await uploadFile(imageForm, "image");
 
       if (!imageUploadResponse.ok) {
-        const imagePath = await imageUploadResponse.json();
-        imageFilePath = imagePath;
+        imageFilePath = await imageUploadResponse.json();
       } else {
         setIsLoading(false);
         return toast.error("An error occurred while uploading image file.");

@@ -6,7 +6,7 @@ interface ConfirmModalStore extends ModalStore {
   description: string
   setAction: (action: () => Promise<void>) => void;
   setDescription: (description: string) => void;
-};
+}
 
 const useConfirmModal = create<ConfirmModalStore>((set) => ({
   action: async () => {},

@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import { useState } from "react";
+import {useRouter} from "next/navigation";
+import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
+import {useState} from "react";
 import toast from "react-hot-toast";
 
-import { useUser } from "@/hooks/useUser";
+import {useUser} from "@/hooks/useUser";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 
 import Modal from "./Modal";
@@ -67,8 +67,7 @@ const PlaylistModal = () => {
         const imageUploadResponse = await uploadFile(imageForm, "image");
 
         if (!imageUploadResponse.ok) {
-          const imagePath = await imageUploadResponse.json();
-          imageFilePath = imagePath;
+          imageFilePath = await imageUploadResponse.json();
 
           const imageDeleteResponse = await deleteFile(playlistModal.imagePath);
 

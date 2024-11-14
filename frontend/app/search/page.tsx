@@ -12,7 +12,7 @@ interface SearchProps {
     searchString: string;
     type: SearchType;
   }
-};
+}
 
 export const revalidate = 0;
 

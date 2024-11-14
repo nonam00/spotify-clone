@@ -42,7 +42,7 @@ export const MyUserContextProvider = (props: Props) => {
         }
         for (const field in data.errors) {
           data.errors[field].forEach((e: any) => toast.error(`${field}: ${e}`))
-        };
+        }
       } else {
         toast.error(data.message);
       }
@@ -63,7 +63,7 @@ export const MyUserContextProvider = (props: Props) => {
         for (const field in data.errors) {
           data.errors[field].forEach((e: any) => toast(`${field}: ${e}`)
           )
-        };
+        }
       }
       else {
         toast(data.message);
