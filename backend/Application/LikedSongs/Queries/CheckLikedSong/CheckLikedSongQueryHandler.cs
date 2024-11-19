@@ -15,9 +15,9 @@ namespace Application.LikedSongs.Queries.CheckLikedSong
         {
             return await _dbContext.LikedSongs
                 .AsNoTracking()  
-                .Where(l => l.SongId == request.SongId &&
-                            l.UserId == request.UserId)
-                .AnyAsync(cancellationToken);
+                .AnyAsync(l => l.SongId == request.SongId &&
+                            l.UserId == request.UserId,
+                            cancellationToken);
         }
     }
 }

@@ -25,11 +25,13 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   song,
   songUrl
 }) => {
-  const [setNextId, setPreviousId] = usePlayer(s => [
+  const [setNextId, setPreviousId, volume, setVolume] = usePlayer(s => [
     s.setNextId,
-    s.setPreviousId
-  ]);
-  const [volume, setVolume] = useState<number>(1); // value for configurating volume from slider
+    s.setPreviousId,
+    s.volume, // value for configurating volume from slider 
+    s.setVolume,
+  ]); 
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
   const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar

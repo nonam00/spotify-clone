@@ -17,8 +17,7 @@ namespace Application.Playlists.Commands.CreatePlaylist
         {
             var count = await _dbContext.Playlists
                 .AsNoTracking()
-                .Where(p => p.UserId == request.UserId)
-                .CountAsync(cancellationToken);
+                .CountAsync(p => p.UserId == request.UserId, cancellationToken);
 
             var playlist = new Playlist
             {

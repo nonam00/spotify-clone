@@ -24,8 +24,7 @@ namespace Application.Users.Commands.CreateUser
         {
             if (await _dbContext.Users
                 .AsNoTracking()
-                .Where(u => u.Email == request.Email)
-                .AnyAsync(cancellationToken))
+                .AnyAsync(u => u.Email == request.Email, cancellationToken))
             {
                 throw new LoginException("User with this email already exits");
             }

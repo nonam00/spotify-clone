@@ -25,9 +25,9 @@ namespace Application.Users.Queries.Login
                 .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
                 ?? throw new LoginException("Wrong email or password");
 
-            var result = _passwordHasher.Verify(request.Password, user.PasswordHash);
+            var check = _passwordHasher.Verify(request.Password, user.PasswordHash);
 
-            if(!result)
+            if (!check)
             {
                 throw new LoginException("Wrong email or password");
             }

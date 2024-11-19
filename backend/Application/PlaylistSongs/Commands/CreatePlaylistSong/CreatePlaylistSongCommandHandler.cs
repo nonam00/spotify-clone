@@ -15,10 +15,11 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
             CreatePlaylistSongCommand request,
             CancellationToken cancellationToken)
         {
-            bool check = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId &&
-                            p.Id == request.PlaylistId)
-                .AnyAsync(cancellationToken);
+            var check = await _dbContext.Playlists
+                .AsNoTracking()  
+                .AnyAsync(p => p.UserId == request.UserId &&
+                               p.Id == request.PlaylistId,
+                               cancellationToken);
 
             if (!check)
             {
