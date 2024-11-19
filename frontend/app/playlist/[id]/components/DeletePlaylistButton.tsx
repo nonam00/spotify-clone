@@ -15,11 +15,14 @@ const DeletePlaylistButton: React.FC<DeletePlaylistButtonProps> = ({
   playlistId
 }) => {
   const router = useRouter();
-  const { onOpen, setAction, setDescription } = useConfirmModal();
+  const [onOpen, setAction, setDescription] = useConfirmModal(s => [
+    s.onOpen,
+    s.setAction,
+    s.setDescription
+  ]);
 
   const deletePlaylist = async () => {
     const response = await deletePlaylistRequest(playlistId);
-
     if (response.ok) {
       router.push("/");
       toast.success("The playlist was successfully deleted")

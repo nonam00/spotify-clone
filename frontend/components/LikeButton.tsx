@@ -11,36 +11,39 @@ import addLikedSong from "@/services/liked/addLikedSong";
 import deleteLikedSong from "@/services/liked/deleteLikedSong";
 
 interface LikeButtonProps {
-  songId: string
+  songId: string;
+  defaultValue?: boolean;
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({
-  songId
+  songId, 
+  defaultValue
 }) => {
-  const authModal = useAuthModal();
+  const openAuthModal = useAuthModal(s => s.onOpen);
   const { isAuth } = useUser();
-  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isLiked, setIsLiked] = useState<boolean>(defaultValue ?? false);
 
   useEffect(() => {
     if (!isAuth) {
       return;
     }
-
-    const fetchData = async () => {
-      const response = await checkLikedSong(songId);
-      if (response.ok) {
-        const data = await response.json();
-        if (data) {
-          setIsLiked(true);
+    if(!defaultValue) {
+      const fetchData = async () => {
+        const response = await checkLikedSong(songId);
+        if (response.ok) {
+          const data = await response.json();
+          if (data) {
+            setIsLiked(true);
+          }
         }
       }
+      fetchData();
     }
-    fetchData();
-  }, [songId, isAuth, isLiked]);
+  }, [songId, isAuth, isLiked, defaultValue]);
 
   const handleLike = async () => {
     if (!isAuth) {
-      return authModal.onOpen()
+      return openAuthModal();
     }
 
     if (isLiked) {

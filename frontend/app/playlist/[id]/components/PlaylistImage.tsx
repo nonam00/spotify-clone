@@ -13,7 +13,7 @@ interface PlaylistImageProps {
 const PlaylistImage: React.FC<PlaylistImageProps> = ({
   playlist
 }) => {
-  const { setPlaylist, onOpen } = usePlaylistModal();
+  const [setPlaylist, onOpen] = usePlaylistModal(s => [s.setPlaylist, s.onOpen]);
   const onClick = () => {
     setPlaylist(playlist);
     onOpen();

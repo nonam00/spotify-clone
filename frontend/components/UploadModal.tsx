@@ -16,7 +16,7 @@ import uploadFile from "@/services/files/uploadFile";
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
-  const uploadModal = useUploadModal();
+  const [onClose, isOpen] = useUploadModal(s => [s.onClose, s.isOpen]);
   const { isAuth } = useUser();
   const router = useRouter();
 
@@ -36,7 +36,7 @@ const UploadModal = () => {
   const onChange = (open: boolean) => {
     if (!open) {
       reset();
-      uploadModal.onClose();
+      onClose();
     }
   }
 
@@ -50,7 +50,7 @@ const UploadModal = () => {
 
       if (!isAuth) {
         toast.error("The user is not authorized!");
-        uploadModal.onClose();
+        onClose();
         return;
       }
 
@@ -104,7 +104,7 @@ const UploadModal = () => {
       setIsLoading(false);
       toast.success('Song created!');
       reset();
-      uploadModal.onClose();
+      onClose();
     } catch {
       toast.error('Something went wrong');
     } finally {
@@ -116,7 +116,7 @@ const UploadModal = () => {
     <Modal
       title="Add a song"
       description="Upload a file"
-      isOpen={uploadModal.isOpen}
+      isOpen={isOpen}
       onChange={onChange}
     >
       <form

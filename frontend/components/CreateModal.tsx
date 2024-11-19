@@ -17,9 +17,9 @@ import toast from "react-hot-toast";
 const CreateModal = () => {
   const router = useRouter();
   const { isAuth } = useUser();
-  const { onClose, isOpen } = useCreateModal();
-  const authModal = useAuthModal();
-  const uploadModal = useUploadModal();
+  const [onClose, isOpen] = useCreateModal(s => [s.onClose, s.isOpen]);
+  const openAuthModal = useAuthModal(s => s.onOpen);
+  const openUploadModal = useUploadModal(s => s.onOpen);
   
   useEffect(() => {
     if(isAuth) {
@@ -37,7 +37,7 @@ const CreateModal = () => {
   const onPlaylistClick = async () => {
     if (!isAuth) {
       onClose();
-      return authModal.onOpen();
+      return openAuthModal();
     }
 
     const response = await createPlaylist();
@@ -55,9 +55,9 @@ const CreateModal = () => {
   const onUploadClick = () => {
     onClose();
     if (!isAuth) {
-      return authModal.onOpen();
+      return openAuthModal();
     }
-    return uploadModal.onOpen();
+    return openUploadModal();
   }
 
   return (

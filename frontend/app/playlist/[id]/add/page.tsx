@@ -11,10 +11,10 @@ export const revalidate = 0;
 interface AddParams {
   params: {
     id: string
-  }
+  };
   searchParams: {
     searchString: string;
-  }
+  };
 }
 
 const Add = async ({

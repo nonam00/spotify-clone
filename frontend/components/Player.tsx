@@ -8,11 +8,11 @@ import PlayerContent from "./PlayerContent";
 import { API_URL } from "@/api/http";
 
 const Player = () => {
-  const player = usePlayer();
-  const { song } = useGetSongById(player.activeId);
+  const activeSongId = usePlayer(s => s.activeId);
+  const { song } = useGetSongById(activeSongId);
   //const songUrl = useLoadSongUrl(song!); 
 
-  if(!song || !player.activeId) {
+  if(!song || !activeSongId) {
     return null;
   }
 

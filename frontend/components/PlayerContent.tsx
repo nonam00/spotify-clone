@@ -25,7 +25,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   song,
   songUrl
 }) => {
-  const { setNextId, setPreviousId } = usePlayer();
+  const [setNextId, setPreviousId] = usePlayer(s => [
+    s.setNextId,
+    s.setPreviousId
+  ]);
   const [volume, setVolume] = useState<number>(1); // value for configurating volume from slider
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
@@ -76,7 +79,7 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
     }
   }, [sound]);
 
-  const handlePlay = () => !isPlaying? play() : pause();
+  const handlePlay = () => !isPlaying ? play() : pause();
 
   const toggleMute = () => volume === 0 ? setVolume(1) : setVolume(0);
 

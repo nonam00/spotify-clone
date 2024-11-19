@@ -26,7 +26,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 }) => {
   const router = useRouter();
   const { isLoading, isAuth } = useUser();
-
   const onPlay = useOnPlay(songs);
 
   useEffect(() => {

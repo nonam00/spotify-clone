@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({
   children,
   className
 }) => {
-  const authModal = useAuthModal();
+  const openAuthModal = useAuthModal(s => s.onOpen);
   const router = useRouter();
 
   const user = useUser();
@@ -149,7 +149,7 @@ const Header: React.FC<HeaderProps> = ({
             <>
               <div>
                 <Button
-                  onClick={authModal.onOpen}
+                  onClick={openAuthModal}
                   className="
                     bg-transparent
                     text-neutral-300
@@ -161,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({
               </div>
               <div>
                 <Button
-                  onClick={authModal.onOpen}
+                  onClick={openAuthModal}
                   className="
                     bg-white
                     px-6

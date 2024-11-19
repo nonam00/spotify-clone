@@ -2,7 +2,7 @@
 
 import {useRouter} from "next/navigation";
 import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import toast from "react-hot-toast";
 
 import {useUser} from "@/hooks/useUser";
@@ -18,26 +18,39 @@ import updatePlaylist from "@/services/playlists/updatePlaylist";
 
 const PlaylistModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
-  const playlistModal = usePlaylistModal();
+  const [onClose, isOpen] = usePlaylistModal(s => [s.onClose, s.isOpen]);
+  const [
+      id,
+      title,
+      description,
+      oldImage
+  ] = usePlaylistModal(s => [s.id, s.title, s.description, s.imagePath]);
   const { isAuth } = useUser();
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
-    reset
+    reset,
+    setValue
   } = useForm<FieldValues>({
     defaultValues: {
-      title: playlistModal.title,
-      description: playlistModal.description,
+      title: '',
+      description: '',
       image: null
     }
   });
 
+  useEffect(() => {
+    setValue("title", title);
+    setValue("description", description);
+    setValue("image", oldImage);
+  }, [description, oldImage, title, setValue]);
+
   const onChange = (open: boolean) => {
     if (!open) {
       reset();
-      playlistModal.onClose();
+      onClose();
     }
   }
 
@@ -49,7 +62,7 @@ const PlaylistModal = () => {
 
       if (!isAuth) {
         toast.error("The user is not authorized!");
-        playlistModal.onClose();
+        onClose();
         return;
       }
 
@@ -69,7 +82,7 @@ const PlaylistModal = () => {
         if (!imageUploadResponse.ok) {
           imageFilePath = await imageUploadResponse.json();
 
-          const imageDeleteResponse = await deleteFile(playlistModal.imagePath);
+          const imageDeleteResponse = await deleteFile(oldImage);
 
           if (!imageDeleteResponse.ok) {
             setIsLoading(false);
@@ -82,11 +95,11 @@ const PlaylistModal = () => {
       }
 
       if (imageFilePath === "") {
-        imageFilePath = playlistModal.imagePath;
+        imageFilePath = oldImage; // image is variable from store
       }
 
       const updateResponse = await updatePlaylist(
-        playlistModal.id,
+        id,
         values.title,
         values.description ?? null,
         imageFilePath
@@ -101,7 +114,7 @@ const PlaylistModal = () => {
       setIsLoading(false);
       toast.success('Playlist information saved!');
       reset();
-      playlistModal.onClose();
+      onClose();
     } catch {
       toast.error('Something went wrong');
     } finally {
@@ -113,7 +126,7 @@ const PlaylistModal = () => {
     <Modal
       title="Edit playlist information"
       description=""
-      isOpen={playlistModal.isOpen}
+      isOpen={isOpen}
       onChange={onChange}
     >
       <form

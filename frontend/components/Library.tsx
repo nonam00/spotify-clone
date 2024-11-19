@@ -20,16 +20,16 @@ interface LibraryProps {
 const Library: React.FC<LibraryProps> = ({
   playlists
 }) => {
-  const authModal = useAuthModal();
-  const createModal = useCreateModal();
+  const openAuthModal = useAuthModal(s => s.onOpen);
+  const openCreateModal = useCreateModal(s => s.onOpen);
   const { isAuth } = useUser();
   const router = useRouter();
 
   const onCreateClick = () => {
     if (!isAuth) {
-      return authModal.onOpen();
+      return openAuthModal();
     }
-    return createModal.onOpen();
+    return openCreateModal();
   };
 
   return (

@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
    playlists
 }) => {
   const pathName = usePathname();
-  const player = usePlayer();
+  const playerActiveSongId = usePlayer(s => s.activeId);
 
   const routes = useMemo(() => [
     {
@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       flex
       h-full
     `,
-      player.activeId && "h-[calc(100%-80px)]"
+      playerActiveSongId && "h-[calc(100%-80px)]"
   )}>
     <div className="
       hidden
