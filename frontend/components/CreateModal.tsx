@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useShallow } from "zustand/shallow";
 
 import { useUser } from "@/hooks/useUser";
 import useAuthModal from "@/hooks/useAuthModal";
@@ -17,16 +17,9 @@ import toast from "react-hot-toast";
 const CreateModal = () => {
   const router = useRouter();
   const { isAuth } = useUser();
-  const [onClose, isOpen] = useCreateModal(s => [s.onClose, s.isOpen]);
+  const [onClose, isOpen] = useCreateModal(useShallow(s => [s.onClose, s.isOpen]));
   const openAuthModal = useAuthModal(s => s.onOpen);
   const openUploadModal = useUploadModal(s => s.onOpen);
-  
-  useEffect(() => {
-    if(isAuth) {
-      router.refresh();
-      onClose();
-    }
-  }, [isAuth, onClose, router]);
 
   const onChange = (open: boolean) => {
     if(!open) {
@@ -35,17 +28,15 @@ const CreateModal = () => {
   }
 
   const onPlaylistClick = async () => {
+    onClose();
+
     if (!isAuth) {
-      onClose();
       return openAuthModal();
     }
 
     const response = await createPlaylist();
     
     if (response.ok) {
-      const id = await response.text();
-      onClose();
-      router.push(`/playlist/${id}`);
       router.refresh();
     } else {
       toast("Failed on creating playlist");

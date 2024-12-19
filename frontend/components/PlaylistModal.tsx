@@ -3,6 +3,7 @@
 import {useRouter} from "next/navigation";
 import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
+import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
 import {useUser} from "@/hooks/useUser";
@@ -18,13 +19,18 @@ import updatePlaylist from "@/services/playlists/updatePlaylist";
 
 const PlaylistModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
-  const [onClose, isOpen] = usePlaylistModal(s => [s.onClose, s.isOpen]);
+  const [onClose, isOpen] = usePlaylistModal(useShallow(s => [s.onClose, s.isOpen]));
   const [
       id,
       title,
       description,
       oldImage
-  ] = usePlaylistModal(s => [s.id, s.title, s.description, s.imagePath]);
+  ] = usePlaylistModal(useShallow(s => [
+    s.id,
+    s.title,
+    s.description,
+    s.imagePath
+  ]));
   const { isAuth } = useUser();
   const router = useRouter();
 

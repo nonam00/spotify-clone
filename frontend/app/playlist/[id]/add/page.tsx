@@ -8,19 +8,17 @@ import SearchInput from "@/components/SearchInput";
 
 export const revalidate = 0;
 
-interface AddParams {
-  params: {
-    id: string
-  };
-  searchParams: {
-    searchString: string;
-  };
+interface AddProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ searchString: string }>;
 }
 
 const Add = async ({
-  params: { id },
-  searchParams: { searchString },
-}: AddParams) => {
+  params,
+  searchParams
+}: AddProps) => {
+  const [{id}, {searchString}] = [await params, await searchParams];
+
   const playlist = await getPlaylistById(id);
   if (!playlist) {
     redirect("/");

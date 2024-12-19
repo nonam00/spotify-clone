@@ -8,26 +8,28 @@ import SearchInput, { SearchType } from "@/components/SearchInput";
 import SearchContent from "./components/SearchContent";
 
 interface SearchProps {
-  searchParams: {
+  searchParams: Promise<{
     searchString: string;
     type: SearchType;
-  }
+  }>
 }
 
 export const revalidate = 0;
 
 const Search = async ({searchParams}: SearchProps) => { 
+  const {searchString, type} = await searchParams;
+
   const handleSearch = async () => {
-    if(!searchParams.searchString) {
+    if(!searchString) {
       return getSongs();
     }
-    switch (searchParams.type) {
+    switch (type) {
       case "title":
-        return await getSongsByTitle(searchParams.searchString);
+        return await getSongsByTitle(searchString);
       case "author":
-        return await getSongsByAuthor(searchParams.searchString);
+        return await getSongsByAuthor(searchString);
       default:
-        return await getSongsByAny(searchParams.searchString);
+        return await getSongsByAny(searchString);
     }
   };
 

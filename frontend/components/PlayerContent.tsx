@@ -4,6 +4,7 @@ import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2"
 import { useEffect, useState } from "react";
+import { useShallow } from "zustand/shallow";
 import useSound from "use-sound";
 
 import { Song } from "@/types/types";
@@ -25,12 +26,12 @@ const PlayerContent: React.FC<PlayerContentProps> = ({
   song,
   songUrl
 }) => {
-  const [setNextId, setPreviousId, volume, setVolume] = usePlayer(s => [
+  const [setNextId, setPreviousId, volume, setVolume] = usePlayer(useShallow(s => [
     s.setNextId,
     s.setPreviousId,
     s.volume, // value for configurating volume from slider 
     s.setVolume,
-  ]); 
+  ])); 
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display

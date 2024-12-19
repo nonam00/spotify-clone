@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
 import useAuthModal from "@/hooks/useAuthModal";
@@ -13,7 +14,7 @@ import Button from "./Button";
 
 const AuthModal = () => {
   const router = useRouter();
-  const [ onClose, isOpen ] = useAuthModal(s => [s.onClose, s.isOpen]);
+  const [ onClose, isOpen ] = useAuthModal(useShallow(s => [s.onClose, s.isOpen]));
   const user = useUser();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");  

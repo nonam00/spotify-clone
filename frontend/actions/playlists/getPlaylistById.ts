@@ -7,11 +7,12 @@ import { API_URL } from "@/api/http";
 
 const getPlaylistById = async (id: string): Promise<Playlist | null> => {
   try {
-    const xsrf = cookies().get(".AspNetCore.Xsrf")?.value ?? "";
+    const cookieStore = await cookies();
+    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(`${API_URL}/playlists/${id}/`, {
       headers: {
         "x-xsrf-token": xsrf,
-        Cookie: cookies().toString()
+        Cookie: cookieStore.toString()
       },
       method: "GET",
       credentials: "include"

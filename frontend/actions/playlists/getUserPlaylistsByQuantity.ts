@@ -11,13 +11,14 @@ const getUserPlaylistsByQuantity = async (
     return await getUserPlaylists();
   }
   try {
-    const xsrf = cookies().get(".AspNetCore.Xsrf")?.value ?? "";
+    const cookieStore = await cookies()
+    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(
       `${API_URL}/playlists/certain/${quantity}`,
       {
         headers: {
           "x-xsrf-token": xsrf,
-          Cookie: cookies().toString(),
+          Cookie: cookieStore.toString(),
         },
         method: "GET",
         credentials: "include",

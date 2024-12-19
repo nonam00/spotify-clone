@@ -3,6 +3,7 @@
 import {useRouter} from "next/navigation";
 import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
 import {useState} from "react";
+import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
 import {useUser} from "@/hooks/useUser";
@@ -16,7 +17,7 @@ import uploadFile from "@/services/files/uploadFile";
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>();
-  const [onClose, isOpen] = useUploadModal(s => [s.onClose, s.isOpen]);
+  const [onClose, isOpen] = useUploadModal(useShallow(s => [s.onClose, s.isOpen]));
   const { isAuth } = useUser();
   const router = useRouter();
 

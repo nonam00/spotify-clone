@@ -10,18 +10,20 @@ import PlaylistImage from "./components/PlaylistImage";
 export const revalidate = 0;
 
 interface PlaylistProps {
-  params: {
-    id: string
-  }
+  params: Promise<{id: string}>
 }
 
 const Playlist = async ({
-  params: { id },
+  params,
 }: PlaylistProps) => {
+  const {id} = await params; 
+
   const playlist = await getPlaylistById(id);
-  if (!playlist) {
+
+  if (playlist === null) {
     redirect("/");
   }
+
   const songs = await getSongsByPlaylistId(playlist.id);
   
   return (

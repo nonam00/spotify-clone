@@ -10,13 +10,14 @@ const getLikedSongsForPlaylist = async (
   searchString: string
 ): Promise<Song[]> => {
   try {
-    const xsrf = cookies().get(".AspNetCore.Xsrf")?.value ?? "";
+    const cookieStore = await cookies();
+    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(
       `${API_URL}/playlists/${playlistId}/liked/${searchString}`,
       {
         headers: {
           "x-xsrf-token": xsrf,
-          Cookie: cookies().toString()
+          Cookie: cookieStore.toString()
         },
         method: "GET",
         credentials: "include"

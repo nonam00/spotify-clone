@@ -7,10 +7,11 @@ import { Song } from "@/types/types";
 
 const getLikedSongs = async (): Promise<Song[]> => {
   try {
-    const xsrf = cookies().get(".AspNetCore.Xsrf")?.value ?? "";
+    const cookieStore = await cookies();
+    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(`${API_URL}/users/songs`, {
       headers: {
-        Cookie: cookies().toString(),
+        Cookie: cookieStore.toString(),
         "x-xsrf-token": xsrf,
       },
       method: "GET",
