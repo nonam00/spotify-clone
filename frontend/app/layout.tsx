@@ -8,6 +8,7 @@ import Player from "@/components/Player";
 import UserProvider from "@/providers/UserProvider";
 import ModalProvider from "@/providers/ModalProvider";
 import ToasterProvider from "@/providers/ToasterProvider";
+
 import getUserPlaylists from "@/actions/playlists/getUserPlaylists";
 
 const font = Figtree({ subsets: ["latin"] });

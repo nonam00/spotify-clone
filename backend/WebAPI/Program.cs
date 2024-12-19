@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -85,9 +84,6 @@ builder.Services.AddAuthentication(options =>
         options.SaveToken = true;
     });
 
-// Configurating XSRF protection
-//builder.Services.AddAntiforgery(options => options.HeaderName = "X-Xsrf-Token");
-
 // Not only controllers because of XSRF protection working principle
 builder.Services.AddControllersWithViews(); 
 
@@ -140,15 +136,8 @@ app.UseCookiePolicy(new CookiePolicyOptions
     Secure = CookieSecurePolicy.Always
 });
 
-// Adding authentication middleware
-app.UseAuthenticationMiddleware();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Adding XSRF protection
-//var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
-//app.UseXsrfProtection(antiforgery);
 
 app.MapControllers();
 

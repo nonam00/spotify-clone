@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react"
 import { Song } from "@/types/types";
 import { API_URL } from "@/api/http";
 
-const useGetSongById = (id?: string) => {
+const useGetSongById = (id: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [song, setSong] = useState<Song | undefined>(undefined);
 
