@@ -7,10 +7,10 @@ namespace Application.Playlists.Queries
 {
     public class PlaylistVm : IMapWith<Playlist>  
     {
-        public Guid Id { get; set; }
-        public string Title { get; set; } = null!;
-        public string? Description { get; set; }
-        public string? ImagePath { get; set; }
+        public Guid Id { get; init; }
+        public string Title { get; init; } = null!;
+        public string? Description { get; init; }
+        public string? ImagePath { get; init; }
         
         public void Mapping(Profile profile)
         {

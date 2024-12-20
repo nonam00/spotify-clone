@@ -6,8 +6,8 @@ namespace Application.Playlists.Commands.UpdatePlaylist
     {
         public Guid UserId { get; set; }
         public Guid PlaylistId { get; set; }
-        public string Title { get; set; } = null!;
-        public string? Description { get; set; }
-        public string? ImagePath { get; set; } 
+        public string Title { get; init; } = null!;
+        public string? Description { get; init; }
+        public string? ImagePath { get; init; } 
     }
 }

@@ -26,10 +26,8 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
-    [ApiVersionNeutral]
     [Produces("application/json")]
-    [Route("{version:apiVersion}/playlists")]
+    [Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
     public class PlaylistsController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;

@@ -16,8 +16,8 @@ namespace Application.Users.Queries.GetUserInfo
         {
             var user = await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
-                ?? throw new Exception("Nonvalid current user id");
+                .SingleOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
+                ?? throw new Exception("Invalid current user id");
 
             var userVm = _mapper.Map<UserInfo>(user);
 

@@ -17,6 +17,7 @@ namespace Infrastructure
             services.AddSingleton<IS3Provider, S3Provider>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            
             return services;
         }
     }

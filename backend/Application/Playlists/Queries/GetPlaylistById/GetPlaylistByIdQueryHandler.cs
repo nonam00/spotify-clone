@@ -19,7 +19,7 @@ namespace Application.Playlists.Queries.GetPlaylistById
             var playlistVm = await _dbContext.Playlists
                 .AsNoTracking()
                 .ProjectTo<PlaylistVm>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+                .SingleOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
                 ?? throw new Exception("Playlist this such ID doesn't exist");
 
             return playlistVm;

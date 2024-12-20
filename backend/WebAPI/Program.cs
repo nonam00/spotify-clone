@@ -75,7 +75,11 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["token"];
+                context.Request.Cookies.TryGetValue("token", out var token);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
                 return Task.CompletedTask;  
             }
         };
@@ -94,6 +98,9 @@ builder.Services.AddApiVersioning()
                     options.GroupNameFormat = "'v'VVV";
                 });
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 // Adding Swagger for testing http requests
 if (builder.Environment.IsDevelopment())
 {
@@ -107,6 +114,8 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Adding Swagger for testing http requests
 if (app.Environment.IsDevelopment())
@@ -125,7 +134,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCustomExceptionHandler();
 app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors("MyPolicy");

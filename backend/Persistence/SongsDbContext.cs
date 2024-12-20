@@ -6,7 +6,7 @@ using Persistence.EntityTypeConfigurations;
 
 namespace Persistence
 {
-    public class SongsDbContext : DbContext, ISongsDbContext
+    public class SongsDbContext(DbContextOptions<SongsDbContext> options) : DbContext(options), ISongsDbContext
     {
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Song> Songs { get; set; } = null!;
@@ -14,9 +14,6 @@ namespace Persistence
         public DbSet<Playlist> Playlists { get; set; } = null!;
         public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
 
-        public SongsDbContext(DbContextOptions<SongsDbContext> options)
-            : base(options) { }
-        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfiguration(new SongConfiguration());

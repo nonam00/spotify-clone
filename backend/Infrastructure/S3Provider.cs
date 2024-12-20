@@ -41,7 +41,7 @@ namespace Infrastructure
             return response.HttpStatusCode;
         }
          
-        public async Task<HttpStatusCode> DeleleFile(string key)
+        public async Task<HttpStatusCode> DeleteFile(string key)
         {
             var deleteObjectRequest = new DeleteObjectRequest
             {

@@ -22,14 +22,14 @@ namespace Application.Users.Queries.Login
         {
             var user = await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
-                ?? throw new LoginException("Wrong email or password");
+                .SingleOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
+                ?? throw new LoginException("Invalid email or password. Please try again.");
 
             var check = _passwordHasher.Verify(request.Password, user.PasswordHash);
 
             if (!check)
             {
-                throw new LoginException("Wrong email or password");
+                throw new LoginException("Invalid email or password. Please try again.");
             }
 
             var token = _jwtProvider.GenerateToken(user);
