@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Form from "next/form";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
-import toast from "react-hot-toast";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
@@ -12,47 +12,42 @@ import Modal from "./Modal";
 import Input from "./Input";
 import Button from "./Button";
 
+import login from "@/services/auth/login";
+import register from "@/services/auth/register";
+
+type SubmitType = "login" | "register";
+
+const actions = {
+  "login": login,
+  "register": register
+};
+
 const AuthModal = () => {
   const router = useRouter();
-  const [ onClose, isOpen ] = useAuthModal(useShallow(s => [s.onClose, s.isOpen]));
-  const user = useUser();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");  
+  const [onClose, isOpen] = useAuthModal(useShallow(s => [s.onClose, s.isOpen]));
+  const { isAuth, authorize } = useUser();
+  const [submitType, setSubmitType] = useState<SubmitType>();
 
   useEffect(() => {
-    if(user.isAuth) {
+    if (isAuth) {
       router.refresh();
       onClose();
     }
-  }, [user.isAuth, router, onClose]);
-
+  }, [isAuth, router, onClose]);
 
   const onChange = (open: boolean) => {
-    if(!open) {
+    if (!open) {
       onClose();
     }
   }
 
-  const upload = async (func: any) => {
-    if (!email) {
-      toast.error("The email field must be filled in");
-      return;
+  const onSubmit = async (form: FormData) => {
+    await authorize(actions[submitType!], form);
+    if (isAuth) {
+      onClose();
+      router.refresh();
     }
-    if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      toast.error("Non valid email");
-      return;
-    }
-    if (!password) {
-      toast.error("The password field must be filled in");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("The password length must be greater than 8");
-      return;
-    }
-    await func(email, password);
   }
-  
   return (
     <Modal
       title="Welcome back"
@@ -60,47 +55,54 @@ const AuthModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <div className="
-        flex
-        flex-col
-        items-center
-        justify-center
-      ">
+      <Form
+        action={onSubmit}
+        className="
+          flex
+          flex-col
+          items-center
+          justify-center
+        "
+      >
         <Input
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
+          name="Email"
           type="email"
           placeholder="Email"
           className="my-3 py-2 text-base"
+          required
         />
         <Input
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
+          name="Password"
           type="password"
           placeholder="Password"
           className="text-base py-2"
+          required
+          minLength={8}
         />
         <Button
-          onClick={async () => await upload(user.login)}
+          onClick={() => setSubmitType("login")}
           className="mt-10 mb-3"
+          type="submit"
         >
           Login
         </Button>
         <Button
-          onClick={async () => await upload(user.register)}
+          onClick={() => setSubmitType("register")}
           className="
             my-2
             hover:bg-neutral-700
             bg-transparent
             text-neutral-300
             font-medium
-          " 
+          "
+          type="submit"
         >
           Register
         </Button>
-      </div>
+      </Form>
     </Modal>
   );
 };
 
 export default AuthModal;
+

@@ -1,14 +1,13 @@
-import {API_URL} from "@/api/http";
+import { API_URL } from "@/api/http";
 
-const loginRequest = async (email: string, password: string) => {
-  return await fetch(`${API_URL}/users/login/`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+const login = async (form: FormData) => {
+  const response = await fetch(`${API_URL}/users/login/`, {
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({email: email, password: password}),
+    body: form
   });
+
+  return response;
 }
 
-export default loginRequest;
+export default login;
