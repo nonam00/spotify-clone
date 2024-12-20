@@ -7,8 +7,8 @@ import { AiOutlineCloseCircle } from "react-icons/ai";
 import removeSongFromPlaylist from "@/services/playlists/removeSongFromPlaylist";
 
 interface RemoveButtonProps {
-  playlistId: string
-  songId: string
+  playlistId: string;
+  songId: string;
 }
 
 const RemoveButton: React.FC<RemoveButtonProps> = ({

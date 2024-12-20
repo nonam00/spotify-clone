@@ -1,24 +1,24 @@
-import { cookies } from "next/headers";
+import {cookies} from "next/headers";
 
-import { API_URL } from "@/api/http";
-import { Playlist } from "@/types/types";
+import {API_URL} from "@/api/http";
+import {Playlist} from "@/types/types";
 import getUserPlaylists from "./getUserPlaylists";
 
 const getUserPlaylistsByQuantity = async (
   quantity: number
 ): Promise<Playlist[]> => {
   if (quantity <= 0) {
-    const allPlaylists = await getUserPlaylists();
-    return allPlaylists;
+    return await getUserPlaylists();
   }
   try {
-    const xsrf = cookies().get(".AspNetCore.Xsrf")?.value ?? "";
+    const cookieStore = await cookies()
+    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(
       `${API_URL}/playlists/certain/${quantity}`,
       {
         headers: {
           "x-xsrf-token": xsrf,
-          Cookie: cookies().toString(),
+          Cookie: cookieStore.toString(),
         },
         method: "GET",
         credentials: "include",

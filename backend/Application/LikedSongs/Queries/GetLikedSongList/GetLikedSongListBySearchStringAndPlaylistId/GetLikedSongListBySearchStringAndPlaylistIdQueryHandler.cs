@@ -22,9 +22,8 @@ namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySear
                 .AsNoTracking()
                 .Where(l => l.UserId == request.UserId)
                 .Where(l => !_dbContext.PlaylistSongs
-                    .Where(ps => ps.PlaylistId == request.PlaylistId &&
-                                 ps.SongId == l.SongId)
-                    .Any())
+                    .Any(ps => ps.PlaylistId == request.PlaylistId &&
+                               ps.SongId == l.SongId))
                 .Where(l => EF.Functions.TrigramsSimilarity(l.Song.Title, request.SearchString) > 0.1 ||
                             EF.Functions.TrigramsSimilarity(l.Song.Author, request.SearchString) > 0.1)
                 .OrderBy(l => EF.Functions.TrigramsSimilarityDistance(l.Song.Title, request.SearchString))
@@ -35,7 +34,6 @@ namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySear
                 .ToListAsync(cancellationToken);
         
             return new LikedSongListVm { LikedSongs = liked };
- 
         }
     }
 }

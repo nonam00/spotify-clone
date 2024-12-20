@@ -1,3 +1,4 @@
+// playlist icon, using this component in home page
 "use client";
 
 import Image from "next/image";

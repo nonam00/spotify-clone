@@ -5,11 +5,12 @@ import Image from "next/image";
 import { Song } from "@/types/types";
 import PlayButton from "@/components/PlayButton";
 import { API_URL } from "@/api/http";
+import React from "react";
 
 interface SongItemProps {
   data: Song;
   onClick: (id: string) => void
-};
+}
 
 const SongItem: React.FC<SongItemProps> = ({
   data,

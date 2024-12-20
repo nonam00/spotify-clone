@@ -4,8 +4,8 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
 {
     public class CreatePlaylistSongCommand : IRequest<string>
     {
-        public Guid UserId { get; set; }
-        public Guid PlaylistId { get; set; }
-        public Guid SongId { get; set; }
+        public Guid UserId { get; init; }
+        public Guid PlaylistId { get; init; }
+        public Guid SongId { get; init; }
     }
 }

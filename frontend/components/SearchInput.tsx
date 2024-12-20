@@ -15,6 +15,8 @@ interface SearchInputProps {
   types: boolean
 }
 
+export type SearchType = "all" | "title" | "author";
+
 const SearchInput: React.FC<SearchInputProps> = ({
   pageUrl,
   types
@@ -22,8 +24,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const router = useRouter();
   const [value, setValue] = useState<string>("");
   const debouncedValue = useDebounce<string>(value, 500);
-  const [searchType, setSearchType] = useState(0);
-  const debouncedType = useDebounce<number>(searchType, 200);
+  const [searchType, setSearchType] = useState<SearchType>("all");
+  const debouncedType = useDebounce<SearchType>(searchType, 200);
 
   const nonActiveStyle = "bg-neutral-700 text-white"
   const activeStyle = "bg-white text-black";
@@ -59,7 +61,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         "
       >
         <button
-          onClick={() => {setSearchType(0)}}
+          onClick={() => {setSearchType("all")}}
           className={twMerge(`
             rounded-full
             py-1.5
@@ -72,13 +74,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
             hover:opacity-75
             transition
           `, 
-            searchType === 0? activeStyle : nonActiveStyle    
+            searchType === "all"? activeStyle : nonActiveStyle    
           )}
         >
           All
         </button>
         <button
-          onClick={() => {setSearchType(1)}}
+          onClick={() => {setSearchType("title")}}
           className={twMerge(`
             rounded-full
             py-1.5
@@ -91,13 +93,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
             hover:opacity-75
             transition
           `, 
-            searchType === 1? activeStyle : nonActiveStyle    
+            searchType === "title"? activeStyle : nonActiveStyle    
           )} 
         >
           By Title
         </button>
         <button
-          onClick={() => {setSearchType(2)}}
+          onClick={() => {setSearchType("author")}}
           className={twMerge(`
             rounded-full
             py-1.5
@@ -110,7 +112,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             hover:opacity-75
             transition
           `, 
-            searchType === 2? activeStyle : nonActiveStyle    
+            searchType === "author"? activeStyle : nonActiveStyle    
           )} 
         >
           By Author

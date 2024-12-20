@@ -9,7 +9,7 @@ namespace Infrastructure
 {
     public class S3Provider : IS3Provider
     {
-        private readonly IAmazonS3 _s3;
+        private readonly AmazonS3Client _s3;
         private readonly AwsOptions _options;
 
         public S3Provider(IOptions<AwsOptions> options)
@@ -41,8 +41,7 @@ namespace Infrastructure
             return response.HttpStatusCode;
         }
          
-        // TODO: Fix file deletion
-        public async Task<HttpStatusCode> DeleleFile(string key)
+        public async Task<HttpStatusCode> DeleteFile(string key)
         {
             var deleteObjectRequest = new DeleteObjectRequest
             {

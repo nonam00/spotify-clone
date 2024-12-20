@@ -2,17 +2,15 @@
 
 import usePlayer from "@/hooks/usePlayer";
 import useGetSongById from "@/hooks/useGetSongById";
-import useLoadSongUrl from "@/hooks/useLoadSongUrl";
 
 import PlayerContent from "./PlayerContent";
 import { API_URL } from "@/api/http";
 
 const Player = () => {
-  const player = usePlayer();
-  const { song } = useGetSongById(player.activeId);
-  //const songUrl = useLoadSongUrl(song!); 
+  const activeSongId = usePlayer(s => s.activeId);
+  const { song } = useGetSongById(activeSongId!);
 
-  if(!song || !player.activeId) {
+  if(!song || !activeSongId) {
     return null;
   }
 

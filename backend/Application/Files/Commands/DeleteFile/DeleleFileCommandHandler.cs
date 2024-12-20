@@ -13,7 +13,7 @@ namespace Application.Files.Commands.DeleteFile
         public async Task Handle(DeleteFileCommand request,
             CancellationToken cancellationToken)
         {
-            var responseCode = await _s3.DeleleFile(request.FileName);
+            var responseCode = await _s3.DeleteFile(request.FileName);
 
             if (responseCode != HttpStatusCode.NoContent)
             {

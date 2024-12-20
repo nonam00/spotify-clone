@@ -22,7 +22,7 @@ namespace Application.Songs.Queries.GetSongList.GetAllSongs
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
             
-            return new SongListVm() { Songs = songs };
+            return new SongListVm { Songs = songs };
         }
     }
 }

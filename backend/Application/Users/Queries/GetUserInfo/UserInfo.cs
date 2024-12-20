@@ -7,10 +7,10 @@ namespace Application.Users.Queries.GetUserInfo
 {
     public class UserInfo : IMapWith<User>
     {
-        public string Email { get; set; } = null!;
-        public string? FullName { get; set; }
-        public string? AvatarUrl { get; set; }
-        public string? PaymentMethod { get; set; }
+        public string Email { get; init; } = null!;
+        public string? FullName { get; init; }
+        public string? AvatarUrl { get; init; }
+        public string? PaymentMethod { get; init; }
 
         public void Mapping(Profile profile)
         {

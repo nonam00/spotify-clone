@@ -8,7 +8,7 @@ import { Song } from "@/types/types";
 import addSongToPlaylist from "@/services/playlists/addSongToPlaylist";
 
 interface AddContentProps {
-  playlistId: string,
+  playlistId: string;
   songs: Song[];
 }
 

@@ -18,7 +18,7 @@ namespace Application.Songs.Queries.GetSongById
             var song = await _dbContext.Songs
                 .AsNoTracking()
                 .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(s => s.Id == request.SongId, cancellationToken)
+                .SingleOrDefaultAsync(s => s.Id == request.SongId, cancellationToken)
                 ?? throw new Exception("Song not found");
 
             return song;

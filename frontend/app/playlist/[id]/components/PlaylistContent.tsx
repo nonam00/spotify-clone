@@ -16,7 +16,7 @@ import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
 
 interface PlaylistContentProps {
-  id: string,
+  id: string;
   songs: Song[];
 }
 
@@ -26,7 +26,6 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
 }) => {
   const router = useRouter();
   const { isLoading, isAuth } = useUser();
-
   const onPlay = useOnPlay(songs);
 
   useEffect(() => {

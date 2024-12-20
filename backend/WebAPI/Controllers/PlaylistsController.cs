@@ -26,10 +26,8 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
-    [Authorize]
-    [ApiVersionNeutral]
     [Produces("application/json")]
-    [Route("{version:apiVersion}/playlists")]
+    [Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
     public class PlaylistsController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;
@@ -48,7 +46,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns PlaylistVm</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpGet("{playlistId}")]
+        [HttpGet("{playlistId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PlaylistVm>> GetPlaylist(Guid playlistId)
@@ -101,7 +99,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns PlaylistListVm</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [HttpGet("certain/{count}")]
+        [HttpGet("certain/{count:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<PlaylistListVm>> GetPlaylistListByCount(int count)
@@ -161,7 +159,7 @@ namespace WebAPI.Controllers
         /// <param name="updatePlaylistDto">object with new info</param>
         /// <response code="204">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpPut("{playlistId}")]
+        [HttpPut("{playlistId:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> UpdatePlaylist(Guid playlistId,
@@ -188,7 +186,7 @@ namespace WebAPI.Controllers
         /// </param>
         /// <response code="204">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpDelete("{playlistId}")]
+        [HttpDelete("{playlistId:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeletePlaylist(Guid playlistId)
@@ -217,7 +215,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns SongListVm</returns>
         /// <response code="204">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpGet("{playlistId}/songs")]
+        [HttpGet("{playlistId:guid}/songs")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<SongListVm>> GetPlaylistSongs(Guid playlistId)
@@ -248,7 +246,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns db key of created relation</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpPost("{playlistId}/songs/{songId}")]
+        [HttpPost("{playlistId:guid}/songs/{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<string>> CreatePlaylistSong(Guid playlistId, Guid songId)
@@ -257,7 +255,7 @@ namespace WebAPI.Controllers
             {
                 UserId = UserId,
                 PlaylistId = playlistId,
-                SongId = songId,
+                SongId = songId
             };
             var ids = await Mediator.Send(command);
             return ids;
@@ -280,7 +278,7 @@ namespace WebAPI.Controllers
         /// </param>
         /// <response code="204">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpDelete("{playlistId}/songs/{songId}")]
+        [HttpDelete("{playlistId:guid}/songs/{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeletePlaylistSong(Guid playlistId, Guid songId)
@@ -309,7 +307,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns LikedSongListVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpGet("{playlistId}/liked")]
+        [HttpGet("{playlistId:guid}/liked")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongs(Guid playlistId)
@@ -340,7 +338,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns LikedSongListVm></returns>
         /// <response code="200">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [HttpGet("{playlistId}/liked/{searchString}")]
+        [HttpGet("{playlistId:guid}/liked/{searchString}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongsBySearchString(

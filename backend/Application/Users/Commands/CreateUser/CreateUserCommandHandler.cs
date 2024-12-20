@@ -22,10 +22,9 @@ namespace Application.Users.Commands.CreateUser
         public async Task<string> Handle(CreateUserCommand request,
             CancellationToken cancellationToken)
         {
-            if(await _dbContext.Users
+            if (await _dbContext.Users
                 .AsNoTracking()
-                .Where(u => u.Email == request.Email)
-                .AnyAsync(cancellationToken))
+                .AnyAsync(u => u.Email == request.Email, cancellationToken))
             {
                 throw new LoginException("User with this email already exits");
             }
@@ -39,7 +38,7 @@ namespace Application.Users.Commands.CreateUser
                 PasswordHash = hashedPassword
             };
 
-            await _dbContext.Users.AddAsync(user);
+            await _dbContext.Users.AddAsync(user, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             var token = _jwtProvider.GenerateToken(user);

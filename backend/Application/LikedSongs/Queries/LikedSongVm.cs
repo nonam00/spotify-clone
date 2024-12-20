@@ -7,11 +7,11 @@ namespace Application.LikedSongs.Queries
 {
     public class LikedSongVm : IMapWith<LikedSong>
     {
-        public Guid Id { get; set; }
-        public string Title { get; set; } = null!;
-        public string Author { get; set; } = null!;
-        public string SongPath { get; set; } = null!;
-        public string ImagePath { get; set; } = null!;
+        public Guid Id { get; init; }
+        public string Title { get; init; } = null!;
+        public string Author { get; init; } = null!;
+        public string SongPath { get; init; } = null!;
+        public string ImagePath { get; init; } = null!;
 
         public void Mapping(Profile profile)
         {

@@ -15,10 +15,11 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
             CreatePlaylistSongCommand request,
             CancellationToken cancellationToken)
         {
-            bool check = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId &&
-                            p.Id == request.PlaylistId)
-                .AnyAsync(cancellationToken);
+            var check = await _dbContext.Playlists
+                .AsNoTracking()  
+                .AnyAsync(p => p.UserId == request.UserId &&
+                               p.Id == request.PlaylistId,
+                               cancellationToken);
 
             if (!check)
             {
@@ -32,16 +33,18 @@ namespace Application.PlaylistSongs.Commands.CreatePlaylistSong
             };
 
             await _dbContext.PlaylistSongs.AddAsync(ps, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
 
             int updatedRows = await _dbContext.Playlists
               .Where(p => p.Id == request.PlaylistId)
-              .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow));
+              .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow),
+                  cancellationToken);
 
             if (updatedRows != 1)
             {
                 throw new Exception("Playlist with such ID doesn't exist");
             }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return ps.PlaylistId.ToString() + ps.SongId.ToString();
         }

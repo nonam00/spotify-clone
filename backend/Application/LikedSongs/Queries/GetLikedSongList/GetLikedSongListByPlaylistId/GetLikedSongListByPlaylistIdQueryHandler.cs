@@ -22,9 +22,8 @@ namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlay
                 .AsNoTracking()
                 .Where(l => l.UserId == request.UserId)
                 .Where(l => !_dbContext.PlaylistSongs
-                    .Where(ps => ps.PlaylistId == request.PlaylistId &&
-                                 ps.SongId == l.SongId)
-                    .Any())
+                    .Any(ps => ps.PlaylistId == request.PlaylistId &&
+                               ps.SongId == l.SongId))
                 .OrderByDescending(l => l.CreatedAt)
                 .ProjectTo<LikedSongVm>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);

@@ -17,9 +17,8 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
-    [ApiVersionNeutral]
     [Produces("application/json")]
-    [Route("{version:apiVersion}/users")]
+    [Route("{version:apiVersion}/users"), ApiVersionNeutral]
     public class UsersController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;
@@ -42,7 +41,7 @@ namespace WebAPI.Controllers
         /// <response code="201">Success</response>
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Register(RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromForm]RegisterDto registerDto)
         {
             var command = _mapper.Map<CreateUserCommand>(registerDto);
             var accessToken = await Mediator.Send(command);
@@ -75,7 +74,7 @@ namespace WebAPI.Controllers
         /// <response code="200">Success</response>
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromForm]LoginDto loginDto)
         {
             var query = _mapper.Map<LoginQuery>(loginDto);
             var accessToken = await Mediator.Send(query);
@@ -101,8 +100,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="205">Success</response>
         /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-        [Authorize]
-        [HttpPost("logout")]
+        [HttpPost("logout"), Authorize]
         [ProducesResponseType(StatusCodes.Status205ResetContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout()
@@ -123,13 +121,12 @@ namespace WebAPI.Controllers
         /// <returns>Returns new user ID</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-        [Authorize]
-        [HttpGet("info")]
+        [HttpGet("info"), Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<UserInfo>> GetUserInfo()
         {
-            var query = new GetUserInfoQuery()
+            var query = new GetUserInfoQuery
             {
                 UserId = UserId
             };
@@ -150,8 +147,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns LikedSongListVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpGet("songs")]
+        [HttpGet("songs"), Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
@@ -174,17 +170,16 @@ namespace WebAPI.Controllers
         ///     GET /songs/{songId}
         /// 
         /// </remarks>
-        /// <param name="songId">ID of tiked song</param>
+        /// <param name="songId">ID of liked song</param>
         /// <returns>Returns LikedSongVm</returns>
         /// <response code="200">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpGet("songs/{songId}")]
+        [HttpGet("songs/{songId:guid}"), Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetLikedSong(Guid songId)
         {
-            var query = new CheckLikedSongQuery()
+            var query = new CheckLikedSongQuery
             {
                 UserId = UserId,
                 SongId = songId
@@ -207,8 +202,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns string</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpPost("songs/{songId}")]
+        [HttpPost("songs/{songId:guid}"), Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<string>> CreateLiked(Guid songId)
@@ -237,8 +231,7 @@ namespace WebAPI.Controllers
         /// </param>
         /// <response code="204">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpDelete("songs/{songId}")]
+        [HttpDelete("songs/{songId:guid}"), Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteLiked(Guid songId)

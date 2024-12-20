@@ -4,30 +4,32 @@ import getSongsByAuthor from "@/actions/songs/search/getSongsByAuthor";
 import getSongs from "@/actions/songs/getSongs";
 
 import Header from "@/components/Header";
-import SearchInput from "@/components/SearchInput";
+import SearchInput, { SearchType } from "@/components/SearchInput";
 import SearchContent from "./components/SearchContent";
 
 interface SearchProps {
-  searchParams: {
+  searchParams: Promise<{
     searchString: string;
-    type: string;
-  }
-};
+    type: SearchType;
+  }>
+}
 
 export const revalidate = 0;
 
 const Search = async ({searchParams}: SearchProps) => { 
+  const {searchString, type} = await searchParams;
+
   const handleSearch = async () => {
-    if(!searchParams.searchString) {
+    if(!searchString) {
       return getSongs();
     }
-    switch (searchParams.type) {
-      case '1':
-        return await getSongsByTitle(searchParams.searchString);
-      case '2':
-        return await getSongsByAuthor(searchParams.searchString);
+    switch (type) {
+      case "title":
+        return await getSongsByTitle(searchString);
+      case "author":
+        return await getSongsByAuthor(searchString);
       default:
-        return await getSongsByAny(searchParams.searchString);
+        return await getSongsByAny(searchString);
     }
   };
 

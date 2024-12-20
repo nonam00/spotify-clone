@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Playlist } from "@/types/types";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 import { API_URL } from "@/api/http";
+import { useShallow } from "zustand/shallow";
 
 interface PlaylistImageProps {
   playlist: Playlist
@@ -13,7 +14,7 @@ interface PlaylistImageProps {
 const PlaylistImage: React.FC<PlaylistImageProps> = ({
   playlist
 }) => {
-  const { setPlaylist, onOpen } = usePlaylistModal();
+  const [setPlaylist, onOpen] = usePlaylistModal(useShallow(s => [s.setPlaylist, s.onOpen]));
   const onClick = () => {
     setPlaylist(playlist);
     onOpen();

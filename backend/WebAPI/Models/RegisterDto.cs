@@ -8,8 +8,7 @@ namespace WebAPI.Models
 {
     public class RegisterDto : IMapWith<CreateUserCommand>
     {
-        [Required]
-        [EmailAddress]
+        [Required, EmailAddress]
         public string Email { get; set; } = null!;
         [Required]
         public string Password { get; set; } = null!;

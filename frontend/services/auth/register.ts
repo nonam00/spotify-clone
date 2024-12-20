@@ -1,16 +1,12 @@
 import { API_URL } from "@/api/http";
 
-const registerRequest = async (email: string, password: string) => {
+const register = async (form: FormData) => {
   const response = await fetch(`${API_URL}/users/register/`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({ email: email, password: password }),
+    body: form
   });
-
   return response;
 }
 
-export default registerRequest;
+export default register;

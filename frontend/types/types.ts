@@ -7,15 +7,22 @@ export interface Song {
 }
 
 export interface UserDetails {
-  email: string,
-  fullName: string | null,
-  avatarUrl: string | null,
-  paymentMethod: string | null
-};
+  email: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  paymentMethod: string | null;
+}
 
 export interface Playlist {
-  id: string,
-  title: string,
-  description?: string,
-  imagePath?: string
-};
+  id: string;
+  title: string;
+  description?: string;
+  imagePath?: string;
+}
+
+// for modal components
+export interface ModalStore {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}

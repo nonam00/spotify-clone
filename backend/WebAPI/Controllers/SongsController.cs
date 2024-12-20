@@ -17,9 +17,8 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
-    [ApiVersionNeutral]
     [Produces("application/json")]
-    [Route("{version:apiVersion}/songs")]
+    [Route("{version:apiVersion}/songs"), ApiVersionNeutral]
     public class SongsController(IMapper mapper) : BaseController
     {
         private readonly IMapper _mapper = mapper;
@@ -76,7 +75,7 @@ namespace WebAPI.Controllers
         /// <param name="songId">Song ID</param>
         /// <returns>Returns SongVm</returns>
         /// <response code="200">Success</response>
-        [HttpGet("{songId}")]
+        [HttpGet("{songId:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<SongVm>> GetSongById(Guid songId)
         {
@@ -187,8 +186,7 @@ namespace WebAPI.Controllers
         /// <returns>Returns created song ID</returns>
         /// <response code="201">Success</response>
         /// <response code="401">If the user is unauthorized</response>
-        [Authorize]
-        [HttpPost]
+        [HttpPost, Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto)

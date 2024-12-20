@@ -4,8 +4,8 @@ namespace Application.PlaylistSongs.Commands.DeletePlaylistSong
 {
     public class DeletePlaylistSongCommand : IRequest
     {
-        public Guid UserId { get; set; }
-        public Guid PlaylistId { get; set; }
-        public Guid SongId { get; set; }
+        public Guid UserId { get; init; }
+        public Guid PlaylistId { get; init; }
+        public Guid SongId { get; init; }
     }
 }

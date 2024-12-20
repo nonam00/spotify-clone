@@ -13,7 +13,7 @@ namespace Application.Files.Commands.UploadFile
         public async Task<string> Handle(UploadFileCommand request,
             CancellationToken cancellationToken)
         {
-            string fileName = Guid.NewGuid().ToString();
+            var fileName = Guid.NewGuid().ToString();
             var responseCode = await _s3.UploadFile
             (
                 request.FileStream,

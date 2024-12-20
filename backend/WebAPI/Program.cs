@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -60,7 +59,7 @@ builder.Services.AddAuthentication(options =>
         // Getting options for JWT crypt from configuration (user secret)
         var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
 
-        options.TokenValidationParameters = new()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             // TODO: replace with real issuer and real audience 
             ValidateIssuer = false,
@@ -76,7 +75,11 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["token"];
+                context.Request.Cookies.TryGetValue("token", out var token);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
                 return Task.CompletedTask;  
             }
         };
@@ -84,9 +87,6 @@ builder.Services.AddAuthentication(options =>
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
     });
-
-// Configurating XSRF protection
-//builder.Services.AddAntiforgery(options => options.HeaderName = "X-Xsrf-Token");
 
 // Not only controllers because of XSRF protection working principle
 builder.Services.AddControllersWithViews(); 
@@ -97,6 +97,9 @@ builder.Services.AddApiVersioning()
                 {
                     options.GroupNameFormat = "'v'VVV";
                 });
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Adding Swagger for testing http requests
 if (builder.Environment.IsDevelopment())
@@ -111,6 +114,8 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Adding Swagger for testing http requests
 if (app.Environment.IsDevelopment())
@@ -129,7 +134,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCustomExceptionHandler();
 app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
@@ -140,15 +144,8 @@ app.UseCookiePolicy(new CookiePolicyOptions
     Secure = CookieSecurePolicy.Always
 });
 
-// Adding authentication middleware
-app.UseAuthenticationMiddleware();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Adding XSRF protection
-//var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
-//app.UseXsrfProtection(antiforgery);
 
 app.MapControllers();
 

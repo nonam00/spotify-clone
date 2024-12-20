@@ -4,7 +4,7 @@ namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlay
 {
     public class GetLikedSongListByPlaylistIdQuery : IRequest<LikedSongListVm>
     {
-        public Guid UserId { get; set; }
-        public Guid PlaylistId { get; set; }
+        public Guid UserId { get; init; }
+        public Guid PlaylistId { get; init; }
     }
 }

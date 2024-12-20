@@ -2,7 +2,8 @@
 
 namespace Application.Users.Queries.GetUserInfo
 {
-    public class GetUserInfoQueryValidator : AbstractValidator<GetUserInfoQuery>    
+    public class GetUserInfoQueryValidator
+        : AbstractValidator<GetUserInfoQuery>    
     {
         public GetUserInfoQueryValidator()
         {

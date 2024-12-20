@@ -56,7 +56,7 @@ const LikedContent: React.FC<LikedContentProps> = ({
               data={song}
             />
           </div>
-          <LikeButton songId={song.id} />
+          <LikeButton songId={song.id} defaultValue={true}/>
         </div>
       ))}
     </div>
