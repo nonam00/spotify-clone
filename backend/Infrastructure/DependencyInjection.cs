@@ -12,8 +12,8 @@ namespace Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
-            services.Configure<AwsOptions>(configuration.GetSection(nameof(AwsOptions)));
+            services.Configure<JwtOptions>(configuration.GetRequiredSection(nameof(JwtOptions)));
+            services.Configure<AwsOptions>(configuration.GetRequiredSection(nameof(AwsOptions)));
             services.AddSingleton<IS3Provider, S3Provider>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();

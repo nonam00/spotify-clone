@@ -16,6 +16,7 @@ using WebAPI;
 using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 // Adding and configurating AutoMapper
 builder.Services.AddAutoMapper(config =>
@@ -135,7 +136,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
-app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 
 app.UseCookiePolicy(new CookiePolicyOptions
