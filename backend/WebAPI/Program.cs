@@ -39,8 +39,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:1",
-                  "https://localhost:3000", "https://localhost:1")
+        policy.WithOrigins("http://localhost:3000", "http://frontend*", "http://frontend:3000", "http://spotify:3000")
+              .SetIsOriginAllowed(_ => true)
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

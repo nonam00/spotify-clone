@@ -5,6 +5,8 @@ services:
     restart: always
     ports:
       - "2345:5432"
+    expose:
+      - "5432"
     environment:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
@@ -30,9 +32,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     restart: always
-    env_file: ./frontend/.env.local
+    environment:
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    hostname: "0.0.0.0"
     ports:
       - "3000:3000"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       - webapi
 

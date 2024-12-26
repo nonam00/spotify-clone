@@ -2,14 +2,14 @@
 
 import { cookies } from "next/headers";
 
-import { API_URL } from "@/api/http";
+import {API_URL, SERVER_API} from "@/api/http";
 import { Song } from "@/types/types";
 
 const getLikedSongs = async (): Promise<Song[]> => {
   try {
     const cookieStore = await cookies();
     const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
-    const response = await fetch(`${API_URL}/users/songs`, {
+    const response = await fetch(`${SERVER_API}/users/songs`, {
       headers: {
         Cookie: cookieStore.toString(),
         "x-xsrf-token": xsrf,

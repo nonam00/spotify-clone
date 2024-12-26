@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-import { API_URL } from "@/api/http";
+import {API_URL, SERVER_API} from "@/api/http";
 import { Song } from "@/types/types";
 
 const getSongsByPlaylistId = async (
@@ -12,7 +12,7 @@ const getSongsByPlaylistId = async (
     const cookieStore = await cookies()
     const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(
-      `${API_URL}/playlists/${playlistId}/songs`,
+      `${SERVER_API}/playlists/${playlistId}/songs`,
       {
         headers: {
           "x-xsrf-token": xsrf,

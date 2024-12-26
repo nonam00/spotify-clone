@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  output: "standalone",
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'localhost:7025',
+        protocol: 'http',
+        hostname: 'localhost:5000',
         pathname: '**'
       }
     ]
