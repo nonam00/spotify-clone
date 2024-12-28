@@ -23,6 +23,8 @@ services:
     env_file: ./backend/WebAPI/.env
     ports:
       - "5000:8080"
+    volumes:
+      - "./backend/WebAPI/Files:/app/Files"
     container_name: aspnet_web_api
     depends_on:
       - db
@@ -34,7 +36,7 @@ services:
     restart: always
     environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-    hostname: "0.0.0.0"
+      - SERVER_API_URL=${SERVER_API_URL}
     ports:
       - "3000:3000"
     extra_hosts:

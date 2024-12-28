@@ -82,9 +82,9 @@ namespace WebAPI.Controllers
                 FileStream = image.OpenReadStream(),
                 ContentType = image.ContentType.Split("/")[0]
             };
-            var path = await Mediator.Send(command);
+            //var path = await Mediator.Send(command);
             //return Ok(new { path = path });
-            return Ok();
+            return Ok(new { path = "empty" });
         }
 
         /// <summary>

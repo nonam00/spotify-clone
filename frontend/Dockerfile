@@ -3,8 +3,7 @@ FROM node:23-alpine AS base
 FROM base AS deps
 WORKDIR /app
 COPY package*.json .
-RUN apk add --no-cache libc6-compat git && \
-    npm ci
+RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
@@ -13,8 +12,8 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build && \
-    npm prune --production && \
     npm cache clean --force && \
+    rm -rf 'node_modules' && \
     rm -rf '/root/.npm'
 
 FROM base AS runner
