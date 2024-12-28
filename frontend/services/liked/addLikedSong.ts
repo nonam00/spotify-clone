@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
 
-import {API_URL} from "@/api/http";
+import {CLIENT_API_URL} from "@/api/http";
 
 const addLikedSong = async (songId: string) => {
-  return await fetch(`${API_URL}/users/songs/${songId}`, {
+  return await fetch(`${CLIENT_API_URL}/users/songs/${songId}`, {
     headers: {
       "x-xsrf-token": Cookies.get(".AspNetCore.Xsrf") ?? "",
     },

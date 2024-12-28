@@ -1,9 +1,9 @@
 import Cookies from "js-cookie";
 
-import {API_URL} from "@/api/http"
+import {CLIENT_API_URL} from "@/api/http"
 
 const deleteFile = async (path: string) => {
-  return await fetch(`${API_URL}/files/image/${path}`, {
+  return await fetch(`${CLIENT_API_URL}/files/image/${path}`, {
     headers: {
       'x-xsrf-token': Cookies.get(".AspNetCore.Xsrf") ?? "",
     },

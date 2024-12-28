@@ -65,8 +65,9 @@ const UploadModal = () => {
       songForm.append("song", songFile);
 
       const songUploadResponse = await uploadFile(songForm, "song");
-      if (!songUploadResponse.ok) {
-        songFilePath = await songUploadResponse.json();
+      if (songUploadResponse.ok) {
+        const songUploadData = await songUploadResponse.json();
+        songFilePath = songUploadData.path;
       } else {
         setIsLoading(false);
         return toast.error("An error occurred while uploading song file.");
@@ -78,8 +79,9 @@ const UploadModal = () => {
 
       const imageUploadResponse = await uploadFile(imageForm, "image");
 
-      if (!imageUploadResponse.ok) {
-        imageFilePath = await imageUploadResponse.json();
+      if (imageUploadResponse.ok) {
+        const imageUploadData = await imageUploadResponse.json();
+        imageFilePath = imageUploadData.path;
       } else {
         setIsLoading(false);
         return toast.error("An error occurred while uploading image file.");
@@ -92,8 +94,8 @@ const UploadModal = () => {
       const response = await uploadSong(
         values.title,
         values.author,
-        imageFilePath,
-        songFilePath
+        songFilePath,
+        imageFilePath
       );
 
       if (!response.ok) {

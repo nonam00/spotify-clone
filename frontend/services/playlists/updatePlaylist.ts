@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 
-import {API_URL} from "@/api/http";
+import {CLIENT_API_URL} from "@/api/http";
 
 const updatePlaylist = async(
   id: string,
@@ -14,7 +14,7 @@ const updatePlaylist = async(
     imagePath: imagePath,
   });
 
-  return await fetch(`${API_URL}/playlists/${id}`, {
+  return await fetch(`${CLIENT_API_URL}/playlists/${id}`, {
     headers: {
       "x-xsrf-token": Cookies.get(".AspNetCore.Xsrf") ?? "",
       "Content-Type": "application/json",
