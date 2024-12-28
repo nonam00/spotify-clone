@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { Playlist } from "@/types/types";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 import { useShallow } from "zustand/shallow";
 
 interface PlaylistImageProps {
@@ -25,7 +25,7 @@ const PlaylistImage: React.FC<PlaylistImageProps> = ({
       alt="Playlist"
       className="object-cover rounded-xl hover:opacity-75 transition"
       src={playlist.imagePath
-        ? `${API_URL}/files/image/${playlist.imagePath}`
+        ? `${CLIENT_API_URL}/files/image/${playlist.imagePath}`
         : "/images/playlist.webp"
       }
       unoptimized

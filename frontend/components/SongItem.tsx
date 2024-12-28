@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { Song } from "@/types/types";
 import PlayButton from "@/components/PlayButton";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 import React from "react";
 
 interface SongItemProps {
@@ -48,7 +48,7 @@ const SongItem: React.FC<SongItemProps> = ({
       >
         <Image 
           className="object-cover"
-          src={`${API_URL}/files/image/${data.imagePath}`}
+          src={`${CLIENT_API_URL}/files/image/${data.imagePath}`}
           fill
           alt="Image"
           unoptimized

@@ -1,25 +1,22 @@
 "use client";
 
-import qs from "query-string";
-
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import useDebounce from "@/hooks/useDebounce";
-
 import Input from "./Input";
 
 interface SearchInputProps {
   pageUrl: string
-  types: boolean
+  types?: boolean
 }
 
 export type SearchType = "all" | "title" | "author";
 
 const SearchInput: React.FC<SearchInputProps> = ({
   pageUrl,
-  types
+  types = true
 }) => {
   const router = useRouter();
   const [value, setValue] = useState<string>("");
@@ -31,17 +28,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const activeStyle = "bg-white text-black";
 
   useEffect(() => {
-    const query = {
-      searchString: debouncedValue,
-      type: debouncedType
-    };
-
-    const url = qs.stringifyUrl({
-      url: pageUrl,
-      query: query
-    });
-
-    router.push(url);
+    const query = `?searchString=${debouncedValue}&type=${debouncedType}`;
+    if (query != location.search) {
+      router.push(pageUrl + query);
+    }
   }, [debouncedValue, debouncedType, router, pageUrl]);
 
   return (

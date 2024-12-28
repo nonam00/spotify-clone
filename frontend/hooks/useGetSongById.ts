@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
 
 import { Song } from "@/types/types";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 
 const useGetSongById = (id: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -15,7 +15,7 @@ const useGetSongById = (id: string) => {
     setIsLoading(true);
 
     const fetchSong = async () => {
-      const response = await fetch(`${API_URL}/songs/${id}`);
+      const response = await fetch(`${CLIENT_API_URL}/songs/${id}`);
 
       if (response.ok) {
         const data = await response.json();

@@ -4,7 +4,7 @@ import getUserPlaylistsByQuantity from "@/actions/playlists/getUserPlaylistsByQu
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";
 import PageContent from "./components/PageContent";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 
 export const revalidate = 0;
 
@@ -54,7 +54,7 @@ export default async function Home() {
                 name={p.title}
                 href={`/${p.id}`}
                 image={p.imagePath
-                  ? `${API_URL}/files/image/${p.imagePath}`
+                  ? `${CLIENT_API_URL}/files/image/${p.imagePath}`
                   : "/images/playlist.webp"}
               />
             ))}

@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: BiSearch,
       label: 'Search',
       active: pathName === '/search',
-      href: '/search'
+      href: '/search?searchString=&type=all'
     }
   ], [pathName]);
 
