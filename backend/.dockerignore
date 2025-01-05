@@ -1,4 +1,5 @@
-﻿**/.dockerignore
+﻿WebAPI/Files
+**/.dockerignore
 **/.env
 **/.git
 **/.gitignore
