@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -10,6 +11,7 @@ using Application.Interfaces;
 using Application.Common.Mappings;
 
 using Infrastructure;
+using Infrastructure.Auth;
 using Persistence;
 
 using WebAPI;
@@ -18,20 +20,14 @@ using WebAPI.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
-// Adding and configurating AutoMapper
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
     config.AddProfile(new AssemblyMappingProfile(typeof(ISongsDbContext).Assembly));
 });
 
-// Adding application layer via dependency injection
 builder.Services.AddApplication();
-
-// Adding infrastructure layer via dependency injection
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// Adding persistence layer via dependency injection
 builder.Services.AddPersistence(builder.Configuration);
 
 // Setting CORS policy for local responds
@@ -39,7 +35,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://frontend*", "http://frontend:3000", "http://spotify:3000")
+        policy.WithOrigins("http://localhost:3000")
               .SetIsOriginAllowed(_ => true)
               .SetIsOriginAllowedToAllowWildcardSubdomains()
               .AllowAnyMethod()
@@ -49,7 +45,6 @@ builder.Services.AddCors(options =>
 });
 
 // Adding and configuration authentication by JWT Tokens
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,8 +53,11 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
-        // Getting options for JWT crypt from configuration (user secret)
-        var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
+        // Getting options for JWT crypt from configuration
+        var jwtOptions = builder.Configuration
+            .GetRequiredSection(nameof(JwtOptions))
+            .Get<JwtOptions>()
+            ?? throw new NullReferenceException("JWT options not found");
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -69,7 +67,7 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
+                Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
         };
         
         // Getting JWT token from request cookies
@@ -142,7 +140,8 @@ app.UseCors("MyPolicy");
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
-    Secure = CookieSecurePolicy.Always
+    Secure = CookieSecurePolicy.Always,
+    HttpOnly = HttpOnlyPolicy.Always
 });
 
 app.UseAuthentication();
