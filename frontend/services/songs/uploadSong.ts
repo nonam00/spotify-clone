@@ -1,21 +1,21 @@
 import Cookies from "js-cookie";
 
-import {API_URL} from "@/api/http";
+import {CLIENT_API_URL} from "@/api/http";
 
 const uploadSong = async (
   title: string,
-  description: string,
+  author: string,
   songPath: string,
   imagePath: string
 ) => {
   const body = JSON.stringify({
     title: title,
-    description: description,
+    author: author,
     songPath: songPath,
     imagePath: imagePath
   });
 
-  return await fetch(`${API_URL}/songs`, {
+  return await fetch(`${CLIENT_API_URL}/songs`, {
     headers: {
       "x-xsrf-token": Cookies.get(".AspNetCore.Xsrf") ?? "",
       "Content-Type": "application/json"

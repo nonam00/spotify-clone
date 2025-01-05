@@ -1,11 +1,12 @@
-using System.Diagnostics;
-using System.Net;
-using System.Text.Json;
-using Application.Common.Exceptions;
-using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using FluentValidation;
+using System.Diagnostics;
+using System.Net;
+using System.Text.Json;
+
+using Application.Common.Exceptions;
 
 namespace WebAPI.Middleware;
 
@@ -15,16 +16,13 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
-        switch(exception)
+        context.Response.StatusCode = exception switch
         {
-            case ValidationException:
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                break;
-            case LoginException:
-                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                break;
-        }
-        
+            ValidationException => (int)HttpStatusCode.BadRequest,
+            LoginException => (int)HttpStatusCode.BadRequest,
+            _ => context.Response.StatusCode
+        };
+
         var problemDetails = CreateProblemDetails(context, exception);
         var json = ToJson(problemDetails);
 
@@ -37,6 +35,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     private ProblemDetails CreateProblemDetails(in HttpContext context, in Exception exception)
     {
         var reasonPhrase = ReasonPhrases.GetReasonPhrase(context.Response.StatusCode);
+        
         if (string.IsNullOrEmpty(reasonPhrase))
         {
             reasonPhrase = UnhandledExceptionMsg;
@@ -64,7 +63,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             return JsonSerializer.Serialize(problemDetails);
         }
-        catch (Exception)
+        catch
         {
             return "An exception has occurred while serializing error to JSON";
         }

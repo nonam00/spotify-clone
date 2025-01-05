@@ -62,7 +62,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         </button>
         <div className="flex-grow" />
         <button
-          onClick={() => { router.push(`/playlist/${id}/add`) }}
+          onClick={() => { router.push(`/playlist/${id}/add?searchString=&type=all`) }}
           className="
             flex
             flex-end

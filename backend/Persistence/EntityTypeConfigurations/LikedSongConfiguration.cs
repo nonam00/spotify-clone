@@ -10,7 +10,6 @@ namespace Persistence.EntityTypeConfigurations
         public void Configure(EntityTypeBuilder<LikedSong> builder)
         {
             builder.HasKey(song => new { song.UserId, song.SongId });
-            builder.HasIndex(song => new { song.UserId, song.SongId }).IsUnique();
 
             builder.HasOne(liked => liked.Song)
                    .WithMany()

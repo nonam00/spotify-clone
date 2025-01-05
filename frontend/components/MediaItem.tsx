@@ -4,7 +4,7 @@
 import Image from "next/image";
 
 import { Playlist, Song } from "@/types/types";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 
 interface MediaItemProps {
   data: Song | Playlist;
@@ -47,7 +47,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
         <Image
           fill
           src={data.imagePath
-            ? `${API_URL}/files/image/${data.imagePath}`
+            ? `${CLIENT_API_URL}/files/image/${data.imagePath}`
             : '/images/playlist.webp'
           }
           alt="Media Item"

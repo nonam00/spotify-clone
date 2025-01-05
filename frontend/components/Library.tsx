@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
@@ -11,7 +12,6 @@ import useCreateModal from "@/hooks/useCreateModal";
 import { useUser } from "@/hooks/useUser";
 
 import MediaItem from "./MediaItem";
-import { useRouter } from "next/navigation";
 
 interface LibraryProps {
   playlists: Playlist[];
@@ -26,11 +26,16 @@ const Library: React.FC<LibraryProps> = ({
   const router = useRouter();
 
   const onCreateClick = () => {
-    if (!isAuth) {
-      return openAuthModal();
-    }
-    return openCreateModal();
+    return !isAuth
+        ? openAuthModal()
+        : openCreateModal();
   };
+
+  const tryRedirect = (url: string) => {
+    if (location.pathname != url) {
+      router.push(url);
+    }
+  }
 
   return (
     <div className="flex flex-col">
@@ -80,7 +85,7 @@ const Library: React.FC<LibraryProps> = ({
         px-3
       ">
         <div
-          onClick={() => router.push("/playlist/liked")}
+          onClick={() => tryRedirect("/playlist/liked")}
           className="
             flex
             items-center
@@ -121,7 +126,7 @@ const Library: React.FC<LibraryProps> = ({
         </div>
         {playlists.map((playlist) => (
           <MediaItem
-            onClick={(id: string) => router.push(`/playlist/${id}`)}
+            onClick={(id: string) => tryRedirect(`/playlist/${id}`)}
             key={playlist.id}
             data={playlist}
           />

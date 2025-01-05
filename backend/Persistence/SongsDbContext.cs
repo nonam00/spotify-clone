@@ -2,11 +2,11 @@
 
 using Domain;
 using Application.Interfaces;
-using Persistence.EntityTypeConfigurations;
 
 namespace Persistence
 {
-    public class SongsDbContext(DbContextOptions<SongsDbContext> options) : DbContext(options), ISongsDbContext
+    public class SongsDbContext(DbContextOptions<SongsDbContext> options)
+        : DbContext(options), ISongsDbContext
     {
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Song> Songs { get; set; } = null!;
@@ -16,12 +16,7 @@ namespace Persistence
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new SongConfiguration());
-            builder.ApplyConfiguration(new UserConfiguration());
-            builder.ApplyConfiguration(new LikedSongConfiguration());
-            builder.ApplyConfiguration(new PlaylistConfiguration());
-            builder.ApplyConfiguration(new PlaylistSongConfiguration());
-
+            builder.ApplyConfigurationsFromAssembly(typeof(SongsDbContext).Assembly);
             base.OnModelCreating(builder);
         }
     }

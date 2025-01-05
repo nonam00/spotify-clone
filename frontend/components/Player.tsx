@@ -4,7 +4,7 @@ import usePlayer from "@/hooks/usePlayer";
 import useGetSongById from "@/hooks/useGetSongById";
 
 import PlayerContent from "./PlayerContent";
-import { API_URL } from "@/api/http";
+import { CLIENT_API_URL } from "@/api/http";
 
 const Player = () => {
   const activeSongId = usePlayer(s => s.activeId);
@@ -14,7 +14,7 @@ const Player = () => {
     return null;
   }
 
-  const songUrl = `${API_URL}/files/song/${song.songPath}`;
+  const songUrl = `${CLIENT_API_URL}/files/song/${song.songPath}`;
   
   return (
     <div

@@ -1,11 +1,10 @@
+using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Microsoft.Extensions.Options;
-using System.Net;
-
 using Application.Interfaces;
+using Microsoft.Extensions.Options;
 
-namespace Infrastructure
+namespace Infrastructure.Aws
 {
     public class S3Provider : IS3Provider
     {

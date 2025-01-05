@@ -1,6 +1,6 @@
 "use server";
 
-import {API_URL} from "@/api/http";
+import {SERVER_API_URL} from "@/api/http";
 import {Song} from "@/types/types";
 import getSongs from "../getSongs";
 
@@ -9,7 +9,7 @@ const getSongsByAuthor = async (author: string): Promise<Song[]> => {
     return await getSongs();
   }
   try {
-    const response = await fetch(`${API_URL}/songs/search/author/${author}`) 
+    const response = await fetch(`${SERVER_API_URL}/songs/search/author/${author}`)
     const data = await response.json();
 
     if (!response.ok) {

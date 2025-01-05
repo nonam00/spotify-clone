@@ -20,8 +20,7 @@ namespace WebAPI
                     {
                         Version = apiVersion,
                         Title = $"Spotify Clone API {apiVersion}",
-                        Description =
-                            "API for Spotify Clone Web Application",
+                        Description = "API for Spotify Clone Web Application",
                         Contact = new OpenApiContact
                         {
                             Name = "Ilya",

@@ -10,12 +10,16 @@ namespace Persistence
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            // getting connection string from api configuration and the password for database from user secret file
-            var connectionString = configuration.GetConnectionString("PostgresDb") + configuration["DbPassword"];
+            // connection string from api public configuration
+            var connectionString = configuration.GetConnectionString("PostgresDb")
+                ?? throw new NullReferenceException("PostgresDb connection string is null");
+            // password for database from user secret or env file
+            var dbPassword = configuration["DbPassword"]
+                ?? throw new NullReferenceException("DbPassword string is null");
 
             services.AddDbContext<SongsDbContext>(options =>
             {
-                options.UseNpgsql(connectionString)
+                options.UseNpgsql(connectionString + dbPassword)
                     .UseSnakeCaseNamingConvention();
             });
 

@@ -7,8 +7,7 @@ using Application.Files.Commands.DeleteFile;
 
 namespace WebAPI.Controllers
 {
-    [ApiVersionNeutral]
-    [Route("{version:apiVersion}/files")]
+    [Route("{version:apiVersion}/files"), ApiVersionNeutral]
     public class FilesController : BaseController
     {
         private readonly string _fullBucketUrl;
@@ -39,8 +38,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpPost("song")]
+        [HttpPost("song"), Authorize]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         [Produces("application/json")]
@@ -75,8 +73,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <response code="201">Success</response>
         /// <response code="401">If user is unauthorized</response>
-        [Authorize]
-        [HttpPost("image")]
+        [HttpPost("image"), Authorize]
         [Produces("application/json")]
         public async Task<ActionResult> UploadImageFile(IFormFile image)
         {
@@ -85,9 +82,9 @@ namespace WebAPI.Controllers
                 FileStream = image.OpenReadStream(),
                 ContentType = image.ContentType.Split("/")[0]
             };
-            var path = await Mediator.Send(command);
-            return Ok(new { path = path });
-            //return Ok();
+            //var path = await Mediator.Send(command);
+            //return Ok(new { path = path });
+            return Ok(new { path = "empty" });
         }
 
         /// <summary>
@@ -127,8 +124,8 @@ namespace WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public Task<IActionResult> GetImageFile(string filename)
         {
-            return Task.FromResult<IActionResult>(Redirect(_fullBucketUrl + "image/" + filename));
-            //return Ok();
+            //return Task.FromResult<IActionResult>(Redirect(_fullBucketUrl + "image/" + filename));
+            return Task.FromResult<IActionResult>(Ok());
         }
 
         /// <summary>
@@ -143,8 +140,7 @@ namespace WebAPI.Controllers
         /// </remarks>
         /// <param name="filename">Filename</param>
         /// <response code="200">Success</response>
-        [Authorize]
-        [HttpDelete("image/{filename}")]
+        [HttpDelete("image/{filename}"), Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> DeleteFile(string filename)
@@ -153,7 +149,7 @@ namespace WebAPI.Controllers
             {
                 FileName = $"image/{filename}"
             };
-            await Mediator.Send(command);
+            //await Mediator.Send(command);
             return NoContent();
         }
     }

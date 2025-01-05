@@ -4,21 +4,23 @@ using Microsoft.Extensions.Configuration;
 using Application.Interfaces;
 using Application.Interfaces.Auth;
 
-namespace Infrastructure
+using Infrastructure.Auth;
+using Infrastructure.Aws;
+
+namespace Infrastructure;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructure(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
-            services.Configure<AwsOptions>(configuration.GetSection(nameof(AwsOptions)));
-            services.AddSingleton<IS3Provider, S3Provider>();
-            services.AddScoped<IJwtProvider, JwtProvider>();
-            services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.Configure<JwtOptions>(configuration.GetRequiredSection(nameof(JwtOptions)));
+        services.Configure<AwsOptions>(configuration.GetRequiredSection(nameof(AwsOptions)));
+        services.AddScoped<IS3Provider, S3Provider>();
+        services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
             
-            return services;
-        }
+        return services;
     }
 }
