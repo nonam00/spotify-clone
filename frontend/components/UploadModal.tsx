@@ -2,7 +2,7 @@
 
 import {useRouter} from "next/navigation";
 import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
-import {useState} from "react";
+import {useTransition} from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -16,7 +16,7 @@ import uploadSong from "@/services/songs/uploadSong";
 import uploadFile from "@/services/files/uploadFile";
 
 const UploadModal = () => {
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isPending, startTransition] = useTransition();
   const [onClose, isOpen] = useUploadModal(useShallow(s => [s.onClose, s.isOpen]));
   const { isAuth } = useUser();
   const router = useRouter();
@@ -42,77 +42,77 @@ const UploadModal = () => {
   }
 
   const onSubmit: SubmitHandler<FieldValues> = async (values) => {
-    try {
-      setIsLoading(true);
-      const imageFile = values.image?.[0];
-      const songFile = values.song?.[0];
-      let songFilePath = "";
-      let imageFilePath = "";
+    startTransition(async () => {
+      try {
+        const imageFile = values.image?.[0];
+        const songFile = values.song?.[0];
+        let songFilePath = "";
+        let imageFilePath = "";
 
-      if (!isAuth) {
-        toast.error("The user is not authorized!");
+        if (!isAuth) {
+          toast.error("The user is not authorized!");
+          onClose();
+          return;
+        }
+
+        if (!imageFile || !songFile) {
+          toast.error('Missing required fields');
+          return;
+        }
+
+        // Upload song file
+        const songForm = new FormData();
+        songForm.append("song", songFile);
+
+        const songUploadResponse = await uploadFile(songForm, "song");
+
+        if (songUploadResponse.ok) {
+          const songUploadData = await songUploadResponse.json();
+          songFilePath = songUploadData.path;
+        } else {
+          toast.error("An error occurred while uploading song file.");
+          return;
+        }
+
+        // Upload image file
+        const imageForm = new FormData();
+        imageForm.append("image", imageFile);
+
+        const imageUploadResponse = await uploadFile(imageForm, "image");
+
+        if (imageUploadResponse.ok) {
+          const imageUploadData = await imageUploadResponse.json();
+          imageFilePath = imageUploadData.path;
+        } else {
+          toast.error("An error occurred while uploading image file.");
+          return
+        }
+
+        if (imageFilePath === "" || songFilePath === "") {
+          toast.error("An error occurred while uploading files.")
+          return
+        }
+
+        const response = await uploadSong(
+          values.title,
+          values.author,
+          songFilePath,
+          imageFilePath
+        );
+
+        if (!response.ok) {
+          toast.error("An error occurred while uploading song information");
+          return
+        }
+
+        router.refresh();
+        toast.success('Song created!');
+        reset();
         onClose();
-        return;
+      } catch {
+        toast.error('Something went wrong');
       }
-
-      if (!imageFile || !songFile) {
-        toast.error('Missing required fields');
-        return;
-      }
-
-      // Upload song file
-      const songForm = new FormData();
-      songForm.append("song", songFile);
-
-      const songUploadResponse = await uploadFile(songForm, "song");
-      if (songUploadResponse.ok) {
-        const songUploadData = await songUploadResponse.json();
-        songFilePath = songUploadData.path;
-      } else {
-        setIsLoading(false);
-        return toast.error("An error occurred while uploading song file.");
-      }
-
-      // Upload image file
-      const imageForm = new FormData();
-      imageForm.append("image", imageFile);
-
-      const imageUploadResponse = await uploadFile(imageForm, "image");
-
-      if (imageUploadResponse.ok) {
-        const imageUploadData = await imageUploadResponse.json();
-        imageFilePath = imageUploadData.path;
-      } else {
-        setIsLoading(false);
-        return toast.error("An error occurred while uploading image file.");
-      }
-
-      if (imageFilePath === "" || songFilePath === "") {
-        return toast.error("An error occurred while uploading files.")
-      }
-
-      const response = await uploadSong(
-        values.title,
-        values.author,
-        songFilePath,
-        imageFilePath
-      );
-
-      if (!response.ok) {
-        setIsLoading(false);
-        return toast.error("An error occurred while uploading song information");
-      }
-
-      router.refresh();
-      setIsLoading(false);
-      toast.success('Song created!');
-      reset();
-      onClose();
-    } catch {
-      toast.error('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
+    });
   }
 
   return (
@@ -128,13 +128,13 @@ const UploadModal = () => {
       >
         <Input
           id="title"
-          disabled={isLoading}
+          disabled={isPending}
           {...register('title', { required: true })}
           placeholder="Song Title"
         />
         <Input
           id="author"
-          disabled={isLoading}
+          disabled={isPending}
           {...register('author', { required: true })}
           placeholder="Song Author"
         />
@@ -145,7 +145,7 @@ const UploadModal = () => {
           <Input
             id="song"
             type="file"
-            disabled={isLoading}
+            disabled={isPending}
             accept=".mp3,.wav,.flac,.m4a,.aac,.ogg"
             {...register('song', { required: true })}
           />
@@ -157,13 +157,13 @@ const UploadModal = () => {
           <Input
             id="image"
             type="file"
-            disabled={isLoading}
+            disabled={isPending}
             accept="image/*"
             {...register('image', { required: true })}
           />
         </div>
         <Button
-          disabled={isLoading}
+          disabled={isPending}
           type="submit"
           className="my-4"
         >

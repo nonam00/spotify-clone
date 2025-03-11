@@ -5,18 +5,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaPlay } from "react-icons/fa";
 
-interface ListItemProps {
-  name: string;
-  href: string;
-  image: string;
-}
-
-const ListItem: React.FC<ListItemProps> = ({
+const ListItem = ({
   name,
   href,
   image
+}: {
+  name: string;
+  href: string;
+  image: string;
 }) => {
   const router = useRouter();
+
   const onClick = () => {
     //Add auth before push
     router.push(`/playlist${href}`);
@@ -24,7 +23,7 @@ const ListItem: React.FC<ListItemProps> = ({
 
   return ( 
     <button
-    onClick={onClick}
+      onClick={onClick}
       className="
         relative
         group
@@ -39,11 +38,7 @@ const ListItem: React.FC<ListItemProps> = ({
         pr-4
       "
     >
-      <div className="
-        relative
-        min-h-[64px]
-        min-w-[64px]
-      ">
+      <div className="relative min-h-[64px] min-w-[64px]">
         <Image
           className="object-cover"
           fill
@@ -52,9 +47,7 @@ const ListItem: React.FC<ListItemProps> = ({
           unoptimized
         />
       </div>
-      <p className="font-medium truncate py-5">
-        {name}
-      </p>
+      <p className="font-medium truncate py-5">{name}</p>
       <div
         className="
           absolute

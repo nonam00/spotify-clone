@@ -1,20 +1,15 @@
 "use client";
 
 import * as RadixSlider from "@radix-ui/react-slider";
+import {memo} from "react";
 
-interface SliderProps {
-  value?: number;
-  onChange?: (value: number) => void;
-}
-
-const Slider: React.FC<SliderProps> = ({
+const Slider = memo(function Slider({
   value = 1,
   onChange
-}) => {
-  const handleChange = (newValue: number[]) => {
-    onChange?.(newValue[0]);
-  }
-  
+}: {
+  value: number;
+  onChange: (value: number[]) => void;
+}) {
   return (
     <RadixSlider.Root
       className="
@@ -23,37 +18,21 @@ const Slider: React.FC<SliderProps> = ({
         items-center
         select-none
         touch-none
-        w-full
-        h-10
+        w-full h-10
         cursor-pointer
       "
       defaultValue={[1]}
       value={[value]}
-      onValueChange={handleChange}
+      onValueChange={onChange}
       max={1}
       step={0.01}
       aria-label="Volume"
     >
-      <RadixSlider.Track
-        className="
-          bg-neutral-600
-          relative
-          grow
-          rounded-full
-          h-[3.1px]
-        "
-      >
-        <RadixSlider.Range
-          className="
-            absolute
-            bg-white
-            rounded-full
-            h-full
-          "
-        />
+      <RadixSlider.Track className="bg-neutral-600 relative grow rounded-full h-[3.1px]">
+        <RadixSlider.Range className="absolute bg-white rounded-full h-full"/>
       </RadixSlider.Track>
     </RadixSlider.Root>
   );
-}
+});
  
 export default Slider;

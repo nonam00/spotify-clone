@@ -58,30 +58,16 @@ const CreateModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <div className="
-        flex
-        flex-col
-        items-center
-        justify-center
-      ">
+      <div className="flex flex-col items-center justify-center">
         <Button
           onClick={onPlaylistClick}
-          className="
-            my-3
-            font-medium
-          "
+          className="my-3 font-medium"
         >
           Create Playlist
         </Button>
         <Button
           onClick={onUploadClick}
-          className="
-            my-3
-            hover:bg-neutral-700
-            bg-transparent
-            text-neutral-300
-            font-medium
-          "
+          className="my-3 bg-transparent text-neutral-300 font-medium hover:bg-neutral-700"
         >
           Upload Song
         </Button>

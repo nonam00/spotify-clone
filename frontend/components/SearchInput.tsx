@@ -7,20 +7,20 @@ import { twMerge } from "tailwind-merge";
 import useDebounce from "@/hooks/useDebounce";
 import Input from "./Input";
 
-interface SearchInputProps {
-  pageUrl: string
-  types?: boolean
-}
-
 export type SearchType = "all" | "title" | "author";
 
-const SearchInput: React.FC<SearchInputProps> = ({
+const SearchInput = ({
   pageUrl,
   types = true
+}: {
+  pageUrl: string
+  types?: boolean
 }) => {
   const router = useRouter();
+  
   const [value, setValue] = useState<string>("");
   const debouncedValue = useDebounce<string>(value, 500);
+  
   const [searchType, setSearchType] = useState<SearchType>("all");
   const debouncedType = useDebounce<SearchType>(searchType, 200);
 
@@ -29,7 +29,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   useEffect(() => {
     const query = `?searchString=${debouncedValue}&type=${debouncedType}`;
-    if (query != location.search) {
+    if (query !== location.search) {
       router.push(pageUrl + query);
     }
   }, [debouncedValue, debouncedType, router, pageUrl]);
@@ -42,20 +42,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={(e) => setValue(e.target.value)}
       />
       {types? 
-      <div
-        className="
-          flex 
-          flex-row
-          mt-5
-          gap-x-0.7
-        "
-      >
+      <div className="flex flex-row mt-5 gap-x-0.7">
         <button
           onClick={() => {setSearchType("all")}}
           className={twMerge(`
             rounded-full
-            py-1.5
-            px-5
+            py-1.5 px-5
             mr-2
             text-sm
             flex
@@ -73,8 +65,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onClick={() => {setSearchType("title")}}
           className={twMerge(`
             rounded-full
-            py-1.5
-            px-5
+            py-1.5 px-5
             mr-2
             text-sm
             flex
@@ -92,8 +83,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
           onClick={() => {setSearchType("author")}}
           className={twMerge(`
             rounded-full
-            py-1.5
-            px-5
+            py-1.5 px-5
             mr-2
             text-sm
             flex
@@ -102,7 +92,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             hover:opacity-75
             transition
           `, 
-            searchType === "author"? activeStyle : nonActiveStyle    
+            searchType === "author" ? activeStyle : nonActiveStyle
           )} 
         >
           By Author

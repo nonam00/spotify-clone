@@ -41,33 +41,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   ], [pathName]);
 
   return (
-  <div className={twMerge(`
-      flex
-      h-full
-    `,
-      playerActiveSongId && "h-[calc(100%-80px)]"
-  )}>
-    <div className="
-      hidden
-      md:flex
-      flex-col
-      gap-y-2
-      bg-black
-      h-full
-      w-[300px]
-      p-2
-    "
-    >
+  <div className={twMerge(`flex h-full`, playerActiveSongId && "h-[calc(100%-80px)]")}>
+    <div className="hidden md:flex flex-col gap-y-2 bg-black h-full w-[300px] p-2">
       <Box>
-        <div 
-          className="
-            flex
-            flex-col
-            gap-y-4
-            px-5
-            py-4
-          "
-        >
+        <div className="flex flex-col gap-y-4 px-5 py-4">
           {routes.map((item) => (
             <SidebarItem
               key={item.label}
@@ -76,11 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
       </Box>
-      <Box className="
-        overflow-y-hidden
-        hover:overflow-y-auto
-        h-full
-      ">
+      <Box className="overflow-y-hidden hover:overflow-y-auto h-full">
         <Library playlists={playlists} />
       </Box>
     </div>

@@ -1,8 +1,7 @@
 import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> { }
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   className,
@@ -18,10 +17,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
         w-full
         rounded-full
         bg-green-500
-        border
-        border-transparent
-        px-3
-        py-3
+        border border-transparent
+        px-3 py-3
         disabled:cursor-not-allowed
         disabled:opacity-50
         text-black
