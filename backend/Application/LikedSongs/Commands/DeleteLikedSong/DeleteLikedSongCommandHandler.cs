@@ -15,8 +15,7 @@ namespace Application.LikedSongs.Commands.DeleteLikedSong
             CancellationToken cancellationToken)
         {
             var deletedRows = await _dbContext.LikedSongs
-                .Where(l => l.UserId == request.UserId && 
-                            l.SongId == request.SongId)
+                .Where(l => l.UserId == request.UserId && l.SongId == request.SongId)
                 .ExecuteDeleteAsync(cancellationToken);
             
             if (deletedRows != 1)

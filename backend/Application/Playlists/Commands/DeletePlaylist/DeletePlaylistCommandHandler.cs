@@ -14,8 +14,7 @@ namespace Application.Playlists.Commands.DeletePlaylist
             CancellationToken cancellationToken)
         {
             var deletedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId &&
-                            p.Id == request.PlaylistId)
+                .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
                 .ExecuteDeleteAsync(cancellationToken);
 
             if (deletedRows != 1)

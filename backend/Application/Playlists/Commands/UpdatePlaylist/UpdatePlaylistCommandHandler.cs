@@ -13,9 +13,8 @@ namespace Application.Playlists.Commands.UpdatePlaylist
         public async Task Handle(UpdatePlaylistCommand request,
             CancellationToken cancellationToken)
         {
-            int updatedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId &&
-                            p.Id == request.PlaylistId)
+            var updatedRows = await _dbContext.Playlists
+                .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
                 .ExecuteUpdateAsync(p => p
                     .SetProperty(u => u.Title, request.Title)
                     .SetProperty(u => u.Description,

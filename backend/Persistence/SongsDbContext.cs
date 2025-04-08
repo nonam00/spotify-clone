@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 using Domain;
 using Application.Interfaces;
@@ -13,6 +14,11 @@ namespace Persistence
         public DbSet<LikedSong> LikedSongs { get; set; } = null!;
         public DbSet<Playlist> Playlists { get; set; } = null!;
         public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            return await Database.BeginTransactionAsync(cancellationToken);
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

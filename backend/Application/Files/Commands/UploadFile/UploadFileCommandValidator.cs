@@ -9,8 +9,7 @@ namespace Application.Files.Commands.UploadFile
         {
             RuleFor(c => c.FileStream).NotNull();
             RuleFor(c => c.ContentType)
-              .Must(type => type.Equals("audio") ||
-                            type.Equals("image"))
+              .Must(type => type.Equals("audio") || type.Equals("image"))
               .WithMessage("Wrong file content type");
         }
     }

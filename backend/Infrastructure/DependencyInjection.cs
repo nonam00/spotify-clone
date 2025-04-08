@@ -17,7 +17,7 @@ public static class DependencyInjection
     {
         services.Configure<JwtOptions>(configuration.GetRequiredSection(nameof(JwtOptions)));
         services.Configure<AwsOptions>(configuration.GetRequiredSection(nameof(AwsOptions)));
-        services.AddScoped<IS3Provider, S3Provider>();
+        services.AddScoped<IStorageProvider, S3Provider>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
             

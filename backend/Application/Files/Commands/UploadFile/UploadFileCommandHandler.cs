@@ -1,27 +1,26 @@
 using MediatR;
-using System.Net;
 
 using Application.Interfaces;
 
 namespace Application.Files.Commands.UploadFile
 {
-    public class UploadFileCommandHandler(IS3Provider s3)
+    public class UploadFileCommandHandler(IStorageProvider storage)
         : IRequestHandler<UploadFileCommand, string>
     {
-        private readonly IS3Provider _s3 = s3;
+        private readonly IStorageProvider _storage = storage;
 
         public async Task<string> Handle(UploadFileCommand request,
             CancellationToken cancellationToken)
         {
             var fileName = Guid.NewGuid().ToString();
-            var responseCode = await _s3.UploadFile
+            var success = await _storage.UploadFile
             (
                 request.FileStream,
                 $"{request.ContentType}/{fileName}",
                 request.ContentType + "/*"
             );
 
-            if (responseCode != HttpStatusCode.OK)
+            if (!success)
             {
                 throw new Exception("Failed on uploading file to the store");
             }
