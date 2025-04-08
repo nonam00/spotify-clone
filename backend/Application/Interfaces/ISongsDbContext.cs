@@ -1,5 +1,6 @@
 ﻿using Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Application.Interfaces
 {
@@ -11,5 +12,6 @@ namespace Application.Interfaces
         DbSet<Playlist> Playlists { get; set; }
         DbSet<PlaylistSong> PlaylistSongs { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
     }
 }

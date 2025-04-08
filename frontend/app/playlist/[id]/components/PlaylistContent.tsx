@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import {useLayoutEffect} from "react";
 import { FaPlay } from "react-icons/fa";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
@@ -15,20 +15,18 @@ import RemoveButton from "./RemoveButton";
 import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
 
-interface PlaylistContentProps {
-  id: string;
-  songs: Song[];
-}
-
-const PlaylistContent: React.FC<PlaylistContentProps> = ({
+const PlaylistContent = ({
   id,
   songs
+}: {
+  id: string;
+  songs: Song[];
 }) => {
   const router = useRouter();
   const { isLoading, isAuth } = useUser();
   const onPlay = useOnPlay(songs);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isLoading && !isAuth) {
       router.replace("/")
     }
@@ -63,13 +61,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
         <div className="flex-grow" />
         <button
           onClick={() => { router.push(`/playlist/${id}/add?searchString=&type=all`) }}
-          className="
-            flex
-            flex-end
-            mx-5
-            rounded-full
-            hover:scale-105
-          "
+          className="flex flex-end mx-5 rounded-full hover:scale-105"
         >
           <AiOutlinePlusCircle className="text-neutral-400" size="35" />
         </button>
@@ -78,13 +70,7 @@ const PlaylistContent: React.FC<PlaylistContentProps> = ({
       <div className="h-0.5 bg-neutral-800/40 w-full" />
       <div className="flex flex-col align-middle gap-y-5 w-full p-6">
         {songs.length === 0 ?
-          <div className="
-            flex
-            flex-col
-            text-neutral-400
-            items-center
-            md:items-start
-          ">
+          <div className="flex flex-col text-neutral-400 items-center md:items-start">
             There are no songs in this playlist.
           </div>
           : songs.map((song) => (

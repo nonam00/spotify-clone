@@ -3,17 +3,15 @@
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { FaTrash } from "react-icons/fa";
+import { useShallow } from "zustand/shallow";
 
 import useConfirmModal from "@/hooks/useConfirmModal";
 import deletePlaylistRequest from "@/services/playlists/deletePlaylist";
-import { useShallow } from "zustand/shallow";
 
-interface DeletePlaylistButtonProps {
-  playlistId: string
-}
-
-const DeletePlaylistButton: React.FC<DeletePlaylistButtonProps> = ({
+const DeletePlaylistButton = ({
   playlistId
+}: {
+  playlistId: string
 }) => {
   const router = useRouter();
   const [

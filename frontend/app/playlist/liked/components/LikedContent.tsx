@@ -1,29 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import {memo, useLayoutEffect} from "react";
 
-import { Song } from "@/types/types"; 
-
+import { Song } from "@/types/types";
 import MediaItem from "@/components/MediaItem";
 import LikeButton from "@/components/LikeButton";
-
 import { useUser } from "@/hooks/useUser";
 import useOnPlay from "@/hooks/useOnPlay";
 
-interface LikedContentProps {
-  songs: Song[];
-}
-
-const LikedContent: React.FC<LikedContentProps> = ({
+const LikedContent = memo(function LikedContent({
   songs
-}) => {
+}: {
+  songs: Song[]
+}) {
   const router = useRouter();
   const { isLoading, isAuth } = useUser();
 
   const onPlay = useOnPlay(songs);
-  
-  useEffect(() => {
+
+  useLayoutEffect(() => {
     if (!isLoading && !isAuth) {
       router.replace('/');
     }
@@ -31,13 +27,7 @@ const LikedContent: React.FC<LikedContentProps> = ({
 
   if (songs.length === 0) {
     return (
-      <div className="
-        flex
-        flex-col
-        gap-y-2
-        px-6
-        text-neutral-400
-      ">
+      <div className="flex flex-col gap-y-2 px-6 text-neutral-400">
         No liked songs.
       </div>
     )
@@ -61,6 +51,6 @@ const LikedContent: React.FC<LikedContentProps> = ({
       ))}
     </div>
   );
-}
+});
  
 export default LikedContent;

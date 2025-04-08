@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import {memo} from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
@@ -13,13 +14,11 @@ import { useUser } from "@/hooks/useUser";
 
 import MediaItem from "./MediaItem";
 
-interface LibraryProps {
-  playlists: Playlist[];
-}
-
-const Library: React.FC<LibraryProps> = ({
+const Library = memo(function Library({
   playlists
-}) => {
+}: {
+  playlists: Playlist[]
+}) {
   const openAuthModal = useAuthModal(s => s.onOpen);
   const openCreateModal = useCreateModal(s => s.onOpen);
   const { isAuth } = useUser();
@@ -39,51 +38,20 @@ const Library: React.FC<LibraryProps> = ({
 
   return (
     <div className="flex flex-col">
-      <div
-        className="
-          flex
-          items-center
-          justify-between
-          px-5
-          pt-4
-        "
-      >
-        <div
-          className="
-            inline-flex
-            items-center
-            gap-x-2
-          "
-        >
+      <div className="flex items-center justify-between px-5 pt-4">
+        <div className="inline-flex items-center gap-x-2">
           <TbPlaylist className="text-neutral-400" size={26} />
-          <p
-            className="
-              text-neutral-400
-              font-medium
-              text-md
-            "
-          >
+          <p className="text-neutral-400 font-medium text-md">
             Your Library
           </p>
         </div>
         <AiOutlinePlus
           onClick={onCreateClick}
           size={20}
-          className="
-            text-neutral-400
-            cursor-pointer
-            hover:text-white
-            transition
-          "
+          className="text-neutral-400 cursor-pointer hover:text-white transition"
         />
       </div>
-      <div className="
-        flex
-        flex-col
-        gap-y-5
-        mt-4
-        px-3
-      ">
+      <div className="flex flex-col gap-y-5 mt-4 px-3">
         <div
           onClick={() => tryRedirect("/playlist/liked")}
           className="
@@ -97,15 +65,7 @@ const Library: React.FC<LibraryProps> = ({
             rounded-md  
           "
         >
-          <div
-            className="
-              relative
-              rounded-md
-              min-h-[48px]
-              min-w-[48px]
-              overflow-hidden
-            "
-          >
+          <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
             <Image
               fill
               src="/images/liked.png"
@@ -113,15 +73,8 @@ const Library: React.FC<LibraryProps> = ({
               className="object-cover"
             />
           </div>
-          <div className="
-            flex
-            flex-col
-            gap-y-1
-            overflow-hidden
-          ">
-            <p className="text-white trancate">
-              Liked Songs 
-            </p>
+          <div className="flex flex-col gap-y-1 overflow-hidden">
+            <p className="text-white trancate">Liked Songs</p>
           </div>
         </div>
         {playlists.map((playlist) => (
@@ -134,6 +87,6 @@ const Library: React.FC<LibraryProps> = ({
       </div>
     </div>
   );
-}
+});
 
 export default Library;

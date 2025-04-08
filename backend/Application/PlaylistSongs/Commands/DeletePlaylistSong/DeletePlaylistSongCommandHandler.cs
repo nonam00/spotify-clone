@@ -13,27 +13,37 @@ namespace Application.PlaylistSongs.Commands.DeletePlaylistSong
         public async Task Handle(DeletePlaylistSongCommand request,
             CancellationToken cancellationToken)
         {
-            // TODO: db transaction
-            var deletedRows = await _dbContext.PlaylistSongs
-                .Where(ps => ps.Playlist.UserId == request.UserId &&
-                             ps.PlaylistId == request.PlaylistId &&
-                             ps.SongId == request.SongId)
-                .ExecuteDeleteAsync(cancellationToken);
+            await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
             
-            if (deletedRows != 1) 
+            try
             {
-                throw new Exception("Relation between playlist and song with such key doesn't exist");
+                var deletedRows = await _dbContext.PlaylistSongs
+                    .Where(ps => ps.Playlist.UserId == request.UserId && 
+                                 ps.PlaylistId == request.PlaylistId &&
+                                 ps.SongId == request.SongId)
+                    .ExecuteDeleteAsync(cancellationToken);
+                
+                if (deletedRows != 1) 
+                {
+                    throw new Exception("Relation between playlist and song with such key doesn't exist");
+                }
+
+                var updatedRows = await _dbContext.Playlists
+                    .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
+                    .ExecuteUpdateAsync(p =>
+                            p.SetProperty(u => u.CreatedAt, DateTime.UtcNow), cancellationToken);
+
+                if (updatedRows != 1)
+                {
+                    throw new Exception("Playlist with such ID doesn't exist");
+                }
+                
+                await transaction.CommitAsync(cancellationToken);
             }
-
-            int updatedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId &&
-                            p.Id == request.PlaylistId)
-                .ExecuteUpdateAsync(p => p.SetProperty(u => u.CreatedAt, DateTime.UtcNow), 
-                    cancellationToken);
-
-            if (updatedRows != 1)
+            catch
             {
-                throw new Exception("Playlist with such ID doesn't exist");
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
             }
         }
     }

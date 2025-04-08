@@ -1,16 +1,15 @@
 "use client";
 
+import {memo} from "react";
 import { Song } from "@/types/types";
 import SongItem from "@/components/SongItem";
 import useOnPlay from "@/hooks/useOnPlay";
 
-interface PageContentProps {
-  songs: Song[];
-}
-
-const PageContent: React.FC<PageContentProps> = ({
+const PageContent = memo(function PageContent({
   songs
-}) => {
+}: {
+  songs: Song[];
+}) {
   const onPlay = useOnPlay(songs);
 
   if (songs.length === 0) {
@@ -44,6 +43,6 @@ const PageContent: React.FC<PageContentProps> = ({
       ))}
     </div>
   );
-}
+});
  
 export default PageContent;

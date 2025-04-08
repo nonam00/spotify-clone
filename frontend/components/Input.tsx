@@ -1,8 +1,7 @@
 import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({ 
   className,
@@ -18,10 +17,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
         w-full
         rounded-md
         bg-neutral-700
-        border
-        border-transparent
-        px-3
-        py-3
+        border border-transparent
+        px-3 py-3
         text-sm
         file:border-0
         file:bg-transparent

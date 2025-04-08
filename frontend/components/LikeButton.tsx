@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "react-hot-toast";
-import { useEffect, useState } from "react";
+import {useLayoutEffect, useState, useTransition} from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 import useAuthModal from "@/hooks/useAuthModal";
@@ -10,34 +10,40 @@ import checkLikedSong from "@/services/liked/checkLikedSong";
 import addLikedSong from "@/services/liked/addLikedSong";
 import deleteLikedSong from "@/services/liked/deleteLikedSong";
 
-interface LikeButtonProps {
-  songId: string;
-  defaultValue?: boolean;
-}
-
-const LikeButton: React.FC<LikeButtonProps> = ({
+const LikeButton = ({
   songId, 
   defaultValue
+}: {
+  songId: string;
+  defaultValue?: boolean;
 }) => {
   const openAuthModal = useAuthModal(s => s.onOpen);
   const { isAuth } = useUser();
   const [isLiked, setIsLiked] = useState<boolean>(defaultValue ?? false);
+  const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (!isAuth) {
+  useLayoutEffect(() => {
+    if (!isAuth || defaultValue !== undefined) {
       return;
     }
-    if(!defaultValue) {
-      const fetchData = async () => {
-        const response = await checkLikedSong(songId);
-        if (response.ok) {
-          const data = await response.json();
-          if (data) {
-            setIsLiked(true);
-          }
+
+    const abortController = new AbortController();
+
+    const loadLike = async () => {
+      const response = await checkLikedSong(songId, abortController);
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setIsLiked(true);
         }
       }
-      fetchData();
+    };
+
+    loadLike();
+
+    return () => {
+      console.log('clear');
+      abortController.abort();
     }
   }, [songId, isAuth, isLiked, defaultValue]);
 
@@ -47,26 +53,32 @@ const LikeButton: React.FC<LikeButtonProps> = ({
     }
 
     if (isLiked) {
-      const response = await deleteLikedSong(songId);
-      if (response.ok) {
-        setIsLiked(false)
-        toast.success("Like deleted")
-      } else {
-        toast.error("An error occurred while deleting the song from your favorites");
-      }
+      startTransition(async () => {
+        const response = await deleteLikedSong(songId);
+        if (response.ok) {
+          setIsLiked(false)
+          toast.success("Like deleted")
+        } else {
+          toast.error("An error occurred while deleting the song from your favorites");
+        }
+      })
     } else {
-      const response = await addLikedSong(songId); 
-      if (response.ok) {
-        setIsLiked(true);
-        toast.success('Liked');
-      } else {
-        toast.error("An error occurred while adding the song to the favorites");
-      }
+      startTransition(async () => {
+        const response = await addLikedSong(songId);
+        if (response.ok) {
+          setIsLiked(true);
+          toast.success('Liked');
+        } else {
+          toast.error("An error occurred while adding the song to the favorites");
+        }
+      })
     }
   }
+
   return (
     <button
       onClick={handleLike}
+      disabled={isPending}
       className="hover:opacity-75 transition"
     >
       {isLiked

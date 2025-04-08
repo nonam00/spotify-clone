@@ -2,7 +2,7 @@
 
 import {useRouter} from "next/navigation";
 import {FieldValues, SubmitHandler, useForm} from "react-hook-form";
-import {useEffect, useState} from "react";
+import {useLayoutEffect, useTransition} from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -18,40 +18,33 @@ import deleteFile from "@/services/files/deleteFile";
 import updatePlaylist from "@/services/playlists/updatePlaylist";
 
 const PlaylistModal = () => {
-  const [isLoading, setIsLoading] = useState<boolean>();
-  const [onClose, isOpen] = usePlaylistModal(useShallow(s => [s.onClose, s.isOpen]));
-  const [
-      id,
-      title,
-      description,
-      oldImage
-  ] = usePlaylistModal(useShallow(s => [
-    s.id,
-    s.title,
-    s.description,
-    s.imagePath
+  const [playlist, isOpen, onClose] = usePlaylistModal(useShallow(s => [
+    s.playlist,
+    s.isOpen,
+    s.onClose
   ]));
   const { isAuth } = useUser();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue
-  } = useForm<FieldValues>({
+  const {register, handleSubmit, reset, setValue} = useForm<FieldValues>({
     defaultValues: {
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       image: null
     }
   });
 
-  useEffect(() => {
-    setValue("title", title);
-    setValue("description", description);
-    setValue("image", oldImage);
-  }, [description, oldImage, title, setValue]);
+  useLayoutEffect(() => {
+    setValue("title", playlist?.title);
+    setValue("description", playlist?.description);
+    setValue("image", playlist?.imagePath);
+  }, [playlist, setValue]);
+
+  if (!playlist) {
+    onClose();
+    return;
+  }
 
   const onChange = (open: boolean) => {
     if (!open) {
@@ -61,71 +54,69 @@ const PlaylistModal = () => {
   }
 
   const onSubmit: SubmitHandler<FieldValues> = async (values) => {
-    try {
-      setIsLoading(true);
-      const imageFile = values.image?.[0];
-      let imageFilePath = "";
+    startTransition(async () => {
+      try {
+        const imageFile = values.image?.[0];
+        let imageFilePath = "";
 
-      if (!isAuth) {
-        toast.error("The user is not authorized!");
-        onClose();
-        return;
-      }
-
-      if (!values.title) {
-        toast.error('Missing required fields');
-        return;
-      }
-
-      // TODO:cache control
-      // Upload image file
-      if (imageFile) {
-        const imageForm = new FormData();
-        imageForm.append("image", imageFile);
-
-        const imageUploadResponse = await uploadFile(imageForm, "image");
-
-        if (!imageUploadResponse.ok) {
-          imageFilePath = await imageUploadResponse.json();
-
-          const imageDeleteResponse = await deleteFile(oldImage);
-
-          if (!imageDeleteResponse.ok) {
-            setIsLoading(false);
-            return toast.error("An error occurred while deleting old image file.");
-          }
-        } else {
-          setIsLoading(false);
-          return toast.error("An error occurred while uploading image file.")
+        if (!isAuth) {
+          toast.error("The user is not authorized!");
+          onClose();
+          return;
         }
+
+        if (!values.title) {
+          toast.error('Missing required fields');
+          return;
+        }
+
+        // TODO:cache control
+        // Upload image file
+        if (imageFile) {
+          const imageForm = new FormData();
+          imageForm.append("image", imageFile);
+
+          const imageUploadResponse = await uploadFile(imageForm, "image");
+
+          if (imageUploadResponse.ok) {
+            imageFilePath = await imageUploadResponse.json();
+
+            const imageDeleteResponse = await deleteFile(playlist.imagePath ?? "");
+
+            if (!imageDeleteResponse.ok) {
+              toast.error("An error occurred while deleting old image file.");
+              return
+            }
+          } else {
+            toast.error("An error occurred while uploading image file.")
+            return
+          }
+        }
+
+        if (imageFilePath === "") {
+          imageFilePath = playlist.imagePath ?? ""; // image is variable from store
+        }
+
+        const updateResponse = await updatePlaylist(
+          playlist.id,
+          values.title,
+          values.description ?? null,
+          imageFilePath
+        );
+
+        if (!updateResponse.ok) {
+          toast.error("An error occurred while updating the playlist info");
+          return;
+        }
+
+        router.refresh();
+        toast.success('Playlist information saved!');
+        reset();
+        onClose();
+      } catch {
+        toast.error('Something went wrong');
       }
-
-      if (imageFilePath === "") {
-        imageFilePath = oldImage; // image is variable from store
-      }
-
-      const updateResponse = await updatePlaylist(
-        id,
-        values.title,
-        values.description ?? null,
-        imageFilePath
-      );
-
-      if (!updateResponse.ok) {
-        setIsLoading(false);
-        return toast.error("An error occurred while updating the playlist info");
-      }
-
-      router.refresh();
-      setIsLoading(false);
-      toast.success('Playlist information saved!');
-      reset();
-      onClose();
-    } catch {
-      toast.error('Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
+    });
   }
 
   return (
@@ -141,13 +132,13 @@ const PlaylistModal = () => {
       >
         <Input
           id="title"
-          disabled={isLoading}
+          disabled={isPending}
           {...register('title', { required: true })}
           placeholder="Playlist Title"
         />
         <Input
           id="description"
-          disabled={isLoading}
+          disabled={isPending}
           {...register('description', { required: false })}
           placeholder="Playlist Description"
         />
@@ -158,12 +149,12 @@ const PlaylistModal = () => {
           <Input
             id="image"
             type="file"
-            disabled={isLoading}
+            disabled={isPending}
             accept="image/*"
             {...register('image', { required: false })}
           />
         </div>
-        <Button disabled={isLoading} type="submit">
+        <Button disabled={isPending} type="submit">
           Edit
         </Button>
       </form>

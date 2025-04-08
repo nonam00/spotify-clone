@@ -12,15 +12,13 @@ import { useUser } from "@/hooks/useUser";
 
 import Button from "./Button";
 
-interface HeaderProps {
-  children: React.ReactNode;
-  className?: string
-}
-
-const Header: React.FC<HeaderProps> = ({
+const Header = ({
   children,
   className
-}) => {
+}: Readonly<{
+  children: React.ReactNode;
+  className?: string
+}>) => {
   const openAuthModal = useAuthModal(s => s.onOpen);
   const router = useRouter();
 
@@ -37,29 +35,9 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <div
-      className={twMerge(`
-        h-fit
-        bg-gradient-to-b
-        from-emerald-800
-        p-6
-      `,
-        className
-      )}
-    >
-      <div className="
-        w-full
-        mb-4
-        flex
-        items-center
-        justify-between
-      ">
-        <div className="
-          hidden 
-          md:flex 
-          gap-x-2 
-          items-center
-        ">
+    <div className={twMerge(`h-fit bg-gradient-to-b from-emerald-800 p-6`, className)}>
+      <div className="w-full mb-4 flex items-center justify-between">
+        <div className="hidden md:flex gap-x-2 items-center">
           <button
             onClick={() => router.back()}
             className="
@@ -121,14 +99,7 @@ const Header: React.FC<HeaderProps> = ({
             <HiSearch className="text-black" size={20}/>
           </button>
         </div>
-        <div
-          className="
-            flex
-            justify-between
-            items-center
-            gap-x-4
-          "
-        >
+        <div className="flex justify-between items-center gap-x-4">
           {user.isAuth ? (
             <div className="flex gap-x-4 items-center">
               <Button
@@ -150,11 +121,7 @@ const Header: React.FC<HeaderProps> = ({
               <div>
                 <Button
                   onClick={openAuthModal}
-                  className="
-                    bg-transparent
-                    text-neutral-300
-                    font-medium
-                  "
+                  className="bg-transparent text-neutral-300  font-medium"
                 >
                   Sign Up
                 </Button>
@@ -162,11 +129,7 @@ const Header: React.FC<HeaderProps> = ({
               <div>
                 <Button
                   onClick={openAuthModal}
-                  className="
-                    bg-white
-                    px-6
-                    py-2
-                  "
+                  className="bg-white px-6 py-2"
                 >
                   Log In
                 </Button>

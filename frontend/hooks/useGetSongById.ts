@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react"
+import {useState, useMemo, useLayoutEffect} from "react"
 
 import { Song } from "@/types/types";
 import { CLIENT_API_URL } from "@/api/http";
@@ -7,25 +7,24 @@ const useGetSongById = (id: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [song, setSong] = useState<Song | undefined>(undefined);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!id) {
       return;
     }
+    const abortController = new AbortController();
 
     setIsLoading(true);
 
-    const fetchSong = async () => {
-      const response = await fetch(`${CLIENT_API_URL}/songs/${id}`);
+    fetch(`${CLIENT_API_URL}/songs/${id}`, {
+      signal: abortController.signal,
+    })
+      .then(res => res.json())
+      .then(setSong)
 
-      if (response.ok) {
-        const data = await response.json();
-        setSong(data as Song);
-      }
-
-      setIsLoading(false);
+    setIsLoading(false);
+    return () => {
+      abortController.abort();
     }
-
-    fetchSong();
   }, [id]);
 
   return useMemo(() => ({

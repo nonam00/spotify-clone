@@ -2,11 +2,12 @@ using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Aws
 {
-    public class S3Provider : IS3Provider
+    public class S3Provider : IStorageProvider
     {
         private readonly AmazonS3Client _s3;
         private readonly AwsOptions _options;
@@ -18,7 +19,7 @@ namespace Infrastructure.Aws
             (
                 _options.AccessKeyId,
                 _options.SecretAccessKey,
-                new AmazonS3Config()
+                new AmazonS3Config
                 {
                     RegionEndpoint = null,
                     ServiceURL = _options.ServiceURL 
@@ -26,7 +27,7 @@ namespace Infrastructure.Aws
             );
         }
 
-        public async Task<HttpStatusCode> UploadFile(Stream fileStream, string key, string contentType)
+        public async Task<bool> UploadFile(Stream fileStream, string key, string contentType)
         {
             var putObjectRequest = new PutObjectRequest
             {
@@ -37,10 +38,10 @@ namespace Infrastructure.Aws
             };
 
             var response = await _s3.PutObjectAsync(putObjectRequest);
-            return response.HttpStatusCode;
+            return (int)response.HttpStatusCode is >= 200 and < 300;
         }
          
-        public async Task<HttpStatusCode> DeleteFile(string key)
+        public async Task<bool> DeleteFile(string key)
         {
             var deleteObjectRequest = new DeleteObjectRequest
             {
@@ -49,7 +50,7 @@ namespace Infrastructure.Aws
             };
 
             var response = await _s3.DeleteObjectAsync(deleteObjectRequest);
-            return response.HttpStatusCode;
+            return (int)response.HttpStatusCode is >= 200 and < 300;
         }
     }
 }

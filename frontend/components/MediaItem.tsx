@@ -2,19 +2,18 @@
 "use client";
 
 import Image from "next/image";
+import {memo} from "react";
 
 import { Playlist, Song } from "@/types/types";
 import { CLIENT_API_URL } from "@/api/http";
 
-interface MediaItemProps {
-  data: Song | Playlist;
-  onClick?: (id: string) => void;
-}
-
-const MediaItem: React.FC<MediaItemProps> = ({
+const MediaItem = memo(function MediaItem({
   data,
   onClick
-}) => {
+}: {
+  data: Song | Playlist;
+  onClick?: (id: string) => void;
+}) {
   const handleClick = () => {
     if (onClick) {
       return onClick(data.id);
@@ -35,15 +34,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
         rounded-md  
       "
     >
-      <div
-        className="
-          relative
-          rounded-md
-          min-h-[48px]
-          min-w-[48px]
-          overflow-hidden
-        "
-      >
+      <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
         <Image
           fill
           src={data.imagePath
@@ -55,12 +46,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
           className="object-cover"
         />
       </div>
-      <div className="
-        flex
-        flex-col
-        gap-y-1
-        overflow-hidden
-      ">
+      <div className="flex flex-col gap-y-1 overflow-hidden">
         <p className="text-white trancate">
           {data.title}
         </p>
@@ -70,6 +56,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
       </div>
     </div>
   );
-}
+});
  
 export default MediaItem;

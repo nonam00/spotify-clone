@@ -8,6 +8,7 @@ using Application.Files.Commands.DeleteFile;
 namespace WebAPI.Controllers
 {
     [Route("{version:apiVersion}/files"), ApiVersionNeutral]
+    //TODO: move to the separate service to reduce load on the main api
     public class FilesController : BaseController
     {
         private readonly string _fullBucketUrl;
@@ -105,7 +106,7 @@ namespace WebAPI.Controllers
             var fullPath = _songsPath + path;
             return !System.IO.File.Exists(fullPath)
                 ? Task.FromResult<IActionResult>(BadRequest())
-                : Task.FromResult<IActionResult>(PhysicalFile(fullPath, "application/ostet-stream", true));
+                : Task.FromResult<IActionResult>(PhysicalFile(fullPath, "application/octet-stream", true));
         }
 
         /// <summary>
