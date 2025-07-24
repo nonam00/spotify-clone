@@ -43,7 +43,8 @@ const ListItem = ({
           className="object-cover"
           fill
           src={image}
-          alt="Image"
+          alt={name}
+          loading="lazy"
           unoptimized
         />
       </div>

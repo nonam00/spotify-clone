@@ -20,13 +20,14 @@ const PlaylistImage = ({
   return (
     <Image
       fill
-      alt="Playlist"
+      alt={playlist.title}
       className="object-cover rounded-xl hover:opacity-75 transition"
       src={playlist.imagePath
         ? `${CLIENT_API_URL}/files/image/${playlist.imagePath}`
         : "/images/playlist.webp"
       }
       unoptimized
+      loading="lazy"
       onClick={onClick}
     />
   )
