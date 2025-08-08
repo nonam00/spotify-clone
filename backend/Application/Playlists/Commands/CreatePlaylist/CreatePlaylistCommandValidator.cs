@@ -1,13 +1,11 @@
 using FluentValidation;
 
-namespace Application.Playlists.Commands.CreatePlaylist
+namespace Application.Playlists.Commands.CreatePlaylist;
+
+public class CreatePlaylistCommandValidator : AbstractValidator<CreatePlaylistCommand>
 {
-    public class CreatePlaylistCommandValidator
-      : AbstractValidator<CreatePlaylistCommand>
+    public CreatePlaylistCommandValidator()
     {
-        public CreatePlaylistCommandValidator()
-        {
-            RuleFor(c => c.UserId).NotEqual(Guid.Empty);
-        }
+        RuleFor(c => c.UserId).NotEqual(Guid.Empty);
     }
 }

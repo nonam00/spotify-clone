@@ -21,7 +21,7 @@ using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlaylistId;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySearchStringAndPlaylistId;
 using Application.LikedSongs.Queries.GetLikedSongList;
-
+using Application.Playlists.Models;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;

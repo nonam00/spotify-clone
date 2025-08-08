@@ -1,33 +1,27 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-using Application.Interfaces;
+using Application.Playlists.Interfaces;
 
-namespace Application.Playlists.Commands.UpdatePlaylist
+namespace Application.Playlists.Commands.UpdatePlaylist;
+
+public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistCommand>
 {
-    public class UpdatePlaylistCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<UpdatePlaylistCommand>
+    private readonly IPlaylistsRepository _playlistsRepository;
+
+    public UpdatePlaylistCommandHandler(IPlaylistsRepository playlistsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _playlistsRepository = playlistsRepository;
+    }
 
-        public async Task Handle(UpdatePlaylistCommand request,
-            CancellationToken cancellationToken)
-        {
-            var updatedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(u => u.Title, request.Title)
-                    .SetProperty(u => u.Description,
-                        request.Description != "" ? request.Description : null)
-                    .SetProperty(u => u.ImagePath,
-                        u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
-                    .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
-                    cancellationToken);
-
-            if (updatedRows != 1)
-            {
-                throw new Exception("Playlist with such ID doesn't exist");
-            }
-        }
+    public async Task Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
+    {
+        await _playlistsRepository.Update(
+            request.PlaylistId,
+            request.UserId,
+            request.Title,
+            request.Description,
+            request.ImagePath,
+            cancellationToken
+        );
     }
 }

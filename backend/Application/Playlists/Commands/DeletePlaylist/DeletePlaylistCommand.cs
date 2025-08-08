@@ -1,10 +1,9 @@
 using MediatR;
 
-namespace Application.Playlists.Commands.DeletePlaylist
+namespace Application.Playlists.Commands.DeletePlaylist;
+
+public class DeletePlaylistCommand : IRequest
 {
-    public class DeletePlaylistCommand : IRequest
-    {
-        public Guid UserId { get; init;}
-        public Guid PlaylistId { get; init; }
-    }
+    public Guid UserId { get; init;}
+    public Guid PlaylistId { get; init; }
 }

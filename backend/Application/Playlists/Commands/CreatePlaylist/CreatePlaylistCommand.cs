@@ -1,9 +1,8 @@
 using MediatR;
 
-namespace Application.Playlists.Commands.CreatePlaylist
+namespace Application.Playlists.Commands.CreatePlaylist;
+
+public class CreatePlaylistCommand : IRequest<Guid>
 {
-    public class CreatePlaylistCommand : IRequest<Guid>
-    {
-        public Guid UserId { get; init; }
-    }
+    public Guid UserId { get; init; }
 }

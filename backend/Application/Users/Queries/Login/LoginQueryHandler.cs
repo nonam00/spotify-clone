@@ -23,7 +23,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, string>
     public async Task<string> Handle(LoginQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.Get(request.Email, cancellationToken)
+        var user = await _usersRepository.GetByEmail(request.Email, cancellationToken)
                    ?? throw new LoginException("Invalid email or password. Please try again.");
             
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))

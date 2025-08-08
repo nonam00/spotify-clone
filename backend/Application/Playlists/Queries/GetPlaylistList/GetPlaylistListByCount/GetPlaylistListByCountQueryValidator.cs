@@ -1,14 +1,12 @@
 using FluentValidation;
 
-namespace Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount
+namespace Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
+
+public class GetPlaylistListByCountQueryValidator : AbstractValidator<GetPlaylistListByCountQuery>
 {
-    public class GetPlaylistListByCountQueryValidator
-        : AbstractValidator<GetPlaylistListByCountQuery>
+    public GetPlaylistListByCountQueryValidator()
     {
-        public GetPlaylistListByCountQueryValidator()
-        {
-            RuleFor(q => q.UserId).NotEqual(Guid.Empty);
-            RuleFor(q => q.Count).GreaterThan(0);
-        }
+        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
+        RuleFor(q => q.Count).GreaterThan(0);
     }
 }

@@ -1,14 +1,12 @@
 using FluentValidation;
 
-namespace Application.Playlists.Commands.DeletePlaylist
+namespace Application.Playlists.Commands.DeletePlaylist;
+
+public class DeletePlaylistCommandValidator : AbstractValidator<DeletePlaylistCommand>
 {
-    public class DeletePlaylistCommandValidator
-      : AbstractValidator<DeletePlaylistCommand>
+    public DeletePlaylistCommandValidator()
     {
-        public DeletePlaylistCommandValidator()
-        {
-            RuleFor(c => c.UserId).NotEqual(Guid.Empty);
-            RuleFor(c => c.PlaylistId).NotEqual(Guid.Empty);
-        }
+        RuleFor(c => c.UserId).NotEqual(Guid.Empty);
+        RuleFor(c => c.PlaylistId).NotEqual(Guid.Empty);
     }
 }

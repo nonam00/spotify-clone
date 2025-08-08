@@ -1,6 +1,7 @@
-﻿using Application.Users.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+
 using Domain;
-using Microsoft.EntityFrameworkCore;
+using Application.Users.Interfaces;
 
 namespace Persistence.Repositories;
 
@@ -19,19 +20,21 @@ public class UsersRepository : IUsersRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<User?> Get(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
-                       .AsNoTracking()
-                       .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        
         return user;
     }
 
-    public async Task<User?> Get(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
         return user;
     }
 

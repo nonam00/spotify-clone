@@ -1,35 +1,32 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 using Domain;
-using Application.Interfaces;
+using Application.Playlists.Interfaces;
 
-namespace Application.Playlists.Commands.CreatePlaylist
+namespace Application.Playlists.Commands.CreatePlaylist;
+
+public class CreatePlaylistCommandHandler : IRequestHandler<CreatePlaylistCommand, Guid>
 {
-    public class CreatePlaylistCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<CreatePlaylistCommand, Guid>
+    private readonly IPlaylistsRepository _playlistsRepository;
+
+    public CreatePlaylistCommandHandler(IPlaylistsRepository playlistsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _playlistsRepository = playlistsRepository;
+    }
 
-        public async Task<Guid> Handle(
-            CreatePlaylistCommand request,
-            CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreatePlaylistCommand request, CancellationToken cancellationToken)
+    {
+        var count = await _playlistsRepository.GetCount(request.UserId, cancellationToken);
+
+        var playlist = new Playlist
         {
-            var count = await _dbContext.Playlists
-                .AsNoTracking()
-                .CountAsync(p => p.UserId == request.UserId, cancellationToken);
+            Id = Guid.NewGuid(),
+            UserId = request.UserId,
+            Title = $"Playlist #{count + 1}"
+        };
 
-            var playlist = new Playlist
-            {
-                Id = Guid.NewGuid(),
-                UserId = request.UserId,
-                Title = $"Playlist #{count + 1}"
-            };
+        await _playlistsRepository.Add(playlist, cancellationToken);
             
-            await _dbContext.Playlists.AddAsync(playlist, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            
-            return playlist.Id;
-        }
+        return playlist.Id;
     }
 }

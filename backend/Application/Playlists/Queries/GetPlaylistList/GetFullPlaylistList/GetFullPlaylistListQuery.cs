@@ -1,9 +1,10 @@
 using MediatR;
 
-namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList
+using Application.Playlists.Models;
+
+namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
+
+public class GetFullPlaylistListQuery : IRequest<PlaylistListVm>
 {
-    public class GetFullPlaylistListQuery : IRequest<PlaylistListVm>
-    {
-        public Guid UserId { get; init; }
-    } 
+    public Guid UserId { get; init; }
 }

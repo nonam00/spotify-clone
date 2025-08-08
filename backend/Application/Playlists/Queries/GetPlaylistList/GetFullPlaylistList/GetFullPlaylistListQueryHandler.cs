@@ -1,32 +1,24 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-using Application.Interfaces;
+using Application.Playlists.Interfaces;
+using Application.Playlists.Models;
 
-namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList
+namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
+
+public class GetPlaylistListByUserIdQueryHandler : IRequestHandler<GetFullPlaylistListQuery, PlaylistListVm>
 {
-    public class GetPlaylistListByUserIdQueryHandler(
-        ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetFullPlaylistListQuery, PlaylistListVm>
+    private readonly IPlaylistsRepository _playlistsRepository;
+    public GetPlaylistListByUserIdQueryHandler(IPlaylistsRepository playlistsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+        _playlistsRepository = playlistsRepository;
+    }
 
-        public async Task<PlaylistListVm> Handle(
-            GetFullPlaylistListQuery request,
-            CancellationToken cancellationToken)
-        {
-            var list = await _dbContext.Playlists
-                .AsNoTracking()
-                .Where(p => p.UserId == request.UserId)
-                .OrderByDescending(p => p.CreatedAt)
-                .ProjectTo<PlaylistVm>(_mapper.ConfigurationProvider)
-                .ToListAsync(cancellationToken);
+    public async Task<PlaylistListVm> Handle(
+        GetFullPlaylistListQuery request,
+        CancellationToken cancellationToken)
+    {
+        var list = await _playlistsRepository.GetList(request.UserId, cancellationToken);
 
-            return new PlaylistListVm { Playlists = list };
-        }
+        return new PlaylistListVm { Playlists = list };
     }
 }
-
