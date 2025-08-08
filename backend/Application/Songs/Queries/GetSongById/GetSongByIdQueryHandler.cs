@@ -1,27 +1,22 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 
-using Application.Interfaces;
+using Application.Songs.Interfaces;
+using Application.Songs.Models;
 
-namespace Application.Songs.Queries.GetSongById
+namespace Application.Songs.Queries.GetSongById;
+
+public class GetSongByIdQueryHandler : IRequestHandler<GetSongByIdQuery, SongVm>
 {
-    public class GetSongByIdQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetSongByIdQuery, SongVm>
+    private readonly ISongsRepository _songsRepository;
+
+    public GetSongByIdQueryHandler(ISongsRepository songsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+        _songsRepository = songsRepository;
+    }
 
-        public async Task<SongVm> Handle(GetSongByIdQuery request, CancellationToken cancellationToken)
-        {
-            var song = await _dbContext.Songs
-                .AsNoTracking()
-                .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync(s => s.Id == request.SongId, cancellationToken)
-                ?? throw new Exception("Song not found");
-
-            return song;
-        }
+    public async Task<SongVm> Handle(GetSongByIdQuery request, CancellationToken cancellationToken)
+    {
+        var song = await _songsRepository.GetById(request.SongId, cancellationToken);
+        return song;
     }
 }

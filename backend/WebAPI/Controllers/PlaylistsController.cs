@@ -4,17 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.Playlists.Queries.GetPlaylistById;
-using Application.Playlists.Queries.GetPlaylistList;
 using Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
 using Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
-using Application.Playlists.Queries;
 using Application.Playlists.Commands.CreatePlaylist;
 using Application.Playlists.Commands.UpdatePlaylist;
 using Application.Playlists.Commands.DeletePlaylist;
 
 using Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
-using Application.Songs.Queries.GetSongList;
-
 using Application.PlaylistSongs.Commands.CreatePlaylistSong;
 using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 
@@ -22,6 +18,7 @@ using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlaylist
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySearchStringAndPlaylistId;
 using Application.LikedSongs.Queries.GetLikedSongList;
 using Application.Playlists.Models;
+using Application.Songs.Models;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;

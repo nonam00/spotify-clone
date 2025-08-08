@@ -1,28 +1,22 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-using Application.Interfaces;
+using Application.Songs.Interfaces;
+using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetNewestSongList
 {
-    public class GetNewestSongListQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetNewestSongListQuery, SongListVm>
+    public class GetNewestSongListQueryHandler : IRequestHandler<GetNewestSongListQuery, SongListVm>
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+        private readonly ISongsRepository _songsRepository;
 
-        public async Task<SongListVm> Handle(GetNewestSongListQuery request,
-            CancellationToken cancellationToken)
+        public GetNewestSongListQueryHandler(ISongsRepository songsRepository)
         {
-            var songs = await _dbContext.Songs
-                .AsNoTracking()
-                .OrderByDescending(s => s.CreatedAt)
-                .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-                .Take(100)
-                .ToListAsync(cancellationToken);
+            _songsRepository = songsRepository;
+        }
 
+        public async Task<SongListVm> Handle(GetNewestSongListQuery request, CancellationToken cancellationToken)
+        {
+            var songs = await _songsRepository.TakeNewestList(100, cancellationToken);
             return new SongListVm { Songs = songs };
         }
     }

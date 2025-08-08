@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using Application.Songs.Commands.CreateSong;
-using Application.Songs.Queries.GetSongList;
+using Application.Songs.Models;
 using Application.Songs.Queries.GetSongList.GetNewestSongList;
 using Application.Songs.Queries.GetSongList.GetAllSongs;
 using Application.Songs.Queries.GetSongById;
-using Application.Songs.Queries;
 using Application.Songs.Queries.GetSongList.GetSongListBySearch;
 using WebAPI.Models;
 

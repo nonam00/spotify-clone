@@ -1,28 +1,22 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
 
-using Application.Interfaces;
+using Application.Songs.Interfaces;
+using Application.Songs.Models;
 
-namespace Application.Songs.Queries.GetSongList.GetAllSongs
+namespace Application.Songs.Queries.GetSongList.GetAllSongs;
+
+public class GetAllSongsQueryHandler : IRequestHandler<GetAllSongsQuery, SongListVm>
 {
-    public class GetAllSongsQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetAllSongsQuery, SongListVm>
-    {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+    private readonly ISongsRepository _songsRepository;
 
-        public async Task<SongListVm> Handle(GetAllSongsQuery request,
-            CancellationToken cancellationToken)
-        {
-            var songs = await _dbContext.Songs
-                .AsNoTracking()
-                .OrderByDescending(s => s.CreatedAt)
-                .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-                .ToListAsync(cancellationToken);
-            
-            return new SongListVm { Songs = songs };
-        }
+    public GetAllSongsQueryHandler(ISongsRepository songsRepository)
+    {
+        _songsRepository = songsRepository;
+    }
+
+    public async Task<SongListVm> Handle(GetAllSongsQuery request, CancellationToken cancellationToken)
+    {
+        var songs = await _songsRepository.GetList(cancellationToken);
+        return new SongListVm { Songs = songs };
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Application.Interfaces;
 using Application.Playlists.Interfaces;
+using Application.Songs.Interfaces;
 using Application.Users.Interfaces;
 using Persistence.Repositories;
 
@@ -41,7 +42,9 @@ public static class DependencyInjection
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUsersRepository, UsersRepository>();
+        services.AddScoped<ISongsRepository, SongsRepository>();
         services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
+        
         return services;
     }
 }

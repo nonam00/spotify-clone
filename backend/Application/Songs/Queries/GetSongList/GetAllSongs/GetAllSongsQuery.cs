@@ -1,6 +1,7 @@
 ﻿using MediatR;
 
-namespace Application.Songs.Queries.GetSongList.GetAllSongs
-{
-    public class GetAllSongsQuery : IRequest<SongListVm>;
-}
+using Application.Songs.Models;
+
+namespace Application.Songs.Queries.GetSongList.GetAllSongs;
+
+public class GetAllSongsQuery : IRequest<SongListVm>;

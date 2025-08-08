@@ -1,29 +1,23 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-
-using Application.Interfaces;
+using Application.Songs.Interfaces;
+using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId
 {
-    public class GetSongListByPlaylistIdQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
+    public class GetSongListByPlaylistIdQueryHandler: IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+        private readonly ISongsRepository _songsRepository;
 
-        public async Task<SongListVm> Handle(
-            GetSongListByPlaylistIdQuery request,
+        public GetSongListByPlaylistIdQueryHandler(ISongsRepository songsRepository)
+        {
+            _songsRepository = songsRepository;
+        }
+
+        public async Task<SongListVm> Handle(GetSongListByPlaylistIdQuery request,
             CancellationToken cancellationToken)
         {
-            var songs = await _dbContext.PlaylistSongs
-              .AsNoTracking()
-              .Where(ps => ps.PlaylistId == request.PlaylistId)
-              .OrderByDescending(ps => ps.CreatedAt)
-              .Select(ps => ps.Song)
-              .ProjectTo<SongVm>(_mapper.ConfigurationProvider)
-              .ToListAsync(cancellationToken);
+            var songs = await _songsRepository.GetListByPlaylistId(
+                request.PlaylistId, cancellationToken);
             
             return new SongListVm { Songs = songs };
         }
