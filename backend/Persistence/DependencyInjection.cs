@@ -2,8 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Application.Interfaces;
+using Application.LikedSongs.Interfaces;
 using Application.Playlists.Interfaces;
+using Application.PlaylistSongs.Interfaces;
 using Application.Songs.Interfaces;
 using Application.Users.Interfaces;
 using Persistence.Repositories;
@@ -33,9 +34,7 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString + dbPassword)
                 .UseSnakeCaseNamingConvention();
         });
-
-        services.AddScoped<ISongsDbContext>(provider => provider.GetRequiredService<SongsDbContext>());
-
+        
         return services;
     }
 
@@ -44,6 +43,8 @@ public static class DependencyInjection
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<ISongsRepository, SongsRepository>();
         services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
+        services.AddScoped<ILikedSongsRepository, LikedSongsRepository>();
+        services.AddScoped<IPlaylistsSongsRepository, PlaylistsSongsRepository>();
         
         return services;
     }

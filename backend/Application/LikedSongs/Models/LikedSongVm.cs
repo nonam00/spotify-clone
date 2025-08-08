@@ -1,10 +1,8 @@
-﻿using MediatR;
+﻿namespace Application.LikedSongs.Models;
 
-namespace Application.Songs.Commands.CreateSong;
-
-public class CreateSongCommand : IRequest<Guid>
+public class LikedSongVm
 {
-    public Guid UserId { get; init; }
+    public Guid Id { get; init; }
     public string Title { get; init; } = null!;
     public string Author { get; init; } = null!;
     public string SongPath { get; init; } = null!;

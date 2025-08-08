@@ -2,10 +2,8 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
-using Application;
-using Application.Interfaces;
-using Application.Common.Mappings;
 
+using Application;
 using Infrastructure;
 using Persistence;
 
@@ -14,12 +12,6 @@ using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
-
-builder.Services.AddAutoMapper(config =>
-{
-    config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
-    config.AddProfile(new AssemblyMappingProfile(typeof(ISongsDbContext).Assembly));
-});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);

@@ -45,7 +45,7 @@ public class SongsRepository : ISongsRepository
             .AsNoTracking()
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
-            .Take(100)
+            .Take(count)
             .ToListAsync(cancellationToken);
 
         return songs;

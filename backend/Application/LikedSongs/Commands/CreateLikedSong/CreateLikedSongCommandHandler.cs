@@ -1,28 +1,29 @@
-﻿using Application.Interfaces;
-using MediatR;
+﻿using MediatR;
 
 using Domain;
+using Application.LikedSongs.Interfaces;
 
-namespace Application.LikedSongs.Commands.CreateLikedSong
+namespace Application.LikedSongs.Commands.CreateLikedSong;
+
+public class CreateLikedSongCommandHandler : IRequestHandler<CreateLikedSongCommand, string>
 {
-    public class CreateLikedSongCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<CreateLikedSongCommand, string>
+    private readonly ILikedSongsRepository _likedSongsRepository;
+
+    public CreateLikedSongCommandHandler(ILikedSongsRepository likedSongsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _likedSongsRepository = likedSongsRepository;
+    }
 
-        public async Task<string> Handle(CreateLikedSongCommand request,
-            CancellationToken cancellationToken)
+    public async Task<string> Handle(CreateLikedSongCommand request, CancellationToken cancellationToken)
+    {
+        var likedSong = new LikedSong
         {
-            var likedSong = new LikedSong
-            {
-                UserId = request.UserId,
-                SongId = request.SongId
-            };
+            UserId = request.UserId,
+            SongId = request.SongId
+        };
 
-            await _dbContext.LikedSongs.AddAsync(likedSong, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+        await _likedSongsRepository.Add(likedSong, cancellationToken);
 
-            return $"{likedSong.UserId}:{likedSong.SongId}";
-        }
+        return $"{likedSong.UserId}:{likedSong.SongId}";
     }
 }

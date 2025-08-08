@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Application.Songs.Enums;
 using Microsoft.AspNetCore.Mvc;
+
+using Application.Songs.Enums;
 
 namespace WebAPI.Models;
 

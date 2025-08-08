@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -15,10 +14,8 @@ namespace WebAPI.Controllers;
 
 [Produces("application/json")]
 [Route("{version:apiVersion}/songs"), ApiVersionNeutral]
-public class SongsController(IMapper mapper) : BaseController
+public class SongsController : BaseController
 {
-    private readonly IMapper _mapper = mapper;
-
     /// <summary>
     /// Gets songs
     /// </summary>
@@ -137,8 +134,15 @@ public class SongsController(IMapper mapper) : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto)
     {
-        var command = _mapper.Map<CreateSongCommand>(createSongDto);
-        command.UserId = UserId;
+        var command = new CreateSongCommand
+        {
+            UserId = UserId,
+            Title = createSongDto.Title,
+            Author = createSongDto.Author,
+            SongPath = createSongDto.SongPath,
+            ImagePath = createSongDto.ImagePath
+        };
+        
         var songId = await Mediator.Send(command);
         return Ok(songId);
     }

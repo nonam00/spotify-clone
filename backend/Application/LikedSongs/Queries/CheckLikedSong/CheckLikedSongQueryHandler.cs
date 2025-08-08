@@ -1,23 +1,20 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using Application.LikedSongs.Interfaces;
+using MediatR;
 
-using Application.Interfaces;
+namespace Application.LikedSongs.Queries.CheckLikedSong;
 
-namespace Application.LikedSongs.Queries.CheckLikedSong
+public class CheckLikedSongQueryHandler : IRequestHandler<CheckLikedSongQuery, bool>
 {
-    public class CheckLikedSongQueryHandler(ISongsDbContext dbContext)
-        : IRequestHandler<CheckLikedSongQuery, bool>
-    {
-        private readonly ISongsDbContext _dbContext = dbContext;
+    private readonly ILikedSongsRepository _likedSongsRepository;
 
-        public async Task<bool> Handle(CheckLikedSongQuery request,
-            CancellationToken cancellationToken)
-        {
-            return await _dbContext.LikedSongs
-                .AsNoTracking()  
-                .AnyAsync(l => l.SongId == request.SongId &&
-                            l.UserId == request.UserId,
-                            cancellationToken);
-        }
+    public CheckLikedSongQueryHandler(ILikedSongsRepository likedSongsRepository)
+    {
+        _likedSongsRepository = likedSongsRepository;
+    }
+
+    public async Task<bool> Handle(CheckLikedSongQuery request,
+        CancellationToken cancellationToken)
+    {
+        return await _likedSongsRepository.CheckIfExists(request.UserId, request.SongId, cancellationToken);
     }
 }

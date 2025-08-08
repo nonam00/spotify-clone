@@ -1,25 +1,25 @@
 using MediatR;
+
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
-namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId
+namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
+
+public class GetSongListByPlaylistIdQueryHandler: IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
 {
-    public class GetSongListByPlaylistIdQueryHandler: IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
+    private readonly ISongsRepository _songsRepository;
+
+    public GetSongListByPlaylistIdQueryHandler(ISongsRepository songsRepository)
     {
-        private readonly ISongsRepository _songsRepository;
+        _songsRepository = songsRepository;
+    }
 
-        public GetSongListByPlaylistIdQueryHandler(ISongsRepository songsRepository)
-        {
-            _songsRepository = songsRepository;
-        }
-
-        public async Task<SongListVm> Handle(GetSongListByPlaylistIdQuery request,
-            CancellationToken cancellationToken)
-        {
-            var songs = await _songsRepository.GetListByPlaylistId(
-                request.PlaylistId, cancellationToken);
+    public async Task<SongListVm> Handle(GetSongListByPlaylistIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var songs = await _songsRepository.GetListByPlaylistId(
+            request.PlaylistId, cancellationToken);
             
-            return new SongListVm { Songs = songs };
-        }
+        return new SongListVm { Songs = songs };
     }
 }

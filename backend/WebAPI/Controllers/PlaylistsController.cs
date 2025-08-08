@@ -1,8 +1,8 @@
-using AutoMapper;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Application.Playlists.Models;
 using Application.Playlists.Queries.GetPlaylistById;
 using Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
 using Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
@@ -10,25 +10,21 @@ using Application.Playlists.Commands.CreatePlaylist;
 using Application.Playlists.Commands.UpdatePlaylist;
 using Application.Playlists.Commands.DeletePlaylist;
 
+using Application.Songs.Models;
 using Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
 using Application.PlaylistSongs.Commands.CreatePlaylistSong;
 using Application.PlaylistSongs.Commands.DeletePlaylistSong;
-
-using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListByPlaylistId;
-using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListBySearchStringAndPlaylistId;
-using Application.LikedSongs.Queries.GetLikedSongList;
-using Application.Playlists.Models;
-using Application.Songs.Models;
+using Application.LikedSongs.Models;
+using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
+using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylistBySearch;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
 
 [Produces("application/json")]
 [Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
-public class PlaylistsController(IMapper mapper) : BaseController
+public class PlaylistsController : BaseController
 {
-    private readonly IMapper _mapper = mapper;
-        
     /// <summary>
     /// Gets certain user playlist 
     /// </summary>
@@ -161,12 +157,18 @@ public class PlaylistsController(IMapper mapper) : BaseController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdatePlaylist(Guid playlistId,
-        UpdatePlaylistDto updatePlaylistDto)
+        UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
     {
-        var command = _mapper.Map<UpdatePlaylistCommand>(updatePlaylistDto);
-        command.UserId = UserId;
-        command.PlaylistId = playlistId;
-        await Mediator.Send(command);
+        var command = new UpdatePlaylistCommand
+        {
+            UserId = UserId,
+            PlaylistId = playlistId,
+            Title = updatePlaylistDto.Title,
+            Description = updatePlaylistDto.Description,
+            ImagePath = updatePlaylistDto.ImagePath
+        };
+        
+        await Mediator.Send(command, cancellationToken);
         return NoContent();
     }
         
@@ -187,14 +189,14 @@ public class PlaylistsController(IMapper mapper) : BaseController
     [HttpDelete("{playlistId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeletePlaylist(Guid playlistId)
+    public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var command = new DeletePlaylistCommand
         {
             UserId = UserId,
             PlaylistId = playlistId
         };
-        await Mediator.Send(command);
+        await Mediator.Send(command, cancellationToken);
         return NoContent();
     }
         
@@ -311,7 +313,7 @@ public class PlaylistsController(IMapper mapper) : BaseController
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongs(
         Guid playlistId, CancellationToken cancellationToken)
     {
-        var query = new GetLikedSongListByPlaylistIdQuery
+        var query = new GetLikedSongListForPlaylistQuery
         {
             UserId = UserId,
             PlaylistId = playlistId
@@ -343,7 +345,7 @@ public class PlaylistsController(IMapper mapper) : BaseController
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongsBySearchString(
         Guid playlistId, string searchString, CancellationToken cancellationToken)
     {
-        var query = new GetLikedSongListBySearchStringAndPlaylistIdQuery
+        var query = new GetLikedSongListForPlaylistBySearchQuery
         {
             UserId = UserId,
             PlaylistId = playlistId,

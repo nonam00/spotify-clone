@@ -1,28 +1,24 @@
-﻿using AutoMapper;
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Application.Users.Models;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Queries.Login;
 using Application.Users.Queries.GetUserInfo;
-
-using Application.LikedSongs.Queries.GetLikedSongList.GetFullLikedSongList;
+using Application.LikedSongs.Models;
 using Application.LikedSongs.Queries.CheckLikedSong;
-using Application.LikedSongs.Queries.GetLikedSongList;
 using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
-using Application.Users.Models;
+using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
 
 [Produces("application/json")]
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
-public class UsersController(IMapper mapper) : BaseController
+public class UsersController : BaseController
 {
-    private readonly IMapper _mapper = mapper;
-
     /// <summary>
     /// Registries the new user
     /// </summary>
@@ -36,15 +32,20 @@ public class UsersController(IMapper mapper) : BaseController
     ///     }
     ///     
     /// </remarks>
-    /// <param name="registerDto">RegisterDto object</param>
+    /// <param name="userCredentialsDto">UserCredentials object</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="201">Success</response>
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> Register(
-        [FromForm] RegisterDto registerDto, CancellationToken cancellationToken)
+        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
-        var command = _mapper.Map<CreateUserCommand>(registerDto);
+        var command = new CreateUserCommand
+        {
+            Email = userCredentialsDto.Email,
+            Password = userCredentialsDto.Password
+        };
+        
         var accessToken = await Mediator.Send(command, cancellationToken);
 
         HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
@@ -70,15 +71,20 @@ public class UsersController(IMapper mapper) : BaseController
     ///     }
     /// 
     /// </remarks>
-    /// <param name="loginDto">LoginDto object</param>
+    /// <param name="userCredentialsDto">LoginDto object</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="200">Success</response>
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Login(
-        [FromForm] LoginDto loginDto, CancellationToken cancellationToken)
+        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
-        var query = _mapper.Map<LoginQuery>(loginDto);
+        var query = new LoginQuery
+        {
+            Email = userCredentialsDto.Email,
+            Password = userCredentialsDto.Password
+        };
+        
         var accessToken = await Mediator.Send(query, cancellationToken);
 
         HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
@@ -154,7 +160,7 @@ public class UsersController(IMapper mapper) : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongList(CancellationToken cancellationToken)
     {
-        var query = new GetFullLikedSongListQuery
+        var query = new GetLikedSongListQuery
         {
             UserId = UserId
         };
@@ -229,7 +235,7 @@ public class UsersController(IMapper mapper) : BaseController
     /// 
     /// </remarks>
     /// <param name="songId">
-    /// Id of the song to remove from user favorites 
+    /// ID of the song to remove from user favorites 
     /// </param>
     /// <response code="204">Success</response>
     /// <response code="401">If user is unauthorized</response>
