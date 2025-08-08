@@ -1,27 +1,30 @@
-﻿using Application.Interfaces;
-using AutoMapper;
+﻿using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-namespace Application.Users.Queries.GetUserInfo
+using Application.Users.Interfaces;
+using Application.Users.Models;
+
+namespace Application.Users.Queries.GetUserInfo;
+
+public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInfo>
 {
-    public class GetUserInfoQueryHandler(ISongsDbContext dbContext, IMapper mapper)
-        : IRequestHandler<GetUserInfoQuery, UserInfo>
+    private readonly IUsersRepository _usersRepository;
+    private readonly IMapper _mapper;
+
+    public GetUserInfoQueryHandler(IUsersRepository usersRepository, IMapper mapper)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IMapper _mapper = mapper;
+        _usersRepository = usersRepository;
+        _mapper = mapper;
+    }
 
-        public async Task<UserInfo> Handle(GetUserInfoQuery request,
-            CancellationToken cancellationToken)
-        {
-            var user = await _dbContext.Users
-                .AsNoTracking()
-                .SingleOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
-                ?? throw new Exception("Invalid current user id");
+    public async Task<UserInfo> Handle(GetUserInfoQuery request,
+        CancellationToken cancellationToken)
+    {
+        var user = await _usersRepository.Get(request.UserId, cancellationToken)
+                   ?? throw new Exception("Invalid current user id");
 
-            var userVm = _mapper.Map<UserInfo>(user);
+        var userVm = _mapper.Map<UserInfo>(user);
 
-            return userVm;
-        }
+        return userVm;
     }
 }

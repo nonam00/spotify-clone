@@ -4,23 +4,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories;
 
-public class UserRepository : IUserRepository
+public class UsersRepository : IUsersRepository
 {
     private readonly SongsDbContext _dbContext;
 
-    public UserRepository(SongsDbContext dbContext)
+    public UsersRepository(SongsDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task CreateUser(User user, CancellationToken cancellationToken = default)
+    public async Task Add(User user, CancellationToken cancellationToken = default)
     {
-        
+        await _dbContext.Users.AddAsync(user, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<User> GetUser(CancellationToken cancellationToken = default)
+    public async Task<User?> Get(string email, CancellationToken cancellationToken = default)
     {
-        
+        var user = await _dbContext.Users
+                       .AsNoTracking()
+                       .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        return user;
+    }
+
+    public async Task<User?> Get(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        return user;
     }
 
     public async Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default)

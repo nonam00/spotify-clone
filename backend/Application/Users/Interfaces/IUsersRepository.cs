@@ -2,9 +2,10 @@
 
 namespace Application.Users.Interfaces;
 
-public interface IUserRepository
+public interface IUsersRepository
 {
-    Task CreateUser(User user, CancellationToken cancellationToken = default);
-    Task<User> GetUser(CancellationToken cancellationToken = default);
+    Task Add(User user, CancellationToken cancellationToken = default);
+    Task<User?> Get(string email, CancellationToken cancellationToken = default);
+    Task<User?> Get(Guid id, CancellationToken cancellationToken = default);
     Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default);
 }

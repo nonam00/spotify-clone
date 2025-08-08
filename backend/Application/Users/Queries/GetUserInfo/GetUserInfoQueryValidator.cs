@@ -1,13 +1,11 @@
 ﻿using FluentValidation;
 
-namespace Application.Users.Queries.GetUserInfo
+namespace Application.Users.Queries.GetUserInfo;
+
+public class GetUserInfoQueryValidator : AbstractValidator<GetUserInfoQuery>    
 {
-    public class GetUserInfoQueryValidator
-        : AbstractValidator<GetUserInfoQuery>    
+    public GetUserInfoQueryValidator()
     {
-        public GetUserInfoQueryValidator()
-        {
-            RuleFor(q => q.UserId).NotEqual(Guid.Empty);
-        }
+        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
     }
 }

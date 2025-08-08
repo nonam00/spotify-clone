@@ -1,40 +1,38 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 using Application.Common.Exceptions;
-using Application.Interfaces.Auth;
-using Application.Interfaces;
+using Application.Users.Interfaces;
 
-namespace Application.Users.Queries.Login
+namespace Application.Users.Queries.Login;
+
+public class LoginQueryHandler : IRequestHandler<LoginQuery, string>
 {
-    public class LoginQueryHandler(
-        ISongsDbContext dbContext,
+    private readonly IUsersRepository _usersRepository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtProvider _jwtProvider;
+
+    public LoginQueryHandler( IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider)
-        : IRequestHandler<LoginQuery, string>
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IPasswordHasher _passwordHasher = passwordHasher;
-        private readonly IJwtProvider _jwtProvider = jwtProvider;
+        _usersRepository = usersRepository;
+        _passwordHasher = passwordHasher;
+        _jwtProvider = jwtProvider;
+    }
 
-        public async Task<string> Handle(LoginQuery request,
-            CancellationToken cancellationToken)
+    public async Task<string> Handle(LoginQuery request,
+        CancellationToken cancellationToken)
+    {
+        var user = await _usersRepository.Get(request.Email, cancellationToken)
+                   ?? throw new LoginException("Invalid email or password. Please try again.");
+            
+        if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            var user = await _dbContext.Users
-                .AsNoTracking()
-                .SingleOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
-                ?? throw new LoginException("Invalid email or password. Please try again.");
-
-            var check = _passwordHasher.Verify(request.Password, user.PasswordHash);
-
-            if (!check)
-            {
-                throw new LoginException("Invalid email or password. Please try again.");
-            }
-
-            var token = _jwtProvider.GenerateToken(user);
-
-            return token;
+            throw new LoginException("Invalid email or password. Please try again.");
         }
+
+        var token = _jwtProvider.GenerateToken(user);
+
+        return token;
     }
 }
