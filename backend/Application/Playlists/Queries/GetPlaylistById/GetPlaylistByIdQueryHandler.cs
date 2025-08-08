@@ -16,17 +16,8 @@ public class GetPlaylistByIdQueryHandler : IRequestHandler<GetPlaylistByIdQuery,
 
     public async Task<PlaylistVm> Handle(GetPlaylistByIdQuery request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetById(request.Id, cancellationToken)
-                       ?? throw new Exception("Playlist this such ID doesn't exist");
-
-        var playlistVm = new PlaylistVm
-        {
-            Id = playlist.Id,
-            Title = playlist.Title,
-            Description = playlist.Description,
-            ImagePath = playlist.ImagePath
-        };
+        var playlist = await _playlistsRepository.GetById(request.Id, cancellationToken);
         
-        return playlistVm;
+        return playlist;
     }
 }

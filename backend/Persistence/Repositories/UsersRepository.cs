@@ -2,6 +2,7 @@
 
 using Domain;
 using Application.Users.Interfaces;
+using Application.Users.Models;
 
 namespace Persistence.Repositories;
 
@@ -29,13 +30,15 @@ public class UsersRepository : IUsersRepository
         return user;
     }
 
-    public async Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<UserInfo> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
-        
-        return user;
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
+            ?? throw new Exception("Invalid current user id");
+
+        var userVm = ToVm(user);
+        return userVm;
     }
 
     public async Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default)
@@ -45,5 +48,14 @@ public class UsersRepository : IUsersRepository
             .AnyAsync(u => u.Email == email, cancellationToken);
 
         return result;
+    }
+
+    private static UserInfo ToVm(User user)
+    {
+        return new UserInfo
+        {
+            Email = user.Email,
+            FullName = user.FullName
+        };
     }
 }

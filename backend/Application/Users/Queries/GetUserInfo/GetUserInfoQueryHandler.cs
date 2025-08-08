@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 
 using Application.Users.Interfaces;
 using Application.Users.Models;
@@ -18,15 +17,7 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
     public async Task<UserInfo> Handle(GetUserInfoQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetById(request.UserId, cancellationToken)
-                   ?? throw new Exception("Invalid current user id");
-
-        var userVm = new UserInfo
-        {
-            Email = user.Email,
-            FullName = user.FullName
-        };
-
-        return userVm;
+        var user = await _usersRepository.GetById(request.UserId, cancellationToken);
+        return user;
     }
 }

@@ -15,13 +15,15 @@ public class PlaylistsRepository : IPlaylistsRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Playlist?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<PlaylistVm> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var playlist = await _dbContext.Playlists
             .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
-
-        return playlist;
+            .SingleOrDefaultAsync(p => p.Id == id, cancellationToken)
+            ?? throw new Exception("Playlist this such ID doesn't exist");
+            
+        var playlistVm = ToVm(playlist);
+        return playlistVm;
     }
 
     public async Task<List<PlaylistVm>> GetList(Guid userId, CancellationToken cancellationToken = default)
@@ -30,13 +32,7 @@ public class PlaylistsRepository : IPlaylistsRepository
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new PlaylistVm
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                ImagePath = p.ImagePath
-            })
+            .Select(p => ToVm(p))
             .ToListAsync(cancellationToken);
         
         return playlists;
@@ -48,13 +44,7 @@ public class PlaylistsRepository : IPlaylistsRepository
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new PlaylistVm
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                ImagePath = p.ImagePath
-            })
+            .Select(p => ToVm(p))
             .Take(count)
             .ToListAsync(cancellationToken);
 
@@ -104,5 +94,16 @@ public class PlaylistsRepository : IPlaylistsRepository
         {
             throw new Exception("Playlist with such ID doesn't exist");
         }
+    }
+
+    private static PlaylistVm ToVm(Playlist playlist)
+    {
+        return new PlaylistVm
+        {
+            Id = playlist.Id,
+            Title = playlist.Title,
+            Description = playlist.Description,
+            ImagePath = playlist.ImagePath
+        };
     }
 }

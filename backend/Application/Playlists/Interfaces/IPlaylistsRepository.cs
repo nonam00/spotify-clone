@@ -5,7 +5,7 @@ namespace Application.Playlists.Interfaces;
 
 public interface IPlaylistsRepository
 {
-    Task<Playlist?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<PlaylistVm> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<List<PlaylistVm>> GetList(Guid userId, CancellationToken cancellationToken = default);
     Task<List<PlaylistVm>> TakeList(Guid userId, int count, CancellationToken cancellationToken = default);
     Task<int> GetCount(Guid userId, CancellationToken cancellationToken = default);
