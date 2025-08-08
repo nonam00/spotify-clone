@@ -1,6 +1,6 @@
 using MediatR;
 
-using Application.Interfaces;
+using Application.Files.Interfaces;
 
 namespace Application.Files.Commands.UploadFile
 {

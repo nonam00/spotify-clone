@@ -12,237 +12,238 @@ using Application.LikedSongs.Queries.CheckLikedSong;
 using Application.LikedSongs.Queries.GetLikedSongList;
 using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
-
+using Application.Users.Models;
 using WebAPI.Models;
 
-namespace WebAPI.Controllers
+namespace WebAPI.Controllers;
+
+[Produces("application/json")]
+[Route("{version:apiVersion}/users"), ApiVersionNeutral]
+public class UsersController(IMapper mapper) : BaseController
 {
-    [Produces("application/json")]
-    [Route("{version:apiVersion}/users"), ApiVersionNeutral]
-    public class UsersController(IMapper mapper) : BaseController
+    private readonly IMapper _mapper = mapper;
+
+    /// <summary>
+    /// Registries the new user
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     POST /register
+    ///     {
+    ///         email: "user@example.com",
+    ///         password "password1234"
+    ///     }
+    ///     
+    /// </remarks>
+    /// <param name="registerDto">RegisterDto object</param>
+    /// <returns>Returns access token in cookies</returns>
+    /// <response code="201">Success</response>
+    [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> Register(
+        [FromForm] RegisterDto registerDto, CancellationToken cancellationToken)
     {
-        private readonly IMapper _mapper = mapper;
+        var command = _mapper.Map<CreateUserCommand>(registerDto);
+        var accessToken = await Mediator.Send(command, cancellationToken);
 
-        /// <summary>
-        /// Registries the new user
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /register
-        ///     {
-        ///         email: "user@example.com",
-        ///         password "password1234"
-        ///     }
-        ///     
-        /// </remarks>
-        /// <param name="registerDto">RegisterDto object</param>
-        /// <returns>Returns access token in cookies</returns>
-        /// <response code="201">Success</response>
-        [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> Register([FromForm]RegisterDto registerDto)
+        HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
         {
-            var command = _mapper.Map<CreateUserCommand>(registerDto);
-            var accessToken = await Mediator.Send(command);
+            HttpOnly = true,
+            Secure = true,
+            MaxAge = TimeSpan.FromHours(12)
+        });
 
-            HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                MaxAge = TimeSpan.FromHours(12)
-            });
+        return Ok();
+    }
 
-            return Ok();
-        }
+    /// <summary>
+    /// Request to get user JWT token
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     POST /login
+    ///     {
+    ///         email: "user@example.com",
+    ///         password "password1234"
+    ///     }
+    /// 
+    /// </remarks>
+    /// <param name="loginDto">LoginDto object</param>
+    /// <returns>Returns access token in cookies</returns>
+    /// <response code="200">Success</response>
+    [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Login(
+        [FromForm] LoginDto loginDto, CancellationToken cancellationToken)
+    {
+        var query = _mapper.Map<LoginQuery>(loginDto);
+        var accessToken = await Mediator.Send(query, cancellationToken);
 
-        /// <summary>
-        /// Request to get user JWT token
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /login
-        ///     {
-        ///         email: "user@example.com",
-        ///         password "password1234"
-        ///     }
-        /// 
-        /// </remarks>
-        /// <param name="loginDto">LoginDto object</param>
-        /// <returns>Returns access token in cookies</returns>
-        /// <response code="200">Success</response>
-        [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Login([FromForm]LoginDto loginDto)
+        HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
         {
-            var query = _mapper.Map<LoginQuery>(loginDto);
-            var accessToken = await Mediator.Send(query);
+            HttpOnly = true,
+            Secure = true,
+            MaxAge = TimeSpan.FromHours(12)
+        });
 
-            HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                MaxAge = TimeSpan.FromHours(12)
-            });
+        return Ok();
+    }
 
-            return Ok();
-        }
+    /// <summary>
+    /// Clears the user's cookies, resulting in a logout
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     POST /logout
+    /// 
+    /// </remarks>
+    /// <response code="205">Success</response>
+    /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
+    [HttpPost("logout"), Authorize]
+    [ProducesResponseType(StatusCodes.Status205ResetContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout()
+    {
+        await Task.Run(() => Parallel.ForEach(Request.Cookies.Keys, Response.Cookies.Delete));
+        return StatusCode(205);
+    }
 
-        /// <summary>
-        /// Clears the user's cookies, resulting in a logout
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     POST /logout
-        /// 
-        /// </remarks>
-        /// <response code="205">Success</response>
-        /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-        [HttpPost("logout"), Authorize]
-        [ProducesResponseType(StatusCodes.Status205ResetContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Logout()
+    /// <summary>
+    /// Gets info about user using jwt token
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    /// 
+    ///     GET /info
+    /// 
+    /// </remarks>
+    /// <returns>Returns new user ID</returns>
+    /// <response code="200">Success</response>
+    /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
+    [HttpGet("info"), Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<UserInfo>> GetUserInfo(CancellationToken cancellationToken)
+    {
+        var query = new GetUserInfoQuery
         {
-            await Task.Run(() => Parallel.ForEach(Request.Cookies.Keys, Response.Cookies.Delete));
-            return StatusCode(205);
-        }
+            UserId = UserId
+        };
+        var info = await Mediator.Send(query, cancellationToken);
+        return Ok(info);
+    }
 
-        /// <summary>
-        /// Gets info about user using jwt token
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        /// 
-        ///     GET /info
-        /// 
-        /// </remarks>
-        /// <returns>Returns new user ID</returns>
-        /// <response code="200">Success</response>
-        /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-        [HttpGet("info"), Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<UserInfo>> GetUserInfo()
+    /// <summary>
+    /// Gets all liked song for certain user
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// Sample request:
+    /// 
+    ///     GET /songs
+    /// 
+    /// </remarks>
+    /// <returns>Returns LikedSongListVm</returns>
+    /// <response code="200">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpGet("songs"), Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<LikedSongListVm>> GetLikedSongList(CancellationToken cancellationToken)
+    {
+        var query = new GetFullLikedSongListQuery
         {
-            var query = new GetUserInfoQuery
-            {
-                UserId = UserId
-            };
-            var info = await Mediator.Send(query);
-            return Ok(info);
-        }
+            UserId = UserId
+        };
+        var vm = await Mediator.Send(query, cancellationToken);
+        return Ok(vm);
+    }
 
-        /// <summary>
-        /// Gets all liked song for certain user
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// Sample request:
-        /// 
-        ///     GET /songs
-        /// 
-        /// </remarks>
-        /// <returns>Returns LikedSongListVm</returns>
-        /// <response code="200">Success</response>
-        /// <response code="401">If user is unauthorized</response>
-        [HttpGet("songs"), Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LikedSongListVm>> GetLikedSongList()
+    /// <summary>
+    /// Checks for like
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// Sample request:
+    /// 
+    ///     GET /songs/{songId}
+    /// 
+    /// </remarks>
+    /// <param name="songId">ID of liked song</param>
+    /// <returns>Returns LikedSongVm</returns>
+    /// <response code="200">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpGet("songs/{songId:guid}"), Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetLikedSong(Guid songId, CancellationToken cancellationToken)
+    {
+        var query = new CheckLikedSongQuery
         {
-            var query = new GetFullLikedSongListQuery
-            {
-                UserId = UserId
-            };
-            var vm = await Mediator.Send(query);
-            return Ok(vm);
-        }
+            UserId = UserId,
+            SongId = songId
+        };
+        var check = await Mediator.Send(query, cancellationToken);
+        return check? Ok(check) : Ok();
+    }
 
-        /// <summary>
-        /// Checks for like
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// Sample request:
-        /// 
-        ///     GET /songs/{songId}
-        /// 
-        /// </remarks>
-        /// <param name="songId">ID of liked song</param>
-        /// <returns>Returns LikedSongVm</returns>
-        /// <response code="200">Success</response>
-        /// <response code="401">If user is unauthorized</response>
-        [HttpGet("songs/{songId:guid}"), Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetLikedSong(Guid songId)
+    /// <summary>
+    /// Creates liked song data for certain song and user
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// Sample request:
+    /// 
+    ///     POST /songs/{songId}
+    /// 
+    /// </remarks>
+    /// <param name="songId">ID of song ot like</param>
+    /// <returns>Returns string</returns>
+    /// <response code="201">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpPost("songs/{songId:guid}"), Authorize]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<string>> CreateLiked(Guid songId)
+    {
+        var command = new CreateLikedSongCommand
         {
-            var query = new CheckLikedSongQuery
-            {
-                UserId = UserId,
-                SongId = songId
-            };
-            var check = await Mediator.Send(query);
-            return check? Ok(check) : Ok();
-        }
+            UserId = UserId,
+            SongId = songId
+        };
+        var likedId = await Mediator.Send(command);
+        return Ok(likedId);
+    }
 
-        /// <summary>
-        /// Creates liked song data for certain song and user
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// Sample request:
-        /// 
-        ///     POST /songs/{songId}
-        /// 
-        /// </remarks>
-        /// <param name="songId">ID of song ot like</param>
-        /// <returns>Returns string</returns>
-        /// <response code="201">Success</response>
-        /// <response code="401">If user is unauthorized</response>
-        [HttpPost("songs/{songId:guid}"), Authorize]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<string>> CreateLiked(Guid songId)
+    /// <summary>
+    /// Delete liked song data by song ID
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// Sample request:
+    /// 
+    ///     DELETE /songs/{songId}
+    /// 
+    /// </remarks>
+    /// <param name="songId">
+    /// Id of the song to remove from user favorites 
+    /// </param>
+    /// <response code="204">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpDelete("songs/{songId:guid}"), Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> DeleteLiked(Guid songId)
+    {
+        var command = new DeleteLikedSongCommand
         {
-            var command = new CreateLikedSongCommand
-            {
-                UserId = UserId,
-                SongId = songId
-            };
-            var likedId = await Mediator.Send(command);
-            return Ok(likedId);
-        }
-
-        /// <summary>
-        /// Delete liked song data by song ID
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// Sample request:
-        /// 
-        ///     DELETE /songs/{songId}
-        /// 
-        /// </remarks>
-        /// <param name="songId">
-        /// Id of the song to remove from user favorites 
-        /// </param>
-        /// <response code="204">Success</response>
-        /// <response code="401">If user is unauthorized</response>
-        [HttpDelete("songs/{songId:guid}"), Authorize]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> DeleteLiked(Guid songId)
-        {
-            var command = new DeleteLikedSongCommand
-            {
-                UserId = UserId,
-                SongId = songId
-            };
-            await Mediator.Send(command);
-            return NoContent();
-        }
+            UserId = UserId,
+            SongId = songId
+        };
+        await Mediator.Send(command);
+        return NoContent();
     }
 }

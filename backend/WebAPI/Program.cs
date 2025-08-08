@@ -1,17 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
-using System.Text;
-
 using Application;
 using Application.Interfaces;
 using Application.Common.Mappings;
 
 using Infrastructure;
-using Infrastructure.Auth;
 using Persistence;
 
 using WebAPI;
@@ -45,58 +40,14 @@ builder.Services.AddCors(options =>
 });
 
 // Adding and configuration authentication by JWT Tokens
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-    {
-        // Getting options for JWT crypt from configuration
-        var jwtOptions = builder.Configuration
-            .GetRequiredSection(nameof(JwtOptions))
-            .Get<JwtOptions>()
-            ?? throw new NullReferenceException("JWT options not found");
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            // TODO: replace with real issuer and real audience 
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
-        };
-        
-        // Getting JWT token from request cookies
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                context.Request.Cookies.TryGetValue("token", out var token);
-                if (!string.IsNullOrEmpty(token))
-                {
-                    context.Token = token;
-                }
-                return Task.CompletedTask;  
-            }
-        };
-
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-    });
+builder.Services.AddAuthServices(builder.Configuration);
 
 // Not only controllers because of XSRF protection working principle
-builder.Services.AddControllersWithViews(); 
+builder.Services.AddControllersWithViews();
 
 // Adding and Configuration API Versioning
 builder.Services.AddApiVersioning()
-                .AddApiExplorer(options =>
-                {
-                    options.GroupNameFormat = "'v'VVV";
-                });
+                .AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -112,6 +63,7 @@ if (builder.Environment.IsDevelopment())
         config.IncludeXmlComments(xmlPath);
     });
 }
+
 
 var app = builder.Build();
 

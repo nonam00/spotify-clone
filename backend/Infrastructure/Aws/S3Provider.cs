@@ -1,8 +1,6 @@
-using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
-using Application.Interfaces;
-using Microsoft.Extensions.Configuration;
+using Application.Files.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Aws

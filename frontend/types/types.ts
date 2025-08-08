@@ -26,3 +26,5 @@ export interface ModalStore {
   onOpen: () => void;
   onClose: () => void;
 }
+
+export type SearchType = "any" | "title" | "author";

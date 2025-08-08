@@ -1,6 +1,5 @@
+using Application.Files.Interfaces;
 using MediatR;
-
-using Application.Interfaces;
 
 namespace Application.Files.Commands.DeleteFile
 {

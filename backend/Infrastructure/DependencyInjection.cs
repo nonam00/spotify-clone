@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Application.Files.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
-using Application.Interfaces;
-using Application.Interfaces.Auth;
-
+using Application.Users.Interfaces;
 using Infrastructure.Auth;
 using Infrastructure.Aws;
 
