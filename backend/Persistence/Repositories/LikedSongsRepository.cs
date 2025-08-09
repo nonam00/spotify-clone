@@ -21,6 +21,7 @@ public class LikedSongsRepository : ILikedSongsRepository
             .AsNoTracking()
             .Where(liked => liked.UserId == userId)
             .OrderByDescending(liked => liked.CreatedAt)
+            .Include(liked => liked.Song)
             .Select(liked => ToVm(liked))
             .ToListAsync(cancellationToken);
 
@@ -36,6 +37,7 @@ public class LikedSongsRepository : ILikedSongsRepository
                         !_dbContext.PlaylistSongs.Any(ps => ps.PlaylistId == playlistId &&
                                                             ps.SongId == l.SongId))
             .OrderByDescending(l => l.CreatedAt)
+            .Include(liked => liked.Song)
             .Select(liked => ToVm(liked))
             .ToListAsync(cancellationToken);
         
@@ -55,6 +57,7 @@ public class LikedSongsRepository : ILikedSongsRepository
             .ThenBy(l => EF.Functions.TrigramsSimilarityDistance(l.Song.Author, searchString))
             .ThenByDescending(song => song.CreatedAt)
             .Take(50)
+            .Include(liked => liked.Song)
             .Select(liked => ToVm(liked))
             .ToListAsync(cancellationToken);
 
