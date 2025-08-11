@@ -29,7 +29,7 @@ const Header = ({
       await user.logout();
       router.refresh();
       toast.error('Logged out');
-    } catch(error: any) {
+    } catch(error) {
       toast.error(error?.message);
     }
   };

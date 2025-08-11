@@ -3,7 +3,7 @@ import { ModalStore, Playlist } from "@/types/types";
 
 interface PlaylistModalStore extends ModalStore {
   playlist: Playlist | undefined;
-  setPlaylist: (playlist: Playlist) => void;
+  setPlaylist: (playlist: Playlist | undefined) => void;
 }
 
 const usePlaylistModal = create<PlaylistModalStore>((set) => ({
@@ -11,7 +11,7 @@ const usePlaylistModal = create<PlaylistModalStore>((set) => ({
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),
   playlist: undefined,
-  setPlaylist: (playlist: Playlist) => set({
+  setPlaylist: (playlist: Playlist | undefined) => set({
     playlist: playlist
   }),
 }));

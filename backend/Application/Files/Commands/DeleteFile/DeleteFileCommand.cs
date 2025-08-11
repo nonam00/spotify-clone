@@ -1,9 +1,11 @@
-using MediatR;
+﻿using MediatR;
 
-namespace Application.Files.Commands.DeleteFile
+using Application.Files.Enums;
+
+namespace Application.Files.Commands.DeleteFile;
+
+public class DeleteFileCommand : IRequest
 {
-    public class DeleteFileCommand : IRequest
-    {
-        public string FileName { get; init; } = null!;
-    }
+    public string Name { get; init; } = null!;
+    public MediaType MediaType { get; init; }
 }

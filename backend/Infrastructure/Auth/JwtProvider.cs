@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 
 using Domain;
-using Application.Interfaces.Auth;
+using Application.Users.Interfaces;
 
 namespace Infrastructure.Auth;
 

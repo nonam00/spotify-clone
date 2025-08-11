@@ -1,31 +1,34 @@
-﻿using Application.Interfaces;
+﻿using MediatR;
+
 using Domain;
-using MediatR;
+using Application.Songs.Interfaces;
 
-namespace Application.Songs.Commands.CreateSong
+namespace Application.Songs.Commands.CreateSong;
+
+public class CreateSongCommandHandler : IRequestHandler<CreateSongCommand, Guid>
 {
-    public class CreateSongCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<CreateSongCommand, Guid>
+    private readonly ISongsRepository _songsRepository;
+
+    public CreateSongCommandHandler(ISongsRepository songsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _songsRepository = songsRepository;
+    }
 
-        public async Task<Guid> Handle(CreateSongCommand request,
-            CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateSongCommand request,
+        CancellationToken cancellationToken)
+    {
+        var song = new Song
         {
-            var song = new Song
-            {
-                Id = Guid.NewGuid(),
-                UserId = request.UserId,
-                Title = request.Title,
-                Author = request.Author,
-                SongPath = request.SongPath,
-                ImagePath = request.ImagePath
-            };
+            Id = Guid.NewGuid(),
+            UserId = request.UserId,
+            Title = request.Title,
+            Author = request.Author,
+            SongPath = request.SongPath,
+            ImagePath = request.ImagePath
+        };
 
-            await _dbContext.Songs.AddAsync(song, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+        await _songsRepository.Add(song, cancellationToken);
 
-            return song.Id;
-        }
+        return song.Id;
     }
 }

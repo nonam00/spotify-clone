@@ -1,13 +1,11 @@
 using FluentValidation;
 
-namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId
+namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
+
+public class GetSongListByPlaylistIdQueryValidator : AbstractValidator<GetSongListByPlaylistIdQuery>
 {
-    public class GetSongListByPlaylistIdQueryValidator
-      : AbstractValidator<GetSongListByPlaylistIdQuery>
+    public GetSongListByPlaylistIdQueryValidator()
     {
-        public GetSongListByPlaylistIdQueryValidator()
-        {
-            RuleFor(q => q.PlaylistId).NotEqual(Guid.Empty);
-        }
+        RuleFor(q => q.PlaylistId).NotEqual(Guid.Empty);
     }
 }

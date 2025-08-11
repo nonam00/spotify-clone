@@ -1,26 +1,22 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-using Application.Interfaces;
+using Application.Playlists.Interfaces;
 
-namespace Application.Playlists.Commands.DeletePlaylist
+namespace Application.Playlists.Commands.DeletePlaylist;
+
+public class DeletePlaylistCommandHandler : IRequestHandler<DeletePlaylistCommand, string?>
 {
-    public class DeletePlaylistCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<DeletePlaylistCommand>
+    private readonly IPlaylistsRepository _playlistsRepository;
+
+    public DeletePlaylistCommandHandler(IPlaylistsRepository playlistsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _playlistsRepository = playlistsRepository;
+    }
 
-        public async Task Handle(DeletePlaylistCommand request,
-            CancellationToken cancellationToken)
-        {
-            var deletedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
-                .ExecuteDeleteAsync(cancellationToken);
-
-            if (deletedRows != 1)
-            {
-                throw new Exception("Playlist with such ID doesn't exist");
-            }
-        }
+    public async Task<string?> Handle(DeletePlaylistCommand request, CancellationToken cancellationToken)
+    {
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, request.UserId, cancellationToken);
+        await _playlistsRepository.Delete(playlist, cancellationToken);
+        return playlist.ImagePath;
     }
 }

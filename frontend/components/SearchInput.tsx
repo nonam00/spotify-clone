@@ -6,8 +6,7 @@ import { twMerge } from "tailwind-merge";
 
 import useDebounce from "@/hooks/useDebounce";
 import Input from "./Input";
-
-export type SearchType = "all" | "title" | "author";
+import { SearchType } from "@/types/types";
 
 const SearchInput = ({
   pageUrl,
@@ -21,7 +20,7 @@ const SearchInput = ({
   const [value, setValue] = useState<string>("");
   const debouncedValue = useDebounce<string>(value, 500);
   
-  const [searchType, setSearchType] = useState<SearchType>("all");
+  const [searchType, setSearchType] = useState<SearchType>("any");
   const debouncedType = useDebounce<SearchType>(searchType, 200);
 
   const nonActiveStyle = "bg-neutral-700 text-white"
@@ -29,7 +28,7 @@ const SearchInput = ({
 
   useEffect(() => {
     const query = `?searchString=${debouncedValue}&type=${debouncedType}`;
-    if (query !== location.search) {
+    if (debouncedValue !== "" && query !== location.search) {
       router.push(pageUrl + query);
     }
   }, [debouncedValue, debouncedType, router, pageUrl]);
@@ -44,7 +43,7 @@ const SearchInput = ({
       {types? 
       <div className="flex flex-row mt-5 gap-x-0.7">
         <button
-          onClick={() => {setSearchType("all")}}
+          onClick={() => {setSearchType("any")}}
           className={twMerge(`
             rounded-full
             py-1.5 px-5
@@ -56,7 +55,7 @@ const SearchInput = ({
             hover:opacity-75
             transition
           `, 
-            searchType === "all"? activeStyle : nonActiveStyle    
+            searchType === "any"? activeStyle : nonActiveStyle
           )}
         >
           All

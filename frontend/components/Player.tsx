@@ -14,7 +14,7 @@ const Player = () => {
     return null;
   }
 
-  const songUrl = `${CLIENT_API_URL}/files/song/${song.songPath}`;
+  const songUrl = `${CLIENT_API_URL}/files/audio/${song.songPath}`;
   
   return (
     <div className="fixed bottom-0 bg-black w-full py-2 h-[80px] px-4">

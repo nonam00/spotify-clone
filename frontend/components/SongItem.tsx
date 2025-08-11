@@ -38,7 +38,8 @@ const SongItem = memo(function SongItem({
           className="object-cover"
           src={`${CLIENT_API_URL}/files/image/${data.imagePath}`}
           fill
-          alt="Image"
+          alt={data.title}
+          loading="lazy"
           unoptimized
         />
       </div>

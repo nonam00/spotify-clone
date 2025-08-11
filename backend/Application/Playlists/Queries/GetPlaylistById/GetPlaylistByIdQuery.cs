@@ -1,9 +1,11 @@
 using MediatR;
 
-namespace Application.Playlists.Queries.GetPlaylistById
+using Application.Playlists.Models;
+
+namespace Application.Playlists.Queries.GetPlaylistById;
+
+public class GetPlaylistByIdQuery : IRequest<PlaylistVm>
 {
-    public class GetPlaylistByIdQuery : IRequest<PlaylistVm>
-    {
-        public Guid Id { get; init; }
-    } 
+    public Guid PlaylistId { get; init; }
+    public Guid UserId { get; set; }
 }

@@ -41,8 +41,9 @@ const MediaItem = memo(function MediaItem({
             ? `${CLIENT_API_URL}/files/image/${data.imagePath}`
             : '/images/playlist.webp'
           }
-          alt="Media Item"
+          alt={data.title}
           unoptimized
+          loading="lazy"
           className="object-cover"
         />
       </div>

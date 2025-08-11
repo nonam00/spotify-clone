@@ -1,49 +1,48 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 using Domain;
-
 using Application.Common.Exceptions;
-using Application.Interfaces;
-using Application.Interfaces.Auth;
+using Application.Users.Interfaces;
 
-namespace Application.Users.Commands.CreateUser
+namespace Application.Users.Commands.CreateUser;
+
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, string>
 {
-    public class CreateUserCommandHandler(
-        ISongsDbContext dbContext,
+    private readonly IUsersRepository _usersRepository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtProvider _jwtProvider;
+
+    public CreateUserCommandHandler(
+        IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider)
-        : IRequestHandler<CreateUserCommand, string>
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
-        private readonly IPasswordHasher _passwordHasher = passwordHasher;
-        private readonly IJwtProvider _jwtProvider = jwtProvider;
+        _usersRepository = usersRepository;
+        _passwordHasher = passwordHasher;
+        _jwtProvider = jwtProvider;
+    }
 
-        public async Task<string> Handle(CreateUserCommand request,
-            CancellationToken cancellationToken)
+    public async Task<string> Handle(CreateUserCommand request,
+        CancellationToken cancellationToken)
+    {
+        if (await _usersRepository.CheckIfExists(request.Email, cancellationToken))
         {
-            if (await _dbContext.Users
-                .AsNoTracking()
-                .AnyAsync(u => u.Email == request.Email, cancellationToken))
-            {
-                throw new LoginException("User with this email already exits");
-            }
-
-            var hashedPassword = _passwordHasher.Generate(request.Password);
-
-            var user = new User()
-            {
-                Id = Guid.NewGuid(),
-                Email = request.Email,
-                PasswordHash = hashedPassword
-            };
-
-            await _dbContext.Users.AddAsync(user, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            var token = _jwtProvider.GenerateToken(user);
-
-            return token;
+            throw new LoginException("User with this email already exits");
         }
+
+        var hashedPassword = _passwordHasher.Generate(request.Password);
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = request.Email,
+            PasswordHash = hashedPassword
+        };
+
+        await _usersRepository.Add(user, cancellationToken);
+
+        var jwtToken = _jwtProvider.GenerateToken(user);
+
+        return jwtToken;
     }
 }

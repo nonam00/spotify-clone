@@ -4,7 +4,7 @@ services:
     image: postgres:16
     restart: always
     ports:
-      - "2345:5432"
+      - "5432:5432"
     expose:
       - "5432"
     environment:
@@ -12,6 +12,7 @@ services:
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
       - POSTGRES_DB=$POSTGRES_DB
     volumes:
+      - .:/docker-entrypoint-initdb.d
       - db_data:/var/lib/postgresql/data
     container_name: postgresql_db
 
@@ -28,6 +29,7 @@ services:
     container_name: aspnet_web_api
     depends_on:
       - db
+      - minio
 
   frontend:
     build:
@@ -44,5 +46,18 @@ services:
     depends_on:
       - webapi
 
+  minio:
+    image: minio/minio
+    container_name: minio_s3
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=$MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
 volumes:
   db_data:
+  minio_data:

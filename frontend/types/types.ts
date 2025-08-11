@@ -9,8 +9,6 @@ export interface Song {
 export interface UserDetails {
   email: string;
   fullName: string | null;
-  avatarUrl: string | null;
-  paymentMethod: string | null;
 }
 
 export interface Playlist {
@@ -26,3 +24,5 @@ export interface ModalStore {
   onOpen: () => void;
   onClose: () => void;
 }
+
+export type SearchType = "any" | "title" | "author";

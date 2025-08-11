@@ -1,13 +1,11 @@
 using FluentValidation;
 
-namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList
+namespace Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
+
+public class GetFullPlaylistListQueryValidator : AbstractValidator<GetFullPlaylistListQuery>
 {
-    public class GetFullPlaylistListQueryValidator
-      : AbstractValidator<GetFullPlaylistListQuery>
+    public GetFullPlaylistListQueryValidator()
     {
-        public GetFullPlaylistListQueryValidator()
-        {
-            RuleFor(q => q.UserId).NotEqual(Guid.Empty);
-        }
+        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
     }
 }

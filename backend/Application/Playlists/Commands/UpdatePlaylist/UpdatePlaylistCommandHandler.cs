@@ -1,33 +1,35 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
-using Application.Interfaces;
+using Application.Playlists.Interfaces;
 
-namespace Application.Playlists.Commands.UpdatePlaylist
+namespace Application.Playlists.Commands.UpdatePlaylist;
+
+public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistCommand, string?>
 {
-    public class UpdatePlaylistCommandHandler(ISongsDbContext dbContext)
-        : IRequestHandler<UpdatePlaylistCommand>
+    private readonly IPlaylistsRepository _playlistsRepository;
+
+    public UpdatePlaylistCommandHandler(IPlaylistsRepository playlistsRepository)
     {
-        private readonly ISongsDbContext _dbContext = dbContext;
+        _playlistsRepository = playlistsRepository;
+    }
 
-        public async Task Handle(UpdatePlaylistCommand request,
-            CancellationToken cancellationToken)
+    public async Task<string?> Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
+    {
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, request.UserId, cancellationToken);
+        
+        playlist.Title = request.Title;
+        playlist.Description = request.Description != "" ? request.Description : null;
+        playlist.CreatedAt = DateTime.UtcNow;
+
+        string? oldImagePath = null;
+        if (request.ImagePath is not null)
         {
-            var updatedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == request.UserId && p.Id == request.PlaylistId)
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(u => u.Title, request.Title)
-                    .SetProperty(u => u.Description,
-                        request.Description != "" ? request.Description : null)
-                    .SetProperty(u => u.ImagePath,
-                        u => request.ImagePath != "" ? request.ImagePath : u.ImagePath)
-                    .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
-                    cancellationToken);
-
-            if (updatedRows != 1)
-            {
-                throw new Exception("Playlist with such ID doesn't exist");
-            }
+            oldImagePath = playlist.ImagePath;
+            playlist.ImagePath = request.ImagePath;
         }
+
+        await _playlistsRepository.Update(playlist, cancellationToken);
+
+        return oldImagePath;
     }
 }

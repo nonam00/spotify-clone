@@ -1,9 +1,10 @@
 ﻿using MediatR;
 
-namespace Application.Songs.Queries.GetSongById
+using Application.Songs.Models;
+
+namespace Application.Songs.Queries.GetSongById;
+
+public class GetSongByIdQuery : IRequest<SongVm>
 {
-    public class GetSongByIdQuery : IRequest<SongVm>
-    {
-        public Guid SongId { get; init; }
-    }
+    public Guid SongId { get; init; }
 }

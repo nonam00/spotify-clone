@@ -1,14 +1,12 @@
 ﻿using FluentValidation;
 
-namespace Application.LikedSongs.Commands.CreateLikedSong
+namespace Application.LikedSongs.Commands.CreateLikedSong;
+
+public class CreateLikedSongCommandValidator : AbstractValidator<CreateLikedSongCommand>
 {
-    public class CreateLikedSongCommandValidator
-        : AbstractValidator<CreateLikedSongCommand>
+    public CreateLikedSongCommandValidator()
     {
-        public CreateLikedSongCommandValidator()
-        {
-            RuleFor(command => command.UserId).NotEqual(Guid.Empty);
-            RuleFor(command => command.SongId).NotEqual(Guid.Empty);
-        }
+        RuleFor(command => command.UserId).NotEqual(Guid.Empty);
+        RuleFor(command => command.SongId).NotEqual(Guid.Empty);
     }
 }

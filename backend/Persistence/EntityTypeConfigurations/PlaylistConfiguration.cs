@@ -3,20 +3,19 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Domain;
 
-namespace Persistence.EntityTypeConfigurations
+namespace Persistence.EntityTypeConfigurations;
+
+public class PlaylistConfiguration : IEntityTypeConfiguration<Playlist>
 {
-    public class PlaylistConfiguration : IEntityTypeConfiguration<Playlist>
+    public void Configure(EntityTypeBuilder<Playlist> builder)
     {
-        public void Configure(EntityTypeBuilder<Playlist> builder)
-        {
-            builder.HasKey(p => p.Id);
+        builder.HasKey(p => p.Id);
             
-            builder.HasMany(p => p.Songs)
-                   .WithMany()
-                   .UsingEntity<PlaylistSong>();
+        builder.HasMany(p => p.Songs)
+            .WithMany()
+            .UsingEntity<PlaylistSong>();
             
-            builder.Property(p => p.CreatedAt)
-                   .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        }
+        builder.Property(p => p.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

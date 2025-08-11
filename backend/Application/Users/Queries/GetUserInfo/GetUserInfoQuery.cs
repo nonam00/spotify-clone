@@ -1,9 +1,10 @@
 ﻿using MediatR;
 
-namespace Application.Users.Queries.GetUserInfo
+using Application.Users.Models;
+
+namespace Application.Users.Queries.GetUserInfo;
+
+public class GetUserInfoQuery : IRequest<UserInfo>
 {
-    public class GetUserInfoQuery : IRequest<UserInfo>
-    {
-        public Guid UserId { get; init; } 
-    }
+    public Guid UserId { get; init; } 
 }
