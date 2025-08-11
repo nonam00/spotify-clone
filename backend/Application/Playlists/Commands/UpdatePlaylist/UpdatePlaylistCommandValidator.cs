@@ -6,7 +6,7 @@ public class UpdatePlaylistCommandValidator : AbstractValidator<UpdatePlaylistCo
 {
     public UpdatePlaylistCommandValidator()
     {
-        RuleFor(c => c.UserId).NotEqual(Guid.Empty);
         RuleFor(c => c.PlaylistId).NotEqual(Guid.Empty);
+        RuleFor(c => c.UserId).NotEqual(Guid.Empty);
     }
 }

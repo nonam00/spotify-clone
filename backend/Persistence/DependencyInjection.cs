@@ -16,18 +16,17 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDatabase(configuration).AddRepositories();
-
         return services;
     }
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         // connection string from api public configuration
-        var connectionString = configuration.GetConnectionString("PostgresDb")
+        var connectionString = configuration.GetConnectionString("PostgresDb") 
                                ?? throw new NullReferenceException("PostgresDb connection string is null");
         // password for database from user secret or env file
         var dbPassword = configuration["DbPassword"]
-                         ?? throw new NullReferenceException("DbPassword string is null");
+                               ?? throw new NullReferenceException("DbPassword string is null");
 
         services.AddDbContext<SongsDbContext>(options =>
         {

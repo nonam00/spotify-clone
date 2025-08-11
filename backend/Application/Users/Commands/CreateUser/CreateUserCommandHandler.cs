@@ -1,7 +1,6 @@
 ﻿using MediatR;
 
 using Domain;
-
 using Application.Common.Exceptions;
 using Application.Users.Interfaces;
 

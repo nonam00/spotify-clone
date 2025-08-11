@@ -1,5 +1,5 @@
-﻿using Application.Songs.Enums;
-using Domain;
+﻿using Domain;
+using Application.Songs.Enums;
 using Application.Songs.Models;
 
 namespace Application.Songs.Interfaces;

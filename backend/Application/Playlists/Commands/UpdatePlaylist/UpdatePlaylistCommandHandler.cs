@@ -4,7 +4,7 @@ using Application.Playlists.Interfaces;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
-public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistCommand>
+public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistCommand, string?>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
 
@@ -13,15 +13,23 @@ public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistComman
         _playlistsRepository = playlistsRepository;
     }
 
-    public async Task Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
+    public async Task<string?> Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
     {
-        await _playlistsRepository.Update(
-            request.PlaylistId,
-            request.UserId,
-            request.Title,
-            request.Description,
-            request.ImagePath,
-            cancellationToken
-        );
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, request.UserId, cancellationToken);
+        
+        playlist.Title = request.Title;
+        playlist.Description = request.Description != "" ? request.Description : null;
+        playlist.CreatedAt = DateTime.UtcNow;
+
+        string? oldImagePath = null;
+        if (request.ImagePath is not null)
+        {
+            oldImagePath = playlist.ImagePath;
+            playlist.ImagePath = request.ImagePath;
+        }
+
+        await _playlistsRepository.Update(playlist, cancellationToken);
+
+        return oldImagePath;
     }
 }

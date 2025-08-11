@@ -4,7 +4,7 @@ using Application.Playlists.Interfaces;
 
 namespace Application.Playlists.Commands.DeletePlaylist;
 
-public class DeletePlaylistCommandHandler : IRequestHandler<DeletePlaylistCommand>
+public class DeletePlaylistCommandHandler : IRequestHandler<DeletePlaylistCommand, string?>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
 
@@ -13,9 +13,10 @@ public class DeletePlaylistCommandHandler : IRequestHandler<DeletePlaylistComman
         _playlistsRepository = playlistsRepository;
     }
 
-    public async Task Handle(DeletePlaylistCommand request,
-        CancellationToken cancellationToken)
+    public async Task<string?> Handle(DeletePlaylistCommand request, CancellationToken cancellationToken)
     {
-        await _playlistsRepository.Delete(request.PlaylistId, request.UserId, cancellationToken);
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, request.UserId, cancellationToken);
+        await _playlistsRepository.Delete(playlist, cancellationToken);
+        return playlist.ImagePath;
     }
 }

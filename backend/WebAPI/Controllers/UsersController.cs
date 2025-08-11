@@ -22,17 +22,8 @@ public class UsersController : BaseController
     /// <summary>
     /// Registries the new user
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     POST /register
-    ///     {
-    ///         email: "user@example.com",
-    ///         password "password1234"
-    ///     }
-    ///     
-    /// </remarks>
     /// <param name="userCredentialsDto">UserCredentials object</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="201">Success</response>
     [HttpPost("register")]
@@ -61,17 +52,8 @@ public class UsersController : BaseController
     /// <summary>
     /// Request to get user JWT token
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     POST /login
-    ///     {
-    ///         email: "user@example.com",
-    ///         password "password1234"
-    ///     }
-    /// 
-    /// </remarks>
     /// <param name="userCredentialsDto">LoginDto object</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="200">Success</response>
     [HttpPost("login")]
@@ -100,12 +82,6 @@ public class UsersController : BaseController
     /// <summary>
     /// Clears the user's cookies, resulting in a logout
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     POST /logout
-    /// 
-    /// </remarks>
     /// <response code="205">Success</response>
     /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
     [HttpPost("logout"), Authorize]
@@ -120,12 +96,6 @@ public class UsersController : BaseController
     /// <summary>
     /// Gets info about user using jwt token
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     GET /info
-    /// 
-    /// </remarks>
     /// <returns>Returns new user ID</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
@@ -145,13 +115,6 @@ public class UsersController : BaseController
     /// <summary>
     /// Gets all liked song for certain user
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     GET /songs
-    /// 
-    /// </remarks>
     /// <returns>Returns LikedSongListVm</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -171,14 +134,8 @@ public class UsersController : BaseController
     /// <summary>
     /// Checks for like
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     GET /songs/{songId}
-    /// 
-    /// </remarks>
     /// <param name="songId">ID of liked song</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns LikedSongVm</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -199,57 +156,43 @@ public class UsersController : BaseController
     /// <summary>
     /// Creates liked song data for certain song and user
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     POST /songs/{songId}
-    /// 
-    /// </remarks>
     /// <param name="songId">ID of song ot like</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns string</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If user is unauthorized</response>
     [HttpPost("songs/{songId:guid}"), Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<string>> CreateLiked(Guid songId)
+    public async Task<ActionResult<string>> CreateLiked(Guid songId, CancellationToken cancellationToken)
     {
         var command = new CreateLikedSongCommand
         {
             UserId = UserId,
             SongId = songId
         };
-        var likedId = await Mediator.Send(command);
+        var likedId = await Mediator.Send(command, cancellationToken);
         return Ok(likedId);
     }
 
     /// <summary>
     /// Delete liked song data by song ID
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     DELETE /songs/{songId}
-    /// 
-    /// </remarks>
-    /// <param name="songId">
-    /// ID of the song to remove from user favorites 
-    /// </param>
+    /// <param name="songId">ID of the song to remove from user favorites</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If user is unauthorized</response>
     [HttpDelete("songs/{songId:guid}"), Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeleteLiked(Guid songId)
+    public async Task<IActionResult> DeleteLiked(Guid songId, CancellationToken cancellationToken)
     {
         var command = new DeleteLikedSongCommand
         {
             UserId = UserId,
             SongId = songId
         };
-        await Mediator.Send(command);
+        await Mediator.Send(command, cancellationToken);
         return NoContent();
     }
 }

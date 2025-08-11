@@ -17,11 +17,11 @@ export const UserContext = createContext<UserContextType | undefined>(
   undefined
 );
 
-export interface Props {
-  [propName: string]: any;
-}
-
-export const MyUserContextProvider = (props: Props) => {
+export const MyUserContextProvider = ({
+  children
+}: {
+  children: React.ReactNode
+}) => {
   const [isAuth, setIsAuth] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -72,7 +72,7 @@ export const MyUserContextProvider = (props: Props) => {
     logout
   };
 
-  return <UserContext.Provider value={value} {...props} />;
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {

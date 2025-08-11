@@ -1,7 +1,7 @@
 import { ModalStore } from "@/types/types";
 import { create } from "zustand";
 
-interface CreateModalStore extends ModalStore {}
+type CreateModalStore = ModalStore;
 
 const useCreateModal = create<CreateModalStore>((set) => ({
   isOpen: false,

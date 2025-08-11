@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -58,6 +59,16 @@ if (builder.Environment.IsDevelopment())
 
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<SongsDbContext>();
+    var notAppliedMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+    if (notAppliedMigrations.Any())
+    {
+        await dbContext.Database.MigrateAsync();
+    }
+}
 
 app.UseExceptionHandler();
 

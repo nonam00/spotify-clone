@@ -6,6 +6,7 @@ public class GetPlaylistByIdQueryValidator : AbstractValidator<GetPlaylistByIdQu
 {
     public GetPlaylistByIdQueryValidator()
     {
-        RuleFor(q => q.Id).NotEqual(Guid.Empty);
+        RuleFor(q => q.PlaylistId).NotEqual(Guid.Empty);
+        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
     }
 }

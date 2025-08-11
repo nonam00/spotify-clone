@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 
 using Application.Files.Interfaces;
 
@@ -6,29 +6,16 @@ namespace Application.Files.Commands.UploadFile;
 
 public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, string>
 {
-    private readonly IStorageProvider _storage;
+    private readonly IStorageProvider _storageProvider;
 
-    public UploadFileCommandHandler(IStorageProvider storage)
+    public UploadFileCommandHandler(IStorageProvider storageProvider)
     {
-        _storage = storage;
+        _storageProvider = storageProvider;
     }
 
-    public async Task<string> Handle(UploadFileCommand request,
-        CancellationToken cancellationToken)
+    public async Task<string> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        var fileName = Guid.NewGuid().ToString();
-        var success = await _storage.UploadFile
-        (
-            request.FileStream,
-            $"{request.ContentType}/{fileName}",
-            request.ContentType + "/*"
-        );
-
-        if (!success)
-        {
-            throw new Exception("Failed on uploading file to the store");
-        }
-            
-        return fileName;
+        var name = await _storageProvider.UploadFile(request.FileStream, request.MediaType, cancellationToken);
+        return name;
     }
 }

@@ -8,8 +8,7 @@ namespace WebAPI;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddAuthServices(this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthentication(options =>
             {

@@ -1,5 +1,6 @@
-﻿using Application.LikedSongs.Interfaces;
-using MediatR;
+﻿using MediatR;
+
+using Application.LikedSongs.Interfaces;
 
 namespace Application.LikedSongs.Queries.CheckLikedSong;
 

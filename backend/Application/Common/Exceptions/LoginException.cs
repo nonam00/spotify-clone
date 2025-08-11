@@ -2,7 +2,6 @@
 
 public class LoginException : Exception
 {
-    public LoginException() { }
     public LoginException(string name) : base(name) { }
     public LoginException(string name, Exception inner): base(name, inner) { }
 }

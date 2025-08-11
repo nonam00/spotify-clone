@@ -8,6 +8,8 @@ using Application.Songs.Queries.GetSongList.GetNewestSongList;
 using Application.Songs.Queries.GetSongList.GetAllSongs;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries.GetSongList.GetSongListBySearch;
+using Application.Files.Commands.UploadFile;
+using Application.Files.Enums;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -19,12 +21,6 @@ public class SongsController : BaseController
     /// <summary>
     /// Gets songs
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     GET /
-    /// 
-    /// </remarks>
     /// <returns>Returns SongListVm</returns>
     /// <response code="200">Success</response>
     [HttpGet]
@@ -39,12 +35,6 @@ public class SongsController : BaseController
     /// <summary>
     /// Gets newest songs
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     GET /newest
-    /// 
-    /// </remarks>
     /// <returns>Returns SongListVm</returns>
     /// <response code="200">Success</response>
     [HttpGet("newest")]
@@ -59,13 +49,8 @@ public class SongsController : BaseController
     /// <summary>
     /// Gets certain song by ID
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     GET /{songId}
-    /// 
-    /// </remarks>
     /// <param name="songId">Song ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns SongVm</returns>
     /// <response code="200">Success</response>
     [HttpGet("{songId:guid}")]
@@ -83,16 +68,8 @@ public class SongsController : BaseController
     /// <summary>
     /// Gets songs satisfying the search request
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     GET /search/title/hysteria
-    /// 
-    /// </remarks>
-    /// <param name="searchSongDto">
-    /// - search query
-    /// - search criteria
-    /// </param>
+    /// <param name="searchSongDto">search query and search criteria</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns SongListVm</returns>
     /// <response code="200">Success</response>
     [HttpGet("search")]
@@ -113,37 +90,43 @@ public class SongsController : BaseController
     /// <summary>
     /// Creates new song 
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    /// 
-    ///     POST /
-    ///     {
-    ///         title: "Hysteria"
-    ///         author: "Muse"
-    ///         songPath: "hysteria.flac"
-    ///         imagePath: "absolution.jpeg"
-    ///     }
-    ///     
-    /// </remarks>
     /// <param name="createSongDto">createSongDto object</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns created song ID</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpPost, Authorize]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto)
+    public async Task<ActionResult<Guid>> UploadNewSong(
+        [FromForm] CreateSongDto createSongDto, CancellationToken cancellationToken)
     {
+        var uploadAudioCommand = new UploadFileCommand
+        {
+            FileStream = createSongDto.Audio.OpenReadStream(),
+            MediaType = MediaType.Audio
+        };
+        var songPath = await Mediator.Send(uploadAudioCommand, cancellationToken);
+        
+        var uploadImageCommand = new UploadFileCommand
+        {
+            FileStream = createSongDto.Image.OpenReadStream(),
+            MediaType = MediaType.Image
+        };
+        var imagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
+        
         var command = new CreateSongCommand
         {
             UserId = UserId,
             Title = createSongDto.Title,
             Author = createSongDto.Author,
-            SongPath = createSongDto.SongPath,
-            ImagePath = createSongDto.ImagePath
+            SongPath = songPath,
+            ImagePath = imagePath
         };
         
-        var songId = await Mediator.Send(command);
+        var songId = await Mediator.Send(command, cancellationToken);
         return Ok(songId);
     }
 }

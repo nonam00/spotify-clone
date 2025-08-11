@@ -2,7 +2,7 @@ using MediatR;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
-public class UpdatePlaylistCommand : IRequest
+public class UpdatePlaylistCommand : IRequest<string?>
 {
     public Guid UserId { get; init; }
     public Guid PlaylistId { get; init; }

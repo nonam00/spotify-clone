@@ -16,7 +16,7 @@ public class GetPlaylistByIdQueryHandler : IRequestHandler<GetPlaylistByIdQuery,
 
     public async Task<PlaylistVm> Handle(GetPlaylistByIdQuery request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetById(request.Id, cancellationToken);
+        var playlist = await _playlistsRepository.GetVmById(request.PlaylistId, request.UserId, cancellationToken);
         
         return playlist;
     }

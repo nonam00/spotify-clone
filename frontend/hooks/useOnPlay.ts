@@ -17,7 +17,7 @@ const useOnPlay = (songs: Song[]) => {
 
     setId(id);
     setIds(songs.map((song) => song.id));
-  }, [songs]);
+  }, [authModal, isAuth, setId, setIds, songs]);
 }
 
 export default useOnPlay;

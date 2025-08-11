@@ -1,7 +1,7 @@
 import { ModalStore } from "@/types/types";
 import { create } from "zustand";
 
-interface UploadModalStore extends ModalStore {}
+type UploadModalStore = ModalStore;
 
 const useUploadModal = create<UploadModalStore>((set) => ({
   isOpen: false,

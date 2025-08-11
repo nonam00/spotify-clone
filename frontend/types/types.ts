@@ -9,8 +9,6 @@ export interface Song {
 export interface UserDetails {
   email: string;
   fullName: string | null;
-  avatarUrl: string | null;
-  paymentMethod: string | null;
 }
 
 export interface Playlist {

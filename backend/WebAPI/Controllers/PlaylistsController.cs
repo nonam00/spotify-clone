@@ -17,6 +17,9 @@ using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 using Application.LikedSongs.Models;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylistBySearch;
+using Application.Files.Commands.DeleteFile;
+using Application.Files.Commands.UploadFile;
+using Application.Files.Enums;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -28,14 +31,8 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Gets certain user playlist 
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     GET /{playlistId}
-    /// 
-    /// </remarks>
     /// <param name="playlistId">ID of playlist</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns PlaylistVm</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -46,7 +43,8 @@ public class PlaylistsController : BaseController
     {
         var query = new GetPlaylistByIdQuery
         {
-            Id = playlistId
+            PlaylistId = playlistId,
+            UserId = UserId
         };
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
@@ -55,13 +53,6 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Gets list of user playlist 
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     GET /
-    /// 
-    /// </remarks>
     /// <returns>Returns PlaylistListVm</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -81,14 +72,8 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Gets certain quantity of user playlists
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     GET /certain/{count}
-    /// 
-    /// </remarks>
     /// <param name="count">Count of playlist</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns PlaylistListVm</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -110,13 +95,6 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Creates new user playlist 
     /// </summary>
-    /// <remarks>
-    /// 
-    /// Sample request:
-    /// 
-    ///     POST /
-    ///
-    /// </remarks>
     /// <returns>Returns Guid</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If user is unauthorized</response>
@@ -136,54 +114,59 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Updates playlist information
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///   PUT /{playlistId}
-    ///   {
-    ///       title: "New Playlist"
-    ///       description: "Description",
-    ///       imagePath: "image.png"
-    ///   }
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    ///   id of the playlist that needs to be updated
-    /// </param>
+    /// <param name="playlistId">ID of the playlist that needs to be updated</param>
     /// <param name="updatePlaylistDto">object with new info</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpPut("{playlistId:guid}")]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdatePlaylist(Guid playlistId,
-        UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
+        [FromForm] UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
     {
-        var command = new UpdatePlaylistCommand
+        string? newImagePath = null;
+        if (updatePlaylistDto.Image is not null)
+        {
+            var uploadImageCommand = new UploadFileCommand
+            {
+                FileStream = updatePlaylistDto.Image.OpenReadStream(),
+                MediaType = MediaType.Image
+            };
+            newImagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
+        }
+        
+        var updatePlaylistCommand = new UpdatePlaylistCommand
         {
             UserId = UserId,
             PlaylistId = playlistId,
             Title = updatePlaylistDto.Title,
             Description = updatePlaylistDto.Description,
-            ImagePath = updatePlaylistDto.ImagePath
+            ImagePath = newImagePath
         };
         
-        await Mediator.Send(command, cancellationToken);
+        var oldImagePath = await Mediator.Send(updatePlaylistCommand, cancellationToken);
+        
+        if (oldImagePath is not null)
+        {
+            var deleteImageCommand = new DeleteFileCommand
+            {
+                Name = oldImagePath,
+                MediaType = MediaType.Image
+            };
+            await Mediator.Send(deleteImageCommand, cancellationToken);
+        }
+        
         return NoContent();
     }
         
     /// <summary>
     /// Deletes user playlist
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///     DELETE /{playlistId}
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist that needs to be deleted
-    /// </param>
+    /// <param name="playlistId">ID of the playlist that needs to be deleted</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpDelete("{playlistId:guid}")]
@@ -191,34 +174,39 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
-        var command = new DeletePlaylistCommand
+        var deletePlaylistCommand = new DeletePlaylistCommand
         {
             UserId = UserId,
             PlaylistId = playlistId
         };
-        await Mediator.Send(command, cancellationToken);
+        var imagePath = await Mediator.Send(deletePlaylistCommand, cancellationToken);
+        
+        if (imagePath is not null)
+        {
+            var deleteImageCommand = new DeleteFileCommand
+            {
+                Name = imagePath,
+                MediaType = MediaType.Image
+            };
+            await Mediator.Send(deleteImageCommand, cancellationToken);
+        }
+        
         return NoContent();
     }
         
     /// <summary>
     /// Gets songs from user playlist
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///     GET /{playlistId}/songs
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist from which the songs will be gotten
-    /// </param>
+    /// <param name="playlistId">ID of the playlist from which the songs will be gotten</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns SongListVm</returns>
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpGet("{playlistId:guid}/songs")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<SongListVm>> GetPlaylistSongs(Guid playlistId, CancellationToken cancellationToken)
+    public async Task<ActionResult<SongListVm>> GetPlaylistSongs(Guid playlistId,
+        CancellationToken cancellationToken)
     {
         var query = new GetSongListByPlaylistIdQuery
         {
@@ -231,18 +219,8 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Adds the song into the playlist
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///   POST /{playlistId}/songs/{songId}
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist to which the song is adding
-    /// </param>
-    /// <param name="songId">
-    /// ID of the song which is adding to the playlist
-    /// </param>
+    /// <param name="playlistId">ID of the playlist to which the song is adding</param>
+    /// <param name="songId">ID of the song which is adding to the playlist</param>
     /// <returns>Returns db key of created relation</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If the user is unauthorized</response>
@@ -264,18 +242,8 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Removes the song from the playlist
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    ///   DELETE /{playlistId}/songs/{songId}
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist from which the song is removing
-    /// </param>
-    /// <param name="songId">
-    /// ID of the song which is removing from the playlist
-    /// </param>
+    /// <param name="playlistId">ID of the playlist from which the song is removing</param>
+    /// <param name="songId">ID of the song which is removing from the playlist</param>
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpDelete("{playlistId:guid}/songs/{songId:guid}")]
@@ -296,14 +264,8 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Gets user favorite songs which are not in the playlist
     /// </summary>
-    /// <remarks>
-    ///     
-    ///     GET /{playlistId}/liked/
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist 
-    /// </param>
+    /// <param name="playlistId">ID of the playlist</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns LikedSongListVm</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If the user is unauthorized</response>
@@ -325,17 +287,9 @@ public class PlaylistsController : BaseController
     /// <summary>
     /// Gets user favorite songs which are not in the playlist by search string
     /// </summary>
-    /// <remarks>
-    /// 
-    ///     GET /{playlistId}/liked/{searchString}
-    ///
-    /// </remarks>
-    /// <param name="playlistId">
-    /// ID of the playlist
-    /// </param>
-    /// <param name="searchString">
-    /// User search request
-    /// </param>
+    /// <param name="playlistId">ID of the playlist</param>
+    /// <param name="searchString">User search request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns LikedSongListVm></returns>
     /// <response code="200">Success</response>
     /// <response code="401">If the user is unauthorized</response>

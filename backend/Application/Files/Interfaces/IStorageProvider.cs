@@ -1,7 +1,10 @@
+﻿using Application.Files.Enums;
+
 namespace Application.Files.Interfaces;
 
 public interface IStorageProvider
 {
-    Task<bool> UploadFile(Stream fileStream, string key, string contentType);
-    Task<bool> DeleteFile(string key);
+    Task<string> UploadFile(Stream fileStream, MediaType mediaType, CancellationToken cancellationToken = default);
+    Task DeleteFile(string name, MediaType mediaType, CancellationToken cancellationToken = default);
+    Task<Stream> GetFile(string name, MediaType mediaType, CancellationToken cancellationToken = default);
 }

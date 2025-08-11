@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Files.Commands.DeleteFile;
 
@@ -6,6 +6,6 @@ public class DeleteFileCommandValidator : AbstractValidator<DeleteFileCommand>
 {
     public DeleteFileCommandValidator()
     {
-        RuleFor(c => c.FileName).NotEqual(string.Empty);
+        RuleFor(c => c.Name).NotEqual(string.Empty);
     }
 }
