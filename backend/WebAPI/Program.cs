@@ -42,6 +42,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddApiVersioning()
                 .AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -102,6 +104,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

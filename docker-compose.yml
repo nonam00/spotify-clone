@@ -1,8 +1,9 @@
 
 services:
   db:
+    container_name: postgresql_db
     image: postgres:16
-    restart: always
+    restart: unless-stopped
     ports:
       - "5432:5432"
     expose:
@@ -14,28 +15,41 @@ services:
     volumes:
       - .:/docker-entrypoint-initdb.d
       - db_data:/var/lib/postgresql/data
-    container_name: postgresql_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 10s 
+      retries: 5
+      start_period: 10s
 
   webapi:
+    container_name: aspnet_web_api
     build:
       context: ./backend
       dockerfile: ./WebAPI/Dockerfile
-    restart: always
+    restart: unless-stopped
     env_file: ./backend/WebAPI/.env
     ports:
       - "5000:8080"
-    volumes:
-      - "./backend/WebAPI/Files:/app/Files"
-    container_name: aspnet_web_api
     depends_on:
-      - db
-      - minio
+      db:
+        condition: service_healthy
+        restart: true
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   frontend:
+    container_name: next_frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    restart: always
+    restart: unless-stopped
     environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - SERVER_API_URL=${SERVER_API_URL}
@@ -44,11 +58,14 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     depends_on:
-      - webapi
+      webapi:
+        condition: service_started
+        restart: true
 
   minio:
-    image: minio/minio
     container_name: minio_s3
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=$MINIO_ROOT_USER
@@ -58,6 +75,12 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
 volumes:
   db_data:
   minio_data:
