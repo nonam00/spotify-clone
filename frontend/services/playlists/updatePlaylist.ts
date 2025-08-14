@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 
-import {CLIENT_API_URL} from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const updatePlaylist = async(id: string, form: FormData) => {
   return await fetch(`${CLIENT_API_URL}/playlists/${id}`, {

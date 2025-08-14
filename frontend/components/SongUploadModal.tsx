@@ -14,7 +14,7 @@ import Input from "./Input";
 import Button from "./Button";
 import uploadSong from "@/services/songs/uploadSong";
 
-const UploadModal = () => {
+const SongUploadModal = () => {
   const [isPending, startTransition] = useTransition();
   const [onClose, isOpen] = useUploadModal(useShallow(s => [s.onClose, s.isOpen]));
   const { isAuth } = useUser();
@@ -115,4 +115,4 @@ const UploadModal = () => {
   );
 }
 
-export default UploadModal;
+export default SongUploadModal;

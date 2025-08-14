@@ -13,14 +13,12 @@ import Box from "./Box";
 import SidebarItem from "./SidebarItem";
 import Library from "./Library";
 
-interface SidebarProps {
-  children: React.ReactNode;
-  playlists: Playlist[]
-}
-
-const Sidebar: React.FC<SidebarProps> = ({
+const Sidebar = ({
    children,
    playlists
+}: {
+  children: React.ReactNode,
+  playlists: Playlist[]
 }) => {
   const pathName = usePathname();
   const playerActiveSongId = usePlayer(s => s.activeId);

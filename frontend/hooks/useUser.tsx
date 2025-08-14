@@ -1,15 +1,22 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { UserDetails } from "@/types/types";
+import {AuthSubmitType, UserDetails} from "@/types/types";
 import getUserInfo from "@/services/auth/getUserInfo";
 import logoutRequest from "@/services/auth/logout";
+import login from "@/services/auth/login";
+import register from "@/services/auth/register";
+
+const actions = {
+  "login": login,
+  "register": register
+}
 
 type UserContextType = {
   isAuth: boolean;
   userDetails: UserDetails | null;
   isLoading: boolean;
-  authorize: (action: (form: FormData) => Promise<Response>, form: FormData) => Promise<void>;
+  authorize: (submitType: AuthSubmitType, form: FormData) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -35,17 +42,29 @@ export const MyUserContextProvider = ({
     }
   }
 
-  const authorize = async (action: (form: FormData) => Promise<Response>, form: FormData) => {
+  const authorize = async (
+    submitType: AuthSubmitType,
+    form: FormData
+  ) => {
     setIsLoadingData(true);
+    const action = actions[submitType];
     const response = await action(form);
-    if (response.ok) {
-      setIsAuth(true);
-      toast.success("Authorized");
-    } else {
+
+    if (!response.ok) {
       const exception = await response.json();
       toast.error(exception.detail);
+      setIsLoadingData(false);
+      return false;
+    }
+
+    if (submitType == "login") {
+      setIsAuth(true);
+      toast.success("Authorized");
+    } else if (submitType == "register") {
+      toast.success("The confirmation code has been sent to your email. Activate your account and then login")
     }
     setIsLoadingData(false);
+    return true;
   }
 
   const logout = async () => {

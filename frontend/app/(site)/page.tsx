@@ -4,7 +4,8 @@ import getUserPlaylistsByQuantity from "@/actions/playlists/getUserPlaylistsByQu
 import Header from "@/components/Header";
 import ListItem from "@/components/ListItem";
 import PageContent from "./components/PageContent";
-import { CLIENT_API_URL } from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 export const revalidate = 0;
 

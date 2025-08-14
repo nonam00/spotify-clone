@@ -1,8 +1,8 @@
 "use server";
 
-import {SERVER_API_URL} from "@/api/http";
 import {SearchType, Song} from "@/types/types";
 import getSongs from "./getSongs";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongsBySearch = async (
   searchString: string,

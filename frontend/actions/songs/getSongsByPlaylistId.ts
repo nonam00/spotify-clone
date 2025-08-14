@@ -2,8 +2,8 @@
 
 import { cookies } from "next/headers";
 
-import {SERVER_API_URL} from "@/api/http";
 import { Song } from "@/types/types";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongsByPlaylistId = async (
   playlistId: string

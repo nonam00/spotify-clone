@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 
-import {CLIENT_API_URL} from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const addLikedSong = async (songId: string) => {
   return await fetch(`${CLIENT_API_URL}/users/songs/${songId}`, {

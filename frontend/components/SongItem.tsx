@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import React, {memo} from "react";
 
 import { Song } from "@/types/types";
 import PlayButton from "@/components/PlayButton";
-import { CLIENT_API_URL } from "@/api/http";
-import React, {memo} from "react";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const SongItem = memo(function SongItem({
   data,

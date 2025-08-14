@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 import AuthModal from "@/components/AuthModal";
 import CreateModal from "@/components/CreateModal";
-import UploadModal from "@/components/UploadModal";
+import SongUploadModal from "@/components/SongUploadModal";
 import PlaylistModal from "@/components/PlaylistModal";
 import ConfirmModal from "@/components/ConfirmModal";
 
@@ -23,7 +23,7 @@ const ModalProvider = () => {
     <>
       <AuthModal />
       <CreateModal /> 
-      <UploadModal />
+      <SongUploadModal />
       <PlaylistModal />
       <ConfirmModal />
     </>

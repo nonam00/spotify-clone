@@ -5,7 +5,8 @@ import Image from "next/image";
 import {memo} from "react";
 
 import { Playlist, Song } from "@/types/types";
-import { CLIENT_API_URL } from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const MediaItem = memo(function MediaItem({
   data,

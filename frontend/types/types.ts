@@ -26,3 +26,4 @@ export interface ModalStore {
 }
 
 export type SearchType = "any" | "title" | "author";
+export type AuthSubmitType = "login" | "register";

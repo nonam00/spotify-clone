@@ -1,7 +1,8 @@
 "use server";
 
 import { Song } from "@/types/types";
-import {SERVER_API_URL} from "@/api/http";
+
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongs = async (): Promise<Song[]> => {
   try {

@@ -4,7 +4,8 @@ import usePlayer from "@/hooks/usePlayer";
 import useGetSongById from "@/hooks/useGetSongById";
 
 import PlayerContent from "./PlayerContent";
-import { CLIENT_API_URL } from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const Player = () => {
   const activeSongId = usePlayer(s => s.activeId);

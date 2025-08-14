@@ -12,21 +12,13 @@ import Modal from "./Modal";
 import Input from "./Input";
 import Button from "./Button";
 
-import login from "@/services/auth/login";
-import register from "@/services/auth/register";
-
-type SubmitType = "login" | "register";
-
-const actions = {
-  "login": login,
-  "register": register
-};
+import {AuthSubmitType} from "@/types/types";
 
 const AuthModal = () => {
   const router = useRouter();
   const [onClose, isOpen] = useAuthModal(useShallow(s => [s.onClose, s.isOpen]));
   const { isAuth, authorize } = useUser();
-  const [submitType, setSubmitType] = useState<SubmitType>();
+  const [submitType, setSubmitType] = useState<AuthSubmitType>();
   const [isPending, startTransition] = useTransition();
 
   useLayoutEffect(() => {
@@ -44,8 +36,8 @@ const AuthModal = () => {
 
   const onSubmit = async (form: FormData) => {
     startTransition(async () => {
-      await authorize(actions[submitType!], form);
-      if (isAuth) {
+      const success = await authorize(submitType!, form);
+      if (success) {
         onClose();
         router.refresh();
       }

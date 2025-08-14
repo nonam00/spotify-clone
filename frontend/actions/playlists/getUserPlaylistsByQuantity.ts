@@ -2,9 +2,9 @@
 
 import {cookies} from "next/headers";
 
-import {SERVER_API_URL} from "@/api/http";
 import {Playlist} from "@/types/types";
 import getUserPlaylists from "./getUserPlaylists";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getUserPlaylistsByQuantity = async (
   quantity: number

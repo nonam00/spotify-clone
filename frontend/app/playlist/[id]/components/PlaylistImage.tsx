@@ -5,7 +5,8 @@ import { useShallow } from "zustand/shallow";
 
 import { Playlist } from "@/types/types";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
-import { CLIENT_API_URL } from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const PlaylistImage = ({
   playlist
