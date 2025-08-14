@@ -12,15 +12,7 @@ const Slider = memo(function Slider({
 }) {
   return (
     <RadixSlider.Root
-      className="
-        relative
-        flex
-        items-center
-        select-none
-        touch-none
-        w-full h-10
-        cursor-pointer
-      "
+      className="relative flex items-center select-none touch-none w-full h-7"
       defaultValue={[1]}
       value={[value]}
       onValueChange={onChange}
@@ -28,7 +20,7 @@ const Slider = memo(function Slider({
       step={0.01}
       aria-label="Volume"
     >
-      <RadixSlider.Track className="bg-neutral-600 relative grow rounded-full h-[3.1px]">
+      <RadixSlider.Track className="bg-neutral-600 relative grow rounded-full h-[3.1px] cursor-pointer">
         <RadixSlider.Range className="absolute bg-white rounded-full h-full"/>
       </RadixSlider.Track>
     </RadixSlider.Root>

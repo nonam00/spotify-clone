@@ -44,16 +44,8 @@ const PlaylistContent = ({
         <button
           onClick={onPlayClick}
           className="
-            transition
-            rounded-full
-            flex
-            items-center
-            justify-start
-            bg-green-500
-            p-5
-            drop-shadow-md
-            right-5
-            hover:scale-110
+            flex items-center justify-start p-5 right-5
+            rounded-full bg-green-500 drop-shadow-md hover:scale-110 transition
           "
         >
           <FaPlay className="text-black" size="20" />

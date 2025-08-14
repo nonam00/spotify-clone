@@ -23,12 +23,10 @@ const Modal = ({
       onOpenChange={onChange}
     >
       <Dialog.Portal>
-        <Dialog.Overlay
-          className="bg-neutral-900/90 backdrop-blur-sm fixed inset-0"
-        />
+        <Dialog.Overlay className="bg-neutral-900/90 backdrop-blur-sm fixed inset-0"/>
         <Dialog.Content
           className="
-            fixed 
+            fixed
             drop-shadow-md 
             border border-neutral-700
             top-[50%] left-[50%]
@@ -46,9 +44,7 @@ const Modal = ({
           <Dialog.Title className="text-xl text-center font-bold mb-4">
             {title}
           </Dialog.Title>
-          <Dialog.Description
-            className="mb-5 text-sm leading-normal text-center"
-          >
+          <Dialog.Description className="mb-5 text-sm leading-normal text-center">
             {description}
           </Dialog.Description>
           <div>
@@ -57,16 +53,16 @@ const Modal = ({
           <Dialog.Close asChild>
             <button
               className="
-                text-neutral-400
-                hover:text-white
                 absolute
-                top-[10px] right-[10px]
                 inline-flex
-                h-[25px] w-[25px]
-                appearance-none
                 items-center
                 justify-center
+                top-[10px] right-[10px]
+                h-[25px] w-[25px]
+                appearance-none
                 rounded-full
+                text-neutral-400
+                hover:text-white
                 focus:outline-none
               "
             >

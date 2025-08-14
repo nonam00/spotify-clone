@@ -18,9 +18,9 @@ const Player = () => {
   const songUrl = `${CLIENT_API_URL}/files/audio/${song.songPath}`;
   
   return (
-    <div className="fixed bottom-0 bg-black w-full py-2 h-[80px] px-4">
+    <div className="fixed bottom-0 bg-black w-full py-2 h-15">
       <PlayerContent
-        key={songUrl} // to completely destructorize an object
+        key={songUrl}
         song={song}
         songUrl={songUrl}
       />

@@ -19,19 +19,10 @@ const SongItem = memo(function SongItem({
     <div
       onClick={() => onClick(data.id)}
       className="
-        relative
-        group
-        flex flex-col
-        items-center
-        justify-center
-        rounded-md
-        overflow-hidden
-        gap-x-4
-        bg-neutral-400/5
-        hover:bg-neutral-400/10
-        cursor-pointer
-        transition
-        p-3
+        relative group flex flex-col items-center justify-center
+        p-3 overflow-hidden gap-x-4
+        rounded-md bg-neutral-400/5 hover:bg-neutral-400/10
+        cursor-pointer transition
       "
     >
       <div className="relative aspect-square w-full h-full rounded-md overflow-hidden">

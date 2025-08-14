@@ -19,17 +19,10 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     <Link
       href={href}
       className={twMerge(`
-        flex flex-row
-        h-auto w-full 
-        items-center
-        gap-x-4 
-        py-1
-        cursor-pointer 
-        text-md 
-        font-medium 
-        text-neutral-400
-        hover:text-white 
-        transition 
+        flex flex-row items-center
+        h-auto w-full py-1 gap-x-4
+        text-md font-medium text-neutral-400
+        cursor-pointer hover:text-white transition-colors 
       `,
         active && "text-white"
       )}

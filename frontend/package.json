@@ -20,12 +20,10 @@
     "react-spinners": "^0.15.0",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.6.0",
-    "use-sound": "^4.0.4",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@types/howler": "^2.2.12",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.19.10",
     "@types/react": "^19.1.10",

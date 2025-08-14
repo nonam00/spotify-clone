@@ -83,13 +83,7 @@ const AuthModal = () => {
           onClick={() => setSubmitType("register")}
           type="submit"
           disabled={isPending}
-          className="
-            my-2
-            hover:bg-neutral-700
-            bg-transparent
-            text-neutral-300
-            font-medium
-          "
+          className="my-2 bg-transparent hover:bg-neutral-700 text-neutral-300 font-medium"
         >
           Register
         </Button>
