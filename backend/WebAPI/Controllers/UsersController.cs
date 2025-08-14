@@ -164,7 +164,7 @@ public class UsersController : BaseController
             SongId = songId
         };
         var check = await Mediator.Send(query, cancellationToken);
-        return check? Ok(check) : Ok();
+        return Ok(new { check });
     }
 
     /// <summary>
