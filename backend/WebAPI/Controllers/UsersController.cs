@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using Application.Users.Models;
 using Application.Users.Commands.CreateUser;
+using Application.Users.Commands.ActivateUser;
 using Application.Users.Queries.Login;
 using Application.Users.Queries.GetUserInfo;
 using Application.LikedSongs.Models;
@@ -37,16 +38,29 @@ public class UsersController : BaseController
             Password = userCredentialsDto.Password
         };
         
-        var accessToken = await Mediator.Send(command, cancellationToken);
-
-        HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(12)
-        });
-
+        await Mediator.Send(command, cancellationToken);
         return Ok();
+    }
+
+    /// <summary>
+    /// Activates user account using confirmation code from email
+    /// </summary>
+    /// <param name="activateUserDto">User email and confirmation code from email</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Returns access token in cookies</returns>
+    /// <response code="200">Success</response>
+    [HttpGet("activate")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Activate(
+        [FromQuery] ActivateUserDto activateUserDto, CancellationToken cancellationToken)
+    {
+        var command = new ActivateUserCommand
+        {
+            Email = activateUserDto.Email,
+            ConfirmationCode = activateUserDto.Code
+        };
+        await Mediator.Send(command, cancellationToken);
+        return Redirect("http://localhost:3000");
     }
 
     /// <summary>

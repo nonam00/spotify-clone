@@ -12,9 +12,9 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .WithMessage("Nonvalid email")
             .WithErrorCode("400");
 
-        RuleFor(command => command.Password.Length)
-            .GreaterThan(8)
-            .WithMessage("Password length must be greater than 8")
+        RuleFor(command => command.Password)
+            .MinimumLength(8)
+            .WithMessage("Password length must be equal or greater than 8")
             .WithErrorCode("400");
 
         // other rules for password

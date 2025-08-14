@@ -6,23 +6,22 @@ using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, string>
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IJwtProvider _jwtProvider;
-
+    private readonly IEmailVerificator _emailVerificator;
     public CreateUserCommandHandler(
         IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
-        IJwtProvider jwtProvider)
+        IEmailVerificator emailVerificator)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
-        _jwtProvider = jwtProvider;
+        _emailVerificator = emailVerificator;
     }
 
-    public async Task<string> Handle(CreateUserCommand request,
+    public async Task Handle(CreateUserCommand request,
         CancellationToken cancellationToken)
     {
         if (await _usersRepository.CheckIfExists(request.Email, cancellationToken))
@@ -36,13 +35,14 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, strin
         {
             Id = Guid.NewGuid(),
             Email = request.Email,
-            PasswordHash = hashedPassword
+            PasswordHash = hashedPassword,
+            IsActive = false
         };
 
         await _usersRepository.Add(user, cancellationToken);
 
-        var jwtToken = _jwtProvider.GenerateToken(user);
-
-        return jwtToken;
+        var verificationCode = _emailVerificator.GenerateCode();
+        await _emailVerificator.StoreCodeAsync(request.Email, verificationCode);
+        await _emailVerificator.SendCodeAsync(request.Email, verificationCode, cancellationToken);
     }
 }

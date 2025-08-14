@@ -25,7 +25,12 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, string>
     {
         var user = await _usersRepository.GetByEmail(request.Email, cancellationToken)
                    ?? throw new LoginException("Invalid email or password. Please try again.");
-            
+
+        if (!user.IsActive)
+        {
+            throw new LoginException("Account is not activated");
+        }
+        
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
             throw new LoginException("Invalid email or password. Please try again.");
