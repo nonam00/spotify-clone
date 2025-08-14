@@ -9,9 +9,15 @@ using Application.Users.Interfaces;
 
 namespace Infrastructure.Auth;
 
-public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
+public class JwtProvider : IJwtProvider
 {
-    private readonly JwtOptions _options = options.Value;
+    private readonly JwtOptions _options;
+
+    public JwtProvider(IOptions<JwtOptions> options)
+    {
+        _options = options.Value;
+    }
+
     public string GenerateToken(User user)
     {
         Claim[] claims = 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 using Application.LikedSongs.Interfaces;
 using Application.Playlists.Interfaces;
@@ -15,24 +16,28 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDatabase(configuration).AddRepositories();
+        services.AddDatabases(configuration).AddRepositories();
         return services;
     }
 
-    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDatabases(this IServiceCollection services, IConfiguration configuration)
     {
-        // connection string from api public configuration
-        var connectionString = configuration.GetConnectionString("PostgresDb") 
-                               ?? throw new NullReferenceException("PostgresDb connection string is null");
-        // password for database from user secret or env file
-        var dbPassword = configuration["DbPassword"]
-                               ?? throw new NullReferenceException("DbPassword string is null");
-
+        var postgresConnectionString = configuration.GetConnectionString("PostgresDb") 
+             ?? throw new NullReferenceException("PostgresDb connection string is null");
+        var postgresDbPassword = configuration["DbPassword"] ?? throw new NullReferenceException("DbPassword string is null");
+        
         services.AddDbContext<SongsDbContext>(options =>
         {
-            options.UseNpgsql(connectionString + dbPassword)
+            options.UseNpgsql(postgresConnectionString + postgresDbPassword)
                 .UseSnakeCaseNamingConvention();
         });
+        
+        
+        var redisConnectionString = configuration["RedisConnectionString"]
+            ?? throw new NullReferenceException("Redis connection string is null");
+                
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(redisConnectionString));
         
         return services;
     }
@@ -44,6 +49,8 @@ public static class DependencyInjection
         services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
         services.AddScoped<ILikedSongsRepository, LikedSongsRepository>();
         services.AddScoped<IPlaylistsSongsRepository, PlaylistsSongsRepository>();
+        
+        services.AddScoped<IConfirmationCodesRepository, ConfirmationCodesRepository>();
         
         return services;
     }

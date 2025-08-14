@@ -50,6 +50,21 @@ public class UsersRepository : IUsersRepository
         return result;
     }
 
+    public async Task<bool> CheckIfActivated(Guid id, CancellationToken cancellationToken = default)
+    {
+        var result = await _dbContext.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+        return result is not null && result.IsActive;
+    }
+
+    public async Task Update(User user, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Update(user);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private static UserInfo ToVm(User user)
     {
         return new UserInfo
