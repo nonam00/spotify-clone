@@ -1,8 +1,7 @@
-import { forwardRef } from "react";
-import { twMerge } from "tailwind-merge";
+import {forwardRef} from "react";
+import {twMerge} from "tailwind-merge";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
-
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   className,
   children,
@@ -14,16 +13,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     <button
       type={type}
       className={twMerge(`
-        w-full
-        rounded-full
-        bg-green-500
-        border border-transparent
-        px-3 py-3
-        disabled:cursor-not-allowed
-        disabled:opacity-50
-        hover:opacity-75
-        text-black font-bold
-        transition
+        w-full rounded-full bg-green-500 border border-transparent px-3 py-3 text-black font-bold
+        disabled:cursor-not-allowed disabled:opacity-50
+        hover:opacity-75 transition
       `,
         className
       )}
@@ -37,5 +29,4 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
 })
 
 Button.displayName = "Button";
- 
 export default Button;

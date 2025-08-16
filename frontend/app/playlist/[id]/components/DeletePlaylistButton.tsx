@@ -14,11 +14,7 @@ const DeletePlaylistButton = ({
   playlistId: string
 }) => {
   const router = useRouter();
-  const [
-    onOpen,
-    setAction,
-    setDescription
-  ] = useConfirmModal(useShallow(s => [
+  const [onOpen, setAction, setDescription] = useConfirmModal(useShallow(s => [
     s.onOpen,
     s.setAction,
     s.setDescription

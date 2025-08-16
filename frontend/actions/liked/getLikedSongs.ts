@@ -8,11 +8,9 @@ import {SERVER_API_URL} from "@/helpers/api";
 const getLikedSongs = async (): Promise<Song[]> => {
   try {
     const cookieStore = await cookies();
-    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
     const response = await fetch(`${SERVER_API_URL}/users/songs`, {
       headers: {
         Cookie: cookieStore.toString(),
-        "x-xsrf-token": xsrf,
       },
       method: "GET",
       credentials: "include",
@@ -21,12 +19,13 @@ const getLikedSongs = async (): Promise<Song[]> => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data)
+      console.error(data);
+      return [];
     }
 
     return data.likedSongs as Song[];
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 }

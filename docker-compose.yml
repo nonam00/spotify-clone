@@ -112,6 +112,7 @@ services:
     ports:
       - "1025"
       - "8025:8025"
+    entrypoint: ["/bin/sh", "-c", "MailHog | awk '!/KEEPALIVE/'"]
 
 volumes:
   db_data:

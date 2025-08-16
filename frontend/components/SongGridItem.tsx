@@ -4,11 +4,11 @@ import Image from "next/image";
 import React, {memo} from "react";
 
 import { Song } from "@/types/types";
-import PlayButton from "@/components/PlayButton";
 
 import {CLIENT_API_URL} from "@/helpers/api";
+import PlayButton from "@/components/ui/PlayButton";
 
-const SongItem = memo(function SongItem({
+const SongGridItem = memo(function SongItem({
   data,
   onClick
 }: {
@@ -50,4 +50,4 @@ const SongItem = memo(function SongItem({
   );
 });
  
-export default SongItem;
+export default SongGridItem;

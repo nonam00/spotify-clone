@@ -1,4 +1,4 @@
-import { twMerge } from "tailwind-merge";
+import {twMerge} from "tailwind-merge";
 
 const Box = ({
   children,
@@ -13,5 +13,4 @@ const Box = ({
     </div>
   );
 }
- 
 export default Box;

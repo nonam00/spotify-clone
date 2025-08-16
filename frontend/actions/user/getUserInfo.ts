@@ -1,19 +1,18 @@
 "use server";
 
-import { cookies } from "next/headers";
-
-import { Playlist } from "@/types/types";
+import {UserDetails} from "@/types/types";
 
 import {SERVER_API_URL} from "@/helpers/api";
+import {cookies} from "next/headers";
 
-const getPlaylistById = async (id: string): Promise<Playlist | null> => {
+const getUserInfo = async (): Promise<UserDetails | null> => {
   try {
     const cookieStore = await cookies();
-    const response = await fetch(`${SERVER_API_URL}/playlists/${id}/`, {
+    const response = await fetch(`${SERVER_API_URL}/users/info`, {
+      method: "GET",
       headers: {
         Cookie: cookieStore.toString()
       },
-      method: "GET",
       credentials: "include"
     });
 
@@ -28,11 +27,12 @@ const getPlaylistById = async (id: string): Promise<Playlist | null> => {
       return null;
     }
 
-    return data as Playlist;
+    return data;
   } catch (error) {
     console.error(error);
     return null;
   }
+
 }
 
-export default getPlaylistById;
+export default getUserInfo;

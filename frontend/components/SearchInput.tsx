@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import useDebounce from "@/hooks/useDebounce";
-import Input from "./Input";
 import { SearchType } from "@/types/types";
+import Input from "@/components/ui/Input";
 
 const SearchInput = ({
   pageUrl,

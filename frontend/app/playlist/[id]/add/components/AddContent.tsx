@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import {useTransition} from "react";
 import toast from "react-hot-toast";
 
-import MediaItem from "@/components/MediaItem";
 import { Song } from "@/types/types";
 import addSongToPlaylist from "@/services/playlists/addSongToPlaylist";
+import SongListItem from "@/components/SongListItem";
 
 const AddContent= ({
   playlistId,
@@ -28,7 +28,7 @@ const AddContent= ({
 
   const onAddClick = async (songId: string) => {
     if (isPending) return;
-    startTransition(async() => {
+    startTransition(async () => {
       const response = await addSongToPlaylist(playlistId, songId);
       if (response.ok) {
         router.refresh();
@@ -42,17 +42,11 @@ const AddContent= ({
   return (
     <div className="flex flex-col gap-y-2 w-full px-6">
       {songs.map((song) => (
-        <div
+        <SongListItem
           key={song.id}
-          className="flex items-center gap-x-4 w-full"
-        >
-          <div className="flex-1">
-            <MediaItem
-              onClick={(id: string) => { onAddClick(id) }}
-              data={song}
-            />
-          </div>
-        </div>
+          song={song}
+          onClickCallback={onAddClick}
+        />
       ))}
     </div>
   );

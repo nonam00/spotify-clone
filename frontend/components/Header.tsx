@@ -10,7 +10,8 @@ import { FaUserAlt } from "react-icons/fa";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 
-import Button from "./Button";
+
+import Button from "@/components/ui/Button";
 
 const Header = ({
   children,

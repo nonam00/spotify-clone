@@ -1,6 +1,6 @@
 "use client";
 
-import usePlayer from "@/hooks/usePlayer";
+import usePlayerStorage from "@/hooks/usePlayerStorage";
 import useGetSongById from "@/hooks/useGetSongById";
 
 import PlayerContent from "./PlayerContent";
@@ -8,7 +8,7 @@ import PlayerContent from "./PlayerContent";
 import {CLIENT_API_URL} from "@/helpers/api";
 
 const Player = () => {
-  const activeSongId = usePlayer(s => s.activeId);
+  const activeSongId = usePlayerStorage(s => s.activeId);
   const { song } = useGetSongById(activeSongId!);
 
   if(!song || !activeSongId) {

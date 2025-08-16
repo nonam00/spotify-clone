@@ -3,26 +3,25 @@
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2"
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback} from "react";
 import { useShallow } from "zustand/shallow";
 
 import { Song } from "@/types/types";
 
-import usePlayer from "@/hooks/usePlayer";
+import usePlayerStorage from "@/hooks/usePlayerStorage";
 
-import MediaItem from "./MediaItem";
 import LikeButton from "./LikeButton";
-import Slider from "./Slider";
-
-type changeSongType = "previous" | "next";
+import useSound from "@/hooks/useSound";
+import Slider from "@/components/ui/Slider";
+import MediaItem from "@/components/ui/MediaItem";
 
 // Helper function to format time
-const formatTime = (timeInSeconds: number): string => {
+function formatTime(timeInSeconds: number): string {
   if (isNaN(timeInSeconds)) return "0:00";
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-};
+}
 
 const PlayerContent = ({
   song,
@@ -31,65 +30,19 @@ const PlayerContent = ({
   song: Song;
   songUrl: string;
 }) => {
-  const [setNextId, setPreviousId, volume, setVolume] = usePlayer(useShallow(s => [
+  const [setNextId, setPreviousId, volume, setVolume] = usePlayerStorage(useShallow(s => [
     s.setNextId,
     s.setPreviousId,
     s.volume,
     s.setVolume,
   ]));
-  
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+
+  const { audioRef, isPlaying, duration, currentTime } = useSound(songUrl, volume, setNextId);
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
   const progress = duration > 0 ? currentTime / duration : 0;
-
-  // Handle song URL changes
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    const audio = audioRef.current;
-    audio.src = songUrl;
-    audio.volume = volume;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => handleChangeSong("next");
-    const handlePlayEvent = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('play', handlePlayEvent);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('ended', handleEnded);
-
-    // Attempt autoplay and handle errors
-    audio.play().catch(error => {
-      console.log("Autoplay error:", error);
-      setIsPlaying(false);
-    });
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('play', handlePlayEvent);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, [songUrl]);
-
-  // Handle volume changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
 
   // Play/pause button handler
   const togglePlay = useCallback(() => {
@@ -102,28 +55,16 @@ const PlayerContent = ({
         console.log("Play error:", error);
       });
     }
-  }, [isPlaying]);
+  }, [audioRef, isPlaying]);
   
   const toggleMute = () => setVolume(volume === 0 ? 1 : 0);
-
-  // Song navigation handler
-  const handleChangeSong = (changeType: changeSongType) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    if (changeType === "next") {
-      setNextId();
-    } else {
-      setPreviousId();
-    }
-  };
 
   // Progress slider callback
   const handleProgressChange = useCallback((values: number[]) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = values[0] * duration;
+      audioRef.current.currentTime = values[0] * audioRef.current.duration;
     }
-  }, [duration]);
+  }, [audioRef]);
 
   // Volume slider callback
   const handleVolumeChange = useCallback((values: number[]) => {
@@ -155,7 +96,7 @@ const PlayerContent = ({
       <div className="hidden md:flex flex-col items-center justify-center w-full">
         <div className="flex items-center justify-center w-full gap-6">
           <button
-            onClick={() => handleChangeSong("previous")}
+            onClick={setPreviousId}
             className="text-neutral-400 hover:text-white transition-colors focus:outline-none"
             aria-label="Previous song"
           >
@@ -169,7 +110,7 @@ const PlayerContent = ({
             <Icon size={24} className="text-black" />
           </button>
           <button
-            onClick={() => handleChangeSong("next")}
+            onClick={setNextId}
             className="text-neutral-400 hover:text-white transition-colors"
             aria-label="Next song"
           >

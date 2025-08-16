@@ -4,7 +4,7 @@ interface PlayerStore {
   ids: string[];
   activeId?: string;
   volume: number;
-  setId: (id: string) => void;
+  setActiveId: (id: string) => void;
   setIds: (ids: string[]) => void;
   setNextId: () => void;
   setPreviousId: () => void;
@@ -12,11 +12,11 @@ interface PlayerStore {
   reset: () => void;
 }
 
-const usePlayer = create<PlayerStore>((set, get) => ({
+const usePlayerStorage = create<PlayerStore>((set, get) => ({
   ids: [],
   activeId: undefined,
   volume: 1,
-  setId: (id: string) => set({ activeId: id }),
+  setActiveId: (id: string) => set({ activeId: id }),
   setIds: (ids: string[]) => set({ ids: ids }),
   setNextId: () => {
     const ids = get().ids;
@@ -28,7 +28,7 @@ const usePlayer = create<PlayerStore>((set, get) => ({
     const currentIndex = ids.findIndex((id) => id === get().activeId);
     const previousId = ids[currentIndex + 1];
 
-    return get().setId(previousId ?? ids[0]);
+    return get().setActiveId(previousId ?? ids[0]);
   },
   setPreviousId: () => {
     const ids = get().ids;
@@ -40,11 +40,11 @@ const usePlayer = create<PlayerStore>((set, get) => ({
     const currentIndex = ids.findIndex((id) => id === get().activeId);
     const previousId = ids[currentIndex - 1];
 
-    return get().setId(previousId ?? ids[ids.length - 1]);
+    return get().setActiveId(previousId ?? ids[ids.length - 1]);
 
   },
   setVolume: (value: number) => set({volume: value}),
   reset: () => set({ ids: [], activeId: undefined, volume: 1})
 }));
 
-export default usePlayer;
+export default usePlayerStorage;

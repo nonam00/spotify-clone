@@ -1,31 +1,15 @@
-// component for user playlists in sidebar library or songs list in home page 
-"use client";
-
+import {Playlist, Song} from "@/types/types";
 import Image from "next/image";
-import {memo} from "react";
-
-import { Playlist, Song } from "@/types/types";
-
 import {CLIENT_API_URL} from "@/helpers/api";
 
-const MediaItem = memo(function MediaItem({
+// component for user playlists in sidebar library or songs list in home page
+const MediaItem = ({
   data,
-  onClick
 }: {
   data: Song | Playlist;
-  onClick?: (id: string) => void;
-}) {
-  const handleClick = () => {
-    if (onClick) {
-      return onClick(data.id);
-    }
-    // default turn on player
-  }
+}) => {
   return (
-    <div
-      onClick={handleClick}
-      className="flex items-center w-full p-2 rounded-md gap-x-3 cursor-pointer hover:bg-neutral-800/50"
-    >
+    <div className="flex items-center w-full p-2 rounded-md gap-x-3 cursor-pointer hover:bg-neutral-800/50">
       <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
         <Image
           fill
@@ -46,6 +30,6 @@ const MediaItem = memo(function MediaItem({
       </div>
     </div>
   );
-});
- 
+};
+
 export default MediaItem;

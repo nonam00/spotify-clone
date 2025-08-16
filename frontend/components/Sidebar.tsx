@@ -1,17 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useMemo } from "react";
+import {IconType} from "react-icons";
 import { BiSearch } from "react-icons/bi";
 import { HiHome } from "react-icons/hi";
 import { twMerge } from "tailwind-merge";
 
 import { Playlist } from "@/types/types";
-import usePlayer from "@/hooks/usePlayer";
-
-import Box from "./Box";
-import SidebarItem from "./SidebarItem";
+import usePlayerStorage from "@/hooks/usePlayerStorage";
 import Library from "./Library";
+import Box from "@/components/ui/Box";
 
 const Sidebar = ({
    children,
@@ -21,7 +21,7 @@ const Sidebar = ({
   playlists: Playlist[]
 }) => {
   const pathName = usePathname();
-  const playerActiveSongId = usePlayer(s => s.activeId);
+  const playerActiveSongId = usePlayerStorage(s => s.activeId);
 
   const routes = useMemo(() => [
     {
@@ -59,6 +59,33 @@ const Sidebar = ({
       {children}
     </main>
   </div>
+  );
+}
+
+const SidebarItem = ({
+  icon: Icon,
+  label,
+  active,
+  href
+}: {
+  icon: IconType;
+  label: string;
+  active?: boolean;
+  href: string;
+}) => {
+  return (
+    <Link
+      href={href}
+      className={twMerge(`
+        flex flex-row items-center h-auto w-full py-1 gap-x-4 text-md font-medium text-neutral-400
+        cursor-pointer hover:text-white transition-colors 
+      `,
+        active && "text-white"
+      )}
+    >
+      <Icon size={26} />
+      <p className="truncate w-full">{label}</p>
+    </Link>
   );
 }
 

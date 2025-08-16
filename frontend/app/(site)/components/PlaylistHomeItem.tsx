@@ -1,11 +1,10 @@
-// playlist icon, using this component in home page
 "use client";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaPlay } from "react-icons/fa";
 
-const ListItem = ({
+const PlaylistHomeItem = ({
   name,
   href,
   image
@@ -17,7 +16,6 @@ const ListItem = ({
   const router = useRouter();
 
   const onClick = () => {
-    //Add auth before push
     router.push(`/playlist${href}`);
   }
 
@@ -50,4 +48,4 @@ const ListItem = ({
   );
 }
  
-export default ListItem;
+export default PlaylistHomeItem;

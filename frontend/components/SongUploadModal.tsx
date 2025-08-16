@@ -9,10 +9,10 @@ import toast from "react-hot-toast";
 import {useUser} from "@/hooks/useUser";
 import useUploadModal from "@/hooks/useUploadModal";
 
-import Modal from "./Modal";
-import Input from "./Input";
-import Button from "./Button";
 import uploadSong from "@/services/songs/uploadSong";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Modal from "@/components/ui/Modal";
 
 const SongUploadModal = () => {
   const [isPending, startTransition] = useTransition();
@@ -65,24 +65,34 @@ const SongUploadModal = () => {
         action={onSubmit}
         className="flex flex-col gap-y-4"
       >
-        <Input
-          id="title"
-          name="Title"
-          type="text"
-          disabled={isPending}
-          placeholder="Song Title"
-          required
-        />
-        <Input
-          id="author"
-          name="Author"
-          type="text"
-          disabled={isPending}
-          placeholder="Song Author"
-          required
-        />
-        <div>
-          <label className="pb-1">Select a song file</label>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">
+            Title:
+          </label>
+          <Input
+            id="title"
+            name="Title"
+            type="text"
+            disabled={isPending}
+            placeholder="Song Title"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-y-1">
+          <label className="w-full text-base font-bold">
+            Author:
+          </label>
+          <Input
+            id="author"
+            name="Author"
+            type="text"
+            disabled={isPending}
+            placeholder="Song Author"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">Select a song file:</label>
           <Input
             id="audio"
             name="Audio"
@@ -92,8 +102,8 @@ const SongUploadModal = () => {
             required
           />
         </div>
-        <div>
-          <label className="pb-1">Select an image</label>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">Select an image:</label>
           <Input
             id="image"
             name="Image"

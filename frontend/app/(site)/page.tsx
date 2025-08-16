@@ -2,7 +2,7 @@ import getSongs from "@/actions/songs/getSongs";
 import getUserPlaylistsByQuantity from "@/actions/playlists/getUserPlaylistsByQuantity";
 
 import Header from "@/components/Header";
-import ListItem from "@/components/ListItem";
+import PlaylistHomeItem from "./components/PlaylistHomeItem";
 import PageContent from "./components/PageContent";
 
 import {CLIENT_API_URL} from "@/helpers/api";
@@ -21,18 +21,18 @@ export default async function Home() {
             Welcome back
           </h1>
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
-            <ListItem
+            <PlaylistHomeItem
               name="Liked Songs"
               href="/liked"
               image="/images/liked.png"
             />
-            {playlists.map((p) => (
-              <ListItem
-                key = {p.id}
-                name={p.title}
-                href={`/${p.id}`}
-                image={p.imagePath
-                  ? `${CLIENT_API_URL}/files/image/${p.imagePath}`
+            {playlists.map((playlist) => (
+              <PlaylistHomeItem
+                key = {playlist.id}
+                name={playlist.title}
+                href={`/${playlist.id}`}
+                image={playlist.imagePath
+                  ? `${CLIENT_API_URL}/files/image/${playlist.imagePath}`
                   : "/images/playlist.webp"}
               />
             ))}
@@ -40,11 +40,9 @@ export default async function Home() {
         </div>
       </Header>
       <div className="mt-2 mb-7 px-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-white text-2xl font-semibold">
-            Newest songs
-          </h1>
-        </div>
+        <h1 className="text-white text-2xl font-semibold">
+          Newest songs
+        </h1>
         <PageContent songs={songs} />
       </div>
     </div>

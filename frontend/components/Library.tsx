@@ -12,7 +12,8 @@ import useAuthModal from "@/hooks/useAuthModal";
 import useCreateModal from "@/hooks/useCreateModal";
 import { useUser } from "@/hooks/useUser";
 
-import MediaItem from "./MediaItem";
+
+import MediaItem from "@/components/ui/MediaItem";
 
 const Library = memo(function Library({
   playlists
@@ -66,11 +67,12 @@ const Library = memo(function Library({
           </div>
         </div>
         {playlists.map((playlist) => (
-          <MediaItem
-            onClick={(id: string) => tryRedirect(`/playlist/${id}`)}
+          <div
             key={playlist.id}
-            data={playlist}
-          />
+            onClick={() => tryRedirect(`/playlist/${playlist.id}`)}
+          >
+            <MediaItem data={playlist} />
+          </div>
         ))}
       </div>
     </div>

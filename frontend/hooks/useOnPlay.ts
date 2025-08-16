@@ -1,12 +1,12 @@
 import {Song} from "@/types/types";
 
-import usePlayer from "./usePlayer";
+import usePlayerStorage from "./usePlayerStorage";
 import useAuthModal from "./useAuthModal";
 import {useUser} from "./useUser";
 import { useCallback } from "react";
 
 const useOnPlay = (songs: Song[]) => {
-  const { setId, setIds } = usePlayer();
+  const { setActiveId, setIds } = usePlayerStorage();
   const authModal = useAuthModal();
   const { isAuth } = useUser();
 
@@ -15,9 +15,9 @@ const useOnPlay = (songs: Song[]) => {
       return authModal.onOpen();
     }
 
-    setId(id);
+    setActiveId(id);
     setIds(songs.map((song) => song.id));
-  }, [authModal, isAuth, setId, setIds, songs]);
+  }, [authModal, isAuth, setActiveId, setIds, songs]);
 }
 
 export default useOnPlay;

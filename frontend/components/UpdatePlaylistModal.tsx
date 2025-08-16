@@ -8,14 +8,13 @@ import toast from "react-hot-toast";
 import {useUser} from "@/hooks/useUser";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 
-import Modal from "./Modal";
-import Input from "./Input";
-import Button from "./Button";
-
 import updatePlaylist from "@/services/playlists/updatePlaylist";
 import Form from "next/form";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Modal from "@/components/ui/Modal";
 
-const PlaylistModal = () => {
+const UpdatePlaylistModal = () => {
   const [playlist, isOpen, onClose, setPlaylist] = usePlaylistModal(useShallow(s => [
     s.playlist,
     s.isOpen,
@@ -77,25 +76,35 @@ const PlaylistModal = () => {
         action={onSubmit}
         className="flex flex-col gap-y-4"
       >
-        <Input
-          id="title"
-          name="Title"
-          type="text"
-          disabled={isPending}
-          placeholder="Playlist Title"
-          defaultValue={playlist.title}
-          required
-        />
-        <Input
-          id="description"
-          name="Description"
-          type="text"
-          disabled={isPending}
-          placeholder="Playlist Description"
-          defaultValue={playlist.description}
-        />
-        <div>
-          <label className="pb-1">Select an image</label>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">
+            Title:
+          </label>
+          <Input
+            id="title"
+            name="Title"
+            type="text"
+            disabled={isPending}
+            placeholder="Playlist Title"
+            defaultValue={playlist.title}
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">
+            Description:
+          </label>
+          <Input
+            id="description"
+            name="Description"
+            type="text"
+            disabled={isPending}
+            placeholder="Playlist Description"
+            defaultValue={playlist.description}
+          />
+        </div>
+        <div className="flex flex-col gap-y-1">
+          <label className="text-base font-bold">Select an image:</label>
           <Input
             id="image"
             name="Image"
@@ -112,4 +121,4 @@ const PlaylistModal = () => {
   );
 }
 
-export default PlaylistModal;
+export default UpdatePlaylistModal;

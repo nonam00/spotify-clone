@@ -8,11 +8,11 @@ import { useShallow } from "zustand/shallow";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 
-import Modal from "./Modal";
-import Input from "./Input";
-import Button from "./Button";
-
 import {AuthSubmitType} from "@/types/types";
+
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Modal from "@/components/ui/Modal";
 
 const AuthModal = () => {
   const router = useRouter();
@@ -52,41 +52,50 @@ const AuthModal = () => {
     >
       <Form
         action={onSubmit}
-        className="flex flex-col items-center justify-center"
+        className="flex flex-col items-center justify-center gap-y-4"
       >
-        <Input
-          name="Email"
-          type="email"
-          placeholder="Email"
-          disabled={isPending}
-          className="my-3 py-2 text-base"
-          required
-        />
-        <Input
-          name="Password"
-          type="password"
-          placeholder="Password"
-          disabled={isPending}
-          className="text-base py-2"
-          required
-          minLength={8}
-        />
-        <Button
-          onClick={() => setSubmitType("login")}
-          className="mt-10 mb-3"
-          type="submit"
-          disabled={isPending}
-        >
-          Login
-        </Button>
-        <Button
-          onClick={() => setSubmitType("register")}
-          type="submit"
-          disabled={isPending}
-          className="my-2 bg-transparent hover:bg-neutral-700 text-neutral-300 font-medium"
-        >
-          Register
-        </Button>
+        <div className="flex flex-col gap-y-1 w-full">
+          <label className="w-full text-base font-bold">
+            Email:
+          </label>
+          <Input
+            name="Email"
+            type="email"
+            placeholder="Email"
+            disabled={isPending}
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-y-1 w-full">
+          <label className="w-full font-bold">
+            Password:
+          </label>
+          <Input
+            name="Password"
+            type="password"
+            placeholder="Password"
+            disabled={isPending}
+            required
+            minLength={8}
+          />
+        </div>
+        <div className="flex flex-col gap-y-3 w-full mt-5">
+          <Button
+            onClick={() => setSubmitType("login")}
+            type="submit"
+            disabled={isPending}
+          >
+            Login
+          </Button>
+          <Button
+            onClick={() => setSubmitType("register")}
+            type="submit"
+            disabled={isPending}
+            className="bg-transparent hover:bg-neutral-700 text-neutral-300 font-medium"
+          >
+            Register
+          </Button>
+        </div>
       </Form>
     </Modal>
   );
