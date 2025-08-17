@@ -114,7 +114,7 @@ const UpdatePlaylistModal = () => {
           />
         </div>
         <Button disabled={isPending} type="submit">
-          Edit
+          {isPending ? "Saving..." : "Save changes"}
         </Button>
       </Form>
     </Modal>

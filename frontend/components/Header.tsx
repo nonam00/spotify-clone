@@ -12,6 +12,8 @@ import { useUser } from "@/hooks/useUser";
 
 
 import Button from "@/components/ui/Button";
+import Image from "next/image";
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const Header = ({
   children,
@@ -22,7 +24,6 @@ const Header = ({
 }>) => {
   const openAuthModal = useAuthModal(s => s.onOpen);
   const router = useRouter();
-
   const user = useUser();
 
   const handleLogout = async () => {
@@ -76,11 +77,20 @@ const Header = ({
                 Logout
               </Button>
               <Button
-                // TODO: replace with actual account details page
-                onClick={() => {}} 
-                className="bg-white"
+                onClick={() => router.push('/account')}
+                className="bg-white p-0"
               >
-                <FaUserAlt />
+                {user.userDetails?.avatarPath ? (
+                  <Image
+                    src={`${CLIENT_API_URL}/files/image/${user.userDetails.avatarPath}`}
+                    alt="Avatar"
+                    className="w-12 h-12 rounded-full object-cover"
+                    loading="lazy"
+                    unoptimized
+                  />
+                ) : (
+                  <FaUserAlt/>
+                )}
               </Button>
             </div>
           ) : (

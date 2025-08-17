@@ -56,8 +56,8 @@ const SongUploadModal = () => {
 
   return (
     <Modal
-      title="Add a song"
-      description="Upload a file"
+      title="Upload new song"
+      description="Share your music with other users"
       isOpen={isOpen}
       onChange={onChange}
     >
@@ -118,7 +118,7 @@ const SongUploadModal = () => {
           type="submit"
           className="my-4"
         >
-          Create
+          {isPending ? "Uploading..." : "Upload"}
         </Button>
       </Form>
     </Modal>
