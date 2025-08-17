@@ -17,7 +17,7 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
     public async Task<UserInfo> Handle(GetUserInfoQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetById(request.UserId, cancellationToken);
+        var user = await _usersRepository.GetInfoById(request.UserId, cancellationToken);
         return user;
     }
 }

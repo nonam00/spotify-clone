@@ -20,6 +20,16 @@ public class UsersRepository : IUsersRepository
         await _dbContext.Users.AddAsync(user, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<User> GetById(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken) 
+            ?? throw new Exception("Invalid current user id");
+
+        return user;
+    }
 
     public async Task<User?> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
@@ -30,7 +40,7 @@ public class UsersRepository : IUsersRepository
         return user;
     }
 
-    public async Task<UserInfo> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<UserInfo> GetInfoById(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
@@ -70,7 +80,8 @@ public class UsersRepository : IUsersRepository
         return new UserInfo
         {
             Email = user.Email,
-            FullName = user.FullName
+            FullName = user.FullName,
+            AvatarPath = user.AvatarPath
         };
     }
 }
