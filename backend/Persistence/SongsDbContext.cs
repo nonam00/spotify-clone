@@ -11,6 +11,7 @@ public class SongsDbContext(DbContextOptions<SongsDbContext> options) : DbContex
     public DbSet<LikedSong> LikedSongs { get; set; } = null!;
     public DbSet<Playlist> Playlists { get; set; } = null!;
     public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

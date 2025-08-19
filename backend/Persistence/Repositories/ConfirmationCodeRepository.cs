@@ -11,7 +11,7 @@ public class ConfirmationCodesRepository : IConfirmationCodesRepository
 
     public ConfirmationCodesRepository(IConnectionMultiplexer redisDb)
     {
-        _redisDb = redisDb.GetDatabase();
+        _redisDb = redisDb.GetDatabase(0);
     }
 
     public async Task SetConfirmationCode(string email, string code, TimeSpan expiry)

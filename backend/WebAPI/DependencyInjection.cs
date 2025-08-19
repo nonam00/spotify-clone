@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 using Infrastructure.Auth;
+using WebAPI.Services;
 
 namespace WebAPI;
 
@@ -39,7 +40,7 @@ public static class DependencyInjection
                 {
                     OnMessageReceived = context =>
                     {
-                        context.Request.Cookies.TryGetValue("token", out var token);
+                        context.Request.Cookies.TryGetValue("access_token", out var token);
                         if (!string.IsNullOrEmpty(token))
                         {
                             context.Token = token;
@@ -52,6 +53,12 @@ public static class DependencyInjection
                 options.SaveToken = true;
             });
 
+        return services;
+    }
+
+    public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
+    {
+        services.AddHostedService<RefreshTokensCleanupService>();
         return services;
     }
 }

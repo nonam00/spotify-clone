@@ -3,7 +3,6 @@
 import { cookies } from "next/headers";
 
 import { Playlist } from "@/types/types";
-
 import {SERVER_API_URL} from "@/helpers/api";
 
 const getPlaylistById = async (id: string): Promise<Playlist | null> => {

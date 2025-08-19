@@ -6,7 +6,7 @@ import { FaTrash } from "react-icons/fa";
 import { useShallow } from "zustand/shallow";
 
 import useConfirmModal from "@/hooks/useConfirmModal";
-import deletePlaylistRequest from "@/services/playlists/deletePlaylist";
+import {deletePlaylist} from "@/services/playlists";
 
 const DeletePlaylistButton = ({
   playlistId
@@ -20,8 +20,8 @@ const DeletePlaylistButton = ({
     s.setDescription
   ]));
 
-  const deletePlaylist = async () => {
-    const response = await deletePlaylistRequest(playlistId);
+  const handleDeletePlaylist = async () => {
+    const response = await deletePlaylist(playlistId);
     if (response.ok) {
       router.push("/");
       toast.success("The playlist was successfully deleted")
@@ -32,7 +32,7 @@ const DeletePlaylistButton = ({
 
   const onClick = () => {
     setDescription("This action will delete this playlist from your library");
-    setAction(deletePlaylist);
+    setAction(handleDeletePlaylist);
     onOpen();
   }
 

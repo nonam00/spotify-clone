@@ -9,9 +9,9 @@ import { useShallow } from "zustand/shallow";
 import { Song } from "@/types/types";
 
 import usePlayerStorage from "@/hooks/usePlayerStorage";
+import useSound from "@/hooks/useSound";
 
 import LikeButton from "./LikeButton";
-import useSound from "@/hooks/useSound";
 import Slider from "@/components/ui/Slider";
 import MediaItem from "@/components/ui/MediaItem";
 

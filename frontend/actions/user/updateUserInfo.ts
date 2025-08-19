@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { SERVER_API_URL } from "@/helpers/api";
+
+import {SERVER_API_URL} from "@/helpers/api";
 
 type updateUserData = {
   fullName?: string,
@@ -47,3 +48,4 @@ const updateUserInfo = async (data: updateUserData): Promise<{
 };
 
 export default updateUserInfo;
+

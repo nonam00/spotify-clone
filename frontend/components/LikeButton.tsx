@@ -6,9 +6,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
-import checkLikedSong from "@/services/liked/checkLikedSong";
-import addLikedSong from "@/services/liked/addLikedSong";
-import deleteLikedSong from "@/services/liked/deleteLikedSong";
+import {addLikedSong, checkLikedSong, deleteLikedSong} from "@/services/liked";
 
 const LikeButton = ({
   songId, 

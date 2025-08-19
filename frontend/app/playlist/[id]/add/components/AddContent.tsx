@@ -5,8 +5,8 @@ import {useTransition} from "react";
 import toast from "react-hot-toast";
 
 import { Song } from "@/types/types";
-import addSongToPlaylist from "@/services/playlists/addSongToPlaylist";
 import SongListItem from "@/components/SongListItem";
+import {addSongToPlaylist} from "@/services/playlists";
 
 const AddContent= ({
   playlistId,

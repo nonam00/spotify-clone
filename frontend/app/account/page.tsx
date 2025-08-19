@@ -8,7 +8,7 @@ import ChangeAvatarForm from "@/app/account/components/ChangeAvatarForm";
 import ChangePasswordForm from "@/app/account/components/ChangePasswordForm";
 import {CLIENT_API_URL} from "@/helpers/api";
 
-const AccountPage = async () => {
+export default async function AccountPage() {
   const userDetails = await getUserInfo();
 
   if (!userDetails) {
@@ -72,5 +72,3 @@ const AccountPage = async () => {
     </div>
   );
 };
-
-export default AccountPage;

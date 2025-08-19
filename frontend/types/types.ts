@@ -9,7 +9,7 @@ export interface Song {
 export interface UserDetails {
   email: string;
   fullName: string | null;
-  avatarPath?: string | null;
+  avatarPath: string | null;
 }
 
 export interface Playlist {
@@ -27,4 +27,3 @@ export interface ModalStore {
 }
 
 export type SearchType = "any" | "title" | "author";
-export type AuthSubmitType = "login" | "register";

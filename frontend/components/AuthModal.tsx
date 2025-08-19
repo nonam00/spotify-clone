@@ -8,16 +8,17 @@ import { useShallow } from "zustand/shallow";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 
-import {AuthSubmitType} from "@/types/types";
-
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 
+type AuthSubmitType = "login" | "register";
+
 const AuthModal = () => {
   const router = useRouter();
   const [onClose, isOpen] = useAuthModal(useShallow(s => [s.onClose, s.isOpen]));
-  const { isAuth, authorize } = useUser();
+  const { isAuth, login, register } = useUser();
+
   const [submitType, setSubmitType] = useState<AuthSubmitType>();
   const [isPending, startTransition] = useTransition();
 
@@ -36,10 +37,10 @@ const AuthModal = () => {
 
   const onSubmit = async (form: FormData) => {
     startTransition(async () => {
-      const success = await authorize(submitType!, form);
-      if (success) {
-        onClose();
-        router.refresh();
+      if (submitType == "login") {
+        await login(form);
+      } else if(submitType == "register") {
+        await register(form);
       }
     })
   }

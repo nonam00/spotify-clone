@@ -1,9 +1,9 @@
 "use server";
 
-import {UserDetails} from "@/types/types";
-
-import {SERVER_API_URL} from "@/helpers/api";
 import {cookies} from "next/headers";
+
+import {UserDetails} from "@/types/types";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getUserInfo = async (): Promise<UserDetails | null> => {
   try {

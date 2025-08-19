@@ -1,7 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { SERVER_API_URL } from "@/helpers/api";
+
+import {SERVER_API_URL} from "@/helpers/api";
 
 const changePassword = async (
   currentPassword: string,
@@ -39,3 +40,4 @@ const changePassword = async (
 };
 
 export default changePassword;
+

@@ -35,7 +35,8 @@ builder.Services.AddCors(options =>
 // Adding and configuration authentication by JWT Tokens
 builder.Services.AddAuthServices(builder.Configuration);
 
-// Not only controllers because of XSRF protection working principle
+builder.Services.AddBackgroundServices();
+
 builder.Services.AddControllersWithViews();
 
 // Adding and Configuration API Versioning

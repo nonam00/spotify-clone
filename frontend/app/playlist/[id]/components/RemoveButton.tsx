@@ -5,7 +5,7 @@ import {useTransition} from "react";
 import toast from "react-hot-toast";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 
-import removeSongFromPlaylist from "@/services/playlists/removeSongFromPlaylist";
+import {removeSongFromPlaylist} from "@/services/playlists";
 
 const RemoveButton = ({
   playlistId,

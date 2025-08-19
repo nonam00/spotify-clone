@@ -49,7 +49,8 @@ public static class DependencyInjection
         services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
         services.AddScoped<ILikedSongsRepository, LikedSongsRepository>();
         services.AddScoped<IPlaylistsSongsRepository, PlaylistsSongsRepository>();
-        
+        services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+
         services.AddScoped<IConfirmationCodesRepository, ConfirmationCodesRepository>();
         
         return services;

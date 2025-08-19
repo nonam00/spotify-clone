@@ -39,7 +39,6 @@ function useSound(songUrl: string, volume: number, setNextSong: () => void): use
     });
 
     return () => {
-      console.log("Player release")
       audio.pause();
       audio.removeEventListener('play', handlePlayEvent);
       audio.removeEventListener('pause', handlePause);

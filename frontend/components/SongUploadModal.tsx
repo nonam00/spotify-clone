@@ -9,10 +9,10 @@ import toast from "react-hot-toast";
 import {useUser} from "@/hooks/useUser";
 import useUploadModal from "@/hooks/useUploadModal";
 
-import uploadSong from "@/services/songs/uploadSong";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import {uploadSong} from "@/services/songs";
 
 const SongUploadModal = () => {
   const [isPending, startTransition] = useTransition();

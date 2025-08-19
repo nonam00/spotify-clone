@@ -26,6 +26,7 @@ const PlaylistContent = ({
     if (songs.length === 0) return;
     onPlay(songs[0].id);
   }
+
   return (
     <div>
       <div className="flex flex-row align-middle gap-y-2 items-center justify-start px-6 py-3">

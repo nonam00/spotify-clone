@@ -9,7 +9,7 @@ const getSongsByPlaylistId = async (
   playlistId: string
 ): Promise<Song[]> => {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = await cookies();
     const response = await fetch(`${SERVER_API_URL}/playlists/${playlistId}/songs`, {
       headers: {
         Cookie: cookieStore.toString(),
@@ -17,7 +17,7 @@ const getSongsByPlaylistId = async (
       method: "GET",
       credentials: "include",
     });
-    
+
     const data = await response.json();
 
     if (!response.ok) {

@@ -27,7 +27,7 @@ const Sidebar = ({
     {
       icon: HiHome,
       label: 'Home',
-      active: pathName !== '/search',
+      active: pathName === '/',
       href: '/'
     },
     {

@@ -1,18 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
 import { HiHome, HiSearch } from "react-icons/hi";
+import {IoMdPerson} from "react-icons/io";
 import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
-import { FaUserAlt } from "react-icons/fa";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
-
-
 import Button from "@/components/ui/Button";
-import Image from "next/image";
 import {CLIENT_API_URL} from "@/helpers/api";
 
 const Header = ({
@@ -84,12 +82,14 @@ const Header = ({
                   <Image
                     src={`${CLIENT_API_URL}/files/image/${user.userDetails.avatarPath}`}
                     alt="Avatar"
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-11 h-11 rounded-full object-cover"
                     loading="lazy"
                     unoptimized
                   />
                 ) : (
-                  <FaUserAlt/>
+                  <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center">
+                    <IoMdPerson className="w-6 h-6 text-black" />
+                  </div>
                 )}
               </Button>
             </div>

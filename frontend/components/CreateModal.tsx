@@ -9,10 +9,9 @@ import useAuthModal from "@/hooks/useAuthModal";
 import useCreateModal from "@/hooks/useCreateModal";
 import useUploadModal from "@/hooks/useUploadModal";
 
-import createPlaylist from "@/services/playlists/createPlaylist";
-
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import {createPlaylist} from "@/services/playlists";
 
 const CreateModal = () => {
   const router = useRouter();

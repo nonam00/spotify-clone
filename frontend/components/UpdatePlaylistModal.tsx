@@ -1,6 +1,7 @@
 "use client";
 
 import {useRouter} from "next/navigation";
+import Form from "next/form";
 import {useLayoutEffect, useTransition} from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
@@ -8,11 +9,10 @@ import toast from "react-hot-toast";
 import {useUser} from "@/hooks/useUser";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 
-import updatePlaylist from "@/services/playlists/updatePlaylist";
-import Form from "next/form";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import {updatePlaylist} from "@/services/playlists";
 
 const UpdatePlaylistModal = () => {
   const [playlist, isOpen, onClose, setPlaylist] = usePlaylistModal(useShallow(s => [
