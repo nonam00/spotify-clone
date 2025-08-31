@@ -32,7 +32,7 @@ public class EmailVerificator : IEmailVerificator
 
     public async Task SendCodeAsync(string email, string code, CancellationToken cancellationToken = default)
     {
-        var confirmationLink = $"http://localhost:5000/1/users/activate?email={email}&code={code}";
+        var confirmationLink = $"http://localhost:5000/1/auth/activate?email={email}&code={code}";
         var body = $"Please confirm your account by clicking <a href='{confirmationLink}'>here</a>";
         await _emailSenderService.SendEmailAsync(email, "Account confirmation", body, cancellationToken);
     }

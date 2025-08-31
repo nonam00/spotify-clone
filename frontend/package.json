@@ -12,7 +12,7 @@
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-slider": "^1.2.2",
     "js-cookie": "^3.0.5",
-    "next": "^15.4.6",
+    "next": "^15.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.5.2",
