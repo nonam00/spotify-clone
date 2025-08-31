@@ -11,7 +11,7 @@ As a beginner developer, I'm excited to present my Spotify clone web application
 ### Project development plans:
 
 - [ ] Creation of a service for moderation of published songs.
-- [ ] Creation of a service for account confirmation.
+- [x] Creation of a service for account confirmation.
 
 ### Remarks
 

@@ -1,21 +1,19 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {createContext, useContext, useEffect, useState, useTransition} from "react";
 import toast from "react-hot-toast";
 
-import { UserDetails } from "@/types/types";
-import getUserInfo from "@/services/auth/getUserInfo";
-import logoutRequest from "@/services/auth/logout";
+import {UserDetails} from "@/types/types";
+import {authFetchClient, CLIENT_API_URL} from "@/helpers/api";
 
 type UserContextType = {
   isAuth: boolean;
   userDetails: UserDetails | null;
   isLoading: boolean;
-  authorize: (action: (form: FormData) => Promise<Response>, form: FormData) => Promise<void>;
+  login: (form: FormData) => Promise<void>;
+  register: (form: FormData) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-export const UserContext = createContext<UserContextType | undefined>(
-  undefined
-);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const MyUserContextProvider = ({
   children
@@ -23,33 +21,56 @@ export const MyUserContextProvider = ({
   children: React.ReactNode
 }) => {
   const [isAuth, setIsAuth] = useState<boolean>(false);
-  const [isLoadingData, setIsLoadingData] = useState<boolean>(false);
+  const [isLoadingData, startTransition] = useTransition();
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
-  const getInfo = async () => {
-    const infoResponse = await getUserInfo();
-    if (infoResponse.ok) {
-      setIsAuth(true);
-      setUserDetails(await infoResponse.json());
-      toast.success("Logged in");
-    }
+  async function login(form: FormData) {
+    startTransition(async () => {
+      const response = await fetch(`${CLIENT_API_URL}/auth/login/`, {
+        method: "POST",
+        credentials: "include",
+        body: form
+      });
+      if (!response.ok) {
+        if (response.status === 400) {
+          const error = await response.json();
+          toast.error(error.detail);
+        } else {
+          toast.error("An error occurred when you tried to log in.")
+        }
+      } else {
+        setIsAuth(true);
+        toast.success("Logged in");
+      }
+    })
+  }
+  
+  async function register(form: FormData) {
+    startTransition(async () => {
+      const response = await fetch(`${CLIENT_API_URL}/auth/register/`, {
+        method: "POST",
+        credentials: "include",
+        body: form
+      });
+      if (!response.ok) {
+        if (response.status === 400) {
+          const error = await response.json();
+          toast.error(error.detail);
+        } else {
+          toast.error("An error occurred when you tried to register your account.")
+
+        }
+      } else {
+        toast.success("The confirmation code has been sent to your email. Activate your account and then login.")
+      }
+    })
   }
 
-  const authorize = async (action: (form: FormData) => Promise<Response>, form: FormData) => {
-    setIsLoadingData(true);
-    const response = await action(form);
-    if (response.ok) {
-      setIsAuth(true);
-      toast.success("Authorized");
-    } else {
-      const exception = await response.json();
-      toast.error(exception.detail);
-    }
-    setIsLoadingData(false);
-  }
-
-  const logout = async () => {
-    const response = await logoutRequest();
+  async function logout() {
+    const response = await fetch(`${CLIENT_API_URL}/auth/logout/`, {
+      method: "POST",
+      credentials: "include",
+    });
     if (response.ok) {
       setIsAuth(false);
       setUserDetails(null);
@@ -58,17 +79,30 @@ export const MyUserContextProvider = ({
 
   useEffect(() => {
     if (!isAuth) {
-      setIsLoadingData(true);
-      getInfo();
-      setIsLoadingData(false);
+      startTransition(async () => {
+        const response = await authFetchClient(`${CLIENT_API_URL}/users/info`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "GET",
+          credentials: "include"
+        });
+        if (response.ok) {
+          setIsAuth(true);
+          const user = await response.json();
+          setUserDetails(user);
+          toast.success("Logged in");
+        }
+      });
     }
-  }, [isAuth, isLoadingData]);
+  }, [isAuth]);
 
   const value = {
     isAuth,
     userDetails,
     isLoading: isLoadingData,
-    authorize,
+    login,
+    register,
     logout
   };
 

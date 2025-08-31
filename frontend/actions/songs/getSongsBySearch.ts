@@ -1,8 +1,8 @@
 "use server";
 
-import {SERVER_API_URL} from "@/api/http";
 import {SearchType, Song} from "@/types/types";
 import getSongs from "./getSongs";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongsBySearch = async (
   searchString: string,
@@ -18,12 +18,13 @@ const getSongsBySearch = async (
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data);
+      console.error(data);
+      return [];
     }
 
     return data.songs;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 }

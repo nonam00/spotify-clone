@@ -8,6 +8,6 @@ namespace WebAPI.Models;
 [BindProperties]
 public class SearchSongDto
 {
-    [Required] public string SearchString { get; set; } = null!;
-    [Required] public SearchCriteria SearchCriteria { get; set; }
+    [Required] public string SearchString { get; init; } = null!;
+    [Required] public SearchCriteria SearchCriteria { get; init; }
 }

@@ -1,16 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
 import { HiHome, HiSearch } from "react-icons/hi";
+import {IoMdPerson} from "react-icons/io";
 import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
-import { FaUserAlt } from "react-icons/fa";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
-
-import Button from "./Button";
+import Button from "@/components/ui/Button";
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const Header = ({
   children,
@@ -21,7 +22,6 @@ const Header = ({
 }>) => {
   const openAuthModal = useAuthModal(s => s.onOpen);
   const router = useRouter();
-
   const user = useUser();
 
   const handleLogout = async () => {
@@ -40,29 +40,13 @@ const Header = ({
         <div className="hidden md:flex gap-x-2 items-center">
           <button
             onClick={() => router.back()}
-            className="
-              rounded-full
-              bg-black
-              flex
-              items-center
-              justify-center
-              hover:opacity-75
-              transitition
-            "
+            className="flex items-center justify-center rounded-full bg-black hover:opacity-75 transitition"
           >
             <RxCaretLeft className="text-white" size={35}/>
           </button>
           <button
             onClick={() => router.forward()}
-            className="
-              rounded-full
-              bg-black
-              flex
-              items-center
-              justify-center
-              hover:opacity-75
-              transitition
-            "
+            className="flex items-center justify-center rounded-full bg-black hover:opacity-75 transitition"
           >
             <RxCaretRight className="text-white" size={35}/>
           </button>
@@ -70,31 +54,13 @@ const Header = ({
         <div className="flex md:hidden gap-x-2 items-center">
           <button
             onClick={() => {router.push('/')}}
-            className="
-              rounded-full
-              p-2
-              bg-white
-              flex
-              items-center
-              justify-center
-              hover:opacity-75
-              transition
-            "
+            className="flex items-center justify-center rounded-full p-2 bg-white hover:opacity-75 transition"
           >
             <HiHome className="text-black" size={20}/>
           </button>
           <button
             onClick={() => {router.push('/search')}}
-            className="
-              rounded-full
-              p-2
-              bg-white
-              flex
-              items-center
-              justify-center
-              hover:opacity-75
-              transition
-            "
+            className="flex items-center justify-center rounded-full p-2 bg-white hover:opacity-75 transition"
           >
             <HiSearch className="text-black" size={20}/>
           </button>
@@ -109,11 +75,22 @@ const Header = ({
                 Logout
               </Button>
               <Button
-                // TODO: replace with actual account details page
-                onClick={() => {}} 
-                className="bg-white"
+                onClick={() => router.push('/account')}
+                className="bg-white p-0"
               >
-                <FaUserAlt />
+                {user.userDetails?.avatarPath ? (
+                  <Image
+                    src={`${CLIENT_API_URL}/files/image/${user.userDetails.avatarPath}`}
+                    alt="Avatar"
+                    className="w-11 h-11 rounded-full object-cover"
+                    loading="lazy"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center">
+                    <IoMdPerson className="w-6 h-6 text-black" />
+                  </div>
+                )}
               </Button>
             </div>
           ) : (

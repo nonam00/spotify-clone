@@ -35,12 +35,15 @@ builder.Services.AddCors(options =>
 // Adding and configuration authentication by JWT Tokens
 builder.Services.AddAuthServices(builder.Configuration);
 
-// Not only controllers because of XSRF protection working principle
+builder.Services.AddBackgroundServices();
+
 builder.Services.AddControllersWithViews();
 
 // Adding and Configuration API Versioning
 builder.Services.AddApiVersioning()
                 .AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
+
+builder.Services.AddHealthChecks();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -102,6 +105,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

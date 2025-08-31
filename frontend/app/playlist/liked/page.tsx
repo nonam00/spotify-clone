@@ -1,12 +1,20 @@
 import Image from "next/image"
+import {redirect} from "next/navigation";
 
 import getLikedSongs from "@/actions/liked/getLikedSongs";
+import getUserInfo from "@/actions/user/getUserInfo";
 import Header from "@/components/Header"
 import LikedContent from "./components/LikedContent";
 
 export const revalidate = 0;
 
 const Liked = async () => {
+  const user = await getUserInfo();
+
+  if (!user) {
+    redirect("/");
+  }
+
   const songs = await getLikedSongs();
   
   return (

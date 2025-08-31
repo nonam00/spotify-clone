@@ -6,9 +6,7 @@ import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
-import checkLikedSong from "@/services/liked/checkLikedSong";
-import addLikedSong from "@/services/liked/addLikedSong";
-import deleteLikedSong from "@/services/liked/deleteLikedSong";
+import {addLikedSong, checkLikedSong, deleteLikedSong} from "@/services/liked";
 
 const LikeButton = ({
   songId, 
@@ -33,7 +31,7 @@ const LikeButton = ({
       const response = await checkLikedSong(songId, abortController);
       if (response.ok) {
         const data = await response.json();
-        if (data) {
+        if (data.check) {
           setIsLiked(true);
         }
       }
@@ -42,7 +40,6 @@ const LikeButton = ({
     loadLike();
 
     return () => {
-      console.log('clear');
       abortController.abort();
     }
   }, [songId, isAuth, isLiked, defaultValue]);
@@ -52,8 +49,8 @@ const LikeButton = ({
       return openAuthModal();
     }
 
-    if (isLiked) {
-      startTransition(async () => {
+    startTransition(async () => {
+      if (isLiked) {
         const response = await deleteLikedSong(songId);
         if (response.ok) {
           setIsLiked(false)
@@ -61,9 +58,7 @@ const LikeButton = ({
         } else {
           toast.error("An error occurred while deleting the song from your favorites");
         }
-      })
-    } else {
-      startTransition(async () => {
+      } else {
         const response = await addLikedSong(songId);
         if (response.ok) {
           setIsLiked(true);
@@ -71,8 +66,8 @@ const LikeButton = ({
         } else {
           toast.error("An error occurred while adding the song to the favorites");
         }
-      })
-    }
+      }
+    });
   }
 
   return (

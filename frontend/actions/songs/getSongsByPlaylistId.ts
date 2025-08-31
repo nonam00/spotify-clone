@@ -2,36 +2,32 @@
 
 import { cookies } from "next/headers";
 
-import {SERVER_API_URL} from "@/api/http";
 import { Song } from "@/types/types";
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongsByPlaylistId = async (
   playlistId: string
 ): Promise<Song[]> => {
   try {
-    const cookieStore = await cookies()
-    const xsrf = cookieStore.get(".AspNetCore.Xsrf")?.value ?? "";
-    const response = await fetch(
-      `${SERVER_API_URL}/playlists/${playlistId}/songs`,
-      {
-        headers: {
-          "x-xsrf-token": xsrf,
-          Cookie: cookieStore.toString(),
-        },
-        method: "GET",
-        credentials: "include",
-      }
-    );
-    
+    const cookieStore = await cookies();
+    const response = await fetch(`${SERVER_API_URL}/playlists/${playlistId}/songs`, {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+      method: "GET",
+      credentials: "include",
+    });
+
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data);
+      console.error(data);
+      return [];
     }
 
     return data.songs as Song[];
-  } catch(error: any) {
-    console.log(error.message);
+  } catch(error) {
+    console.error(error);
     return [];
   }
 }

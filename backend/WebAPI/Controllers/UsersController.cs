@@ -3,98 +3,29 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.Users.Models;
-using Application.Users.Commands.CreateUser;
-using Application.Users.Queries.Login;
 using Application.Users.Queries.GetUserInfo;
+using Application.Users.Commands.UpdatePassword;
+using Application.Users.Commands.UpdateUser;
+
 using Application.LikedSongs.Models;
 using Application.LikedSongs.Queries.CheckLikedSong;
 using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
+
+using Application.Files.Commands.DeleteFile;
+using Application.Files.Commands.UploadFile;
+using Application.Files.Enums;
+
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
 
-[Produces("application/json")]
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
 public class UsersController : BaseController
 {
     /// <summary>
-    /// Registries the new user
-    /// </summary>
-    /// <param name="userCredentialsDto">UserCredentials object</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Returns access token in cookies</returns>
-    /// <response code="201">Success</response>
-    [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> Register(
-        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
-    {
-        var command = new CreateUserCommand
-        {
-            Email = userCredentialsDto.Email,
-            Password = userCredentialsDto.Password
-        };
-        
-        var accessToken = await Mediator.Send(command, cancellationToken);
-
-        HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(12)
-        });
-
-        return Ok();
-    }
-
-    /// <summary>
-    /// Request to get user JWT token
-    /// </summary>
-    /// <param name="userCredentialsDto">LoginDto object</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Returns access token in cookies</returns>
-    /// <response code="200">Success</response>
-    [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Login(
-        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
-    {
-        var query = new LoginQuery
-        {
-            Email = userCredentialsDto.Email,
-            Password = userCredentialsDto.Password
-        };
-        
-        var accessToken = await Mediator.Send(query, cancellationToken);
-
-        HttpContext.Response.Cookies.Append("token", accessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(12)
-        });
-
-        return Ok();
-    }
-
-    /// <summary>
-    /// Clears the user's cookies, resulting in a logout
-    /// </summary>
-    /// <response code="205">Success</response>
-    /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-    [HttpPost("logout"), Authorize]
-    [ProducesResponseType(StatusCodes.Status205ResetContent)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Logout()
-    {
-        await Task.Run(() => Parallel.ForEach(Request.Cookies.Keys, Response.Cookies.Delete));
-        return StatusCode(205);
-    }
-
-    /// <summary>
-    /// Gets info about user using jwt token
+    /// Gets user info
     /// </summary>
     /// <returns>Returns new user ID</returns>
     /// <response code="200">Success</response>
@@ -110,6 +41,76 @@ public class UsersController : BaseController
         };
         var info = await Mediator.Send(query, cancellationToken);
         return Ok(info);
+    }
+
+    /// <summary>
+    /// Updates user info
+    /// </summary>
+    /// <param name="updateUserInfoDto">Form with user info</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <response code="204">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpPut, Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateUserInfo(
+        [FromForm] UpdateUserInfoDto updateUserInfoDto, CancellationToken cancellationToken)
+    {
+        string? newImagePath = null;
+        if (updateUserInfoDto.Avatar is not null)
+        {
+            var uploadImageCommand = new UploadFileCommand
+            {
+                FileStream = updateUserInfoDto.Avatar.OpenReadStream(),
+                MediaType = MediaType.Image
+            };
+            newImagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
+        }
+
+        var updateUserCommand = new UpdateUserCommand
+        {
+            UserId = UserId,
+            FullName = updateUserInfoDto.FullName,
+            AvatarPath = newImagePath
+        };
+
+        var oldImagePath = await Mediator.Send(updateUserCommand, cancellationToken);
+        
+        if (oldImagePath is not null)
+        {
+            var deleteImageCommand = new DeleteFileCommand
+            {
+                Name = oldImagePath,
+                MediaType = MediaType.Image
+            };
+            await Mediator.Send(deleteImageCommand, cancellationToken);
+        }
+        
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Changes user password
+    /// </summary>
+    /// <param name="updateUserPasswordDto">Current and new passwords</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <response code="204">Success</response>
+    /// <response code="401">If user is unauthorized</response>
+    [HttpPut("password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateUserPassword(
+        UpdateUserPasswordDto updateUserPasswordDto, CancellationToken cancellationToken)
+    {
+        var updatePasswordCommand = new UpdatePasswordCommand
+        {
+            UserId = UserId,
+            CurrentPassword = updateUserPasswordDto.CurrentPassword,
+            NewPassword = updateUserPasswordDto.NewPassword
+        };
+        await Mediator.Send(updatePasswordCommand, cancellationToken);
+
+        return NoContent();
     }
 
     /// <summary>
@@ -150,7 +151,7 @@ public class UsersController : BaseController
             SongId = songId
         };
         var check = await Mediator.Send(query, cancellationToken);
-        return check? Ok(check) : Ok();
+        return Ok(new { check });
     }
 
     /// <summary>

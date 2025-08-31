@@ -12,7 +12,8 @@ import useAuthModal from "@/hooks/useAuthModal";
 import useCreateModal from "@/hooks/useCreateModal";
 import { useUser } from "@/hooks/useUser";
 
-import MediaItem from "./MediaItem";
+
+import MediaItem from "@/components/ui/MediaItem";
 
 const Library = memo(function Library({
   playlists
@@ -24,11 +25,7 @@ const Library = memo(function Library({
   const { isAuth } = useUser();
   const router = useRouter();
 
-  const onCreateClick = () => {
-    return !isAuth
-        ? openAuthModal()
-        : openCreateModal();
-  };
+  const onCreateClick = () => !isAuth ? openAuthModal() : openCreateModal();
 
   const tryRedirect = (url: string) => {
     if (location.pathname != url) {
@@ -45,25 +42,17 @@ const Library = memo(function Library({
             Your Library
           </p>
         </div>
-        <AiOutlinePlus
+        <button
           onClick={onCreateClick}
-          size={20}
-          className="text-neutral-400 cursor-pointer hover:text-white transition"
-        />
+          className="text-neutral-400 hover:text-white transition-сolors"
+        >
+          <AiOutlinePlus size={20}/>
+        </button>
       </div>
       <div className="flex flex-col gap-y-5 mt-4 px-3">
         <div
           onClick={() => tryRedirect("/playlist/liked")}
-          className="
-            flex
-            items-center
-            gap-x-3
-            cursor-pointer
-            hover:bg-neutral-800/50
-            w-full
-            p-2
-            rounded-md  
-          "
+          className="flex items-center p-2 w-full gap-x-3 rounded-md cursor-pointer hover:bg-neutral-800/50"
         >
           <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
             <Image
@@ -78,11 +67,12 @@ const Library = memo(function Library({
           </div>
         </div>
         {playlists.map((playlist) => (
-          <MediaItem
-            onClick={(id: string) => tryRedirect(`/playlist/${id}`)}
+          <div
             key={playlist.id}
-            data={playlist}
-          />
+            onClick={() => tryRedirect(`/playlist/${playlist.id}`)}
+          >
+            <MediaItem data={playlist} />
+          </div>
         ))}
       </div>
     </div>

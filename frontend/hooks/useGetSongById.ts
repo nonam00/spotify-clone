@@ -1,7 +1,8 @@
 import {useState, useMemo, useLayoutEffect} from "react"
 
 import { Song } from "@/types/types";
-import { CLIENT_API_URL } from "@/api/http";
+
+import {CLIENT_API_URL} from "@/helpers/api";
 
 const useGetSongById = (id: string) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

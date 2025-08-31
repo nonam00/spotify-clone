@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 import useDebounce from "@/hooks/useDebounce";
-import Input from "./Input";
 import { SearchType } from "@/types/types";
+import Input from "@/components/ui/Input";
 
 const SearchInput = ({
   pageUrl,
@@ -40,22 +40,19 @@ const SearchInput = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      {types? 
+      {types ?
       <div className="flex flex-row mt-5 gap-x-0.7">
         <button
           onClick={() => {setSearchType("any")}}
           className={twMerge(`
+            flex items-center justify-center
+            py-1.5 px-5 mr-2
             rounded-full
-            py-1.5 px-5
-            mr-2
             text-sm
-            flex
-            items-center
-            justify-center
             hover:opacity-75
             transition
           `, 
-            searchType === "any"? activeStyle : nonActiveStyle
+            searchType === "any" ? activeStyle : nonActiveStyle
           )}
         >
           All
@@ -63,17 +60,14 @@ const SearchInput = ({
         <button
           onClick={() => {setSearchType("title")}}
           className={twMerge(`
+            flex items-center justify-center
+            py-1.5 px-5 mr-2
             rounded-full
-            py-1.5 px-5
-            mr-2
             text-sm
-            flex
-            items-center
-            justify-center
             hover:opacity-75
             transition
           `, 
-            searchType === "title"? activeStyle : nonActiveStyle    
+            searchType === "title" ? activeStyle : nonActiveStyle
           )} 
         >
           By Title
@@ -81,13 +75,10 @@ const SearchInput = ({
         <button
           onClick={() => {setSearchType("author")}}
           className={twMerge(`
+            flex items-center justify-center
+            py-1.5 px-5 mr-2
             rounded-full
-            py-1.5 px-5
-            mr-2
             text-sm
-            flex
-            items-center
-            justify-center
             hover:opacity-75
             transition
           `, 

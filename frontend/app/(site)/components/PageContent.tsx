@@ -1,8 +1,9 @@
 "use client";
 
 import {memo} from "react";
+
 import { Song } from "@/types/types";
-import SongItem from "@/components/SongItem";
+import SongGridItem from "@/components/SongGridItem";
 import useOnPlay from "@/hooks/useOnPlay";
 
 const PageContent = memo(function PageContent({
@@ -21,21 +22,12 @@ const PageContent = memo(function PageContent({
   }
 
   return (
-    <div
-      className="
-        grid
-        grid-cols-2
-        sm:grid-cols-3
-        md:grid-cols-3
-        lg:grid-cols-4
-        xl:grid-cols-5
-        2xl:grid-cols-8
-        gap-4
-        mt-4
-      "
-    >
+    <div className="
+      grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-8
+      gap-4 mt-4
+    ">
       {songs.map((item) => (
-        <SongItem
+        <SongGridItem
           key={item.id}
           onClick={(id: string) => onPlay(id)}
           data={item}

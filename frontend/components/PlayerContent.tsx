@@ -3,35 +3,24 @@
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2"
-import {useCallback, useEffect, useState} from "react";
+import {useCallback} from "react";
 import { useShallow } from "zustand/shallow";
-import useSound from "use-sound";
 
 import { Song } from "@/types/types";
 
-import usePlayer from "@/hooks/usePlayer";
+import usePlayerStorage from "@/hooks/usePlayerStorage";
+import useSound from "@/hooks/useSound";
 
-import MediaItem from "./MediaItem";
 import LikeButton from "./LikeButton";
-import Slider from "./Slider";
+import Slider from "@/components/ui/Slider";
+import MediaItem from "@/components/ui/MediaItem";
 
-type changeSongType = "previous" | "next";
-
-// parsing current playing time to human-readable format
-const getCurrentTimeString = (
-  duration: number,
-  progress: number
-) => {
-  const minutes = progress * duration / 60 >> 0;
-  const seconds = progress * duration % 60 >> 0;
-  return `${minutes}:${seconds >= 10? seconds : `0${seconds}`}`;
-}
-
-// parsing track duration to human-readable format
-const getDurationString = (duration: number) => {
-  const minutes = duration / 60 >> 0;
-  const seconds = duration % 60 >> 0;
-  return `${minutes}:${seconds >= 10? seconds : `0${seconds}`}`;
+// Helper function to format time
+function formatTime(timeInSeconds: number): string {
+  if (isNaN(timeInSeconds)) return "0:00";
+  const minutes = Math.floor(timeInSeconds / 60);
+  const seconds = Math.floor(timeInSeconds % 60);
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
 const PlayerContent = ({
@@ -41,187 +30,129 @@ const PlayerContent = ({
   song: Song;
   songUrl: string;
 }) => {
-  const [setNextId, setPreviousId, volume, setVolume] = usePlayer(useShallow(s => [
+  const [setNextId, setPreviousId, volume, setVolume] = usePlayerStorage(useShallow(s => [
     s.setNextId,
     s.setPreviousId,
-    s.volume, // value for configuring volume from slider
+    s.volume,
     s.setVolume,
   ]));
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0); // progress value for the progress bar and time display
-  const [delay, setDelay] = useState<NodeJS.Timeout>(); // timeout for updating time and progress bar
-  const [currentTimeString, setCurrentTimeString] = useState<string>(""); // variable for displaying current play time of track
+
+  const { audioRef, isPlaying, duration, currentTime } = useSound(songUrl, volume, setNextId);
+
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
-  // songUrl doesn't updates dynamically
-  const [play, { pause, sound }] = useSound(
-    songUrl, {
-      volume: volume,
-      onplay: () => {
-        setIsPlaying(true);
-        setDelay(timeout);
-      },
-      onend: () => {
-        setIsPlaying(false);
-        handleChangeSong("next");
-      },
-      onpause: () => {
-        setIsPlaying(false)
-        clearTimeout(delay);
-      },
-      format: ['flac', 'mp3', 'wav','m4a','aac','ogg'],
-      html5: true,
+  const progress = duration > 0 ? currentTime / duration : 0;
+
+  // Play/pause button handler
+  const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(error => {
+        console.log("Play error:", error);
+      });
     }
-  );
+  }, [audioRef, isPlaying]);
+  
+  const toggleMute = () => setVolume(volume === 0 ? 1 : 0);
 
-  useEffect(() => {
-    sound?.play();
-    return () => {
-      sound?.unload();
+  // Progress slider callback
+  const handleProgressChange = useCallback((values: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = values[0] * audioRef.current.duration;
     }
-  }, [sound]);
+  }, [audioRef]);
 
-  const handlePlay = () => !isPlaying ? play() : pause();
-
-  const toggleMute = () => volume === 0 ? setVolume(1) : setVolume(0);
-
-  // handling player prev and next buttons
-  const handleChangeSong = (changeType: changeSongType) => {
-    pause();
-    clearTimeout(delay);
-    if (changeType == "next") {
-      setNextId();
-    } else if (changeType == "previous") {
-      setPreviousId();
-    }
-  }
-
-  const updateProgress = () => {
-    const seek: number = sound?.seek() ?? 0;
-    const duration: number = sound?.duration() ?? 1;
-    setProgress(seek / duration);
-    setCurrentTimeString(getCurrentTimeString(duration, progress));
-  }
-
-  const timeout = setTimeout(updateProgress, 100);
-
-  //sliders callbacks
-  const setCurrentTimeCallback = useCallback((value: number[]) => {
-    clearTimeout(delay);
-    if (sound) {
-      sound.seek(sound.duration() * value[0])
-    }
-    setDelay(timeout);
-  }, [delay, sound, timeout]);
-
-  const setVolumeCallback = useCallback((value: number[]) => {
-    setVolume(value[0]);
-  }, [setVolume])
+  // Volume slider callback
+  const handleVolumeChange = useCallback((values: number[]) => {
+    setVolume(values[0]);
+  }, [setVolume]);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 h-full" >
-      <div className="flex w-full justify-start">
-        <div className="flex items-center gap-x-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 h-full">
+      <audio ref={audioRef} preload="auto" />
+      {/* Media info section */}
+      <div className="flex items-center justify-start pl-2">
+        <div className="flex items-center gap-2">
           <MediaItem data={song} />
           <LikeButton songId={song.id} />
         </div>
       </div>
-      
-      {/* Mobile view */}
-      <div className="flex md:hidden col-auto w-full justify-end items-center">
-        <div
-          onClick={handlePlay}
-          className="
-            h-10 w-10
-            flex
-            items-center
-            justify-center
-            rounded-full
-            bg-white
-            p-1
-            cursor-pointer
-          "
+
+      {/* Mobile controls */}
+      <div className="flex md:hidden items-center justify-end pr-4">
+        <button
+          onClick={togglePlay}
+          className="flex items-center justify-center h-10 w-10 rounded-full bg-white"
         >
           <Icon size={30} className="text-black"/>
-        </div>
+        </button>
       </div>
-      
-      {/* Normal view */}
-      <div className="flex flex-col">
-        <div
-          className="
-            hidden
-            md:flex
-            h-full w-full max-w-[722px]
-            justify-center
-            items-center
-            gap-x-6
-          "
-        >
-          <AiFillStepBackward
-            onClick={() => handleChangeSong("previous")}
-            size={25}
-            className="text-neutral-400 cursor-pointer hover:text-white transition"
-          />
-          <div
-            onClick={handlePlay}
-            className="
-              flex
-              items-center
-              justify-center
-              h-8 w-8
-              p-1
-              rounded-full
-              bg-white
-              cursor-pointer
-            "
+
+      {/* Desktop player controls */}
+      <div className="hidden md:flex flex-col items-center justify-center w-full">
+        <div className="flex items-center justify-center w-full gap-6">
+          <button
+            onClick={setPreviousId}
+            className="text-neutral-400 hover:text-white transition-colors focus:outline-none"
+            aria-label="Previous song"
           >
-            <Icon size={25} className="text-black" />
-          </div>
-          <AiFillStepForward
-            onClick={() => handleChangeSong("next")}
-            size={25}
-            className="text-neutral-400 cursor-pointer hover:text-white transition"
-          />
+            <AiFillStepBackward size={23}/>
+          </button>
+          <button
+            onClick={togglePlay}
+            className="flex items-center justify-center h-8 w-8 rounded-full bg-white"
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            <Icon size={24} className="text-black" />
+          </button>
+          <button
+            onClick={setNextId}
+            className="text-neutral-400 hover:text-white transition-colors"
+            aria-label="Next song"
+          >
+            <AiFillStepForward size={23}/>
+          </button>
         </div>
-        <div className="hidden md:flex md:flex-row items-center gap-x-3">
-          <p className="flex align-middle items-center text-center text-sm w-[8%]">
-            {sound
-              ? currentTimeString
-              : ""
-            }
-          </p>
-          <div className="w-[84%]">
+
+        {/* Progress bar */}
+        <div className="flex items-center w-full max-w-2xl gap-2">
+          <span className="text-sm text-right tabular-nums text-neutral-400 w-12">
+            {formatTime(currentTime)}
+          </span>
+          <div className="flex-1">
             <Slider
               value={progress}
-              onChange={setCurrentTimeCallback}
+              onChange={handleProgressChange}
             />
           </div>
-          <p className="flex align-middle items-center text-center text-sm w-[8%]">
-            {sound
-              ? getDurationString(sound.duration() ?? 1)
-              : ""
-            }
-          </p>
+          <span className="text-sm text-left tabular-nums text-neutral-400 w-12">
+            {formatTime(duration)}
+          </span>
         </div>
       </div>
 
-      <div className="hidden md:flex w-full justify-end pr-2">
-        <div className="flex items-center gap-x-2 w-[120px]">
-          <VolumeIcon
+      {/* Volume controls */}
+      <div className="hidden md:flex items-cetner justify-end pr-4">
+        <div className="flex items-center gap-2 w-32">
+          <button
             onClick={toggleMute}
-            className="cursor-pointer"
-            size={34}
-          />
+            className="text-neutral-400 hover:text-white transition-colors"
+            aria-label={volume === 0 ? "Unmute" : "Mute"}
+          >
+            <VolumeIcon size={20}/>
+          </button>
           <Slider
             value={volume}
-            onChange={setVolumeCallback}
+            onChange={handleVolumeChange}
           />
         </div>
       </div>
     </div>
   );
-}
+};
  
 export default PlayerContent;

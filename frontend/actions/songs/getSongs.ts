@@ -1,7 +1,8 @@
 "use server";
 
 import { Song } from "@/types/types";
-import {SERVER_API_URL} from "@/api/http";
+
+import {SERVER_API_URL} from "@/helpers/api";
 
 const getSongs = async (): Promise<Song[]> => {
   try {
@@ -9,12 +10,13 @@ const getSongs = async (): Promise<Song[]> => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data);
+      console.error(data);
+      return [];
     }
 
     return (data.songs) || [];
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 }

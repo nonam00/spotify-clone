@@ -2,17 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useShallow } from "zustand/shallow";
+import toast from "react-hot-toast";
 
 import { useUser } from "@/hooks/useUser";
 import useAuthModal from "@/hooks/useAuthModal";
 import useCreateModal from "@/hooks/useCreateModal";
 import useUploadModal from "@/hooks/useUploadModal";
 
-import createPlaylist from "@/services/playlists/createPlaylist";
-
-import Button from "./Button";
-import Modal from "./Modal";
-import toast from "react-hot-toast";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import {createPlaylist} from "@/services/playlists";
 
 const CreateModal = () => {
   const router = useRouter();
@@ -35,7 +34,7 @@ const CreateModal = () => {
     }
 
     const response = await createPlaylist();
-    
+
     if (response.ok) {
       router.refresh();
     } else {

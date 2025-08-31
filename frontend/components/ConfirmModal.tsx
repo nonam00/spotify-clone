@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import {useTransition} from "react";
 
 import useConfirmModal from "@/hooks/useConfirmModal";
-import Modal from "./Modal";
-import Button from "./Button";
+
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 
 const ConfirmModal = () => {
   const router = useRouter();
