@@ -82,9 +82,23 @@ public class MinioProvider : IStorageProvider
         stream.Position = 0;
 
         var cacheOptions = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(mediaType == MediaType.Image? 60 : 1));
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(mediaType == MediaType.Image ? 60 : 1));
         _cache.Set(name, stream.ToArray(), cacheOptions);
         
         return stream;
+    }
+    
+    public async Task<string> GetPresignedUrl(string name, MediaType mediaType, CancellationToken cancellationToken)
+    {
+        var bucket = mediaType.ToString().ToLower();
+
+        var url = await _minio.PresignedGetObjectAsync(
+            new PresignedGetObjectArgs()
+                .WithBucket(bucket)
+                .WithObject(name)
+                .WithExpiry(3600))
+            ?? throw new Exception("Error on getting presigned URL");
+
+        return url;
     }
 }

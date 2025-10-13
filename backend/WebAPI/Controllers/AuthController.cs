@@ -97,7 +97,6 @@ public class AuthController : BaseController
     /// <summary>
     /// Gets access token using refresh token
     /// </summary>
-    /// <param name="userCredentialsDto">LoginDto object</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="200">Success</response>

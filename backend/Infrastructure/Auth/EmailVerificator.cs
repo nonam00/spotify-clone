@@ -1,4 +1,5 @@
-﻿using Application.Users.Interfaces;
+﻿using System.Security.Cryptography;
+using Application.Users.Interfaces;
 
 namespace Infrastructure.Auth;
  
@@ -19,10 +20,7 @@ public class EmailVerificator : IEmailVerificator
 
     public string GenerateCode(int length = 6)
     {
-        var random = new Random();
-        return new string(Enumerable.Repeat("0123456789", length)
-            .Select(s => s[random.Next(s.Length)])
-            .ToArray());
+        return RandomNumberGenerator.GetString("0123456789", length);
     }
 
     public async Task StoreCodeAsync(string email, string code)
@@ -32,6 +30,7 @@ public class EmailVerificator : IEmailVerificator
 
     public async Task SendCodeAsync(string email, string code, CancellationToken cancellationToken = default)
     {
+        // hardcoded link, change to something else
         var confirmationLink = $"http://localhost:5000/1/auth/activate?email={email}&code={code}";
         var body = $"Please confirm your account by clicking <a href='{confirmationLink}'>here</a>";
         await _emailSenderService.SendEmailAsync(email, "Account confirmation", body, cancellationToken);

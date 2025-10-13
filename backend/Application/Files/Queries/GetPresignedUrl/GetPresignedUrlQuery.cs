@@ -1,10 +1,9 @@
-﻿using MediatR;
-
 using Application.Files.Enums;
+using MediatR;
 
-namespace Application.Files.Queries.GetFile;
+namespace Application.Files.Queries.GetPresignedUrl;
 
-public class GetFileQuery : IRequest<Stream>
+public class GetPresignedUrlQuery : IRequest<string>
 {
     public string Name { get; set; } = null!;
     public MediaType MediaType { get; set; }
