@@ -6,5 +6,4 @@ public interface IStorageProvider
 {
     Task<string> UploadFile(Stream fileStream, MediaType mediaType, CancellationToken cancellationToken = default);
     Task DeleteFile(string name, MediaType mediaType, CancellationToken cancellationToken = default);
-    Task<string> GetPresignedUrl(string name, MediaType mediaType, CancellationToken cancellationToken = default);
 }

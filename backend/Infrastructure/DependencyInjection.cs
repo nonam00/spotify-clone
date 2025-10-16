@@ -20,7 +20,6 @@ public static class DependencyInjection
     private static IServiceCollection AddMinio(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<MinioOptions>(configuration.GetRequiredSection(nameof(MinioOptions)));
-        services.AddMemoryCache();
         services.AddScoped<IStorageProvider, MinioProvider>();
 
         return services;
