@@ -32,7 +32,7 @@ type SecurityConfig struct {
 	CORSAllowedOrigins []string
 }
 
-// Loading config from environment or setting default values
+// Load function loads config from environment or sets default values
 func Load() (*Config, error) {
 	viper.SetDefault("MINIO_ACCESS_KEY_ID", "minioadmin")
 	viper.SetDefault("MINIO_SECRET_ACCESS_KEY", "minioadmin")

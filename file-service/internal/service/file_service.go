@@ -11,7 +11,7 @@ import (
 )
 
 type FileService interface {
-	GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.UploadResponse, error)
+	GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.PresignedURLResponse, error)
 	GenerateDownloadURL(ctx context.Context, fileType domain.FileType, fileID string) (*domain.PresignedURLResponse, error)
 	CheckFileExists(ctx context.Context, fileType domain.FileType, fileID string) (bool, error)
 	DeleteFile(ctx context.Context, fileType domain.FileType, fileID string) error
@@ -29,7 +29,7 @@ func NewFileService(storage *storage.MinioClient, logger *logger.Logger) FileSer
 	}
 }
 
-func (s *fileService) GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.UploadResponse, error) {
+func (s *fileService) GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.PresignedURLResponse, error) {
 	fileID := uuid.New().String()
 
 	presignedURL, err := s.storage.GeneratePresignedPutURL(ctx, req, fileID)
@@ -45,10 +45,7 @@ func (s *fileService) GenerateUploadURL(ctx context.Context, req domain.UploadRe
 		Str("file_type", string(req.FileType)).
 		Msg("Upload URL generated successfully")
 
-	return &domain.UploadResponse{
-		UploadURL: *presignedURL,
-		FileID:    fileID,
-	}, nil
+	return presignedURL, nil
 }
 
 func (s *fileService) GenerateDownloadURL(ctx context.Context, fileType domain.FileType, fileID string) (*domain.PresignedURLResponse, error) {
