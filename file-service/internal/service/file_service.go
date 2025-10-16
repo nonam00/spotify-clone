@@ -6,6 +6,8 @@ import (
 	"file-service/internal/storage"
 	"file-service/pkg/logger"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type FileService interface {
@@ -28,22 +30,24 @@ func NewFileService(storage *storage.MinioClient, logger *logger.Logger) FileSer
 }
 
 func (s *fileService) GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.UploadResponse, error) {
-	presignedURL, err := s.storage.GeneratePresignedPutURL(ctx, req, req.FileID)
+	fileID := uuid.New().String()
+
+	presignedURL, err := s.storage.GeneratePresignedPutURL(ctx, req, fileID)
 	if err != nil {
 		s.logger.Error().Err(err).
 			Str("file_type", string(req.FileType)).
-			Str("file_id", req.FileID).
 			Msg("Failed to generate upload URL")
 		return nil, fmt.Errorf("failed to generate upload URL: %w", err)
 	}
 
 	s.logger.Info().
+		Str("file_id", fileID).
 		Str("file_type", string(req.FileType)).
-		Str("file_name", req.FileID).
 		Msg("Upload URL generated successfully")
 
 	return &domain.UploadResponse{
 		UploadURL: *presignedURL,
+		FileID:    fileID,
 	}, nil
 }
 

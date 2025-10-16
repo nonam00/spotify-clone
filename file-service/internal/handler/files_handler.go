@@ -43,7 +43,7 @@ func (h *FileHandler) GenerateUploadURL(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.PureJSON(http.StatusOK, response)
 }
 
 func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {

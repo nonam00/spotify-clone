@@ -91,6 +91,7 @@ func (m *MinioClient) GeneratePresignedPutURL(ctx context.Context, req domain.Up
 	return &domain.PresignedURLResponse{
 		URL:       m.fixProxyDomain(presignedUrl.String()),
 		ExpiresAt: time.Now().Add(m.config.PresignExpiry),
+		FileID:    fileID,
 	}, nil
 }
 

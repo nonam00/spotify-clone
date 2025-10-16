@@ -16,12 +16,12 @@ type PresignedURLResponse struct {
 }
 
 type UploadRequest struct {
-	FileID   string   `json:"file_id" binding:"required"`
 	FileType FileType `json:"file_type" binding:"required,oneof=image audio"`
 }
 
 type UploadResponse struct {
 	UploadURL PresignedURLResponse `json:"upload_url"`
+	FileID    string               `json:"file_id"`
 }
 
 type ErrorResponse struct {
