@@ -5,7 +5,7 @@ import React, {memo} from "react";
 
 import { Song } from "@/types/types";
 
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_FILES_URL} from "@/helpers/api";
 import PlayButton from "@/components/ui/PlayButton";
 
 const SongGridItem = memo(function SongItem({
@@ -28,7 +28,7 @@ const SongGridItem = memo(function SongItem({
       <div className="relative aspect-square w-full h-full rounded-md overflow-hidden">
         <Image 
           className="object-cover"
-          src={`${CLIENT_API_URL}/files/image/${data.imagePath}`}
+          src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${data.imagePath}`}
           fill
           alt={data.title}
           loading="lazy"

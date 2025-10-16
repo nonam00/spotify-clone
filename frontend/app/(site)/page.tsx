@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import PlaylistHomeItem from "./components/PlaylistHomeItem";
 import PageContent from "./components/PageContent";
 
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_FILES_URL} from "@/helpers/api";
 
 export const revalidate = 0;
 
@@ -32,7 +32,7 @@ export default async function Home() {
                 name={playlist.title}
                 href={`/${playlist.id}`}
                 image={playlist.imagePath
-                  ? `${CLIENT_API_URL}/files/image/${playlist.imagePath}`
+                  ? `${CLIENT_FILES_URL}/download-url?type=image&file_id=${playlist.imagePath}`
                   : "/images/playlist.webp"}
               />
             ))}

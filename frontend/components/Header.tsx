@@ -11,7 +11,7 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 import Button from "@/components/ui/Button";
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_API_URL, CLIENT_FILES_URL} from "@/helpers/api";
 
 const Header = ({
   children,
@@ -80,7 +80,7 @@ const Header = ({
               >
                 {user.userDetails?.avatarPath ? (
                   <Image
-                    src={`${CLIENT_API_URL}/files/image/${user.userDetails.avatarPath}`}
+                    src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${user.userDetails.avatarPath}`}
                     alt="Avatar"
                     className="w-11 h-11 rounded-full object-cover"
                     loading="lazy"

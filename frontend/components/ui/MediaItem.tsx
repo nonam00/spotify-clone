@@ -1,6 +1,6 @@
 import {Playlist, Song} from "@/types/types";
 import Image from "next/image";
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_FILES_URL} from "@/helpers/api";
 
 // component for user playlists in sidebar library or songs list in home page
 const MediaItem = ({
@@ -13,7 +13,7 @@ const MediaItem = ({
       <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
         <Image
           fill
-          src={data.imagePath ? `${CLIENT_API_URL}/files/image/${data.imagePath}` : '/images/playlist.webp'}
+          src={data.imagePath ? `${CLIENT_FILES_URL}/download-url?type=image&file_id=${data.imagePath}` : '/images/playlist.webp'}
           alt={data.title}
           unoptimized
           loading="lazy"

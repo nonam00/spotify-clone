@@ -6,7 +6,7 @@ import getUserInfo from "@/actions/user/getUserInfo";
 import Header from "@/components/Header";
 import ChangeAvatarForm from "@/app/account/components/ChangeAvatarForm";
 import ChangePasswordForm from "@/app/account/components/ChangePasswordForm";
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_API_URL, CLIENT_FILES_URL} from "@/helpers/api";
 
 export default async function AccountPage() {
   const userDetails = await getUserInfo();
@@ -35,7 +35,7 @@ export default async function AccountPage() {
             <div className="flex items-center space-x-4">
               {userDetails.avatarPath ? (
                 <Image
-                  src={`${CLIENT_API_URL}/files/image/${userDetails.avatarPath}`}
+                  src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${userDetails.avatarPath}`}
                   alt="Avatar" 
                   className="w-16 h-16 rounded-full object-cover"
                   loading="lazy"
