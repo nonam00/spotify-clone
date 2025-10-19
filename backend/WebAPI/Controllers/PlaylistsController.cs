@@ -17,8 +17,6 @@ using Application.PlaylistSongs.Commands.DeletePlaylistSong;
 using Application.LikedSongs.Models;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylistBySearch;
-using Application.Files.Commands.DeleteFile;
-using Application.Files.Enums;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -27,6 +25,7 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
 public class PlaylistsController : BaseController
 {
+    private readonly HttpClient _httpClient = new();
     /// <summary>
     /// Gets certain user playlist 
     /// </summary>
@@ -136,12 +135,7 @@ public class PlaylistsController : BaseController
         
         if (oldImagePath is not null)
         {
-            var deleteImageCommand = new DeleteFileCommand
-            {
-                Name = oldImagePath,
-                MediaType = MediaType.Image
-            };
-            await Mediator.Send(deleteImageCommand, cancellationToken);
+            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + oldImagePath, cancellationToken);
         }
         
         return NoContent();
@@ -168,12 +162,7 @@ public class PlaylistsController : BaseController
         
         if (imagePath is not null)
         {
-            var deleteImageCommand = new DeleteFileCommand
-            {
-                Name = imagePath,
-                MediaType = MediaType.Image
-            };
-            await Mediator.Send(deleteImageCommand, cancellationToken);
+            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + imagePath, cancellationToken);
         }
         
         return NoContent();

@@ -13,9 +13,6 @@ using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
 
-using Application.Files.Commands.DeleteFile;
-using Application.Files.Enums;
-
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -23,6 +20,7 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
 public class UsersController : BaseController
 {
+    private readonly HttpClient _httpClient = new();
     /// <summary>
     /// Gets user info
     /// </summary>
@@ -65,13 +63,8 @@ public class UsersController : BaseController
         var oldImagePath = await Mediator.Send(updateUserCommand, cancellationToken);
         
         if (oldImagePath is not null)
-        {
-            var deleteImageCommand = new DeleteFileCommand
-            {
-                Name = oldImagePath,
-                MediaType = MediaType.Image
-            };
-            await Mediator.Send(deleteImageCommand, cancellationToken);
+        {            
+            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + oldImagePath, cancellationToken);
         }
         
         return NoContent();
