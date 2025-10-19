@@ -4,9 +4,9 @@ import { IoMdPerson, IoMdMail } from "react-icons/io";
 
 import getUserInfo from "@/actions/user/getUserInfo";
 import Header from "@/components/Header";
-import ChangeAvatarForm from "@/app/account/components/ChangeAvatarForm";
-import ChangePasswordForm from "@/app/account/components/ChangePasswordForm";
-import {CLIENT_API_URL, CLIENT_FILES_URL} from "@/helpers/api";
+import ChangeUserInfoForm from "@/app/account/components/ChangeUserInfoForm";
+import ChangeUserPasswordForm from "@/app/account/components/ChangeUserPasswordForm";
+import {CLIENT_FILES_URL} from "@/helpers/api";
 
 export default async function AccountPage() {
   const userDetails = await getUserInfo();
@@ -61,10 +61,10 @@ export default async function AccountPage() {
           {/* Settings Sections */}
           <div className="flex flex-col gap-8">
             <div>
-              <ChangeAvatarForm userDetails={userDetails} />
+              <ChangeUserInfoForm userDetails={userDetails} />
             </div>
             <div>
-              <ChangePasswordForm />
+              <ChangeUserPasswordForm />
             </div>
           </div>
         </div>

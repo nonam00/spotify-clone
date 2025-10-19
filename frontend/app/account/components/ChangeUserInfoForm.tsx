@@ -10,8 +10,9 @@ import updateUserInfo from "@/actions/user/updateUserInfo";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import {UserDetails} from "@/types/types";
+import {getPresignedUrl, uploadFileToS3, validateImage} from "@/services/files";
 
-const ChangeAvatarForm = ({
+const ChangeUserInfoForm = ({
   userDetails
 }: {
   userDetails: UserDetails
@@ -29,14 +30,9 @@ const ChangeAvatarForm = ({
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      newErrors.file = "Please select a valid image file";
-      setErrors(newErrors);
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      newErrors.file = "Image size must be less than 5MB";
+    const validationResult = validateImage(file);
+    if (validationResult) {
+      newErrors.file = validationResult;
       setErrors(newErrors);
       return;
     }
@@ -64,9 +60,30 @@ const ChangeAvatarForm = ({
           return;
         }
 
+        let file_id = null;
+
+        if (file) {
+          console.log(file);
+          const presignedUrlImage = await getPresignedUrl("image");
+
+          if (!presignedUrlImage) {
+            toast.error("Failed to get upload URL");
+            return;
+          }
+
+          const imageUploadSuccess = await uploadFileToS3(presignedUrlImage.url, file, "image");
+
+          if (!imageUploadSuccess) {
+            toast.error("Failed to upload files");
+            return;
+          }
+
+          file_id = presignedUrlImage.file_id;
+        }
+
         const result = await updateUserInfo({
-          avatar: file,
-          fullName: fullName === userDetails?.fullName ? undefined : fullName
+          avatarId: file_id,
+          fullName: fullName === userDetails?.fullName ? null : fullName
         })
         ;
         if (result.success) {
@@ -154,4 +171,4 @@ const ChangeAvatarForm = ({
   );
 };
 
-export default ChangeAvatarForm;
+export default ChangeUserInfoForm;

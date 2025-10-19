@@ -3,5 +3,5 @@
 public class UpdateUserInfoDto
 {
     public string? FullName { get; set; }
-    public IFormFile? Avatar { get; set; }
+    public string? AvatarId { get; set; }
 }

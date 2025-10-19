@@ -18,7 +18,6 @@ using Application.LikedSongs.Models;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylistBySearch;
 using Application.Files.Commands.DeleteFile;
-using Application.Files.Commands.UploadFile;
 using Application.Files.Enums;
 using WebAPI.Models;
 
@@ -120,31 +119,17 @@ public class PlaylistsController : BaseController
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpPut("{playlistId:guid}")]
-    [DisableRequestSizeLimit]
-    [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdatePlaylist(Guid playlistId,
-        [FromForm] UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdatePlaylist(Guid playlistId, UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
     {
-        string? newImagePath = null;
-        if (updatePlaylistDto.Image is not null)
-        {
-            var uploadImageCommand = new UploadFileCommand
-            {
-                FileStream = updatePlaylistDto.Image.OpenReadStream(),
-                MediaType = MediaType.Image
-            };
-            newImagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
-        }
-        
         var updatePlaylistCommand = new UpdatePlaylistCommand
         {
             UserId = UserId,
             PlaylistId = playlistId,
             Title = updatePlaylistDto.Title,
             Description = updatePlaylistDto.Description,
-            ImagePath = newImagePath
+            ImagePath = updatePlaylistDto.ImageId
         };
         
         var oldImagePath = await Mediator.Send(updatePlaylistCommand, cancellationToken);
