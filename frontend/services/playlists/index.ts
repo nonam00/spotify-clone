@@ -17,12 +17,25 @@ export async function createPlaylist() {
   });
 }
 
-export async function updatePlaylist(id: string, form: FormData) {
-  return await authFetchClient(`${CLIENT_API_URL}/playlists/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    body: form
-  })
+export async function updatePlaylist(id: string, data: {
+  title: string,
+  description: string | null,
+  imageId: string | null,
+}): Promise<boolean> {
+  try {
+    const response = await authFetchClient(`${CLIENT_API_URL}/playlists/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error("Error updating playlist", error);
+    return false
+  }
 }
 
 export async function deletePlaylist(id: string) {

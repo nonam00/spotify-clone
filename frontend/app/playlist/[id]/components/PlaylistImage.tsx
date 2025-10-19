@@ -6,7 +6,7 @@ import { useShallow } from "zustand/shallow";
 import { Playlist } from "@/types/types";
 import usePlaylistModal from "@/hooks/usePlaylistModal";
 
-import {CLIENT_API_URL} from "@/helpers/api";
+import {CLIENT_API_URL, CLIENT_FILES_URL} from "@/helpers/api";
 
 const PlaylistImage = ({
   playlist
@@ -24,7 +24,7 @@ const PlaylistImage = ({
       alt={playlist.title}
       className="object-cover rounded-xl hover:opacity-75 transition"
       src={playlist.imagePath
-        ? `${CLIENT_API_URL}/files/image/${playlist.imagePath}`
+        ? `${CLIENT_FILES_URL}/download-url?type=image&file_id=${playlist.imagePath}`
         : "/images/playlist.webp"
       }
       unoptimized

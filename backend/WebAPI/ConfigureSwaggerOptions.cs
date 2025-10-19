@@ -5,10 +5,14 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebAPI;
 
-public class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
-    : IConfigureOptions<SwaggerGenOptions>
+public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
-    private readonly IApiVersionDescriptionProvider _provider = provider;
+    private readonly IApiVersionDescriptionProvider _provider;
+
+    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
+    {
+        _provider = provider;
+    }
 
     public void Configure(SwaggerGenOptions options) 
     {
@@ -20,17 +24,7 @@ public class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider)
                 {
                     Version = apiVersion,
                     Title = $"Spotify Clone API {apiVersion}",
-                    Description = "API for Spotify Clone Web Application",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Ilya",
-                        Email = "raisky.ilya3@yandex.ru",
-                        Url = new Uri("https://t.me/NoNam0000")
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "License"
-                    }
+                    Description = "API for Spotify Clone Web Application"
                 });
 
             options.AddSecurityDefinition($"AuthToken {apiVersion}",

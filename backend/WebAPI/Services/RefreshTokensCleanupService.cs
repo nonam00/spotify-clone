@@ -13,6 +13,7 @@ public class RefreshTokensCleanupService : BackgroundService
         _mediator = mediator;
     }
 
+    // Deletes outdated refresh tokens on service startup and then every 24 hours
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await DoWork();

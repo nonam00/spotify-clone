@@ -60,7 +60,7 @@ public class RefreshTokensRepository : IRefreshTokensRepository
     public async Task DeleteExpired(CancellationToken cancellationToken = default)
     {
         var expiredTokens = await _dbContext.RefreshTokens
-            .Where(rf => rf.Expires > DateTime.UtcNow)
+            .Where(rf => rf.Expires < DateTime.UtcNow)
             .ToListAsync(cancellationToken);
 
         _dbContext.RefreshTokens.RemoveRange(expiredTokens);

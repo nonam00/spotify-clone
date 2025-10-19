@@ -8,8 +8,6 @@ using Application.Songs.Queries.GetSongList.GetNewestSongList;
 using Application.Songs.Queries.GetSongList.GetAllSongs;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries.GetSongList.GetSongListBySearch;
-using Application.Files.Commands.UploadFile;
-using Application.Files.Enums;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -96,34 +94,17 @@ public class SongsController : BaseController
     /// <response code="201">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpPost, Authorize]
-    [DisableRequestSizeLimit]
-    [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Guid>> UploadNewSong(
-        [FromForm] CreateSongDto createSongDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto, CancellationToken cancellationToken)
     {
-        var uploadAudioCommand = new UploadFileCommand
-        {
-            FileStream = createSongDto.Audio.OpenReadStream(),
-            MediaType = MediaType.Audio
-        };
-        var songPath = await Mediator.Send(uploadAudioCommand, cancellationToken);
-        
-        var uploadImageCommand = new UploadFileCommand
-        {
-            FileStream = createSongDto.Image.OpenReadStream(),
-            MediaType = MediaType.Image
-        };
-        var imagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
-        
         var command = new CreateSongCommand
         {
             UserId = UserId,
             Title = createSongDto.Title,
             Author = createSongDto.Author,
-            SongPath = songPath,
-            ImagePath = imagePath
+            SongPath = createSongDto.AudioId.ToString(),
+            ImagePath = createSongDto.ImageId.ToString(),
         };
         
         var songId = await Mediator.Send(command, cancellationToken);

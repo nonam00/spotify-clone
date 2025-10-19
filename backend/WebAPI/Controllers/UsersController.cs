@@ -13,10 +13,6 @@ using Application.LikedSongs.Commands.CreateLikedSong;
 using Application.LikedSongs.Commands.DeleteLikedSong;
 using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
 
-using Application.Files.Commands.DeleteFile;
-using Application.Files.Commands.UploadFile;
-using Application.Files.Enums;
-
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -24,6 +20,7 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
 public class UsersController : BaseController
 {
+    private readonly HttpClient _httpClient = new();
     /// <summary>
     /// Gets user info
     /// </summary>
@@ -54,36 +51,20 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateUserInfo(
-        [FromForm] UpdateUserInfoDto updateUserInfoDto, CancellationToken cancellationToken)
+        UpdateUserInfoDto updateUserInfoDto, CancellationToken cancellationToken)
     {
-        string? newImagePath = null;
-        if (updateUserInfoDto.Avatar is not null)
-        {
-            var uploadImageCommand = new UploadFileCommand
-            {
-                FileStream = updateUserInfoDto.Avatar.OpenReadStream(),
-                MediaType = MediaType.Image
-            };
-            newImagePath = await Mediator.Send(uploadImageCommand, cancellationToken);
-        }
-
         var updateUserCommand = new UpdateUserCommand
         {
             UserId = UserId,
             FullName = updateUserInfoDto.FullName,
-            AvatarPath = newImagePath
+            AvatarPath = updateUserInfoDto.AvatarId
         };
 
         var oldImagePath = await Mediator.Send(updateUserCommand, cancellationToken);
         
         if (oldImagePath is not null)
-        {
-            var deleteImageCommand = new DeleteFileCommand
-            {
-                Name = oldImagePath,
-                MediaType = MediaType.Image
-            };
-            await Mediator.Send(deleteImageCommand, cancellationToken);
+        {            
+            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + oldImagePath, cancellationToken);
         }
         
         return NoContent();

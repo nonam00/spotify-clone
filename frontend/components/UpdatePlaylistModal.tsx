@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import {updatePlaylist} from "@/services/playlists";
+import {FILE_CONFIG, getPresignedUrl, uploadFileToS3, validateImage} from "@/services/files";
 
 const UpdatePlaylistModal = () => {
   const [playlist, isOpen, onClose, setPlaylist] = usePlaylistModal(useShallow(s => [
@@ -50,10 +51,55 @@ const UpdatePlaylistModal = () => {
         onClose();
         return;
       }
-      
-      const updateResponse = await updatePlaylist(playlist.id, formData);
 
-      if (!updateResponse.ok) {
+      const title = formData.get("Title") as string;
+      const description = formData.get("Description") as string;
+      const imageFile = formData.get("Image") as File;
+      console.log(imageFile);
+
+      if (!title?.trim()) {
+        toast.error("Title is required");
+        return;
+      }
+
+      let file_id = null;
+
+      if (imageFile.size !== 0) {
+        const imageError = validateImage(imageFile);
+        if (imageError) {
+          toast.error(`Image error: ${imageError}`);
+          return;
+        }
+
+        const presignedUrlImage = await getPresignedUrl("image");
+        if (!presignedUrlImage) {
+          toast.error("Failed to get upload URL");
+          return;
+        }
+
+        const imageUploadSuccess = await uploadFileToS3(presignedUrlImage.url, imageFile, "image");
+
+        if (!imageUploadSuccess) {
+          toast.error("Failed to upload files");
+          return;
+        }
+
+        file_id = presignedUrlImage.file_id;
+      }
+
+      const playlistData = {
+        title: title.trim(),
+        description: description?.trim(),
+        imageId: file_id,
+      };
+
+      const recordSuccess = await updatePlaylist(playlist.id, playlistData);
+      if (!recordSuccess) {
+        toast.error("Failed to create song record");
+        return;
+      }
+
+      if (!recordSuccess) {
         toast.error("An error occurred while updating the playlist");
         return;
       }
@@ -112,6 +158,10 @@ const UpdatePlaylistModal = () => {
             disabled={isPending}
             accept="image/*"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB •
+            Supported formats: JPEG, PNG, WebP, GIF
+          </p>
         </div>
         <Button disabled={isPending} type="submit">
           {isPending ? "Saving..." : "Save changes"}

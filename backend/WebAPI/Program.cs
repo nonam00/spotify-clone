@@ -66,8 +66,15 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<SongsDbContext>();
-    var notAppliedMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-    if (notAppliedMigrations.Any())
+    try
+    {
+        var notAppliedMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+        if (notAppliedMigrations.Any())
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+    }
+    catch
     {
         await dbContext.Database.MigrateAsync();
     }

@@ -7,7 +7,7 @@ import changePassword from "@/actions/user/changePassword";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
-const ChangePasswordForm = () => {
+const ChangeUserPasswordForm = () => {
   const [isPending, startTransition] = useTransition();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -124,4 +124,4 @@ const ChangePasswordForm = () => {
   );
 };
 
-export default ChangePasswordForm;
+export default ChangeUserPasswordForm;

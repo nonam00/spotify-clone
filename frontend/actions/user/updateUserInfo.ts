@@ -6,8 +6,8 @@ import { cookies } from "next/headers";
 import {SERVER_API_URL} from "@/helpers/api";
 
 type updateUserData = {
-  fullName?: string,
-  avatar?: File
+  fullName: string | null,
+  avatarId: string | null,
 }
 
 const updateUserInfo = async (data: updateUserData): Promise<{
@@ -16,26 +16,20 @@ const updateUserInfo = async (data: updateUserData): Promise<{
 }> => {
   try {
     const cookieStore = await cookies();
-    
-    const formData = new FormData();
-    if (data.fullName) {
-      formData.append("FullName", data.fullName);
-    }
-    if (data.avatar) {
-      formData.append("Avatar", data.avatar);
-    }
 
     const response = await fetch(`${SERVER_API_URL}/users`, {
       method: "PUT",
       headers: {
+        "Content-Type": "application/json",
         Cookie: cookieStore.toString()
       },
-      body: formData,
+      body: JSON.stringify(data),
       credentials: "include"
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.log(errorData);
       return { success: false, error: errorData.detail || "Failed to update user info" };
     }
 
