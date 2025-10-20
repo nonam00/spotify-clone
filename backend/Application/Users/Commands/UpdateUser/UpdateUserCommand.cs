@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UpdateUser;
 
-public class UpdateUserCommand : IRequest<string?>
+public class UpdateUserCommand : ICommand<string?>
 {
     public Guid UserId { get; set; }
     public string? FullName { get; set; }

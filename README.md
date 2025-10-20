@@ -93,7 +93,6 @@ The project is built on a microservices architecture and includes:
 - .NET 8 SDK (for local development)
 - Node.js 18+ (for local development)
 
-
 ### ⚙️ Configuration
 
 The application requires the following environment variables to be configured:

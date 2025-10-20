@@ -1,16 +1,14 @@
-﻿using MediatR;
-
-using Domain;
+﻿using Domain;
 using Application.LikedSongs.Interfaces;
+using Application.Shared.Messaging;
 using Application.Users.Interfaces;
 
 namespace Application.LikedSongs.Commands.CreateLikedSong;
 
-public class CreateLikedSongCommandHandler : IRequestHandler<CreateLikedSongCommand, string>
+public class CreateLikedSongCommandHandler : ICommandHandler<CreateLikedSongCommand, string>
 {
     private readonly ILikedSongsRepository _likedSongsRepository;
     private readonly IUsersRepository _usersRepository;
-
     public CreateLikedSongCommandHandler(ILikedSongsRepository likedSongsRepository, IUsersRepository usersRepository)
     {
         _likedSongsRepository = likedSongsRepository;

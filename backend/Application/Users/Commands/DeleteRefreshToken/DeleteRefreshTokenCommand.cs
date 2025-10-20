@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.DeleteRefreshToken;
 
-public class DeleteRefreshTokenQuery : IRequest
+public class DeleteRefreshTokenCommand : ICommand
 {
     public string RefreshToken { get; init; } = null!;
 }

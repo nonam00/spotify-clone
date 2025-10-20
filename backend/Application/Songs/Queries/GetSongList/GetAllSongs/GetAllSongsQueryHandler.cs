@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetAllSongs;
 
-public class GetAllSongsQueryHandler : IRequestHandler<GetAllSongsQuery, SongListVm>
+public class GetAllSongsQueryHandler : IQueryHandler<GetAllSongsQuery, SongListVm>
 {
     private readonly ISongsRepository _songsRepository;
 

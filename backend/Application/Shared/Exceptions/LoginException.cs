@@ -1,4 +1,4 @@
-﻿namespace Application.Common.Exceptions;
+﻿namespace Application.Shared.Exceptions;
 
 public class LoginException : Exception
 {

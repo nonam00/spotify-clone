@@ -1,5 +1,5 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.CleanupRefreshTokens;
 
-public class CleanupRefreshTokensCommand : IRequest;
+public class CleanupRefreshTokensCommand : ICommand;

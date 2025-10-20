@@ -1,9 +1,9 @@
 ﻿using Application.Users.Interfaces;
-using MediatR;
+using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UpdateUser;
 
-public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, string?>
+public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, string?>
 {
     private readonly IUsersRepository _usersRepository;
 

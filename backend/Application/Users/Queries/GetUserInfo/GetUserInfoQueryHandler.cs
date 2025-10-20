@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.GetUserInfo;
 
-public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInfo>
+public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, UserInfo>
 {
     private readonly IUsersRepository _usersRepository;
 

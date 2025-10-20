@@ -1,10 +1,10 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.PlaylistSongs.Interfaces;
 
 namespace Application.PlaylistSongs.Commands.CreatePlaylistSong;
 
-public class CreatePlaylistSongCommandHandler : IRequestHandler<CreatePlaylistSongCommand, string>
+public class CreatePlaylistSongCommandHandler : ICommandHandler<CreatePlaylistSongCommand, string>
 {
     private readonly IPlaylistsSongsRepository _playlistsSongsRepository;
 

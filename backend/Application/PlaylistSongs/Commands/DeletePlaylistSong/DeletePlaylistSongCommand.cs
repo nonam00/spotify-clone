@@ -1,8 +1,8 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 namespace Application.PlaylistSongs.Commands.DeletePlaylistSong;
 
-public class DeletePlaylistSongCommand : IRequest
+public class DeletePlaylistSongCommand : ICommand
 {
     public Guid UserId { get; init; }
     public Guid PlaylistId { get; init; }

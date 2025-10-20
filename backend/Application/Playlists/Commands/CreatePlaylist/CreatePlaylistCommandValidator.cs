@@ -6,6 +6,9 @@ public class CreatePlaylistCommandValidator : AbstractValidator<CreatePlaylistCo
 {
     public CreatePlaylistCommandValidator()
     {
-        RuleFor(c => c.UserId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");
     }
 }

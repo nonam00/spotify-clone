@@ -6,7 +6,14 @@ public class CheckLikedSongQueryValidator : AbstractValidator<CheckLikedSongQuer
 {
     public CheckLikedSongQueryValidator()
     {
-        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
-        RuleFor(q => q.SongId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");
+        
+        RuleFor(q => q.SongId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Song ID is required")
+            .WithErrorCode("400");;
     }
 }

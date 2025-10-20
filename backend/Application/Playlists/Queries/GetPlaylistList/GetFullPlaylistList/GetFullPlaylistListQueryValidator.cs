@@ -6,6 +6,9 @@ public class GetFullPlaylistListQueryValidator : AbstractValidator<GetFullPlayli
 {
     public GetFullPlaylistListQueryValidator()
     {
-        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");
     }
 }

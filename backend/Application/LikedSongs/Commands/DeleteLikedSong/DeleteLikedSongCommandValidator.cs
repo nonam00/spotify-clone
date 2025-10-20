@@ -6,7 +6,14 @@ public class DeleteLikedSongCommandValidator : AbstractValidator<DeleteLikedSong
 {
     public DeleteLikedSongCommandValidator()
     {
-        RuleFor(command => command.UserId).NotEqual(Guid.Empty);
-        RuleFor(command => command.SongId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");
+        
+        RuleFor(command => command.SongId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Song ID is required")
+            .WithErrorCode("400");;
     }
 }

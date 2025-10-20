@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.ActivateUser;
 
-public class ActivateUserCommand : IRequest
+public class ActivateUserCommand : ICommand
 {
     public string Email { get; set; } = null!;
     public string ConfirmationCode { get; set; } = null!;

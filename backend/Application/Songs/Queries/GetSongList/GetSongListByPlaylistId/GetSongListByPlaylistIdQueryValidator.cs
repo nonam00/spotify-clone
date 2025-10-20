@@ -6,6 +6,10 @@ public class GetSongListByPlaylistIdQueryValidator : AbstractValidator<GetSongLi
 {
     public GetSongListByPlaylistIdQueryValidator()
     {
-        RuleFor(q => q.PlaylistId).NotEqual(Guid.Empty);
+        RuleFor(command => command.PlaylistId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Playlist ID is required")
+            .WithErrorCode("400");
+        
     }
 }

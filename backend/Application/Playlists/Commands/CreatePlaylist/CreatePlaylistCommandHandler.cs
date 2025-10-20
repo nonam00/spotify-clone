@@ -1,4 +1,4 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Domain;
 using Application.Playlists.Interfaces;
@@ -6,7 +6,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Playlists.Commands.CreatePlaylist;
 
-public class CreatePlaylistCommandHandler : IRequestHandler<CreatePlaylistCommand, Guid>
+public class CreatePlaylistCommandHandler : ICommandHandler<CreatePlaylistCommand, Guid>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
     private readonly IUsersRepository _usersRepository;

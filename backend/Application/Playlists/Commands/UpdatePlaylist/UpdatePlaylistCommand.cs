@@ -1,8 +1,8 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
-public class UpdatePlaylistCommand : IRequest<string?>
+public class UpdatePlaylistCommand : ICommand<string?>
 {
     public Guid UserId { get; init; }
     public Guid PlaylistId { get; init; }

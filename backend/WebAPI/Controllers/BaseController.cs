@@ -1,5 +1,6 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+
+using Application.Shared.Messaging;
 
 namespace WebAPI.Controllers;
 

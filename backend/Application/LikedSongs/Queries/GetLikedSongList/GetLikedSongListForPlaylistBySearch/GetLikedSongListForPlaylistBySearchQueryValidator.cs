@@ -7,8 +7,19 @@ public class GetLikedSongListForPlaylistBySearchQueryValidator
 {
     public GetLikedSongListForPlaylistBySearchQueryValidator()
     {
-        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
-        RuleFor(q => q.PlaylistId).NotEqual(Guid.Empty);
-        RuleFor(q => q.SearchString).NotEqual(string.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");       
+        
+        RuleFor(q => q.PlaylistId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Playlist ID is required")
+            .WithErrorCode("400");
+        
+        RuleFor(q => q.SearchString)
+            .NotEqual(string.Empty)
+            .WithMessage("Search string is required")
+            .WithErrorCode("400");;
     }
 }

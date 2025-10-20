@@ -1,4 +1,4 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
@@ -6,7 +6,7 @@ using Application.Playlists.Models;
 namespace Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
 
 public class GetPlaylistListByCountQueryHandler
-    : IRequestHandler<GetPlaylistListByCountQuery, PlaylistListVm>
+    : IQueryHandler<GetPlaylistListByCountQuery, PlaylistListVm>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
 

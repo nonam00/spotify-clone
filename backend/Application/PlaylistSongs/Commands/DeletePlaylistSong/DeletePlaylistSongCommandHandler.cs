@@ -1,10 +1,10 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.PlaylistSongs.Interfaces;
 
 namespace Application.PlaylistSongs.Commands.DeletePlaylistSong;
 
-public class DeletePlaylistSongCommandHandler: IRequestHandler<DeletePlaylistSongCommand>
+public class DeletePlaylistSongCommandHandler: ICommandHandler<DeletePlaylistSongCommand>
 {
     private readonly IPlaylistsSongsRepository _playlistsSongsRepository;
 

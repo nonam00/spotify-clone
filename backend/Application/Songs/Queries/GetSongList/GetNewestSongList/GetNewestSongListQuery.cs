@@ -1,7 +1,7 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetNewestSongList;
 
-public class GetNewestSongListQuery : IRequest<SongListVm>;
+public class GetNewestSongListQuery : IQuery<SongListVm>;

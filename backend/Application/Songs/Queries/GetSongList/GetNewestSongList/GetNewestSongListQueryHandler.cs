@@ -1,11 +1,11 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetNewestSongList;
 
-public class GetNewestSongListQueryHandler : IRequestHandler<GetNewestSongListQuery, SongListVm>
+public class GetNewestSongListQueryHandler : IQueryHandler<GetNewestSongListQuery, SongListVm>
 {
     private readonly ISongsRepository _songsRepository;
 

@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Songs.Commands.CreateSong;
 
-public class CreateSongCommand : IRequest<Guid>
+public class CreateSongCommand : ICommand<Guid>
 {
     public Guid UserId { get; init; }
     public string Title { get; init; } = null!;

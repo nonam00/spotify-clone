@@ -1,10 +1,9 @@
-﻿using MediatR;
-
-using Application.LikedSongs.Interfaces;
+﻿using Application.LikedSongs.Interfaces;
+using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Commands.DeleteLikedSong;
 
-public class DeleteLikedSongCommandHandler : IRequestHandler<DeleteLikedSongCommand>
+public class DeleteLikedSongCommandHandler : ICommandHandler<DeleteLikedSongCommand>
 {
     private readonly ILikedSongsRepository _likedSongsRepository;
 

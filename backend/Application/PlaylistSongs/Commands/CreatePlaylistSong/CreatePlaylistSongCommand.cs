@@ -1,8 +1,8 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 namespace Application.PlaylistSongs.Commands.CreatePlaylistSong;
 
-public class CreatePlaylistSongCommand : IRequest<string>
+public class CreatePlaylistSongCommand : ICommand<string>
 {
     public Guid UserId { get; init; }
     public Guid PlaylistId { get; init; }

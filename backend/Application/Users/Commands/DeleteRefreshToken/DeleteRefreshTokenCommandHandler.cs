@@ -1,19 +1,19 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.DeleteRefreshToken;
 
-public class DeleteRefreshTokenQueryHandler : IRequestHandler<DeleteRefreshTokenQuery>
+public class DeleteRefreshTokenCommandHandler : ICommandHandler<DeleteRefreshTokenCommand>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
 
-    public DeleteRefreshTokenQueryHandler(IRefreshTokensRepository refreshTokensRepository)
+    public DeleteRefreshTokenCommandHandler(IRefreshTokensRepository refreshTokensRepository)
     {
         _refreshTokensRepository = refreshTokensRepository;
     }
 
-    public async Task Handle(DeleteRefreshTokenQuery request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteRefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var refreshToken = await _refreshTokensRepository.GetByValue(request.RefreshToken, cancellationToken);
         await _refreshTokensRepository.Delete(refreshToken, cancellationToken);

@@ -1,5 +1,4 @@
-﻿using MediatR;
-
+﻿using Application.Shared.Messaging;
 using Application.Users.Commands.CleanupRefreshTokens;
 
 namespace WebAPI.Services;

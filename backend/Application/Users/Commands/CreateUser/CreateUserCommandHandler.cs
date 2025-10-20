@@ -1,12 +1,12 @@
-﻿using MediatR;
+﻿using Application.Shared.Exceptions;
+using Application.Shared.Messaging;
 
 using Domain;
-using Application.Common.Exceptions;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand>
+public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;

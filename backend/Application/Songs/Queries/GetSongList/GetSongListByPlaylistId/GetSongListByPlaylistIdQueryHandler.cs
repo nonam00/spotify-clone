@@ -1,11 +1,11 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
 
-public class GetSongListByPlaylistIdQueryHandler: IRequestHandler<GetSongListByPlaylistIdQuery, SongListVm>
+public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPlaylistIdQuery, SongListVm>
 {
     private readonly ISongsRepository _songsRepository;
 

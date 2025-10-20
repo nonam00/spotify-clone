@@ -146,7 +146,7 @@ public class AuthController : BaseController
         if (HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
         {
             Response.Cookies.Delete("refresh_token");
-            var deleteTokenCommand = new DeleteRefreshTokenQuery
+            var deleteTokenCommand = new DeleteRefreshTokenCommand
             {
                 RefreshToken = refreshToken
             };

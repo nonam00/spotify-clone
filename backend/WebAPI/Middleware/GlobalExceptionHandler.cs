@@ -5,8 +5,7 @@ using FluentValidation;
 using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
-
-using Application.Common.Exceptions;
+using Application.Shared.Exceptions;
 
 namespace WebAPI.Middleware;
 

@@ -6,6 +6,9 @@ public class GetLikedSongListQueryValidator : AbstractValidator<GetLikedSongList
 {
     public GetLikedSongListQueryValidator()
     {
-        RuleFor(query => query.UserId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");   
     }
 }
