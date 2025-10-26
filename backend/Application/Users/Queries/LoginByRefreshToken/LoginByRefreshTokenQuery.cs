@@ -1,10 +1,7 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQuery : IRequest<TokenPair>
-{
-    public string RefreshToken { get; init; } = null!;
-}
+public record LoginByRefreshTokenQuery(string RefreshToken) : IQuery<TokenPair>;

@@ -18,7 +18,7 @@ const Player = () => {
   const songUrl = `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${song.songPath}`;
   
   return (
-    <div className="fixed bottom-0 bg-black w-full py-2 h-15">
+    <div className="fixed bottom-0 bg-black w-full h-[80px]">
       <PlayerContent
         key={songUrl}
         song={song}

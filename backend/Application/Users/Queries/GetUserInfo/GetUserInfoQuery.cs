@@ -1,10 +1,7 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Users.Models;
 
 namespace Application.Users.Queries.GetUserInfo;
 
-public class GetUserInfoQuery : IRequest<UserInfo>
-{
-    public Guid UserId { get; init; } 
-}
+public record GetUserInfoQuery(Guid UserId) : IQuery<UserInfo>;

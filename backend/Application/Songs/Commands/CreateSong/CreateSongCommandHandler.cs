@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Domain;
 using Application.Songs.Interfaces;
 
 namespace Application.Songs.Commands.CreateSong;
 
-public class CreateSongCommandHandler : IRequestHandler<CreateSongCommand, Guid>
+public class CreateSongCommandHandler : ICommandHandler<CreateSongCommand, Guid>
 {
     private readonly ISongsRepository _songsRepository;
 

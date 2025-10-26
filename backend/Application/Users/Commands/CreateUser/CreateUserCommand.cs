@@ -1,9 +1,5 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommand : IRequest
-{
-    public string Email { get; init; } = null!;
-    public string Password { get; init; } = null!;
-}
+public record CreateUserCommand(string Email, string Password) : ICommand;

@@ -86,7 +86,7 @@ const PlayerContent = ({
       <div className="flex md:hidden items-center justify-end pr-4">
         <button
           onClick={togglePlay}
-          className="flex items-center justify-center h-10 w-10 rounded-full bg-white"
+          className="flex items-center justify-center h-10 w-10 rounded-full bg-white cursor-pointer"
         >
           <Icon size={30} className="text-black"/>
         </button>
@@ -97,21 +97,21 @@ const PlayerContent = ({
         <div className="flex items-center justify-center w-full gap-6">
           <button
             onClick={setPreviousId}
-            className="text-neutral-400 hover:text-white transition-colors focus:outline-none"
+            className="text-neutral-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
             aria-label="Previous song"
           >
             <AiFillStepBackward size={23}/>
           </button>
           <button
             onClick={togglePlay}
-            className="flex items-center justify-center h-8 w-8 rounded-full bg-white"
+            className="flex items-center justify-center h-8 w-8 rounded-full bg-white cursor-pointer"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             <Icon size={24} className="text-black" />
           </button>
           <button
             onClick={setNextId}
-            className="text-neutral-400 hover:text-white transition-colors"
+            className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
             aria-label="Next song"
           >
             <AiFillStepForward size={23}/>
@@ -140,7 +140,7 @@ const PlayerContent = ({
         <div className="flex items-center gap-2 w-32">
           <button
             onClick={toggleMute}
-            className="text-neutral-400 hover:text-white transition-colors"
+            className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
             aria-label={volume === 0 ? "Unmute" : "Mute"}
           >
             <VolumeIcon size={20}/>

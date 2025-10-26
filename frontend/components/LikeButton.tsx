@@ -74,7 +74,7 @@ const LikeButton = ({
     <button
       onClick={handleLike}
       disabled={isPending}
-      className="hover:opacity-75 transition"
+      className="hover:opacity-75 transition cursor-pointer"
     >
       {isLiked
         ? <AiFillHeart color="22c55e" size={25} />

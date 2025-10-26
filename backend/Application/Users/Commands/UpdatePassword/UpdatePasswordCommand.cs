@@ -1,10 +1,5 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UpdatePassword;
 
-public class UpdatePasswordCommand : IRequest
-{
-    public Guid UserId { get; set; }
-    public string CurrentPassword { get; set; } = null!;
-    public string NewPassword { get; set; } = null!;
-}
+public record UpdatePasswordCommand(Guid UserId, string CurrentPassword, string NewPassword) : ICommand;

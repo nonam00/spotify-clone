@@ -1,10 +1,9 @@
-﻿using MediatR;
-
+﻿using Application.Shared.Messaging;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.ActivateUser;
 
-public class ActivateUserCommandHandler : IRequestHandler<ActivateUserCommand>
+public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand>
 {
     private readonly IEmailVerificator _emailVerificator;
     private readonly IUsersRepository _usersRepository;

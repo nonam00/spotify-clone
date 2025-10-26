@@ -22,18 +22,16 @@ public static class DependencyInjection
 
     private static IServiceCollection AddDatabases(this IServiceCollection services, IConfiguration configuration)
     {
-        var postgresConnectionString = configuration.GetConnectionString("PostgresDb") 
-             ?? throw new NullReferenceException("PostgresDb connection string is null");
-        var postgresDbPassword = configuration["DbPassword"] ?? throw new NullReferenceException("DbPassword string is null");
+        var postgresConnectionString = configuration.GetConnectionString("Postgres") 
+             ?? throw new NullReferenceException("Postgres connection string is null");
         
         services.AddDbContext<SongsDbContext>(options =>
         {
-            options.UseNpgsql(postgresConnectionString + postgresDbPassword)
+            options.UseNpgsql(postgresConnectionString)
                 .UseSnakeCaseNamingConvention();
         });
         
-        
-        var redisConnectionString = configuration["RedisConnectionString"]
+        var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new NullReferenceException("Redis connection string is null");
                 
         services.AddSingleton<IConnectionMultiplexer>(

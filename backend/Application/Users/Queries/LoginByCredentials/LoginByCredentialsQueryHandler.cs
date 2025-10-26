@@ -1,14 +1,14 @@
 ﻿using System.Security.Cryptography;
-using MediatR;
+using Application.Shared.Exceptions;
+using Application.Shared.Messaging;
 
 using Domain;
-using Application.Common.Exceptions;
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByCredentials;
 
-public class LoginByCredentialsQueryHandler : IRequestHandler<LoginByCredentialsQuery, TokenPair>
+public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, TokenPair>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -56,10 +56,6 @@ public class LoginByCredentialsQueryHandler : IRequestHandler<LoginByCredentials
         
         await _refreshTokensRepository.Add(refreshToken, cancellationToken);
 
-        return new TokenPair
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshTokenValue
-        };
+        return new TokenPair(accessToken, refreshTokenValue);
     }
 }

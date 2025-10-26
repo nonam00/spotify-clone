@@ -1,16 +1,15 @@
-﻿using MediatR;
-
+﻿using Application.Shared.Messaging;
 using Application.Users.Commands.CleanupRefreshTokens;
 
 namespace WebAPI.Services;
 
 public class RefreshTokensCleanupService : BackgroundService
 {
-    private readonly IMediator _mediator;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public RefreshTokensCleanupService(IMediator mediator)
+    public RefreshTokensCleanupService(IServiceScopeFactory scopeFactory)
     {
-        _mediator = mediator;
+        _scopeFactory = scopeFactory;
     }
 
     // Deletes outdated refresh tokens on service startup and then every 24 hours
@@ -28,7 +27,8 @@ public class RefreshTokensCleanupService : BackgroundService
 
     private async Task DoWork()
     {
-        var command = new CleanupRefreshTokensCommand();
-        await _mediator.Send(command);
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.Send(new CleanupRefreshTokensCommand());
     }
 }

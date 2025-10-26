@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
-using Application.Common.Exceptions;
+using Application.Shared.Exceptions;
 
 namespace WebAPI.Middleware;
 
@@ -20,6 +20,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             ValidationException => (int)HttpStatusCode.BadRequest,
             LoginException => (int)HttpStatusCode.BadRequest,
+            OwnershipException => (int)HttpStatusCode.Forbidden,
             _ => context.Response.StatusCode
         };
 
@@ -57,7 +58,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         return problemDetails;
     }
 
-    private string ToJson(in ProblemDetails problemDetails)
+    private static string ToJson(in ProblemDetails problemDetails)
     {
         try
         {

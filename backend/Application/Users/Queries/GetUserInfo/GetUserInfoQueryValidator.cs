@@ -6,6 +6,9 @@ public class GetUserInfoQueryValidator : AbstractValidator<GetUserInfoQuery>
 {
     public GetUserInfoQueryValidator()
     {
-        RuleFor(q => q.UserId).NotEqual(Guid.Empty);
+        RuleFor(command => command.UserId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("User ID is required")
+            .WithErrorCode("400");   
     }
 }

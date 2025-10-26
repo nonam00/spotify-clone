@@ -2,6 +2,7 @@
 
 using Domain;
 using Application.PlaylistSongs.Interfaces;
+using Application.Shared.Exceptions;
 
 namespace Persistence.Repositories;
 
@@ -21,13 +22,14 @@ public class PlaylistsSongsRepository : IPlaylistsSongsRepository
 
         try
         {
-            var playlistExist = await _dbContext.Playlists
+            var playlist = await _dbContext.Playlists
                 .AsNoTracking()  
-                .AnyAsync(p => p.UserId == userId && p.Id == playlistId, cancellationToken);
+                .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken)
+                ?? throw new Exception("Playlist with such ID doesn't exist");
 
-            if (!playlistExist)
+            if (playlist.UserId != userId)
             {
-                throw new Exception("Playlist with such ID doesn't exist or doesn't belong to the current user");
+                throw new OwnershipException("Playlist doesn't belong to current user");
             }
                 
             var songExists = await _dbContext.Songs
@@ -47,17 +49,9 @@ public class PlaylistsSongsRepository : IPlaylistsSongsRepository
 
             await _dbContext.PlaylistSongs.AddAsync(ps, cancellationToken);
 
-            var updatedRows = await _dbContext.Playlists
-                .Where(p => p.Id == playlistId)
-                .ExecuteUpdateAsync(p =>
-                        p.SetProperty(u => u.CreatedAt, DateTime.UtcNow),
-                    cancellationToken);
-
-            if (updatedRows != 1)
-            {
-                throw new Exception("Playlist with such ID doesn't exist");
-            }
-
+            playlist.CreatedAt = DateTime.UtcNow;
+            _dbContext.Playlists.Update(playlist);
+            
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
@@ -76,27 +70,26 @@ public class PlaylistsSongsRepository : IPlaylistsSongsRepository
             
         try
         {
-            var deletedRows = await _dbContext.PlaylistSongs
-                .Where(ps => ps.Playlist.UserId == userId && 
-                             ps.PlaylistId == playlistId &&
-                             ps.SongId == songId)
-                .ExecuteDeleteAsync(cancellationToken);
-                
-            if (deletedRows != 1) 
-            {
-                throw new Exception("Relation between playlist and song with such key doesn't exist");
-            }
+            var playlist = await _dbContext.Playlists
+                .AsNoTracking()
+                .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken)
+                ?? throw new Exception("Playlist with such ID doesn't exist");
 
-            var updatedRows = await _dbContext.Playlists
-                .Where(p => p.UserId == userId && p.Id == playlistId)
-                .ExecuteUpdateAsync(p =>
-                    p.SetProperty(u => u.CreatedAt, DateTime.UtcNow), cancellationToken);
-
-            if (updatedRows != 1)
+            if (playlist.UserId != userId)
             {
-                throw new Exception("Playlist with such ID doesn't exist");
+                throw new OwnershipException("Playlist doesn't belong to current user");
             }
-                
+            
+            var ps = await _dbContext.PlaylistSongs
+                .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId, cancellationToken)
+                ?? throw new Exception("Relation between this playlist and song don't exist");
+            
+            _dbContext.PlaylistSongs.Remove(ps);
+
+            playlist.CreatedAt = DateTime.UtcNow;
+            _dbContext.Playlists.Update(playlist);
+            
+            await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
         catch

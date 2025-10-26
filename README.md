@@ -7,17 +7,16 @@ is a modern music streaming web application built using a microservices architec
 The project is built on a microservices architecture and includes:
 
 ### Backend (ASP.NET Core)
-- **Domain Layer** - domain models and business logic
-- **Application Layer** - application layer with CQRS pattern (MediatR)
+- **Domain Layer** - domain anemic models
+- **Application Layer** - application layer with business logic implemented using CQRS pattern
 - **Infrastructure Layer** - external services (JWT, Email, password hashing)
-- **Persistence Layer** - database interaction (Entity Framework Core)
+- **Persistence Layer** - database interaction (ORM - Entity Framework Core)
 - **WebAPI Layer** - REST API controllers
 
-### Frontend (Next.js 15)
+### Frontend (Next.js 16)
 - **React 19** with TypeScript
 - **Tailwind CSS** for styling
 - **Zustand** for state management
-- **Radix UI** for interface components
 - **React Hot Toast** for notifications
 
 ### File Service (Go)
@@ -55,12 +54,11 @@ The project is built on a microservices architecture and includes:
 ### Backend
 - **.NET Core** - the main technology
 - **Entity Framework Core** - ORM for working with the database
-- **MediatR** - CQRS pattern implementation
 - **FluentValidation** - data validation
 - **JWT Bearer** - authentication
 
 ### Frontend
-- **Next.js 15** - React framework
+- **Next.js 16** - React framework
 - **TypeScript** - for JavaScript type-safety
 - **Tailwind CSS** - utility-first CSS framework
 - **Zustand** - lightweight state management
@@ -90,9 +88,8 @@ The project is built on a microservices architecture and includes:
 
 ### Requirements
 - Docker and Docker Compose
-- .NET 8 SDK (for local development)
+- .NET 9 SDK (for local development)
 - Node.js 18+ (for local development)
-
 
 ### ⚙️ Configuration
 
@@ -112,14 +109,17 @@ The application requires the following environment variables to be configured:
 - `MINIO_ROOT_PASSWORD` - MinIO password
 
 #### JWT
-- `JWT_SECRET` - JWT token secret key
-- `JWT_EXPIRY` - token expiration date
+- `JwtOptions__SecretKey` - JWT token secret key
+- `JwtOptions__ExpiresHours` - token ttl
 
 #### Email (SMTP)
-- `SMTP_HOST` - SMTP server
-- `SMTP_PORT` - port SMTP
-- `SMTP_USER` - SMTP user
-- `SMTP_PASSWORD` - SMTP password
+- `SmtpOptions__Server` - SMTP server domain
+- `SmtpOptions__Port` - SMTP server port
+
+#### Next SSR endpoints
+- `SERVER_API_URL` - endpoint for web api (if running in container use host.docker.internal)
+- `FILE_SERVER_URL` - endpoint for file service (if running in container use host.docker.internal)
+*endpoints for client side request are hardcoded because of the way how next.js operates with env variables*
 
 ### 📝 Important Notes
 

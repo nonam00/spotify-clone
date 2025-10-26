@@ -1,10 +1,7 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
 
-public class GetSongListByPlaylistIdQuery : IRequest<SongListVm>
-{
-    public Guid PlaylistId { get; init; } 
-}
+public record GetSongListByPlaylistIdQuery(Guid PlaylistId) : IQuery<SongListVm>;

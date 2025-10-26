@@ -6,6 +6,9 @@ public class GetSongByIdQueryValidator : AbstractValidator<GetSongByIdQuery>
 {
     public GetSongByIdQueryValidator()
     {
-        RuleFor(q => q.SongId).NotEqual(Guid.Empty);
+        RuleFor(command => command.SongId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Song ID is required")
+            .WithErrorCode("400");    
     }
 }

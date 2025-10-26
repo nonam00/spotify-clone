@@ -1,10 +1,9 @@
-﻿using MediatR;
-
-using Application.LikedSongs.Interfaces;
+﻿using Application.LikedSongs.Interfaces;
+using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Queries.CheckLikedSong;
 
-public class CheckLikedSongQueryHandler : IRequestHandler<CheckLikedSongQuery, bool>
+public class CheckLikedSongQueryHandler : IQueryHandler<CheckLikedSongQuery, bool>
 {
     private readonly ILikedSongsRepository _likedSongsRepository;
 

@@ -26,12 +26,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Register(
         [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
-        var command = new CreateUserCommand
-        {
-            Email = userCredentialsDto.Email,
-            Password = userCredentialsDto.Password
-        };
-        
+        var command = new CreateUserCommand(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
         await Mediator.Send(command, cancellationToken);
         return Ok();
     }
@@ -48,11 +43,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Activate(
         [FromQuery] ActivateUserDto activateUserDto, CancellationToken cancellationToken)
     {
-        var command = new ActivateUserCommand
-        {
-            Email = activateUserDto.Email,
-            ConfirmationCode = activateUserDto.Code
-        };
+        var command = new ActivateUserCommand(Email: activateUserDto.Email, ConfirmationCode: activateUserDto.Code);
         await Mediator.Send(command, cancellationToken);
         return Redirect("http://localhost:3000");
     }
@@ -69,11 +60,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> Login(
         [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
-        var query = new LoginByCredentialsQuery
-        {
-            Email = userCredentialsDto.Email,
-            Password = userCredentialsDto.Password
-        };
+        var query = new LoginByCredentialsQuery(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
         
         var pair = await Mediator.Send(query, cancellationToken);
         
@@ -108,11 +95,7 @@ public class AuthController : BaseController
             return Unauthorized();
         }
 
-        var loginQuery = new LoginByRefreshTokenQuery
-        {
-            RefreshToken = refreshToken
-        };
-
+        var loginQuery = new LoginByRefreshTokenQuery(refreshToken);
         var tokenPair = await Mediator.Send(loginQuery, cancellationToken);
         
         HttpContext.Response.Cookies.Append("access_token", tokenPair.AccessToken, new CookieOptions
@@ -146,10 +129,7 @@ public class AuthController : BaseController
         if (HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
         {
             Response.Cookies.Delete("refresh_token");
-            var deleteTokenCommand = new DeleteRefreshTokenQuery
-            {
-                RefreshToken = refreshToken
-            };
+            var deleteTokenCommand = new DeleteRefreshTokenCommand(refreshToken);
             await Mediator.Send(deleteTokenCommand, cancellationToken);
         }
         return StatusCode(205);

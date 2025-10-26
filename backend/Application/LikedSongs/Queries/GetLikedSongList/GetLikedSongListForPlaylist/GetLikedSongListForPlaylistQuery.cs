@@ -1,11 +1,6 @@
-using MediatR;
-
 using Application.LikedSongs.Models;
+using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
 
-public class GetLikedSongListForPlaylistQuery : IRequest<LikedSongListVm>
-{
-    public Guid UserId { get; init; }
-    public Guid PlaylistId { get; init; }
-}
+public record GetLikedSongListForPlaylistQuery(Guid UserId, Guid PlaylistId) : IQuery<LikedSongListVm>;

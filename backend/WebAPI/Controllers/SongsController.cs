@@ -55,10 +55,7 @@ public class SongsController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<SongVm>> GetSongById(Guid songId, CancellationToken cancellationToken)
     {
-        var query = new GetSongByIdQuery
-        {
-            SongId = songId
-        };
+        var query = new GetSongByIdQuery(songId);
         var vm = await Mediator.Send(query, cancellationToken);
         return Ok(vm);
     }
@@ -75,12 +72,8 @@ public class SongsController : BaseController
     public async Task<ActionResult<SongListVm>> GetSongListBySearch(
         [FromQuery] SearchSongDto searchSongDto, CancellationToken cancellationToken)
     {
-        var query = new GetSongListBySearchQuery
-        {
-            SearchString = searchSongDto.SearchString,
-            SearchCriteria = searchSongDto.SearchCriteria
-        };
-            
+        var query = new GetSongListBySearchQuery(
+            SearchString: searchSongDto.SearchString, SearchCriteria: searchSongDto.SearchCriteria);
         var vm = await Mediator.Send(query, cancellationToken);
         return Ok(vm);
     }
@@ -98,14 +91,13 @@ public class SongsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto, CancellationToken cancellationToken)
     {
-        var command = new CreateSongCommand
-        {
-            UserId = UserId,
-            Title = createSongDto.Title,
-            Author = createSongDto.Author,
-            SongPath = createSongDto.AudioId.ToString(),
-            ImagePath = createSongDto.ImageId.ToString(),
-        };
+        var command = new CreateSongCommand(
+            UserId: UserId,
+            Title: createSongDto.Title,
+            Author: createSongDto.Author,
+            SongPath: createSongDto.AudioId.ToString(),
+            ImagePath: createSongDto.ImageId.ToString()
+        );
         
         var songId = await Mediator.Send(command, cancellationToken);
         return Ok(songId);

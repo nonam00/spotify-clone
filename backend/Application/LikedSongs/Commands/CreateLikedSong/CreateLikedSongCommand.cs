@@ -1,9 +1,5 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Commands.CreateLikedSong;
 
-public class CreateLikedSongCommand : IRequest<string>
-{
-    public Guid UserId { get; init; }
-    public Guid SongId { get; init; }
-}
+public record CreateLikedSongCommand(Guid UserId, Guid SongId) : ICommand<string>;

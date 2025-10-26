@@ -1,9 +1,9 @@
 ﻿using Application.Users.Interfaces;
-using MediatR;
+using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UpdatePassword;
 
-public class UpdatePasswordCommandHandler : IRequestHandler<UpdatePasswordCommand>
+public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;

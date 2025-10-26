@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListBySearch;
 
-public class GetSongListBySearchQueryHandler : IRequestHandler<GetSongListBySearchQuery, SongListVm>
+public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearchQuery, SongListVm>
 {
     private readonly ISongsRepository _songsRepository;
 
@@ -20,6 +20,6 @@ public class GetSongListBySearchQueryHandler : IRequestHandler<GetSongListBySear
         var songs = await _songsRepository.GetSearchList(
             request.SearchString, request.SearchCriteria, cancellationToken);
 
-        return new SongListVm { Songs = songs };
+        return new SongListVm(songs);
     }
 }

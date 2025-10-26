@@ -1,10 +1,10 @@
-﻿using MediatR;
+﻿using Application.Shared.Messaging;
 
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CleanupRefreshTokens;
 
-public class CleanupRefreshTokensCommandHandler : IRequestHandler<CleanupRefreshTokensCommand>
+public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefreshTokensCommand>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
 

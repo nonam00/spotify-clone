@@ -1,12 +1,12 @@
 ﻿using System.Security.Cryptography;
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQueryHandler : IRequestHandler<LoginByRefreshTokenQuery, TokenPair>
+public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshTokenQuery, TokenPair>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IJwtProvider _jwtProvider;
@@ -30,12 +30,6 @@ public class LoginByRefreshTokenQueryHandler : IRequestHandler<LoginByRefreshTok
         
         await _refreshTokensRepository.Update(refreshToken, cancellationToken);
         
-        var tokenPair = new TokenPair
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshTokenValue
-        };
-
-        return tokenPair;
+        return new TokenPair(accessToken, refreshTokenValue);
     }
 }

@@ -1,11 +1,10 @@
-﻿using MediatR;
-
-using Application.LikedSongs.Interfaces;
+﻿using Application.LikedSongs.Interfaces;
 using Application.LikedSongs.Models;
+using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
 
-public class GetLikedSongListQueryHandler : IRequestHandler<GetLikedSongListQuery, LikedSongListVm>
+public class GetLikedSongListQueryHandler : IQueryHandler<GetLikedSongListQuery, LikedSongListVm>
 {
     private readonly ILikedSongsRepository _likedSongsRepository;
 
@@ -19,6 +18,6 @@ public class GetLikedSongListQueryHandler : IRequestHandler<GetLikedSongListQuer
     {
         var liked = await _likedSongsRepository.GetList(request.UserId, cancellationToken);
 
-        return new LikedSongListVm { LikedSongs = liked };
+        return new LikedSongListVm(liked);
     }
 }

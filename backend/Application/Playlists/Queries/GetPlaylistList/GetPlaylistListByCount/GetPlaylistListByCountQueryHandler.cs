@@ -1,12 +1,11 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
 
 namespace Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
 
-public class GetPlaylistListByCountQueryHandler
-    : IRequestHandler<GetPlaylistListByCountQuery, PlaylistListVm>
+public class GetPlaylistListByCountQueryHandler : IQueryHandler<GetPlaylistListByCountQuery, PlaylistListVm>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
 
@@ -15,13 +14,11 @@ public class GetPlaylistListByCountQueryHandler
         _playlistsRepository = playlistsRepository;
     }
 
-    public async Task<PlaylistListVm> Handle(
-        GetPlaylistListByCountQuery request,
-        CancellationToken cancellationToken)
+    public async Task<PlaylistListVm> Handle(GetPlaylistListByCountQuery request, CancellationToken cancellationToken)
     {
         var playlists = await _playlistsRepository.TakeList(
             request.UserId, request.Count, cancellationToken);
 
-        return new PlaylistListVm { Playlists = playlists };
+        return new PlaylistListVm(playlists);
     }
 }

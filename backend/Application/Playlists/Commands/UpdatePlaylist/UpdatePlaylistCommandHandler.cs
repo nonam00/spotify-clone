@@ -1,10 +1,10 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Playlists.Interfaces;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
-public class UpdatePlaylistCommandHandler : IRequestHandler<UpdatePlaylistCommand, string?>
+public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistCommand, string?>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
 

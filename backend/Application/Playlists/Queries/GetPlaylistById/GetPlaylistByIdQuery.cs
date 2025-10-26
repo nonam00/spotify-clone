@@ -1,11 +1,7 @@
-using MediatR;
+using Application.Shared.Messaging;
 
 using Application.Playlists.Models;
 
 namespace Application.Playlists.Queries.GetPlaylistById;
 
-public class GetPlaylistByIdQuery : IRequest<PlaylistVm>
-{
-    public Guid PlaylistId { get; init; }
-    public Guid UserId { get; set; }
-}
+public record GetPlaylistByIdQuery(Guid UserId, Guid PlaylistId) : IQuery<PlaylistVm>;
