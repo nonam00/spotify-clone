@@ -2,4 +2,4 @@
 
 namespace Application.Users.Commands.CleanupRefreshTokens;
 
-public class CleanupRefreshTokensCommand : ICommand;
+public record CleanupRefreshTokensCommand : ICommand;

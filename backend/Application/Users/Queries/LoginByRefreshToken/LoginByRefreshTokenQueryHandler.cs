@@ -30,12 +30,6 @@ public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshToken
         
         await _refreshTokensRepository.Update(refreshToken, cancellationToken);
         
-        var tokenPair = new TokenPair
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshTokenValue
-        };
-
-        return tokenPair;
+        return new TokenPair(accessToken, refreshTokenValue);
     }
 }

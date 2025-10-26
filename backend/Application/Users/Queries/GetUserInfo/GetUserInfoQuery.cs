@@ -4,7 +4,4 @@ using Application.Users.Models;
 
 namespace Application.Users.Queries.GetUserInfo;
 
-public class GetUserInfoQuery : IQuery<UserInfo>
-{
-    public Guid UserId { get; init; } 
-}
+public record GetUserInfoQuery(Guid UserId) : IQuery<UserInfo>;

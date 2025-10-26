@@ -4,4 +4,4 @@ using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetAllSongs;
 
-public class GetAllSongsQuery : IQuery<SongListVm>;
+public record GetAllSongsQuery : IQuery<SongListVm>;

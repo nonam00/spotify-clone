@@ -5,8 +5,4 @@ using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongList.GetSongListBySearch;
 
-public class GetSongListBySearchQuery : IQuery<SongListVm>
-{
-    public string SearchString { get; init; } = null!;
-    public SearchCriteria SearchCriteria { get; init; }
-}
+public record GetSongListBySearchQuery(string SearchString, SearchCriteria SearchCriteria) : IQuery<SongListVm>;

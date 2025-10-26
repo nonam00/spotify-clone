@@ -89,15 +89,10 @@ public class LikedSongsRepository : ILikedSongsRepository
         }
     }
 
-    private static LikedSongVm ToVm(LikedSong liked)
-    {
-        return new LikedSongVm
-        {
-            Id = liked.Song.Id,
-            Title = liked.Song.Title,
-            Author = liked.Song.Author,
-            SongPath = liked.Song.SongPath,
-            ImagePath = liked.Song.ImagePath
-        };
-    } 
+    private static LikedSongVm ToVm(LikedSong liked) =>
+        new(Id: liked.Song.Id,
+            Title: liked.Song.Title,
+            Author: liked.Song.Author,
+            SongPath: liked.Song.SongPath,
+            ImagePath: liked.Song.ImagePath);
 }

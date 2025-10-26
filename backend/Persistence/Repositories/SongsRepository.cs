@@ -110,15 +110,11 @@ public class SongsRepository : ISongsRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static SongVm ToVm(Song song)
-    {
-        return new SongVm
-        {
-            Id = song.Id,
-            Title = song.Title,
-            Author = song.Author,
-            SongPath = song.SongPath,
-            ImagePath = song.ImagePath
-        };
-    }
+    private static SongVm ToVm(Song song) =>
+        new(
+            Id: song.Id, 
+            Title: song.Title,
+            Author: song.Author,
+            SongPath: song.SongPath,
+            ImagePath: song.ImagePath);
 }

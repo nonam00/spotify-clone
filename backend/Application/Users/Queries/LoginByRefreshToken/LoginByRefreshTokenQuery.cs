@@ -4,7 +4,4 @@ using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQuery : IQuery<TokenPair>
-{
-    public string RefreshToken { get; init; } = null!;
-}
+public record LoginByRefreshTokenQuery(string RefreshToken) : IQuery<TokenPair>;

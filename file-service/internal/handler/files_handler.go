@@ -54,7 +54,7 @@ func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {
 
 	if fileType == "" || fileID == "" {
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Missing required parameters: type, file_id, file_name",
+			Error: "Missing required parameters: type, file_id",
 		})
 		return
 	}
@@ -90,7 +90,7 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 
 	if fileType == "" || fileID == "" {
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Missing required parameters: type, file_id, file_name",
+			Error: "Missing required parameters: type, file_id",
 		})
 		return
 	}

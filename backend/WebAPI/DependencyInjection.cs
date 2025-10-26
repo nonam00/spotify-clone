@@ -60,6 +60,7 @@ public static class DependencyInjection
     public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
     {
         services.AddHostedService<RefreshTokensCleanupService>();
+        services.AddHostedService<NonActiveUsersCleanupService>();
         return services;
     }
 }

@@ -1,23 +1,23 @@
-﻿using Application.Shared.Messaging;
-using Application.Users.Commands.CleanupRefreshTokens;
+using Application.Shared.Messaging;
+using Application.Users.Commands.CleanupNonActiveUsers;
 
 namespace WebAPI.Services;
 
-public class RefreshTokensCleanupService : BackgroundService
+public class NonActiveUsersCleanupService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public RefreshTokensCleanupService(IServiceScopeFactory scopeFactory)
+    public NonActiveUsersCleanupService(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
     }
 
-    // Deletes outdated refresh tokens on service startup and then every 24 hours
+    // Deletes users who have not confirmed their account within an hour on service startup and then every hour
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await DoWork();
         
-        using var timer = new PeriodicTimer(TimeSpan.FromHours(24));
+        using var timer = new PeriodicTimer(TimeSpan.FromHours(1));
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
@@ -29,6 +29,6 @@ public class RefreshTokensCleanupService : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.Send(new CleanupRefreshTokensCommand());
+        await mediator.Send(new CleanupNonActiveUsersCommand());
     }
 }

@@ -106,14 +106,7 @@ public class PlaylistsRepository : IPlaylistsRepository
         }
     }
 
-    private static PlaylistVm ToVm(Playlist playlist)
-    {
-        return new PlaylistVm
-        {
-            Id = playlist.Id,
-            Title = playlist.Title,
-            Description = playlist.Description,
-            ImagePath = playlist.ImagePath
-        };
-    }
+    private static PlaylistVm ToVm(Playlist playlist) =>
+        new(playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath);
+    
 }

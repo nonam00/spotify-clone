@@ -2,8 +2,4 @@
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommand : ICommand
-{
-    public string Email { get; init; } = null!;
-    public string Password { get; init; } = null!;
-}
+public record CreateUserCommand(string Email, string Password) : ICommand;

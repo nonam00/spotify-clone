@@ -21,6 +21,6 @@ public class GetLikedSongListForPlaylistBySearchQueryHandler
         var liked = await _likedSongsRepository.GetSearchListForPlaylist(
             request.UserId, request.SearchString, request.PlaylistId, cancellationToken);
         
-        return new LikedSongListVm { LikedSongs = liked };
+        return new LikedSongListVm(liked);
     }
 }

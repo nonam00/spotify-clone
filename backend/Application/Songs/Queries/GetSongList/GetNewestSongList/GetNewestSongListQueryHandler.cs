@@ -17,6 +17,6 @@ public class GetNewestSongListQueryHandler : IQueryHandler<GetNewestSongListQuer
     public async Task<SongListVm> Handle(GetNewestSongListQuery request, CancellationToken cancellationToken)
     {
         var songs = await _songsRepository.TakeNewestList(100, cancellationToken);
-        return new SongListVm { Songs = songs };
+        return new SongListVm(songs);
     }
 }

@@ -75,13 +75,16 @@ public class UsersRepository : IUsersRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static UserInfo ToVm(User user)
+    public async Task DeleteNonActive(CancellationToken cancellationToken = default)
     {
-        return new UserInfo
-        {
-            Email = user.Email,
-            FullName = user.FullName,
-            AvatarPath = user.AvatarPath
-        };
+        var nonActiveUsers = await _dbContext.Users.Where(
+            u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+        
+        _dbContext.Users.RemoveRange(nonActiveUsers);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    private static UserInfo ToVm(User user) =>
+        new(Email: user.Email, FullName: user.FullName, AvatarPath: user.AvatarPath);
 }

@@ -20,6 +20,6 @@ public class GetLikedSongListForPlaylistQueryHandler
         var liked = await _likedSongsRepository.GetListForPlaylist(
             request.UserId, request.PlaylistId, cancellationToken);
         
-        return new LikedSongListVm { LikedSongs = liked };
+        return new LikedSongListVm(liked);
     }
 }

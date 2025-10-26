@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Playlists : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,9 +19,9 @@ namespace Persistence.Migrations
                     email = table.Column<string>(type: "text", nullable: false),
                     password_hash = table.Column<string>(type: "text", nullable: false),
                     full_name = table.Column<string>(type: "text", nullable: true),
-                    avatar_url = table.Column<string>(type: "text", nullable: true),
-                    billing_address = table.Column<string>(type: "text", nullable: true),
-                    payment_method = table.Column<string>(type: "text", nullable: true)
+                    avatar_path = table.Column<string>(type: "text", nullable: true),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -37,7 +37,7 @@ namespace Persistence.Migrations
                     title = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
                     image_path = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(7809))
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -51,11 +51,32 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    token = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    expires = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "songs",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 6, 24, 4, 30, 3, 862, DateTimeKind.Utc).AddTicks(3660)),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     title = table.Column<string>(type: "text", nullable: false),
                     song_path = table.Column<string>(type: "text", nullable: false),
                     image_path = table.Column<string>(type: "text", nullable: false),
@@ -79,7 +100,7 @@ namespace Persistence.Migrations
                 {
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     song_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 6, 24, 4, 30, 3, 863, DateTimeKind.Utc).AddTicks(1798))
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -104,7 +125,7 @@ namespace Persistence.Migrations
                 {
                     playlist_id = table.Column<Guid>(type: "uuid", nullable: false),
                     song_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 6, 24, 4, 30, 3, 865, DateTimeKind.Utc).AddTicks(8777))
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -129,12 +150,6 @@ namespace Persistence.Migrations
                 column: "song_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_liked_songs_user_id_song_id",
-                table: "liked_songs",
-                columns: new[] { "user_id", "song_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "ix_playlist_songs_song_id",
                 table: "playlist_songs",
                 column: "song_id");
@@ -143,6 +158,29 @@ namespace Persistence.Migrations
                 name: "ix_playlists_user_id",
                 table: "playlists",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_token",
+                table: "refresh_tokens",
+                column: "token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_user_id",
+                table: "refresh_tokens",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_songs_author",
+                table: "songs",
+                column: "author")
+                .Annotation("Npgsql:IndexMethod", "gin");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_songs_title",
+                table: "songs",
+                column: "title")
+                .Annotation("Npgsql:IndexMethod", "gin");
 
             migrationBuilder.CreateIndex(
                 name: "ix_songs_user_id",
@@ -164,6 +202,9 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "playlist_songs");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
 
             migrationBuilder.DropTable(
                 name: "playlists");

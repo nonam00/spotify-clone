@@ -2,8 +2,4 @@
 
 namespace Application.Users.Commands.ActivateUser;
 
-public class ActivateUserCommand : ICommand
-{
-    public string Email { get; set; } = null!;
-    public string ConfirmationCode { get; set; } = null!;
-}
+public record ActivateUserCommand(string Email, string ConfirmationCode) : ICommand;

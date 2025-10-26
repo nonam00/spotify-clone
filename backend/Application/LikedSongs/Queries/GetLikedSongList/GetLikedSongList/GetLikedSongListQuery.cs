@@ -3,7 +3,4 @@ using Application.Shared.Messaging;
 
 namespace Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
 
-public class GetLikedSongListQuery : IQuery<LikedSongListVm>
-{
-    public Guid UserId { get; init; }
-}
+public record GetLikedSongListQuery(Guid UserId) : IQuery<LikedSongListVm>;

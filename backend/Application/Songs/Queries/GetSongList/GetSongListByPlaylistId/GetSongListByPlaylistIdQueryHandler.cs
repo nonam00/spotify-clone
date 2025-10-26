@@ -20,6 +20,6 @@ public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPla
         var songs = await _songsRepository.GetListByPlaylistId(
             request.PlaylistId, cancellationToken);
             
-        return new SongListVm { Songs = songs };
+        return new SongListVm(songs);
     }
 }

@@ -12,4 +12,5 @@ public interface IUsersRepository
     Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default);
     Task<bool> CheckIfActivated(Guid id, CancellationToken cancellationToken = default);
     Task Update(User user, CancellationToken cancellationToken = default);
+    Task DeleteNonActive(CancellationToken cancellationToken = default);
 }

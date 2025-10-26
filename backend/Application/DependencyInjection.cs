@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,7 +40,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblies([assembly]);
         
         // Register custom mediator
-        services.AddScoped<IMediator, Mediator>();
+        services.AddScoped<IMediator, Mediator>();  
         
         return services;
     }

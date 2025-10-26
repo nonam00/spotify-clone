@@ -56,10 +56,6 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
         
         await _refreshTokensRepository.Add(refreshToken, cancellationToken);
 
-        return new TokenPair
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshTokenValue
-        };
+        return new TokenPair(accessToken, refreshTokenValue);
     }
 }

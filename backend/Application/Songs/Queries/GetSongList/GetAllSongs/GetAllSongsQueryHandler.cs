@@ -17,6 +17,6 @@ public class GetAllSongsQueryHandler : IQueryHandler<GetAllSongsQuery, SongListV
     public async Task<SongListVm> Handle(GetAllSongsQuery request, CancellationToken cancellationToken)
     {
         var songs = await _songsRepository.GetList(cancellationToken);
-        return new SongListVm { Songs = songs };
+        return new SongListVm(songs);
     }
 }

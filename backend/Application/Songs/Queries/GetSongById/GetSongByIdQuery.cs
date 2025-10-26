@@ -4,7 +4,4 @@ using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongById;
 
-public class GetSongByIdQuery : IQuery<SongVm>
-{
-    public Guid SongId { get; init; }
-}
+public record GetSongByIdQuery(Guid SongId) : IQuery<SongVm>;

@@ -32,10 +32,7 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserInfo>> GetUserInfo(CancellationToken cancellationToken)
     {
-        var query = new GetUserInfoQuery
-        {
-            UserId = UserId
-        };
+        var query = new GetUserInfoQuery(UserId);
         var info = await Mediator.Send(query, cancellationToken);
         return Ok(info);
     }
@@ -53,12 +50,8 @@ public class UsersController : BaseController
     public async Task<IActionResult> UpdateUserInfo(
         UpdateUserInfoDto updateUserInfoDto, CancellationToken cancellationToken)
     {
-        var updateUserCommand = new UpdateUserCommand
-        {
-            UserId = UserId,
-            FullName = updateUserInfoDto.FullName,
-            AvatarPath = updateUserInfoDto.AvatarId
-        };
+        var updateUserCommand = new UpdateUserCommand(
+            UserId: UserId, FullName: updateUserInfoDto.FullName, AvatarPath: updateUserInfoDto.AvatarId);
 
         var oldImagePath = await Mediator.Send(updateUserCommand, cancellationToken);
         
@@ -83,14 +76,12 @@ public class UsersController : BaseController
     public async Task<IActionResult> UpdateUserPassword(
         UpdateUserPasswordDto updateUserPasswordDto, CancellationToken cancellationToken)
     {
-        var updatePasswordCommand = new UpdatePasswordCommand
-        {
-            UserId = UserId,
-            CurrentPassword = updateUserPasswordDto.CurrentPassword,
-            NewPassword = updateUserPasswordDto.NewPassword
-        };
+        var updatePasswordCommand = new UpdatePasswordCommand(
+            UserId: UserId,
+            CurrentPassword: updateUserPasswordDto.CurrentPassword,
+            NewPassword: updateUserPasswordDto.NewPassword);
+        
         await Mediator.Send(updatePasswordCommand, cancellationToken);
-
         return NoContent();
     }
 
@@ -105,10 +96,7 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongList(CancellationToken cancellationToken)
     {
-        var query = new GetLikedSongListQuery
-        {
-            UserId = UserId
-        };
+        var query = new GetLikedSongListQuery(UserId);
         var vm = await Mediator.Send(query, cancellationToken);
         return Ok(vm);
     }
@@ -126,11 +114,7 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetLikedSong(Guid songId, CancellationToken cancellationToken)
     {
-        var query = new CheckLikedSongQuery
-        {
-            UserId = UserId,
-            SongId = songId
-        };
+        var query = new CheckLikedSongQuery(UserId: UserId, SongId: songId);
         var check = await Mediator.Send(query, cancellationToken);
         return Ok(new { check });
     }
@@ -148,11 +132,7 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<string>> CreateLiked(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new CreateLikedSongCommand
-        {
-            UserId = UserId,
-            SongId = songId
-        };
+        var command = new CreateLikedSongCommand(UserId: UserId, SongId: songId);
         var likedId = await Mediator.Send(command, cancellationToken);
         return Ok(likedId);
     }
@@ -169,11 +149,7 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteLiked(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new DeleteLikedSongCommand
-        {
-            UserId = UserId,
-            SongId = songId
-        };
+        var command = new DeleteLikedSongCommand(UserId: UserId, SongId: songId);
         await Mediator.Send(command, cancellationToken);
         return NoContent();
     }

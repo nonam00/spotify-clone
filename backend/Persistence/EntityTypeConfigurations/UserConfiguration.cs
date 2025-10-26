@@ -25,5 +25,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.IsActive)
             .HasDefaultValue(false);
+        
+        builder.Property(u => u.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

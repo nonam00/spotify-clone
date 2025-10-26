@@ -20,6 +20,6 @@ public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearch
         var songs = await _songsRepository.GetSearchList(
             request.SearchString, request.SearchCriteria, cancellationToken);
 
-        return new SongListVm { Songs = songs };
+        return new SongListVm(songs);
     }
 }

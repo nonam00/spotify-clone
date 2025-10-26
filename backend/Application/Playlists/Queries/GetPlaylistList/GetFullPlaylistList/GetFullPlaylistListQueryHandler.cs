@@ -19,6 +19,6 @@ public class GetPlaylistListByUserIdQueryHandler : IQueryHandler<GetFullPlaylist
     {
         var list = await _playlistsRepository.GetList(request.UserId, cancellationToken);
 
-        return new PlaylistListVm { Playlists = list };
+        return new PlaylistListVm(list);
     }
 }

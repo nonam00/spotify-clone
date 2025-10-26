@@ -39,11 +39,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PlaylistVm>> GetPlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
-        var query = new GetPlaylistByIdQuery
-        {
-            PlaylistId = playlistId,
-            UserId = UserId
-        };
+        var query = new GetPlaylistByIdQuery(PlaylistId: playlistId, UserId: UserId);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }
@@ -59,10 +55,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PlaylistListVm>> GetPlaylistList(CancellationToken cancellationToken)
     {
-        var query = new GetFullPlaylistListQuery
-        {
-            UserId = UserId
-        };
+        var query = new GetFullPlaylistListQuery(UserId);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }
@@ -81,11 +74,7 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<PlaylistListVm>> GetPlaylistListByCount(
         int count, CancellationToken cancellationToken)
     {
-        var query = new GetPlaylistListByCountQuery
-        {
-            UserId = UserId,
-            Count = count
-        };
+        var query = new GetPlaylistListByCountQuery(UserId, count);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }
@@ -101,10 +90,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Guid>> CreatePlaylist(CancellationToken cancellationToken)
     {
-        var command = new CreatePlaylistCommand
-        {
-            UserId = UserId
-        };
+        var command = new CreatePlaylistCommand(UserId);
         var id = await Mediator.Send(command, cancellationToken);
         return id;
     }
@@ -122,14 +108,12 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdatePlaylist(Guid playlistId, UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
     {
-        var updatePlaylistCommand = new UpdatePlaylistCommand
-        {
-            UserId = UserId,
-            PlaylistId = playlistId,
-            Title = updatePlaylistDto.Title,
-            Description = updatePlaylistDto.Description,
-            ImagePath = updatePlaylistDto.ImageId
-        };
+        var updatePlaylistCommand = new UpdatePlaylistCommand(
+            UserId: UserId,
+            PlaylistId: playlistId,
+            Title: updatePlaylistDto.Title,
+            Description: updatePlaylistDto.Description,
+            ImagePath: updatePlaylistDto.ImageId);
         
         var oldImagePath = await Mediator.Send(updatePlaylistCommand, cancellationToken);
         
@@ -153,11 +137,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
-        var deletePlaylistCommand = new DeletePlaylistCommand
-        {
-            UserId = UserId,
-            PlaylistId = playlistId
-        };
+        var deletePlaylistCommand = new DeletePlaylistCommand(UserId: UserId, PlaylistId: playlistId);
         var imagePath = await Mediator.Send(deletePlaylistCommand, cancellationToken);
         
         if (imagePath is not null)
@@ -182,10 +162,7 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<SongListVm>> GetPlaylistSongs(Guid playlistId,
         CancellationToken cancellationToken)
     {
-        var query = new GetSongListByPlaylistIdQuery
-        {
-            PlaylistId = playlistId
-        };
+        var query = new GetSongListByPlaylistIdQuery(playlistId);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }
@@ -203,12 +180,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<string>> CreatePlaylistSong(Guid playlistId, Guid songId)
     {
-        var command = new CreatePlaylistSongCommand
-        {
-            UserId = UserId,
-            PlaylistId = playlistId,
-            SongId = songId
-        };
+        var command = new CreatePlaylistSongCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
         var ids = await Mediator.Send(command);
         return ids;
     }
@@ -225,12 +197,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeletePlaylistSong(Guid playlistId, Guid songId)
     {
-        var command = new DeletePlaylistSongCommand
-        {
-            UserId = UserId,
-            PlaylistId = playlistId,
-            SongId = songId
-        };
+        var command = new DeletePlaylistSongCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
         await Mediator.Send(command);
         return NoContent();
     }
@@ -249,11 +216,7 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongs(
         Guid playlistId, CancellationToken cancellationToken)
     {
-        var query = new GetLikedSongListForPlaylistQuery
-        {
-            UserId = UserId,
-            PlaylistId = playlistId
-        };
+        var query = new GetLikedSongListForPlaylistQuery(UserId: UserId, PlaylistId: playlistId);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }
@@ -273,12 +236,8 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<LikedSongListVm>> GetLikedSongsBySearchString(
         Guid playlistId, string searchString, CancellationToken cancellationToken)
     {
-        var query = new GetLikedSongListForPlaylistBySearchQuery
-        {
-            UserId = UserId,
-            PlaylistId = playlistId,
-            SearchString = searchString
-        };
+        var query = new GetLikedSongListForPlaylistBySearchQuery(
+            UserId: UserId, PlaylistId: playlistId, SearchString: searchString);
         var vm = await Mediator.Send(query, cancellationToken);
         return vm;
     }

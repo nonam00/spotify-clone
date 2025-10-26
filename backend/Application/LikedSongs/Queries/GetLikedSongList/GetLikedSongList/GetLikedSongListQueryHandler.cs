@@ -18,6 +18,6 @@ public class GetLikedSongListQueryHandler : IQueryHandler<GetLikedSongListQuery,
     {
         var liked = await _likedSongsRepository.GetList(request.UserId, cancellationToken);
 
-        return new LikedSongListVm { LikedSongs = liked };
+        return new LikedSongListVm(liked);
     }
 }
