@@ -13,7 +13,7 @@ The project is built on a microservices architecture and includes:
 - **Persistence Layer** - database interaction (ORM - Entity Framework Core)
 - **WebAPI Layer** - REST API controllers
 
-### Frontend (Next.js 15)
+### Frontend (Next.js 16)
 - **React 19** with TypeScript
 - **Tailwind CSS** for styling
 - **Zustand** for state management
@@ -58,7 +58,7 @@ The project is built on a microservices architecture and includes:
 - **JWT Bearer** - authentication
 
 ### Frontend
-- **Next.js 15** - React framework
+- **Next.js 16** - React framework
 - **TypeScript** - for JavaScript type-safety
 - **Tailwind CSS** - utility-first CSS framework
 - **Zustand** - lightweight state management

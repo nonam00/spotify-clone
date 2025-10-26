@@ -11,7 +11,7 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import useAuthModal from "@/hooks/useAuthModal";
 import { useUser } from "@/hooks/useUser";
 import Button from "@/components/ui/Button";
-import {CLIENT_API_URL, CLIENT_FILES_URL} from "@/helpers/api";
+import {CLIENT_FILES_URL} from "@/helpers/api";
 
 const Header = ({
   children,

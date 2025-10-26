@@ -103,4 +103,4 @@ export async function uploadFileToS3(url: string, file: File, contentType: fileU
         console.error("Error uploading file to S3:", error);
         return false;
     }
-};
+}

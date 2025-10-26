@@ -164,7 +164,7 @@ const ChangeUserInfoForm = ({
           </div>
         </div>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Updating..." : "Updating"}
+          {isPending ? "Updating..." : "Update"}
         </Button>
       </form>
     </div>
