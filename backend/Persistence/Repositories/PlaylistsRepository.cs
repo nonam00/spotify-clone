@@ -28,9 +28,9 @@ public class PlaylistsRepository : IPlaylistsRepository
     public async Task<PlaylistVm> GetVmById(Guid playlistId, Guid userId, CancellationToken cancellationToken = default)
     {
         var playlist = await _dbContext.Playlists
-                           .AsNoTracking()
-                           .SingleOrDefaultAsync(p => p.Id == playlistId && p.UserId == userId, cancellationToken)
-                       ?? throw new Exception("Playlist this such ID doesn't exist");
+            .AsNoTracking()
+            .SingleOrDefaultAsync(p => p.Id == playlistId && p.UserId == userId, cancellationToken) 
+            ?? throw new Exception("Playlist this such ID doesn't exist");
 
         var playlistVm = ToVm(playlist);
         return playlistVm;
@@ -86,24 +86,6 @@ public class PlaylistsRepository : IPlaylistsRepository
     {
         _dbContext.Playlists.Update(playlist);
         await _dbContext.SaveChangesAsync(cancellationToken);   
-    }
-
-    public async Task Update(Guid playlistId, Guid userId, string title, string? description, string? imagePath,
-        CancellationToken cancellationToken = default)
-    {
-        var updatedRows = await _dbContext.Playlists
-            .Where(p => p.UserId == userId && p.Id == playlistId)
-            .ExecuteUpdateAsync(p => p
-                    .SetProperty(u => u.Title, title)
-                    .SetProperty(u => u.Description, description != "" ? description : null)
-                    .SetProperty(u => u.ImagePath, u => imagePath != "" ? imagePath : u.ImagePath)
-                    .SetProperty(u => u.CreatedAt, DateTime.UtcNow),
-                cancellationToken);
-
-        if (updatedRows != 1)
-        {
-            throw new Exception("Playlist with such ID doesn't exist");
-        }
     }
 
     private static PlaylistVm ToVm(Playlist playlist) =>
