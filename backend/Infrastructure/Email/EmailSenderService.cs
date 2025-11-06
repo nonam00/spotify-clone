@@ -14,8 +14,7 @@ public class EmailSenderService : IDisposable, IAsyncDisposable
     {
         _logger = logger;
         _smtpClient = new SmtpClient();
-        var connectTask = _smtpClient.ConnectAsync(smtpSettings.Value.Server, smtpSettings.Value.Port, false);
-        connectTask.Wait();
+        _smtpClient.Connect(smtpSettings.Value.Server, smtpSettings.Value.Port, false);
     }
 
     public async Task SendEmailAsync(string email, string title, string body, CancellationToken cancellationToken)

@@ -1,27 +1,27 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
+using Application.Shared.Clients;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Events.PlaylistDeleted;
 
 public class PlaylistDeletedEventHandler : IDomainEventHandler<PlaylistDeletedEvent>
 {
-    private readonly HttpClient _httpClient;
+    private readonly IFileServiceClient _fileServiceClient;
     private readonly ILogger<PlaylistDeletedEventHandler> _logger;
 
-    public PlaylistDeletedEventHandler(HttpClient httpClient, ILogger<PlaylistDeletedEventHandler> logger)
+    public PlaylistDeletedEventHandler(IFileServiceClient fileServiceClient, ILogger<PlaylistDeletedEventHandler> logger)
     {
-        _httpClient = httpClient;
+        _fileServiceClient = fileServiceClient;
         _logger = logger;
     }
 
     public async Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Playlist deleted: {PlaylistId}", @event.PlaylistId);
-
-        await _httpClient.DeleteAsync(
-            "http://nginx/files/api/v1?type=image&file_id=" + @event.ImagePath,
-            cancellationToken);
+        _logger.LogDebug("Handling playlist {playlistId} deleted event", @event.PlaylistId);
+        _logger.LogDebug("Deleting playlist {playlistId} cover image {imagePath}",
+            @event.PlaylistId, @event.ImagePath.Value);
+        await _fileServiceClient.DeleteAsync(@event.ImagePath, cancellationToken);
     }
 }
