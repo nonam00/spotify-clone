@@ -1,16 +1,17 @@
-﻿using Domain;
-using Application.Users.Models;
+﻿using Domain.Models;
 
 namespace Application.Users.Interfaces;
 
 public interface IUsersRepository
 {
     Task Add(User user, CancellationToken cancellationToken = default);
-    Task<User> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdWithSongs(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdWithPlaylists(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByEmail(string email, CancellationToken cancellationToken = default);
-    Task<UserInfo> GetInfoById(Guid id, CancellationToken cancellationToken = default);
-    Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default);
-    Task<bool> CheckIfActivated(Guid id, CancellationToken cancellationToken = default);
-    Task Update(User user, CancellationToken cancellationToken = default);
-    Task DeleteNonActive(CancellationToken cancellationToken = default);
+    Task<User?> GetByEmailWithRefreshTokens(string email, CancellationToken cancellationToken = default);
+    Task<bool> CheckIfSongLiked(Guid userId, Guid songId, CancellationToken cancellationToken = default);
+    Task<List<User>> GetNonActiveList(CancellationToken cancellationToken = default);
+    void Update(User user);
+    void DeleteRange(IEnumerable<User> users);
 }

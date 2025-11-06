@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Domain;
+using Domain.Models;
 using Application.Songs.Enums;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
@@ -16,16 +16,13 @@ public class SongsRepository : ISongsRepository
         _dbContext = dbContext;
     }
 
-    public async Task<SongVm> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Song?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var song = await _dbContext.Songs
             .AsNoTracking()
-            .SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
-            ?? throw new Exception("Song not found");
+            .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
         
-        var songVm = ToVm(song);
-        
-        return songVm;
+        return song;
     }
 
     public async Task<List<SongVm>> GetList(CancellationToken cancellationToken = default)
@@ -53,14 +50,15 @@ public class SongsRepository : ISongsRepository
 
     public async Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.PlaylistSongs
+        var songsInPlaylist = await _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.PlaylistId == playlistId)
             .OrderByDescending(ps => ps.CreatedAt)
-            .Select(ps => ToVm(ps.Song))
+            .Include(ps => ps.Song)
+            .Select(ps => ToVm(ps.Song)) 
             .ToListAsync(cancellationToken);
 
-        return songs;
+        return songsInPlaylist;
     }
 
     public async Task<List<SongVm>> GetSearchList(string searchString, SearchCriteria searchCriteria,
@@ -104,10 +102,40 @@ public class SongsRepository : ISongsRepository
         return result;
     }
 
+    public async Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var liked = await _dbContext.LikedSongs
+            .AsNoTracking()
+            .Where(ls => ls.UserId == userId)
+            .OrderByDescending(ls => ls.CreatedAt)
+            .Include(ls => ls.Song)
+            .Select(ls => ToVm(ls.Song))
+            .ToListAsync(cancellationToken);
+            
+        return liked;
+    }
+
+    public async Task<List<SongVm>> GetSearchLikedByUserId(Guid userId, string searchString, CancellationToken cancellationToken = default)
+    {
+        var liked = await _dbContext.LikedSongs
+            .AsNoTracking()
+            .Where(ls => ls.UserId == userId)
+            .Include(ls => ls.Song)
+            .Where(ls =>
+                EF.Functions.TrigramsSimilarity(ls.Song.Title, searchString) > 0.1 ||
+                EF.Functions.TrigramsSimilarity(ls.Song.Author, searchString) > 0.1)
+            .OrderBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Title, searchString))
+            .ThenBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Author, searchString))
+            .ThenByDescending(ls => ls.CreatedAt)
+            .Select(ls => ToVm(ls.Song))
+            .ToListAsync(cancellationToken);
+
+        return liked;
+    }
+
     public async Task Add(Song song, CancellationToken cancellationToken = default)
     {
         await _dbContext.Songs.AddAsync(song, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static SongVm ToVm(Song song) =>

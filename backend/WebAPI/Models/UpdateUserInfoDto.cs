@@ -2,6 +2,6 @@
 
 public class UpdateUserInfoDto
 {
-    public string? FullName { get; set; }
-    public string? AvatarId { get; set; }
+    public string? FullName { get; init; }
+    public string? AvatarId { get; init; }
 }

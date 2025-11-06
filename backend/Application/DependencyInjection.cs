@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
+using Domain.Common;
 using Application.Shared.Messaging;
 
 namespace Application;
@@ -17,7 +18,8 @@ public static class DependencyInjection
                 i.IsGenericType && 
                 (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
                  i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                 i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>))))
+                 i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+                 i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))))
             .ToList();
 
         foreach (var handlerType in handlerTypes)
@@ -27,7 +29,8 @@ public static class DependencyInjection
                 .Where(i => i.IsGenericType && 
                     (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
                      i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                     i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)))
+                     i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+                     i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
                 .ToList();
 
             foreach (var interfaceType in implementedInterfaces)
@@ -40,7 +43,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblies([assembly]);
         
         // Register custom mediator
-        services.AddScoped<IMediator, Mediator>();  
+        services.AddScoped<IMediator, Mediator>();
+        
+        services.AddScoped<IDomainEventDispatcher, InMemoryDomainEventDispatcher>();
         
         return services;
     }

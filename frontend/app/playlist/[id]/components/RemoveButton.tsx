@@ -33,7 +33,7 @@ const RemoveButton = ({
     <button
       onClick={handleRemove}
       disabled={isPending}
-      className="hover:opacity-75 transition"
+      className="hover:opacity-75 cursor-pointer transition"
     >
       <AiOutlineCloseCircle
         className="text-neutral-400 hover:text-red-500"

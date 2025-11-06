@@ -23,7 +23,7 @@ const getLikedSongs = async (): Promise<Song[]> => {
       return [];
     }
 
-    return data.likedSongs as Song[];
+    return data.songs as Song[];
   } catch (error) {
     console.error(error);
     return [];

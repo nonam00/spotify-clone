@@ -39,7 +39,7 @@ const DeletePlaylistButton = ({
   return (
     <button
       onClick={onClick}
-      className="flex flex-end hover:opacity-75"
+      className="flex flex-end hover:opacity-75 cursor-pointer"
     >
       <FaTrash className="text-neutral-400 hover:text-red-500" size="24" />
     </button>

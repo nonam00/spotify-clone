@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 
 using Application.Songs.Commands.CreateSong;
 using Application.Songs.Models;
-using Application.Songs.Queries.GetSongList.GetNewestSongList;
-using Application.Songs.Queries.GetSongList.GetAllSongs;
+using Application.Songs.Queries.GetAllSongs;
+using Application.Songs.Queries.GetNewestSongList;
 using Application.Songs.Queries.GetSongById;
-using Application.Songs.Queries.GetSongList.GetSongListBySearch;
+using Application.Songs.Queries.GetSongListBySearch;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -98,7 +98,6 @@ public class SongsController : BaseController
             SongPath: createSongDto.AudioId.ToString(),
             ImagePath: createSongDto.ImageId.ToString()
         );
-        
         var songId = await Mediator.Send(command, cancellationToken);
         return Ok(songId);
     }

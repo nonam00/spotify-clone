@@ -132,6 +132,7 @@ public class AuthController : BaseController
             var deleteTokenCommand = new DeleteRefreshTokenCommand(refreshToken);
             await Mediator.Send(deleteTokenCommand, cancellationToken);
         }
+
         return StatusCode(205);
     }
 }

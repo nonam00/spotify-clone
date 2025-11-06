@@ -1,7 +1,10 @@
-﻿using Application.Shared.Exceptions;
-using Application.Shared.Messaging;
+﻿using Microsoft.Extensions.Logging;
 
-using Domain;
+using Domain.Models;
+using Domain.ValueObjects;
+using Application.Shared.Data;
+using Application.Shared.Exceptions;
+using Application.Shared.Messaging;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CreateUser;
@@ -10,39 +13,47 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IEmailVerificator _emailVerificator;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CreateUserCommandHandler> _logger;
+    
     public CreateUserCommandHandler(
         IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
-        IEmailVerificator emailVerificator)
+        IUnitOfWork unitOfWork, ILogger<CreateUserCommandHandler> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
-        _emailVerificator = emailVerificator;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
-    public async Task Handle(CreateUserCommand request,
-        CancellationToken cancellationToken)
+    public async Task Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        if (await _usersRepository.CheckIfExists(request.Email, cancellationToken))
+        var checkUser = await _usersRepository.GetByEmail(request.Email, cancellationToken);
+        
+        if (checkUser != null)
         {
+            if (!checkUser.IsActive)
+            {
+                _logger.LogInformation(               
+                    "Tried to create user with email {email} which is already exists but not active.",
+                    request.Email);
+                throw new LoginException("Activate your account!");
+            }
+            _logger.LogInformation(
+                "Tried to create user with email {email} which is already active.",
+                request.Email);
             throw new LoginException("User with this email already exits");
         }
 
         var hashedPassword = _passwordHasher.Generate(request.Password);
 
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = request.Email,
-            PasswordHash = hashedPassword,
-            IsActive = false
-        };
-
+        var email = new Email(request.Email);
+        var passwordHash = new PasswordHash(hashedPassword);
+        
+        var user = User.Create(email, passwordHash);
+        
         await _usersRepository.Add(user, cancellationToken);
-
-        var verificationCode = _emailVerificator.GenerateCode();
-        await _emailVerificator.StoreCodeAsync(request.Email, verificationCode);
-        await _emailVerificator.SendCodeAsync(request.Email, verificationCode, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

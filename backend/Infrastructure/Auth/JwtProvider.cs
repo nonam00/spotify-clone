@@ -4,8 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-using Domain;
 using Application.Users.Interfaces;
+using Domain.Models;
 
 namespace Infrastructure.Auth;
 

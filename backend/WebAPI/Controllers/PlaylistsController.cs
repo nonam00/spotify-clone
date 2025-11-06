@@ -4,19 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 using Application.Playlists.Models;
 using Application.Playlists.Queries.GetPlaylistById;
-using Application.Playlists.Queries.GetPlaylistList.GetFullPlaylistList;
-using Application.Playlists.Queries.GetPlaylistList.GetPlaylistListByCount;
-using Application.Playlists.Commands.CreatePlaylist;
 using Application.Playlists.Commands.UpdatePlaylist;
-using Application.Playlists.Commands.DeletePlaylist;
-
+using Application.Playlists.Commands.AddSongToPlaylist;
+using Application.Playlists.Commands.RemoveSongFromPlaylist;
+using Application.Playlists.Queries.GetFullPlaylistList;
+using Application.Playlists.Queries.GetPlaylistListByCount;
 using Application.Songs.Models;
-using Application.Songs.Queries.GetSongList.GetSongListByPlaylistId;
-using Application.PlaylistSongs.Commands.CreatePlaylistSong;
-using Application.PlaylistSongs.Commands.DeletePlaylistSong;
-using Application.LikedSongs.Models;
-using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylist;
-using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongListForPlaylistBySearch;
+using Application.Songs.Queries.GetLikedSongListForPlaylist;
+using Application.Songs.Queries.GetLikedSongListForPlaylistBySearch;
+using Application.Songs.Queries.GetSongListByPlaylistId;
+using Application.Users.Commands.CreatePlaylist;
+using Application.Users.Commands.DeletePlaylist;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -25,7 +23,6 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
 public class PlaylistsController : BaseController
 {
-    private readonly HttpClient _httpClient = new();
     /// <summary>
     /// Gets certain user playlist 
     /// </summary>
@@ -114,14 +111,7 @@ public class PlaylistsController : BaseController
             Title: updatePlaylistDto.Title,
             Description: updatePlaylistDto.Description,
             ImagePath: updatePlaylistDto.ImageId);
-        
-        var oldImagePath = await Mediator.Send(updatePlaylistCommand, cancellationToken);
-        
-        if (oldImagePath is not null)
-        {
-            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + oldImagePath, cancellationToken);
-        }
-        
+        await Mediator.Send(updatePlaylistCommand, cancellationToken);
         return NoContent();
     }
         
@@ -138,13 +128,7 @@ public class PlaylistsController : BaseController
     public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var deletePlaylistCommand = new DeletePlaylistCommand(UserId: UserId, PlaylistId: playlistId);
-        var imagePath = await Mediator.Send(deletePlaylistCommand, cancellationToken);
-        
-        if (imagePath is not null)
-        {
-            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + imagePath, cancellationToken);
-        }
-        
+        await Mediator.Send(deletePlaylistCommand, cancellationToken);
         return NoContent();
     }
         
@@ -159,8 +143,7 @@ public class PlaylistsController : BaseController
     [HttpGet("{playlistId:guid}/songs")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<SongListVm>> GetPlaylistSongs(Guid playlistId,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<SongListVm>> GetSongsInPlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetSongListByPlaylistIdQuery(playlistId);
         var vm = await Mediator.Send(query, cancellationToken);
@@ -178,11 +161,11 @@ public class PlaylistsController : BaseController
     [HttpPost("{playlistId:guid}/songs/{songId:guid}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<string>> CreatePlaylistSong(Guid playlistId, Guid songId)
+    public async Task<IActionResult> AddSongToPlaylist(Guid playlistId, Guid songId)
     {
-        var command = new CreatePlaylistSongCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
-        var ids = await Mediator.Send(command);
-        return ids;
+        var command = new AddSongToPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
+        await Mediator.Send(command);
+        return Ok();
     }
 
     /// <summary>
@@ -197,7 +180,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeletePlaylistSong(Guid playlistId, Guid songId)
     {
-        var command = new DeletePlaylistSongCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
+        var command = new RemoveSongFromPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
         await Mediator.Send(command);
         return NoContent();
     }
@@ -213,7 +196,7 @@ public class PlaylistsController : BaseController
     [HttpGet("{playlistId:guid}/liked")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<LikedSongListVm>> GetLikedSongs(
+    public async Task<ActionResult<SongListVm>> GetLikedSongsNotInPlaylist(
         Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListForPlaylistQuery(UserId: UserId, PlaylistId: playlistId);
@@ -233,7 +216,7 @@ public class PlaylistsController : BaseController
     [HttpGet("{playlistId:guid}/liked/{searchString}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<LikedSongListVm>> GetLikedSongsBySearchString(
+    public async Task<ActionResult<SongListVm>> GetLikedSongsBySearchString(
         Guid playlistId, string searchString, CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListForPlaylistBySearchQuery(

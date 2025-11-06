@@ -60,13 +60,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     private static string ToJson(in ProblemDetails problemDetails)
     {
-        try
-        {
-            return JsonSerializer.Serialize(problemDetails);
-        }
-        catch
-        {
-            return "An exception has occurred while serializing error to JSON";
-        }
+        try { return JsonSerializer.Serialize(problemDetails); }
+        catch { return "An exception has occurred while serializing error to JSON"; }
     }
 }

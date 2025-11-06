@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using Domain;
+using Domain.Models;
 
 namespace Persistence.EntityTypeConfigurations;
 
@@ -12,7 +12,7 @@ public class PlaylistSongConfiguration : IEntityTypeConfiguration<PlaylistSong>
         builder.HasKey(ps => new { ps.PlaylistId, ps.SongId });
 
         builder.HasOne(ps => ps.Playlist)
-            .WithMany()
+            .WithMany(p => p.PlaylistSongs)
             .HasForeignKey(ps => ps.PlaylistId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -21,7 +21,7 @@ public class PlaylistSongConfiguration : IEntityTypeConfiguration<PlaylistSong>
             .HasForeignKey(ps => ps.SongId)
             .OnDelete(DeleteBehavior.Cascade);
     
-        builder.Property(ps => ps.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(ps => ps.CreatedAt).IsRequired();
+        builder.Property(ps => ps.UpdatedAt).IsRequired();
     } 
 }

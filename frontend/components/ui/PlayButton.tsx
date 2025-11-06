@@ -8,7 +8,7 @@ const PlayButton = () => {
         bg-green-500 drop-shadow-md opacity-0 rounded-full
         translate transtate-1/4
         group-hover:opacity-100 group-hover:translate-y-0
-        hover:scale-110
+        hover:scale-110 cursor-pointer
         transition
       "
     >

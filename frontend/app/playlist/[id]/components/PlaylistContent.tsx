@@ -38,11 +38,11 @@ const PlaylistContent = ({
           "
           aria-label="Play playlist"
         >
-          <FaPlay className="text-black" size="20" />
+          <FaPlay className="text-black cursor-pointer" size="20" />
         </button>
         <button
           onClick={() => { router.push(`/playlist/${id}/add?searchString=&type=all`) }}
-          className="flex flex-end mx-5 rounded-full hover:scale-105"
+          className="flex flex-end mx-5 rounded-full hover:scale-105 cursor-pointer"
         >
           <AiOutlinePlusCircle className="text-neutral-400" size="35" />
         </button>
@@ -59,7 +59,6 @@ const PlaylistContent = ({
               <SongListItem
                 key={song.id}
                 song={song}
-                likeButton={true}
                 onClickCallback={onPlay}
               >
                 <RemoveButton playlistId={id} songId={song.id} />

@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Domain;
+using Domain.Models;
 using Application.Users.Interfaces;
-using Application.Users.Models;
 
 namespace Persistence.Repositories;
 
@@ -18,16 +17,32 @@ public class UsersRepository : IUsersRepository
     public async Task Add(User user, CancellationToken cancellationToken = default)
     {
         await _dbContext.Users.AddAsync(user, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
     
-    public async Task<User> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken) 
-            ?? throw new Exception("Invalid current user id");
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        return user;
+    }
 
+    public async Task<User?> GetByIdWithSongs(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.UserLikedSongs)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithPlaylists(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user =  await _dbContext.Users
+            .Include(u => u.Playlists)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
+            ?? throw new Exception("Invalid user id");
+        
         return user;
     }
 
@@ -40,51 +55,34 @@ public class UsersRepository : IUsersRepository
         return user;
     }
 
-    public async Task<UserInfo> GetInfoById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmailWithRefreshTokens(string email, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
-            .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
-            ?? throw new Exception("Invalid current user id");
-
-        var userVm = ToVm(user);
-        return userVm;
-    }
-
-    public async Task<bool> CheckIfExists(string email, CancellationToken cancellationToken = default)
-    {
-        var result = await _dbContext.Users
-            .AsNoTracking()
-            .AnyAsync(u => u.Email == email, cancellationToken);
-
-        return result;
-    }
-
-    public async Task<bool> CheckIfActivated(Guid id, CancellationToken cancellationToken = default)
-    {
-        var result = await _dbContext.Users
-            .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
-
-        return result is not null && result.IsActive;
-    }
-
-    public async Task Update(User user, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Update(user);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteNonActive(CancellationToken cancellationToken = default)
-    {
-        var nonActiveUsers = await _dbContext.Users.Where(
-            u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
-            .ToListAsync(cancellationToken);
+            .Include(u => u.RefreshTokens)
+            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
         
-        _dbContext.Users.RemoveRange(nonActiveUsers);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        return user;   
     }
 
-    private static UserInfo ToVm(User user) =>
-        new(Email: user.Email, FullName: user.FullName, AvatarPath: user.AvatarPath);
+    public async Task<bool> CheckIfSongLiked(Guid userId, Guid songId, CancellationToken cancellationToken = default)
+    {
+        var isLiked = await _dbContext.LikedSongs
+            .AsNoTracking()
+            .AnyAsync(l => l.UserId == userId && l.SongId == songId, cancellationToken);
+        
+        return isLiked;
+    }
+
+    public async Task<List<User>> GetNonActiveList(CancellationToken cancellationToken = default)
+    {
+        var nonActiveUsers = await _dbContext.Users
+            .Where(u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+        return nonActiveUsers;
+    }
+
+    public void Update(User user) => _dbContext.Update(user);
+    
+    public void DeleteRange(IEnumerable<User> users) =>
+        _dbContext.Users.RemoveRange(users);
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using Domain;
+using Domain.Models;
 
 namespace Persistence.EntityTypeConfigurations;
 
@@ -17,11 +16,10 @@ public class LikedSongConfiguration: IEntityTypeConfiguration<LikedSong>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(liked => liked.User)
-            .WithMany(user => user.LikedSongs)
+            .WithMany(u => u.UserLikedSongs)
             .HasForeignKey(likedSong => likedSong.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(liked => liked.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(liked => liked.CreatedAt).IsRequired();
     }
 }
