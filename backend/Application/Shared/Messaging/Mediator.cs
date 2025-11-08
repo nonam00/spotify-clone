@@ -21,7 +21,7 @@ public class Mediator : IMediator
     public async Task<TResponse> Send<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Sending command {command}", command);
-        var validationError = await ValidateCommand(command, cancellationToken);
+        var validationError = await ValidateCommand(command, cancellationToken).ConfigureAwait(false);
         
         if (validationError != null)
         {
@@ -42,14 +42,14 @@ public class Mediator : IMediator
             throw new InvalidOperationException($"Command handler {command.GetType()} did not return task");
         }
         
-        return await task;
+        return await task.ConfigureAwait(false);
     }
 
     public async Task<TResponse> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Sending query {query}", query);
         
-        var validationError = await ValidateQuery(query, cancellationToken);
+        var validationError = await ValidateQuery(query, cancellationToken).ConfigureAwait(false);
         
         if (validationError != null)
         {
@@ -70,7 +70,7 @@ public class Mediator : IMediator
             throw new InvalidOperationException($"Query handler {query.GetType()} did not return task");
         }
         
-        return await task;
+        return await task.ConfigureAwait(false);
     }
     
     
@@ -86,7 +86,9 @@ public class Mediator : IMediator
             return null;
         }
         
-        var validationResult = await validator.ValidateAsync(new ValidationContext<object>(command), cancellationToken);
+        var validationResult = await validator
+            .ValidateAsync(new ValidationContext<object>(command), cancellationToken)
+            .ConfigureAwait(false);
         
         return !validationResult.IsValid
             ? ValidationErrors.CreateFromFluentValidation(validationResult)
@@ -104,7 +106,7 @@ public class Mediator : IMediator
             return null;
         }
 
-        var validationResult = await validator.ValidateAsync(new ValidationContext<object>(query), cancellationToken);
+        var validationResult = await validator.ValidateAsync(new ValidationContext<object>(query), cancellationToken).ConfigureAwait(false);
         
         return !validationResult.IsValid ?
             ValidationErrors.CreateFromFluentValidation(validationResult)

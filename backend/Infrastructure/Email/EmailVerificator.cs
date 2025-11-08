@@ -26,7 +26,7 @@ public class EmailVerificator : IEmailVerificator
 
     public async Task StoreCodeAsync(string email, string code)
     {
-        await _confirmationCodesRepository.SetConfirmationCode(email, code, _codeExpiry);
+        await _confirmationCodesRepository.SetConfirmationCode(email, code, _codeExpiry).ConfigureAwait(false);
     }
 
     public async Task SendCodeAsync(string email, string code, CancellationToken cancellationToken = default)
@@ -34,12 +34,17 @@ public class EmailVerificator : IEmailVerificator
         // hardcoded link, change to something else
         var confirmationLink = $"http://localhost:8080/1/auth/activate?email={email}&code={code}";
         var body = $"Please confirm your account by clicking <a href='{confirmationLink}'>here</a>";
-        await _emailSenderService.SendEmailAsync(email, "Account confirmation", body, cancellationToken);
+        await _emailSenderService
+            .SendEmailAsync(email, "Account confirmation", body, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<bool> VerifyCodeAsync(string email, string code)
     {
-        var storedCode = await _confirmationCodesRepository.GetConfirmationCode(email);
+        var storedCode = await _confirmationCodesRepository
+            .GetConfirmationCode(email)
+            .ConfigureAwait(false);
+        
         return storedCode is not null && storedCode == code;
     }
 }

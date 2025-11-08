@@ -20,8 +20,6 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
 
     public async Task DispatchAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(domainEvent);
-
         var eventType = domainEvent.GetType();
         var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(eventType);
 
@@ -55,7 +53,7 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
 
         foreach (var domainEvent in domainEvents)
         {
-            await DispatchAsync(domainEvent, cancellationToken);
+            await DispatchAsync(domainEvent, cancellationToken).ConfigureAwait(false);
         }
     }
 }

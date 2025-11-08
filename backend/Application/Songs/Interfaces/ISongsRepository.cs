@@ -15,5 +15,9 @@ public interface ISongsRepository
     Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetSearchLikedByUserId(Guid userId, string searchString,
         CancellationToken cancellationToken = default);
+    Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(Guid userId, Guid playlistId,
+        CancellationToken cancellationToken = default);
+    Task<List<SongVm>> GetSearchLikedByUserIdExcludeInPlaylist(Guid userId, Guid playlistId, string searchString,
+        CancellationToken cancellationToken = default);
     Task Add(Song song, CancellationToken cancellationToken = default);
 }

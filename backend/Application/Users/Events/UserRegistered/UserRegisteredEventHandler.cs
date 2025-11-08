@@ -28,6 +28,6 @@ public class UserRegisteredEventHandler : IDomainEventHandler<UserRegisteredEven
         var sendTask = _emailVerificator.SendCodeAsync(@event.Email, verificationCode, cancellationToken);
         _logger.LogDebug("Sending verification code {code} to email {email}", verificationCode, @event.Email);
         
-        await Task.WhenAll(storeTask, sendTask);
+        await Task.WhenAll(storeTask, sendTask).ConfigureAwait(false);
     }
 }

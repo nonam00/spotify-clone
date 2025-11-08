@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
         var result = await _context.SaveChangesAsync(cancellationToken);
         
         // Dispatch domain events after successful save
-        await DispatchDomainEventsAsync(cancellationToken);
+        await DispatchDomainEventsAsync(cancellationToken).ConfigureAwait(false);
         
         return result;
     }
@@ -50,23 +50,8 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
                     domainEvent.GetType().Name, domainEvent.EventId);
             }
             
-            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
+            await _domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken).ConfigureAwait(false);
         }
-    }
-
-    public Task BeginTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task CommitTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     public void Dispose()

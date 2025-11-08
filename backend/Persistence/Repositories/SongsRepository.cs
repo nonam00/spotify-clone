@@ -31,7 +31,8 @@ public class SongsRepository : ISongsRepository
             .AsNoTracking()
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         
         return songs;
     }
@@ -43,7 +44,8 @@ public class SongsRepository : ISongsRepository
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
             .Take(count)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return songs;
     }
@@ -53,10 +55,11 @@ public class SongsRepository : ISongsRepository
         var songsInPlaylist = await _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.PlaylistId == playlistId)
-            .OrderByDescending(ps => ps.CreatedAt)
+            .OrderByDescending(ps => ps.UpdatedAt)
             .Include(ps => ps.Song)
             .Select(ps => ToVm(ps.Song)) 
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return songsInPlaylist;
     }
@@ -97,7 +100,8 @@ public class SongsRepository : ISongsRepository
         var result = await songs
             .Take(50)
             .Select(s => ToVm(s))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return result;
     }
@@ -110,7 +114,8 @@ public class SongsRepository : ISongsRepository
             .OrderByDescending(ls => ls.CreatedAt)
             .Include(ls => ls.Song)
             .Select(ls => ToVm(ls.Song))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
             
         return liked;
     }
@@ -128,9 +133,55 @@ public class SongsRepository : ISongsRepository
             .ThenBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Author, searchString))
             .ThenByDescending(ls => ls.CreatedAt)
             .Select(ls => ToVm(ls.Song))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return liked;
+    }
+
+    public async Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(
+        Guid userId, Guid playlistId, CancellationToken cancellationToken = default)
+    {
+        var songsInPlaylist = _dbContext.PlaylistSongs
+            .AsNoTracking()
+            .Where(ps => ps.PlaylistId == playlistId);
+        
+        var result = await _dbContext.LikedSongs
+            .AsNoTracking()
+            .Where(ls => ls.UserId == userId)
+            .Include(ls => ls.Song)
+            .Where(ls => !songsInPlaylist.Any(ps => ps.SongId == ls.SongId))
+            .OrderByDescending(ls => ls.CreatedAt)
+            .Select(ls => ToVm(ls.Song))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return result;
+    }
+
+    public async Task<List<SongVm>> GetSearchLikedByUserIdExcludeInPlaylist(
+        Guid userId, Guid playlistId, string searchString, CancellationToken cancellationToken = default)
+    {
+        var songsInPlaylist = _dbContext.PlaylistSongs
+            .AsNoTracking()
+            .Where(ps => ps.PlaylistId == playlistId);
+        
+        var result = await _dbContext.LikedSongs
+            .AsNoTracking()
+            .Where(ls => ls.UserId == userId)
+            .Include(ls => ls.Song)
+            .Where(ls =>
+                !songsInPlaylist.Any(ps => ps.SongId == ls.SongId) &&
+                (EF.Functions.TrigramsSimilarity(ls.Song.Title, searchString) > 0.1 ||
+                EF.Functions.TrigramsSimilarity(ls.Song.Author, searchString) > 0.1))
+            .OrderBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Title, searchString))
+            .ThenBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Author, searchString))
+            .ThenByDescending(ls => ls.CreatedAt)
+            .Select(ls => ToVm(ls.Song))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return result;
     }
 
     public async Task Add(Song song, CancellationToken cancellationToken = default)

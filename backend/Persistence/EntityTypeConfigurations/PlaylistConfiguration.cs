@@ -11,6 +11,7 @@ public class PlaylistConfiguration : IEntityTypeConfiguration<Playlist>
     public void Configure(EntityTypeBuilder<Playlist> builder)
     {
         builder.HasKey(p => p.Id);
+        // To avoid problems when working with child collections 
         builder.Property(p => p.Id).ValueGeneratedNever();
         
         builder.Property(p => p.UserId).IsRequired();

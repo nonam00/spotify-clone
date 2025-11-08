@@ -68,7 +68,8 @@ public class UsersRepository : IUsersRepository
     {
         var isLiked = await _dbContext.LikedSongs
             .AsNoTracking()
-            .AnyAsync(l => l.UserId == userId && l.SongId == songId, cancellationToken);
+            .AnyAsync(l => l.UserId == userId && l.SongId == songId, cancellationToken)
+            .ConfigureAwait(false);
         
         return isLiked;
     }
@@ -77,7 +78,9 @@ public class UsersRepository : IUsersRepository
     {
         var nonActiveUsers = await _dbContext.Users
             .Where(u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+            
         return nonActiveUsers;
     }
 

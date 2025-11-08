@@ -11,8 +11,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // Register all handlers from assembly
         var assembly = Assembly.GetExecutingAssembly();
+        
+        // Register all handlers from assembly
         var handlerTypes = assembly.GetTypes()
             .Where(t => t.GetInterfaces().Any(i => 
                 i.IsGenericType && 

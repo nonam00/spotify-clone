@@ -27,7 +27,7 @@ public class PlaylistDetailsUpdatedEventHandler : IDomainEventHandler<PlaylistDe
         {
             _logger.LogDebug("Deleting playlist {playlistId} old cover image {imagePath}",
                 @event.PlaylistId, @event.OldImagePath.Value);
-            await _fileServiceClient.DeleteAsync(@event.OldImagePath, cancellationToken);
+            await _fileServiceClient.DeleteAsync(@event.OldImagePath, cancellationToken).ConfigureAwait(false);
         }
     }
 }

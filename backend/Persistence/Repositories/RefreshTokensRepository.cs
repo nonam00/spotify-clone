@@ -38,7 +38,8 @@ public class RefreshTokensRepository : IRefreshTokensRepository
         var expiredTokens = await _dbContext.RefreshTokens
             .AsNoTracking()
             .Where(rf => rf.Expires < DateTime.UtcNow)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         
         return expiredTokens;
     }

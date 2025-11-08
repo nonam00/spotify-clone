@@ -16,7 +16,7 @@ public record Email
             throw new ArgumentException("Invalid email format", nameof(value));
         }
 
-        Value = value.Trim().ToLower();
+        Value = value.Trim();
     }
 
     public static implicit operator string(Email email) => email.Value;

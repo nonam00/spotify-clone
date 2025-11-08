@@ -10,6 +10,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
         builder.HasKey(rt => rt.Id);
+        // To avoid problems when working with child collections 
         builder.Property(rt => rt.Id).ValueGeneratedNever();
 
         builder.Property(rt => rt.UserId).IsRequired();

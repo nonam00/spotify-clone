@@ -28,8 +28,8 @@ public class EmailSenderService : IDisposable, IAsyncDisposable
             Body = new TextPart("html") { Text = body } 
         };
         
-        var response = await _smtpClient.SendAsync(message, cancellationToken);
-        _logger.LogDebug("Email sent, received response: {response}" , response);
+        var response = await _smtpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        _logger.LogDebug("Email sent, received response: {response}", response);
     }
 
     public void Dispose()

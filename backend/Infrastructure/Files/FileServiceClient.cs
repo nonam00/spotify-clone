@@ -19,7 +19,7 @@ public class FileServiceClient :  IFileServiceClient, IDisposable
     public async Task DeleteAsync(string path, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Sending request to delete file {path}", path);
-        await _httpClient.DeleteAsync("?type=image&file_id=" + path, cancellationToken);
+        await _httpClient.DeleteAsync("?type=image&file_id=" + path, cancellationToken).ConfigureAwait(false);
     }
 
     public void Dispose()

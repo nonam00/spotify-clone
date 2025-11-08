@@ -18,11 +18,8 @@ public class GetLikedSongListForPlaylistBySearchQueryHandler
     public async Task<Result<SongListVm>> Handle(GetLikedSongListForPlaylistBySearchQuery request,
         CancellationToken cancellationToken)
     {
-        var searchedLiked = await _songsRepository.GetSearchLikedByUserId(
-            request.UserId, request.SearchString, cancellationToken);
-        var songsInPlaylist = await _songsRepository.GetListByPlaylistId(
-            request.PlaylistId, cancellationToken);
-        var songs = searchedLiked.Except(songsInPlaylist).ToList();
-        return Result<SongListVm>.Success(new SongListVm(songs));
+        var searchedLikedNotInPlaylist = await _songsRepository.GetSearchLikedByUserIdExcludeInPlaylist(
+            request.UserId, request.PlaylistId, request.SearchString, cancellationToken);
+        return Result<SongListVm>.Success(new SongListVm(searchedLikedNotInPlaylist));
     }
 }

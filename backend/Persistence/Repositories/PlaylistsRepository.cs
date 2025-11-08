@@ -40,7 +40,8 @@ public class PlaylistsRepository : IPlaylistsRepository
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.UpdatedAt)
             .Select(p => ToVm(p))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         
         return playlists;
     }
@@ -53,7 +54,8 @@ public class PlaylistsRepository : IPlaylistsRepository
             .OrderByDescending(p => p.UpdatedAt)
             .Select(p => ToVm(p))
             .Take(count)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return playlists;
     }
