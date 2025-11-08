@@ -1,10 +1,11 @@
-﻿using Application.Shared.Messaging;
+﻿using Application.Shared.Data;
+using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongListBySearch;
 
-public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearchQuery, SongListVm>
+public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearchQuery, Result<SongListVm>>
 {
     private readonly ISongsRepository _songsRepository;
 
@@ -13,10 +14,10 @@ public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearch
         _songsRepository = songsRepository;
     }
 
-    public async Task<SongListVm> Handle(GetSongListBySearchQuery request, CancellationToken cancellationToken)
+    public async Task<Result<SongListVm>> Handle(GetSongListBySearchQuery request, CancellationToken cancellationToken)
     {
         var songs = await _songsRepository.GetSearchList(
             request.SearchString, request.SearchCriteria, cancellationToken);
-        return new SongListVm(songs);
+        return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

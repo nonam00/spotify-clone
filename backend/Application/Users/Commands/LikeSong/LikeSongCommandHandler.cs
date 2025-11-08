@@ -2,11 +2,12 @@
 
 using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.LikeSong;
 
-public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand>
+public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -22,7 +23,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand>
         _logger = logger;
     }
 
-    public async Task Handle(LikeSongCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LikeSongCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetByIdWithSongs(request.UserId, cancellationToken);
 
@@ -31,7 +32,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand>
             _logger.LogError(
                 "Tried to like song {songId} but user {userId} doesn't exist",
                 request.SongId, request.UserId);
-            throw new ArgumentException("User doesn't exist");
+            return Result.Failure(UserErrors.NotFound);
         }
         
         if (!user.LikeSong(request.SongId))
@@ -39,9 +40,12 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand>
             _logger.LogError(
                 "User with id {userId} tried to like song {songId} but he already liked this song",
                 request.UserId, request.SongId);
-            throw new ArgumentException("You already have liked this song");
+            
+            return Result.Failure(UserLikeErrors.AlreadyLiked);
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

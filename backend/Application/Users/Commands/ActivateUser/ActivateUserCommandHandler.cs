@@ -2,11 +2,12 @@
 
 using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.ActivateUser;
 
-public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand>
+public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, Result>
 {
     private readonly IEmailVerificator _emailVerificator;
     private readonly IUsersRepository _usersRepository;
@@ -25,7 +26,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand>
         _logger = logger;
     }
 
-    public async Task Handle(ActivateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ActivateUserCommand request, CancellationToken cancellationToken)
     {
         var codeVerificationStatus = await _emailVerificator.VerifyCodeAsync(
             request.Email, request.ConfirmationCode);
@@ -35,7 +36,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand>
             _logger.LogInformation(
                 "Someone tried to activate user account with email {email} using invalid code {confirmationCode}",
                 request.Email, request.ConfirmationCode);
-            throw new ArgumentException("Invalid code");
+            return Result.Failure(UserErrors.InvalidVerificationCode);
         }
 
         var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
@@ -45,13 +46,13 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand>
             _logger.LogError(
                 "Someone tried to activate non-existing user account with email {email} and code {confirmationCode}", 
                 request.Email, request.ConfirmationCode);
-            throw new ArgumentException($"User with email {request.Email} doesn't exist");
+            return Result.Failure(UserErrors.NotFoundWithEmail);
         }
         
         user.Activate();
-        
         _usersRepository.Update(user);
-        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

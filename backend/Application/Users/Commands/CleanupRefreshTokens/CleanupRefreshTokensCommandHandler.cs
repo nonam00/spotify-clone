@@ -4,7 +4,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CleanupRefreshTokens;
 
-public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefreshTokensCommand>
+public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefreshTokensCommand, Result>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -15,7 +15,7 @@ public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefresh
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Handle(CleanupRefreshTokensCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CleanupRefreshTokensCommand request, CancellationToken cancellationToken)
     {
         var expired = await _refreshTokensRepository.GetExpiredList(cancellationToken);
         
@@ -24,5 +24,7 @@ public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefresh
             _refreshTokensRepository.DeleteRange(expired);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+        
+        return Result.Success();
     }
 }

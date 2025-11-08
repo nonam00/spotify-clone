@@ -1,3 +1,4 @@
+using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
@@ -5,7 +6,7 @@ using Application.Songs.Models;
 namespace Application.Songs.Queries.GetLikedSongListForPlaylistBySearch;
 
 public class GetLikedSongListForPlaylistBySearchQueryHandler 
-    : IQueryHandler<GetLikedSongListForPlaylistBySearchQuery, SongListVm>
+    : IQueryHandler<GetLikedSongListForPlaylistBySearchQuery, Result<SongListVm>>
 {
     private readonly ISongsRepository _songsRepository;
 
@@ -14,7 +15,7 @@ public class GetLikedSongListForPlaylistBySearchQueryHandler
         _songsRepository = songsRepository;
     }
 
-    public async Task<SongListVm> Handle(GetLikedSongListForPlaylistBySearchQuery request,
+    public async Task<Result<SongListVm>> Handle(GetLikedSongListForPlaylistBySearchQuery request,
         CancellationToken cancellationToken)
     {
         var searchedLiked = await _songsRepository.GetSearchLikedByUserId(
@@ -22,6 +23,6 @@ public class GetLikedSongListForPlaylistBySearchQueryHandler
         var songsInPlaylist = await _songsRepository.GetListByPlaylistId(
             request.PlaylistId, cancellationToken);
         var songs = searchedLiked.Except(songsInPlaylist).ToList();
-        return new SongListVm(songs);
+        return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

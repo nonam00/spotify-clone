@@ -7,6 +7,7 @@ using Application.Playlists.Queries.GetPlaylistById;
 using Application.Playlists.Commands.UpdatePlaylist;
 using Application.Playlists.Commands.AddSongToPlaylist;
 using Application.Playlists.Commands.RemoveSongFromPlaylist;
+using Application.Playlists.Errors;
 using Application.Playlists.Queries.GetFullPlaylistList;
 using Application.Playlists.Queries.GetPlaylistListByCount;
 using Application.Songs.Models;
@@ -37,8 +38,20 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<PlaylistVm>> GetPlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetPlaylistByIdQuery(PlaylistId: playlistId, UserId: UserId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+
+        if (result.Error.Code == nameof(PlaylistErrors.NotFound))
+        {
+            return NotFound(new { Detail = result.Error.Description });
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -53,8 +66,15 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<PlaylistListVm>> GetPlaylistList(CancellationToken cancellationToken)
     {
         var query = new GetFullPlaylistListQuery(UserId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -72,8 +92,15 @@ public class PlaylistsController : BaseController
         int count, CancellationToken cancellationToken)
     {
         var query = new GetPlaylistListByCountQuery(UserId, count);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -88,8 +115,14 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<Guid>> CreatePlaylist(CancellationToken cancellationToken)
     {
         var command = new CreatePlaylistCommand(UserId);
-        var id = await Mediator.Send(command, cancellationToken);
-        return id;
+        
+        var result = await Mediator.Send(command, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -103,7 +136,8 @@ public class PlaylistsController : BaseController
     [HttpPut("{playlistId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdatePlaylist(Guid playlistId, UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdatePlaylist(
+        Guid playlistId, UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
     {
         var updatePlaylistCommand = new UpdatePlaylistCommand(
             UserId: UserId,
@@ -111,8 +145,15 @@ public class PlaylistsController : BaseController
             Title: updatePlaylistDto.Title,
             Description: updatePlaylistDto.Description,
             ImagePath: updatePlaylistDto.ImageId);
-        await Mediator.Send(updatePlaylistCommand, cancellationToken);
-        return NoContent();
+        
+        var result = await Mediator.Send(updatePlaylistCommand, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
         
     /// <summary>
@@ -128,8 +169,15 @@ public class PlaylistsController : BaseController
     public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var deletePlaylistCommand = new DeletePlaylistCommand(UserId: UserId, PlaylistId: playlistId);
-        await Mediator.Send(deletePlaylistCommand, cancellationToken);
-        return NoContent();
+        
+        var result = await Mediator.Send(deletePlaylistCommand, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
         
     /// <summary>
@@ -146,8 +194,14 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<SongListVm>> GetSongsInPlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetSongListByPlaylistIdQuery(playlistId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -164,8 +218,14 @@ public class PlaylistsController : BaseController
     public async Task<IActionResult> AddSongToPlaylist(Guid playlistId, Guid songId)
     {
         var command = new AddSongToPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
-        await Mediator.Send(command);
-        return Ok();
+        var result = await Mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -178,11 +238,17 @@ public class PlaylistsController : BaseController
     [HttpDelete("{playlistId:guid}/songs/{songId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeletePlaylistSong(Guid playlistId, Guid songId)
+    public async Task<IActionResult> DeleteSongFromPlaylist(Guid playlistId, Guid songId)
     {
         var command = new RemoveSongFromPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
-        await Mediator.Send(command);
-        return NoContent();
+        var result = await Mediator.Send(command);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
         
     /// <summary>
@@ -200,8 +266,15 @@ public class PlaylistsController : BaseController
         Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListForPlaylistQuery(UserId: UserId, PlaylistId: playlistId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        throw new Exception(result.Error.Description);
     }
         
     /// <summary>
@@ -221,7 +294,14 @@ public class PlaylistsController : BaseController
     {
         var query = new GetLikedSongListForPlaylistBySearchQuery(
             UserId: UserId, PlaylistId: playlistId, SearchString: searchString);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return vm;
+        
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 }

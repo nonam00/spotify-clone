@@ -4,10 +4,11 @@ using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 
 namespace Application.Users.Commands.UpdateUser;
 
-public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
+public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -23,14 +24,14 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
         _logger = logger;
     }
 
-    public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken);
 
         if (user == null)
         {
             _logger.LogError("Tried to update profile but user {userId} does not exist", request.UserId);
-            throw new ArgumentException("User doesn't exist");
+            return Result.Failure(UserErrors.NotFound);
         }
         
         var newFullName = request.FullName ?? user.FullName;
@@ -40,5 +41,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand>
         
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

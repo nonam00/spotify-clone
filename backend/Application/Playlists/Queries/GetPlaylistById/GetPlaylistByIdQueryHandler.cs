@@ -1,11 +1,14 @@
+using Microsoft.Extensions.Logging;
+
 using Application.Shared.Messaging;
+using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
-using Microsoft.Extensions.Logging;
+using Application.Shared.Data;
 
 namespace Application.Playlists.Queries.GetPlaylistById;
 
-public class GetPlaylistByIdQueryHandler : IQueryHandler<GetPlaylistByIdQuery, PlaylistVm>
+public class GetPlaylistByIdQueryHandler : IQueryHandler<GetPlaylistByIdQuery, Result<PlaylistVm>>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
     private readonly ILogger<GetPlaylistByIdQueryHandler> _logger;
@@ -18,16 +21,17 @@ public class GetPlaylistByIdQueryHandler : IQueryHandler<GetPlaylistByIdQuery, P
         _logger = logger;
     }
 
-    public async Task<PlaylistVm> Handle(GetPlaylistByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlaylistVm>> Handle(GetPlaylistByIdQuery request, CancellationToken cancellationToken)
     {
         var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken);
         
         if (playlist != null)
         {
-            return new PlaylistVm(playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath);
+            return Result<PlaylistVm>.Success(
+                new PlaylistVm(playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath));
         }
         
         _logger.LogError("Tried to get playlist {playlistId} but it does not exist", request.PlaylistId);
-        throw new ArgumentException($"Playlist does not exist");
+        return Result<PlaylistVm>.Failure(PlaylistErrors.NotFound);
     }
 }

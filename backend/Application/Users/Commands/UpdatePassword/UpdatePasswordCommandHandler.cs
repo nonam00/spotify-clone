@@ -4,10 +4,11 @@ using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 
 namespace Application.Users.Commands.UpdatePassword;
 
-public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand>
+public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -26,14 +27,14 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         _logger = logger;
     }
 
-    public async Task Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken);
 
         if (user == null)
         {
             _logger.LogError("Tried to change password but user with id {userId} doesn't exist", request.UserId);
-            throw new ArgumentException("User doesn't exist");
+            return Result.Failure(UserErrors.NotFound);
         }
 
         if (!_passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
@@ -41,7 +42,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
             _logger.LogInformation(
                 "User {userId} tried to change password but password {requestCurrentPassword} doesn't match with the actual password",
                 request.UserId, request.CurrentPassword);
-            throw new ArgumentException("Password doesn't match");
+            return Result.Failure(UserErrors.PasswordsMissMatch);
         }
 
         var newPasswordHash = _passwordHasher.Generate(request.NewPassword);
@@ -50,5 +51,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

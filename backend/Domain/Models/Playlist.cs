@@ -84,5 +84,5 @@ public class Playlist : AggregateRoot<Guid>
         return playlistSong != null && _playlistSongs.Remove(playlistSong);
     }
 
-    public bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
+    private bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
 }

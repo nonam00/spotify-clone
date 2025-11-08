@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Logging;
 
 using Application.Shared.Data;
-using Application.Shared.Exceptions;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshTokenQuery, TokenPair>
+public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshTokenQuery, Result<TokenPair>>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IJwtProvider _jwtProvider;
@@ -28,14 +28,14 @@ public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshToken
         _logger = logger;
     }
 
-    public async Task<TokenPair> Handle(LoginByRefreshTokenQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenQuery request, CancellationToken cancellationToken)
     {
         var refreshToken = await _refreshTokensRepository.GetByValueWithUser(request.RefreshToken, cancellationToken);
         
         if (refreshToken is null || refreshToken.Expires < DateTime.UtcNow)
         {
-            _logger.LogInformation("Anonymous user tried to login with non-relevant refresh token");
-            throw new LoginException("The refresh token has expired or does not exist.");
+            _logger.LogInformation("Anonymous user tried to login with non-relevant refresh token"); 
+            return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
         }
         
         var accessToken = _jwtProvider.GenerateToken(refreshToken.User);
@@ -47,6 +47,6 @@ public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshToken
         _refreshTokensRepository.Update(refreshToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return new TokenPair(accessToken, refreshTokenValue);
+        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
     }
 }

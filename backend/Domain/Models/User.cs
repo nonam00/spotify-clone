@@ -55,12 +55,6 @@ public class User : AggregateRoot<Guid>
     {
         PasswordHash = newPasswordHash;
     }
-    
-    public void Deactivate()
-    {
-        IsActive = false;
-        _refreshTokens.Clear();
-    }
 
     public void Activate()
     {
@@ -74,14 +68,6 @@ public class User : AggregateRoot<Guid>
         return refreshToken;
     }
 
-    public bool RemoveRefreshToken(Guid refreshTokenId)
-    {
-        var token = _refreshTokens.FirstOrDefault(rt => rt.Id == refreshTokenId);
-        return token != null && _refreshTokens.Remove(token);
-    }
-
-    public void RemoveExpiredRefreshTokens() => _refreshTokens.RemoveAll(rt => rt.IsExpired);
-    
     public bool LikeSong(Guid songId)
     {
         if (HasLikedSong(songId))
@@ -100,7 +86,7 @@ public class User : AggregateRoot<Guid>
         return likedSong != null && _userLikedSongs.Remove(likedSong);
     }
 
-    public bool HasLikedSong(Guid songId) => _userLikedSongs.Any(s => s.SongId == songId);
+    private bool HasLikedSong(Guid songId) => _userLikedSongs.Any(s => s.SongId == songId);
 
     public Playlist CreatePlaylist()
     {

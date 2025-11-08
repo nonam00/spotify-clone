@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
 
+using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
-using Application.Shared.Exceptions;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Commands.RemoveSongFromPlaylist;
 
-public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFromPlaylistCommand>
+public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFromPlaylistCommand, Result>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -23,7 +23,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
         _logger = logger;
     }
 
-    public async Task Handle(RemoveSongFromPlaylistCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveSongFromPlaylistCommand request, CancellationToken cancellationToken)
     {
         var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
         
@@ -32,7 +32,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
             _logger.LogError(
                 "User {userId} tried to remove song {songId} from playlist {playlistId} but playlist does not exist",
                 request.UserId, request.SongId, request.PlaylistId);
-            throw new ArgumentException("Playlist does not exist.");
+            return Result.Failure(PlaylistErrors.NotFound);
         }
         
         if (playlist.UserId != request.UserId)
@@ -40,7 +40,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
             _logger.LogWarning(
                 "User {userId} tried to add remove {songId} from playlist {playlist} that belongs to user {ownerId}",
                 request.UserId, request.SongId, request.PlaylistId, playlist.UserId);
-            throw new OwnershipException("You do not have permission to remove songs from this playlist");
+            return Result.Failure(PlaylistErrors.OwnershipError);
         }
 
         if (!playlist.RemoveSong(request.SongId))
@@ -48,9 +48,10 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
             _logger.LogError(
                 "User {userId} tried to remove song {songId} but it's not in playlist {playlistId}",
                 request.UserId, request.SongId, playlist.Id);        
-            throw new Exception("Song not found in playlist");
+            return Result.Failure(PlaylistErrors.SongNotInPlaylist);
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }

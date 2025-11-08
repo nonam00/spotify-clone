@@ -1,10 +1,11 @@
+using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
 
 namespace Application.Songs.Queries.GetSongListByPlaylistId;
 
-public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPlaylistIdQuery, SongListVm>
+public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPlaylistIdQuery, Result<SongListVm>>
 {
     private readonly ISongsRepository _songsRepository;
 
@@ -13,9 +14,9 @@ public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPla
         _songsRepository = songsRepository;
     }
 
-    public async Task<SongListVm> Handle(GetSongListByPlaylistIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<SongListVm>> Handle(GetSongListByPlaylistIdQuery request, CancellationToken cancellationToken)
     {
         var songs = await _songsRepository.GetListByPlaylistId(request.PlaylistId, cancellationToken);
-        return new SongListVm(songs);
+        return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

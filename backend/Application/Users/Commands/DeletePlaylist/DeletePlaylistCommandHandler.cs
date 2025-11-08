@@ -1,11 +1,12 @@
 using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Users.Commands.DeletePlaylist;
 
-public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistCommand>
+public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,7 +21,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
         _logger = logger;
     }
 
-    public async Task Handle(DeletePlaylistCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeletePlaylistCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetByIdWithPlaylists(request.UserId, cancellationToken);
 
@@ -28,7 +29,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
         {
             _logger.LogError("Tried to delete playlist {playlistId} but user {userId} doesn't exist", 
                 request.PlaylistId, request.UserId);
-            throw new ArgumentException("User doesn't exist");
+            return Result.Failure(UserErrors.NotFound);
         }
         
         var playlist = user.RemovePlaylist(request.PlaylistId);
@@ -38,9 +39,11 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
             _logger.LogError(
                 "Tried to delete playlist {playlistId} but user {userId} does not have this playlist",
                 request.PlaylistId, request.UserId);
-            throw new ArgumentException("Playlist does not exist or does not belong to you");
+            return Result.Failure(UserPlaylistErrors.Ownership);
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

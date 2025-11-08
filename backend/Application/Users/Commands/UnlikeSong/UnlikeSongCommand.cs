@@ -1,5 +1,6 @@
-﻿using Application.Shared.Messaging;
+﻿using Application.Shared.Data;
+using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UnlikeSong;
 
-public record UnlikeSongCommand(Guid UserId, Guid SongId) : ICommand;
+public record UnlikeSongCommand(Guid UserId, Guid SongId) : ICommand<Result>;

@@ -4,7 +4,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CleanupNonActiveUsers;
 
-public class CleanupNonActiveUsersCommandHandler : ICommandHandler<CleanupNonActiveUsersCommand>
+public class CleanupNonActiveUsersCommandHandler : ICommandHandler<CleanupNonActiveUsersCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -15,7 +15,7 @@ public class CleanupNonActiveUsersCommandHandler : ICommandHandler<CleanupNonAct
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Handle(CleanupNonActiveUsersCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CleanupNonActiveUsersCommand command, CancellationToken cancellationToken)
     {
         var nonActiveUsers = await _usersRepository.GetNonActiveList(cancellationToken);
         
@@ -24,5 +24,7 @@ public class CleanupNonActiveUsersCommandHandler : ICommandHandler<CleanupNonAct
             _usersRepository.DeleteRange(nonActiveUsers);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+        
+        return Result.Success();
     }
 }

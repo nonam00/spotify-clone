@@ -26,8 +26,14 @@ public class SongsController : BaseController
     public async Task<ActionResult<SongListVm>> GetAllSongs(CancellationToken cancellationToken)
     {
         var query = new GetAllSongsQuery();
-        var vm = await Mediator.Send(query, cancellationToken);
-        return Ok(vm);
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -40,8 +46,14 @@ public class SongsController : BaseController
     public async Task<ActionResult<SongListVm>> GetNewestSongs(CancellationToken cancellationToken)
     {
         var query = new GetNewestSongListQuery();
-        var vm = await Mediator.Send(query, cancellationToken);
-        return Ok(vm);
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -56,8 +68,14 @@ public class SongsController : BaseController
     public async Task<ActionResult<SongVm>> GetSongById(Guid songId, CancellationToken cancellationToken)
     {
         var query = new GetSongByIdQuery(songId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return Ok(vm);
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        return BadRequest(result.Error.Description);
     }
 
     /// <summary>
@@ -70,12 +88,18 @@ public class SongsController : BaseController
     [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<SongListVm>> GetSongListBySearch(
-        [FromQuery] SearchSongDto searchSongDto, CancellationToken cancellationToken)
+        [FromQuery]SearchSongDto searchSongDto, CancellationToken cancellationToken)
     {
         var query = new GetSongListBySearchQuery(
             SearchString: searchSongDto.SearchString, SearchCriteria: searchSongDto.SearchCriteria);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return Ok(vm);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -89,7 +113,7 @@ public class SongsController : BaseController
     [HttpPost, Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Guid>> UploadNewSong(CreateSongDto createSongDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<Guid>> UploadSong(CreateSongDto createSongDto, CancellationToken cancellationToken)
     {
         var command = new CreateSongCommand(
             UserId: UserId,
@@ -98,7 +122,13 @@ public class SongsController : BaseController
             SongPath: createSongDto.AudioId.ToString(),
             ImagePath: createSongDto.ImageId.ToString()
         );
-        var songId = await Mediator.Send(command, cancellationToken);
-        return Ok(songId);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 }

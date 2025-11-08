@@ -16,8 +16,7 @@ public static class DependencyInjection
         var handlerTypes = assembly.GetTypes()
             .Where(t => t.GetInterfaces().Any(i => 
                 i.IsGenericType && 
-                (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
-                 i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
                  i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
                  i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))))
             .ToList();
@@ -27,8 +26,7 @@ public static class DependencyInjection
             // Register handler as its implemented interface
             var implementedInterfaces = handlerType.GetInterfaces()
                 .Where(i => i.IsGenericType && 
-                    (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
-                     i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                    (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
                      i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
                      i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
                 .ToList();

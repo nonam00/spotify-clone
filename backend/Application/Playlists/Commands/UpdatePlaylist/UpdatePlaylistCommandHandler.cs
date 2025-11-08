@@ -1,14 +1,14 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.ValueObjects;
-using Application.Shared.Messaging;
-using Application.Playlists.Interfaces;
 using Application.Shared.Data;
-using Application.Shared.Exceptions;
+using Application.Shared.Messaging;
+using Application.Playlists.Errors;
+using Application.Playlists.Interfaces;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
-public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistCommand>
+public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistCommand, Result>
 {
     private readonly IPlaylistsRepository _playlistsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -24,7 +24,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         _logger = logger;
     }
 
-    public async Task Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
     {
         var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken);
         
@@ -33,7 +33,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
             _logger.LogError(
                 "User {userId} tried update details of playlist {playlistId} but playlist does not exist",
                 request.UserId, request.PlaylistId);
-            throw new ArgumentException("Playlist does not exist.");
+            return Result.Failure(PlaylistErrors.NotFound);
         }
         
         if (playlist.UserId != request.UserId)
@@ -41,7 +41,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
             _logger.LogWarning(
                 "User {userId} tried to update details of playlist {playlist} but playlist belongs to user {ownerId}",
                 request.UserId, request.PlaylistId, playlist.UserId);
-            throw new OwnershipException("You do not have permission to update this playlist");
+            return Result.Failure(PlaylistErrors.OwnershipError);
         }
         
         var title = request.Title;
@@ -52,5 +52,6 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         _playlistsRepository.Update(playlist);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }

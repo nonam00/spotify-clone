@@ -3,13 +3,13 @@
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Shared.Data;
-using Application.Shared.Exceptions;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.CreateUser;
 
-public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
+public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -27,7 +27,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
         _logger = logger;
     }
 
-    public async Task Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var checkUser = await _usersRepository.GetByEmail(request.Email, cancellationToken);
         
@@ -38,12 +38,12 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
                 _logger.LogInformation(               
                     "Tried to create user with email {email} which is already exists but not active.",
                     request.Email);
-                throw new LoginException("Activate your account!");
+                return Result.Failure(UserErrors.AlreadyExistButNotActive);
             }
             _logger.LogInformation(
                 "Tried to create user with email {email} which is already active.",
                 request.Email);
-            throw new LoginException("User with this email already exits");
+            return Result.Failure(UserErrors.AlreadyExist);
         }
 
         var hashedPassword = _passwordHasher.Generate(request.Password);
@@ -55,5 +55,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand>
         
         await _usersRepository.Add(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

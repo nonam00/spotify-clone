@@ -1,10 +1,11 @@
 ﻿using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.DeleteRefreshToken;
 
-public class DeleteRefreshTokenCommandHandler : ICommandHandler<DeleteRefreshTokenCommand>
+public class DeleteRefreshTokenCommandHandler : ICommandHandler<DeleteRefreshTokenCommand, Result>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository; 
     private readonly IUnitOfWork _unitOfWork;
@@ -15,16 +16,18 @@ public class DeleteRefreshTokenCommandHandler : ICommandHandler<DeleteRefreshTok
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Handle(DeleteRefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteRefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var refreshToken = await _refreshTokensRepository.GetByValue(request.RefreshToken, cancellationToken);
 
         if (refreshToken == null)
         {
-            throw new ArgumentException($"Refresh token {request.RefreshToken} doesn't exist");
+            return Result.Failure(RefreshTokenErrors.NotFound);
         }
         
         _refreshTokensRepository.Delete(refreshToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

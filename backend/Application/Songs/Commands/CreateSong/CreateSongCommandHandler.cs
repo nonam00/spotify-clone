@@ -6,7 +6,7 @@ using Application.Songs.Interfaces;
 
 namespace Application.Songs.Commands.CreateSong;
 
-public class CreateSongCommandHandler : ICommandHandler<CreateSongCommand, Guid>
+public class CreateSongCommandHandler : ICommandHandler<CreateSongCommand, Result<Guid>>
 {
     private readonly ISongsRepository _songsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,7 +17,7 @@ public class CreateSongCommandHandler : ICommandHandler<CreateSongCommand, Guid>
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Guid> Handle(CreateSongCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateSongCommand request, CancellationToken cancellationToken)
     {
         var audioPath = new FilePath(request.SongPath);
         var imagePath = new FilePath(request.ImagePath);
@@ -26,6 +26,6 @@ public class CreateSongCommandHandler : ICommandHandler<CreateSongCommand, Guid>
         await _songsRepository.Add(song, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return song.Id;
+        return Result<Guid>.Success(song.Id);
     }
 }

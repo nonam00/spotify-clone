@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Logging;
 
 using Application.Shared.Data;
-using Application.Shared.Exceptions;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByCredentials;
 
-public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, TokenPair>
+public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, Result<TokenPair>>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -29,21 +29,25 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
         _logger = logger;
     }
 
-    public async Task<TokenPair> Handle(LoginByCredentialsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TokenPair>> Handle(LoginByCredentialsQuery request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByEmailWithRefreshTokens(request.Email, cancellationToken)
-            ?? throw new LoginException("Invalid email or password. Please try again.");
+        var user = await _usersRepository.GetByEmailWithRefreshTokens(request.Email, cancellationToken);
+
+        if (user == null)
+        {
+            return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
+        }
 
         if (!user.IsActive)
         {
             _logger.LogInformation("Non active user {userId} with tried to login.", user.Id);
-            throw new LoginException("Account is not activated");
+            return Result<TokenPair>.Failure(UserErrors.AlreadyExistButNotActive);
         }
         
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
             _logger.LogInformation("Invalid login attempt by user {userId}.", user.Id);
-            throw new LoginException("Invalid email or password. Please try again.");
+            return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
         }
 
         var accessToken = _jwtProvider.GenerateToken(user);
@@ -55,6 +59,6 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
 
         _logger.LogInformation("Generated token pair for user {userId}", user.Id);
 
-        return new TokenPair(accessToken, refreshTokenValue);
+        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
     }
 }

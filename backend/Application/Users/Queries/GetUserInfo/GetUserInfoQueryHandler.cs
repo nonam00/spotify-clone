@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Application.Users.Models;
 
 namespace Application.Users.Queries.GetUserInfo;
 
-public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, UserInfo>
+public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, Result<UserInfo>>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly ILogger<GetUserInfoQueryHandler> _logger;
@@ -17,17 +19,16 @@ public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, UserInfo>
         _logger = logger;
     }
 
-    public async Task<UserInfo> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserInfo>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken);
 
         if (user != null)
         {
-            return new UserInfo(user.Email, user.FullName, user.AvatarPath);
+            return Result<UserInfo>.Success(new UserInfo(user.Email, user.FullName, user.AvatarPath));
         }
         
         _logger.LogWarning("Tried to get info for non-existing user {userId}", request.UserId);
-        throw new Exception("You are trying to get info for non-existing user");
-
+        return Result<UserInfo>.Failure(UserErrors.NotFound);
     }
 }
