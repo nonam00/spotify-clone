@@ -37,7 +37,7 @@ const PlayerContent = ({
     s.setVolume,
   ]));
 
-  const { audioRef, isPlaying, duration, currentTime } = useSound(songUrl, volume, setNextId);
+  const { audioRef, isPlaying, duration, currentTime } = useSound(song, songUrl, volume, setNextId, setPreviousId);
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
