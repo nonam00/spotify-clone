@@ -9,11 +9,11 @@ https://github.com/user-attachments/assets/e064eb61-1632-4a06-ac58-bdb705514cf3
 The project is built on a microservices architecture and includes:
 
 ### Backend (ASP.NET Core)
-- **Domain Layer** - domain anemic models
-- **Application Layer** - application layer with business logic implemented using CQRS pattern
+- **Domain Layer** - rich domain models with business logic, entities, value objects, domain events
+- **Application Layer** - implements use cases using CQRS pattern, domain event handlers and result pattern
 - **Infrastructure Layer** - external services (JWT, Email, password hashing)
-- **Persistence Layer** - database interaction (ORM - Entity Framework Core)
-- **WebAPI Layer** - REST API controllers
+- **Persistence Layer** - database interaction (ORM - Entity Framework Core) with repository pattern
+- **WebAPI Layer** - REST API controllers, DTOs and middleware
 
 ### Frontend (Next.js 16)
 - **React 19** with TypeScript
@@ -75,7 +75,7 @@ The project is built on a microservices architecture and includes:
 
 ## 📋 Development Plans
 
-### In Development
+### Plans
 - [ ] **Moderation Service** - Automatic verification of uploaded content
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
