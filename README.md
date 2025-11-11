@@ -2,6 +2,8 @@
 
 is a modern music streaming web application built using a microservices architecture. It allows users to upload, listen, and organize music tracks into personalized playlists.
 
+https://github.com/user-attachments/assets/e064eb61-1632-4a06-ac58-bdb705514cf3
+
 ## 🏗️ Architecture
 
 The project is built on a microservices architecture and includes:
