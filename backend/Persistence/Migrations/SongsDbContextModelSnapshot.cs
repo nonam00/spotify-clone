@@ -22,7 +22,7 @@ namespace Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.LikedSong", b =>
+            modelBuilder.Entity("Domain.Models.LikedSong", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -33,10 +33,8 @@ namespace Persistence.Migrations
                         .HasColumnName("song_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
 
                     b.HasKey("UserId", "SongId")
                         .HasName("pk_liked_songs");
@@ -47,31 +45,35 @@ namespace Persistence.Migrations
                     b.ToTable("liked_songs", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Playlist", b =>
+            modelBuilder.Entity("Domain.Models.Playlist", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
 
                     b.Property<string>("ImagePath")
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("image_path");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -86,7 +88,7 @@ namespace Persistence.Migrations
                     b.ToTable("playlists", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.PlaylistSong", b =>
+            modelBuilder.Entity("Domain.Models.PlaylistSong", b =>
                 {
                     b.Property<Guid>("PlaylistId")
                         .HasColumnType("uuid")
@@ -97,10 +99,12 @@ namespace Persistence.Migrations
                         .HasColumnName("song_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("PlaylistId", "SongId")
                         .HasName("pk_playlist_songs");
@@ -111,10 +115,9 @@ namespace Persistence.Migrations
                     b.ToTable("playlist_songs", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.RefreshToken", b =>
+            modelBuilder.Entity("Domain.Models.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -149,7 +152,7 @@ namespace Persistence.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Song", b =>
+            modelBuilder.Entity("Domain.Models.Song", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,33 +161,35 @@ namespace Persistence.Migrations
 
                     b.Property<string>("Author")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("author");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("image_path");
 
                     b.Property<string>("SongPath")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("song_path");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("title");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid?>("UploaderId")
                         .HasColumnType("uuid")
-                        .HasColumnName("user_id");
+                        .HasColumnName("uploader_id");
 
                     b.HasKey("Id")
                         .HasName("pk_songs");
@@ -199,13 +204,13 @@ namespace Persistence.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Title"), "gin");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_songs_user_id");
+                    b.HasIndex("UploaderId")
+                        .HasDatabaseName("ix_songs_uploader_id");
 
                     b.ToTable("songs", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.User", b =>
+            modelBuilder.Entity("Domain.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -213,22 +218,23 @@ namespace Persistence.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarPath")
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("avatar_path");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("full_name");
 
                     b.Property<bool>("IsActive")
@@ -239,7 +245,8 @@ namespace Persistence.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("password_hash");
 
                     b.HasKey("Id")
@@ -252,17 +259,17 @@ namespace Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.LikedSong", b =>
+            modelBuilder.Entity("Domain.Models.LikedSong", b =>
                 {
-                    b.HasOne("Domain.Song", "Song")
+                    b.HasOne("Domain.Models.Song", "Song")
                         .WithMany()
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_liked_songs_songs_song_id");
 
-                    b.HasOne("Domain.User", "User")
-                        .WithMany("LikedSongs")
+                    b.HasOne("Domain.Models.User", "User")
+                        .WithMany("UserLikedSongs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -273,26 +280,28 @@ namespace Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Playlist", b =>
+            modelBuilder.Entity("Domain.Models.Playlist", b =>
                 {
-                    b.HasOne("Domain.User", null)
+                    b.HasOne("Domain.Models.User", "User")
                         .WithMany("Playlists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_playlists_users_user_id");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.PlaylistSong", b =>
+            modelBuilder.Entity("Domain.Models.PlaylistSong", b =>
                 {
-                    b.HasOne("Domain.Playlist", "Playlist")
-                        .WithMany()
+                    b.HasOne("Domain.Models.Playlist", "Playlist")
+                        .WithMany("PlaylistSongs")
                         .HasForeignKey("PlaylistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_playlist_songs_playlists_playlist_id");
 
-                    b.HasOne("Domain.Song", "Song")
+                    b.HasOne("Domain.Models.Song", "Song")
                         .WithMany()
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -304,9 +313,9 @@ namespace Persistence.Migrations
                     b.Navigation("Song");
                 });
 
-            modelBuilder.Entity("Domain.RefreshToken", b =>
+            modelBuilder.Entity("Domain.Models.RefreshToken", b =>
                 {
-                    b.HasOne("Domain.User", "User")
+                    b.HasOne("Domain.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -316,24 +325,29 @@ namespace Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Song", b =>
+            modelBuilder.Entity("Domain.Models.Song", b =>
                 {
-                    b.HasOne("Domain.User", "User")
+                    b.HasOne("Domain.Models.User", "Uploader")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UploaderId")
                         .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_songs_users_user_id");
+                        .HasConstraintName("fk_songs_users_uploader_id");
 
-                    b.Navigation("User");
+                    b.Navigation("Uploader");
                 });
 
-            modelBuilder.Entity("Domain.User", b =>
+            modelBuilder.Entity("Domain.Models.Playlist", b =>
                 {
-                    b.Navigation("LikedSongs");
+                    b.Navigation("PlaylistSongs");
+                });
 
+            modelBuilder.Entity("Domain.Models.User", b =>
+                {
                     b.Navigation("Playlists");
 
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("UserLikedSongs");
                 });
 #pragma warning restore 612, 618
         }

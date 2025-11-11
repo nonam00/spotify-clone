@@ -48,13 +48,16 @@ const Playlist = async ({
                 text-center font-semibold text-neutral-300
                 md:box md:text-sm md:text-left md:text-white
               ">
-                {playlist.description ?? "No description"}
+                {
+                  (!playlist.description || playlist.description.length == 0)
+                  ? "No description" : playlist.description
+                }
               </p>
             </div>
           </div>
         </div>
       </Header>
-      <PlaylistContent id={id} songs={songs}/>
+      <PlaylistContent id={id} initialSongs={songs}/>
     </div>
   );
 }

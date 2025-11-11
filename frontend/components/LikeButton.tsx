@@ -77,7 +77,7 @@ const LikeButton = ({
       className="hover:opacity-75 transition cursor-pointer"
     >
       {isLiked
-        ? <AiFillHeart color="22c55e" size={25} />
+        ? <AiFillHeart color="#22c55e" size={25} />
         : <AiOutlineHeart color="white" size={25} />
       }
     </button>

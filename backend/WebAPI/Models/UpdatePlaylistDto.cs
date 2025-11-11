@@ -4,7 +4,7 @@ namespace WebAPI.Models;
 
 public class UpdatePlaylistDto
 {
-    [Required] public string Title { get; set; } = null!;
-    public string? Description { get; set; }
-    public string? ImageId { get; set; }
+    [Required] public string Title { get; init; } = null!;
+    public string? Description { get; init; }
+    public string? ImageId { get; init; }
 }

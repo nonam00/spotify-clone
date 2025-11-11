@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import {startTransition, useState} from "react";
 import { FaPlay } from "react-icons/fa";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
@@ -14,17 +15,24 @@ import SongListItem from "@/components/SongListItem";
 
 const PlaylistContent = ({
   id,
-  songs
+  initialSongs
 }: {
   id: string;
-  songs: Song[];
+  initialSongs: Song[];
 }) => {
   const router = useRouter();
+  const [songs, setSongs] = useState<Song[]>(initialSongs);
   const onPlay = useOnPlay(songs);
 
   const onPlayClick = () => {
     if (songs.length === 0) return;
     onPlay(songs[0].id);
+  }
+
+  const onRemoveClick = (songId: string) => {
+    startTransition(() =>{
+      setSongs(prevSongs => prevSongs.filter(song => song.id !== songId));
+    })
   }
 
   return (
@@ -38,11 +46,11 @@ const PlaylistContent = ({
           "
           aria-label="Play playlist"
         >
-          <FaPlay className="text-black" size="20" />
+          <FaPlay className="text-black cursor-pointer" size="20" />
         </button>
         <button
           onClick={() => { router.push(`/playlist/${id}/add?searchString=&type=all`) }}
-          className="flex flex-end mx-5 rounded-full hover:scale-105"
+          className="flex flex-end mx-5 rounded-full hover:scale-105 cursor-pointer"
         >
           <AiOutlinePlusCircle className="text-neutral-400" size="35" />
         </button>
@@ -59,10 +67,13 @@ const PlaylistContent = ({
               <SongListItem
                 key={song.id}
                 song={song}
-                likeButton={true}
                 onClickCallback={onPlay}
               >
-                <RemoveButton playlistId={id} songId={song.id} />
+                <RemoveButton
+                  playlistId={id}
+                  songId={song.id}
+                  callback={onRemoveClick}
+                />
               </SongListItem>
             ))
         }

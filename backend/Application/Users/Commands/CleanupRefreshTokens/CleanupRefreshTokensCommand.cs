@@ -1,5 +1,6 @@
-﻿using Application.Shared.Messaging;
+﻿using Application.Shared.Data;
+using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.CleanupRefreshTokens;
 
-public record CleanupRefreshTokensCommand : ICommand;
+public record CleanupRefreshTokensCommand : ICommand<Result>;

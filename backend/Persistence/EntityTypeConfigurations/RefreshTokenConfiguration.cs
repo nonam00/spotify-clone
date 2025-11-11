@@ -1,7 +1,7 @@
-﻿using Domain;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Domain.Models;
 
 namespace Persistence.EntityTypeConfigurations;
 
@@ -9,10 +9,15 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
-        builder.HasKey(rf => rf.Id);
+        builder.HasKey(rt => rt.Id);
+        // To avoid problems when working with child collections 
+        builder.Property(rt => rt.Id).ValueGeneratedNever();
+
+        builder.Property(rt => rt.UserId).IsRequired();
         
-        builder.Property(rf => rf.Token).HasMaxLength(200);
-        
-        builder.HasIndex(rf => rf.Token).IsUnique();
+        builder.Property(rt => rt.Token).IsRequired().HasMaxLength(200);
+        builder.HasIndex(rt => rt.Token).IsUnique();
+
+        builder.Property(rt => rt.CreatedAt);
     }
 }

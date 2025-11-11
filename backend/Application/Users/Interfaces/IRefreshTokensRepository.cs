@@ -1,13 +1,13 @@
-﻿using Domain;
+﻿using Domain.Models;
 
 namespace Application.Users.Interfaces;
 
 public interface IRefreshTokensRepository
 {
-    Task Add(RefreshToken refreshToken, CancellationToken cancellationToken = default);
-    Task<RefreshToken> GetByValue(string token, CancellationToken cancellationToken = default);
-    Task<RefreshToken> GetRelevantByValue(string token, CancellationToken cancellationToken = default);
-    Task Update(RefreshToken refreshToken, CancellationToken cancellationToken = default);
-    Task Delete(RefreshToken refreshToken, CancellationToken cancellationToken = default);
-    Task DeleteExpired(CancellationToken cancellationToken = default);
+    Task<RefreshToken?> GetByValue(string token, CancellationToken cancellationToken = default);
+    Task<RefreshToken?> GetByValueWithUser(string token, CancellationToken cancellationToken = default);
+    Task<List<RefreshToken>> GetExpiredList(CancellationToken cancellationToken = default);
+    void Update(RefreshToken refreshToken);
+    void Delete(RefreshToken refreshToken);
+    void DeleteRange(IEnumerable<RefreshToken> refreshTokens);
 }

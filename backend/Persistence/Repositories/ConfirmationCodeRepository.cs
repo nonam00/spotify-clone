@@ -16,12 +16,12 @@ public class ConfirmationCodesRepository : IConfirmationCodesRepository
 
     public async Task SetConfirmationCode(string email, string code, TimeSpan expiry)
     {
-        await _redisDb.StringSetAsync($"{Prefix}:{email}", code, expiry);
+        await _redisDb.StringSetAsync($"{Prefix}:{email}", code, expiry).ConfigureAwait(false);
     }
 
     public async Task<string?> GetConfirmationCode(string email)
     {
-        var code = await _redisDb.StringGetAsync($"{Prefix}:{email}");
+        var code = await _redisDb.StringGetAsync($"{Prefix}:{email}").ConfigureAwait(false);
         return code;
     }
 }

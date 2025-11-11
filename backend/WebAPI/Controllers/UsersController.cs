@@ -6,13 +6,11 @@ using Application.Users.Models;
 using Application.Users.Queries.GetUserInfo;
 using Application.Users.Commands.UpdatePassword;
 using Application.Users.Commands.UpdateUser;
-
-using Application.LikedSongs.Models;
-using Application.LikedSongs.Queries.CheckLikedSong;
-using Application.LikedSongs.Commands.CreateLikedSong;
-using Application.LikedSongs.Commands.DeleteLikedSong;
-using Application.LikedSongs.Queries.GetLikedSongList.GetLikedSongList;
-
+using Application.Songs.Models;
+using Application.Songs.Queries.GetLikedSongList;
+using Application.Users.Queries.CheckLike;
+using Application.Users.Commands.LikeSong;
+using Application.Users.Commands.UnlikeSong;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -20,7 +18,6 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
 public class UsersController : BaseController
 {
-    private readonly HttpClient _httpClient = new();
     /// <summary>
     /// Gets user info
     /// </summary>
@@ -33,8 +30,14 @@ public class UsersController : BaseController
     public async Task<ActionResult<UserInfo>> GetUserInfo(CancellationToken cancellationToken)
     {
         var query = new GetUserInfoQuery(UserId);
-        var info = await Mediator.Send(query, cancellationToken);
-        return Ok(info);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -52,15 +55,12 @@ public class UsersController : BaseController
     {
         var updateUserCommand = new UpdateUserCommand(
             UserId: UserId, FullName: updateUserInfoDto.FullName, AvatarPath: updateUserInfoDto.AvatarId);
-
-        var oldImagePath = await Mediator.Send(updateUserCommand, cancellationToken);
-        
-        if (oldImagePath is not null)
-        {            
-            await _httpClient.DeleteAsync("http://nginx/files/api/v1?type=image&file_id=" + oldImagePath, cancellationToken);
+        var result = await Mediator.Send(updateUserCommand, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return NoContent();
         }
-        
-        return NoContent();
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -81,8 +81,14 @@ public class UsersController : BaseController
             CurrentPassword: updateUserPasswordDto.CurrentPassword,
             NewPassword: updateUserPasswordDto.NewPassword);
         
-        await Mediator.Send(updatePasswordCommand, cancellationToken);
-        return NoContent();
+        var result = await Mediator.Send(updatePasswordCommand, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -94,11 +100,17 @@ public class UsersController : BaseController
     [HttpGet("songs"), Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<LikedSongListVm>> GetLikedSongList(CancellationToken cancellationToken)
+    public async Task<ActionResult<SongListVm>> GetLikedSongList(CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListQuery(UserId);
-        var vm = await Mediator.Send(query, cancellationToken);
-        return Ok(vm);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
@@ -114,31 +126,43 @@ public class UsersController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetLikedSong(Guid songId, CancellationToken cancellationToken)
     {
-        var query = new CheckLikedSongQuery(UserId: UserId, SongId: songId);
-        var check = await Mediator.Send(query, cancellationToken);
-        return Ok(new { check });
+        var query = new CheckLikeQuery(UserId: UserId, SongId: songId);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Ok(new { check = result.Value});
+        }
+        
+        throw new Exception(result.Error.Description);
     }
 
     /// <summary>
-    /// Creates liked song data for certain song and user
+    /// Add song to user favorites collection 
     /// </summary>
-    /// <param name="songId">ID of song ot like</param>
+    /// <param name="songId">ID of song to like</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns string</returns>
-    /// <response code="201">Success</response>
+    /// <response code="201">Created</response>
     /// <response code="401">If user is unauthorized</response>
     [HttpPost("songs/{songId:guid}"), Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<string>> CreateLiked(Guid songId, CancellationToken cancellationToken)
+    public async Task<IActionResult> LikeSong(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new CreateLikedSongCommand(UserId: UserId, SongId: songId);
-        var likedId = await Mediator.Send(command, cancellationToken);
-        return Ok(likedId);
+        var command = new LikeSongCommand(UserId: UserId, SongId: songId);
+        var result = await Mediator.Send(command, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return Created();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
-    /// Delete liked song data by song ID
+    /// Delete song from user favorites collection
     /// </summary>
     /// <param name="songId">ID of the song to remove from user favorites</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -147,10 +171,16 @@ public class UsersController : BaseController
     [HttpDelete("songs/{songId:guid}"), Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeleteLiked(Guid songId, CancellationToken cancellationToken)
+    public async Task<IActionResult> UnlikeSong(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new DeleteLikedSongCommand(UserId: UserId, SongId: songId);
-        await Mediator.Send(command, cancellationToken);
-        return NoContent();
+        var command = new UnlikeSongCommand(UserId: UserId, SongId: songId);
+        var result = await Mediator.Send(command, cancellationToken);
+       
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 }

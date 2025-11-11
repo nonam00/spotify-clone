@@ -1,0 +1,21 @@
+﻿using Application.Shared.Data;
+using Application.Shared.Messaging;
+using Application.Users.Interfaces;
+
+namespace Application.Users.Queries.CheckLike;
+
+public class CheckLikeQueryHandler : IQueryHandler<CheckLikeQuery, Result<bool>>
+{
+    private readonly IUsersRepository _usersRepository;
+    
+    public CheckLikeQueryHandler(IUsersRepository usersRepository)
+    {
+        _usersRepository = usersRepository;
+    }
+
+    public async Task<Result<bool>> Handle(CheckLikeQuery request, CancellationToken cancellationToken)
+    {
+        var isLiked = await _usersRepository.CheckIfSongLiked(request.UserId, request.SongId, cancellationToken);
+        return Result<bool>.Success(isLiked);
+    }
+}

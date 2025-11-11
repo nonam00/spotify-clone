@@ -4,8 +4,8 @@ namespace WebAPI.Models;
 
 public class CreateSongDto
 {
-    [Required] public string Title { get; set; } = null!;
-    [Required] public string Author { get; set; } = null!;
-    [Required] public Guid ImageId { get; set; }
-    [Required] public Guid AudioId{ get; set; }
+    [Required] public string Title { get; init; } = null!;
+    [Required] public string Author { get; init; } = null!;
+    [Required] public Guid ImageId { get; init; }
+    [Required] public Guid AudioId{ get; init; }
 }

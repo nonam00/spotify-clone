@@ -1,31 +1,57 @@
-﻿using Application.Users.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+
+using Domain.ValueObjects;
+using Application.Shared.Data;
+using Application.Users.Interfaces;
 using Application.Shared.Messaging;
+using Application.Users.Errors;
 
 namespace Application.Users.Commands.UpdatePassword;
 
-public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand>
+public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdatePasswordCommandHandler> _logger;
 
-    public UpdatePasswordCommandHandler(IUsersRepository usersRepository, IPasswordHasher passwordHasher)
+    public UpdatePasswordCommandHandler(
+        IUsersRepository usersRepository,
+        IPasswordHasher passwordHasher,
+        IUnitOfWork unitOfWork,
+        ILogger<UpdatePasswordCommandHandler> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
-    public async Task Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken);
 
+        if (user == null)
+        {
+            _logger.LogError("Tried to change password but user with id {userId} doesn't exist", request.UserId);
+            return Result.Failure(UserErrors.NotFound);
+        }
+
         if (!_passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
         {
-            throw new Exception("Password doesnt match");
+            _logger.LogInformation(
+                "User {userId} tried to change password but password {requestCurrentPassword} doesn't match with the actual password",
+                request.UserId, request.CurrentPassword);
+            return Result.Failure(UserErrors.PasswordsMissMatch);
         }
 
         var newPasswordHash = _passwordHasher.Generate(request.NewPassword);
-        user.PasswordHash = newPasswordHash;
+        var passwordHash = new PasswordHash(newPasswordHash);
+        user.ChangePassword(passwordHash);
         
-        await _usersRepository.Update(user, cancellationToken);
+        _usersRepository.Update(user);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
     }
 }

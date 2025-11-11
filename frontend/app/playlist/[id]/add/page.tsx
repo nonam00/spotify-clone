@@ -36,7 +36,7 @@ const Add = async ({
           <SearchInput pageUrl={`/playlist/${id}/add/`} types={false}/>
         </div>
       </Header>
-      <AddContent playlistId={playlist.id} songs={songs} />
+      <AddContent playlistId={playlist.id} songs={ songs} />
     </div>
   )
 }

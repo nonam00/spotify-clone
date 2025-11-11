@@ -98,7 +98,7 @@ const Header = ({
               <div>
                 <Button
                   onClick={openAuthModal}
-                  className="bg-transparent text-neutral-300  font-medium"
+                  className="bg-transparent text-neutral-300 font-medium"
                 >
                   Sign Up
                 </Button>

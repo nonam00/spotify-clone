@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
-using Application.Shared.Exceptions;
-
 namespace WebAPI.Middleware;
 
 public class GlobalExceptionHandler : IExceptionHandler
@@ -19,8 +17,6 @@ public class GlobalExceptionHandler : IExceptionHandler
         context.Response.StatusCode = exception switch
         {
             ValidationException => (int)HttpStatusCode.BadRequest,
-            LoginException => (int)HttpStatusCode.BadRequest,
-            OwnershipException => (int)HttpStatusCode.Forbidden,
             _ => context.Response.StatusCode
         };
 
@@ -33,7 +29,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         return true;
     }
-    private ProblemDetails CreateProblemDetails(in HttpContext context, in Exception exception)
+    private static ProblemDetails CreateProblemDetails(in HttpContext context, in Exception exception)
     {
         var reasonPhrase = ReasonPhrases.GetReasonPhrase(context.Response.StatusCode);
         
@@ -60,13 +56,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     private static string ToJson(in ProblemDetails problemDetails)
     {
-        try
-        {
-            return JsonSerializer.Serialize(problemDetails);
-        }
-        catch
-        {
-            return "An exception has occurred while serializing error to JSON";
-        }
+        try { return JsonSerializer.Serialize(problemDetails); }
+        catch { return "An exception has occurred while serializing error to JSON"; }
     }
 }

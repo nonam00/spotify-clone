@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Domain;
+using Domain.Models;
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
 
@@ -9,31 +9,28 @@ namespace Persistence.Repositories;
 public class PlaylistsRepository : IPlaylistsRepository
 {
     private readonly SongsDbContext _dbContext;
-
+    
     public PlaylistsRepository(SongsDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<Playlist> GetById(Guid playlistId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Playlist?> GetById(Guid playlistId, CancellationToken cancellationToken = default)
     {
         var playlist = await _dbContext.Playlists
             .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == playlistId && p.UserId == userId, cancellationToken)
-            ?? throw new Exception("Playlist this such ID doesn't exist");
-            
+            .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken);
+        
         return playlist;
     }
 
-    public async Task<PlaylistVm> GetVmById(Guid playlistId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Playlist?> GetByIdWithSongs(Guid playlistId, CancellationToken cancellationToken = default)
     {
         var playlist = await _dbContext.Playlists
-            .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == playlistId && p.UserId == userId, cancellationToken) 
-            ?? throw new Exception("Playlist this such ID doesn't exist");
-
-        var playlistVm = ToVm(playlist);
-        return playlistVm;
+            .Include(p => p.PlaylistSongs)
+            .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken);
+        
+        return playlist;
     }
 
     public async Task<List<PlaylistVm>> GetList(Guid userId, CancellationToken cancellationToken = default)
@@ -41,9 +38,10 @@ public class PlaylistsRepository : IPlaylistsRepository
         var playlists = await _dbContext.Playlists
             .AsNoTracking()
             .Where(p => p.UserId == userId)
-            .OrderByDescending(p => p.CreatedAt)
+            .OrderByDescending(p => p.UpdatedAt)
             .Select(p => ToVm(p))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         
         return playlists;
     }
@@ -53,42 +51,20 @@ public class PlaylistsRepository : IPlaylistsRepository
         var playlists = await _dbContext.Playlists
             .AsNoTracking()
             .Where(p => p.UserId == userId)
-            .OrderByDescending(p => p.CreatedAt)
+            .OrderByDescending(p => p.UpdatedAt)
             .Select(p => ToVm(p))
             .Take(count)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return playlists;
     }
 
-    public async Task<int> GetCount(Guid userId, CancellationToken cancellationToken = default)
-    {
-        var count = await _dbContext.Playlists
-            .AsNoTracking()
-            .CountAsync(p => p.UserId == userId, cancellationToken);
-
-        return count;
-    }
-
-    public async Task Add(Playlist playlist, CancellationToken cancellationToken = default)
-    {
-        await _dbContext.Playlists.AddAsync(playlist, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task Delete(Playlist playlist, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Playlists.Remove(playlist);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task Update(Playlist playlist, CancellationToken cancellationToken = default)
-    {
+    public void Update(Playlist playlist) =>
         _dbContext.Playlists.Update(playlist);
-        await _dbContext.SaveChangesAsync(cancellationToken);   
-    }
+    
 
     private static PlaylistVm ToVm(Playlist playlist) =>
-        new(playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath);
+        new (playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath.Value);
     
 }

@@ -1,4 +1,5 @@
 import {RefObject, useEffect, useRef, useState} from "react";
+import {Song} from "@/types/types";
 
 type useSoundReturnType = {
   audioRef: RefObject<HTMLAudioElement | null>,
@@ -7,7 +8,7 @@ type useSoundReturnType = {
   currentTime: number
 }
 
-function useSound(songUrl: string, volume: number, setNextSong: () => void): useSoundReturnType {
+function useSound(song: Song, songUrl: string, volume: number, setNextSong: () => void, setPreviousSong: () => void): useSoundReturnType {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -34,17 +35,49 @@ function useSound(songUrl: string, volume: number, setNextSong: () => void): use
 
     // Attempt autoplay and handle errors
     audio.play().catch(error => {
-      console.log("Autoplay error:", error);
+      console.error("Autoplay error:", error);
       setIsPlaying(false);
     });
 
+    // Configuration of media player widget in user device
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.author,
+        artwork: [{
+          src: song.imagePath,
+          sizes: "512x512",
+          type: "image/*",
+        }]
+      });
+
+      navigator.mediaSession.setActionHandler('play', () => audio.play());
+      navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+      navigator.mediaSession.setActionHandler('previoustrack', setPreviousSong);
+      navigator.mediaSession.setActionHandler('nexttrack', setNextSong);
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime !== undefined) {
+          audio.currentTime = details.seekTime;
+        }
+      })
+    }
+
+
     return () => {
       audio.pause();
+
       audio.removeEventListener('play', handlePlayEvent);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
+
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('seekto', null);
     };
   }, [songUrl]);
 

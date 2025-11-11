@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
+using Domain.Common;
 using Application.Shared.Messaging;
 
 namespace Application;
@@ -10,14 +11,15 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // Register all handlers from assembly
         var assembly = Assembly.GetExecutingAssembly();
+        
+        // Register all handlers from assembly
         var handlerTypes = assembly.GetTypes()
             .Where(t => t.GetInterfaces().Any(i => 
                 i.IsGenericType && 
-                (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
-                 i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                 i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>))))
+                (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                 i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+                 i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))))
             .ToList();
 
         foreach (var handlerType in handlerTypes)
@@ -25,9 +27,9 @@ public static class DependencyInjection
             // Register handler as its implemented interface
             var implementedInterfaces = handlerType.GetInterfaces()
                 .Where(i => i.IsGenericType && 
-                    (i.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
-                     i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                     i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)))
+                    (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                     i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+                     i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
                 .ToList();
 
             foreach (var interfaceType in implementedInterfaces)
@@ -40,7 +42,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblies([assembly]);
         
         // Register custom mediator
-        services.AddScoped<IMediator, Mediator>();  
+        services.AddScoped<IMediator, Mediator>();
+        
+        services.AddScoped<IDomainEventDispatcher, InMemoryDomainEventDispatcher>();
         
         return services;
     }
