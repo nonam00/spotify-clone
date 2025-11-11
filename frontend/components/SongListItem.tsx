@@ -7,12 +7,14 @@ const SongListItem = ({
   onClickCallback,
   likeButton,
   likeDefault,
+  selected,
   children
 }: {
   song: Song
   onClickCallback: (id: string) => void,
   likeButton?: boolean,
-  likeDefault?: boolean
+  likeDefault?: boolean,
+  selected?: boolean,
   children?: React.ReactNode
 }) => {
   return (
@@ -24,7 +26,7 @@ const SongListItem = ({
         onClick={() => onClickCallback(song.id)}
         className="flex-1"
       >
-        <MediaItem data={song}/>
+        <MediaItem data={song} selected={selected}/>
       </div>
       <div className="flex flex-row gap-x-6">
         {children}

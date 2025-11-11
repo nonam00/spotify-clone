@@ -57,7 +57,7 @@ const Playlist = async ({
           </div>
         </div>
       </Header>
-      <PlaylistContent id={id} songs={songs}/>
+      <PlaylistContent id={id} initialSongs={songs}/>
     </div>
   );
 }

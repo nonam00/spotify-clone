@@ -6,6 +6,7 @@ using Application.Playlists.Models;
 using Application.Playlists.Queries.GetPlaylistById;
 using Application.Playlists.Commands.UpdatePlaylist;
 using Application.Playlists.Commands.AddSongToPlaylist;
+using Application.Playlists.Commands.AddSongsToPlaylist;
 using Application.Playlists.Commands.RemoveSongFromPlaylist;
 using Application.Playlists.Errors;
 using Application.Playlists.Queries.GetFullPlaylistList;
@@ -205,20 +206,22 @@ public class PlaylistsController : BaseController
     }
 
     /// <summary>
-    /// Adds the song into the playlist
+    /// Adds the song to the playlist
     /// </summary>
     /// <param name="playlistId">ID of the playlist to which the song is adding</param>
     /// <param name="songId">ID of the song which is adding to the playlist</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>Returns db key of created relation</returns>
     /// <response code="201">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpPost("{playlistId:guid}/songs/{songId:guid}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> AddSongToPlaylist(Guid playlistId, Guid songId)
+    public async Task<IActionResult> AddSongToPlaylist(
+        Guid playlistId, Guid songId, CancellationToken cancellationToken)
     {
         var command = new AddSongToPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -228,6 +231,35 @@ public class PlaylistsController : BaseController
         return BadRequest(new { Detail = result.Error.Description });
     }
 
+
+    /// <summary>
+    /// Adds songs to the playlist
+    /// </summary>
+    /// <param name="playlistId">ID of the playlist to which the song is adding</param>
+    /// <param name="songId">ID of the song which is adding to the playlist</param>
+    /// <param name="addSongsToPlaylistDto"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Returns db key of created relation</returns>
+    /// <response code="201">Success</response>
+    /// <response code="401">If the user is unauthorized</response>
+    [HttpPost("{playlistId:guid}/songs/")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AddSongsToPlaylist(
+            Guid playlistId, AddSongsToPlaylistDto addSongsToPlaylistDto, CancellationToken cancellationToken)
+    {
+        var command = new AddSongsToPlaylistCommand(
+            UserId: UserId, PlaylistId: playlistId, SongIds: addSongsToPlaylistDto.SongIds);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+        
     /// <summary>
     /// Removes the song from the playlist
     /// </summary>
@@ -289,7 +321,7 @@ public class PlaylistsController : BaseController
     [HttpGet("{playlistId:guid}/liked/{searchString}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<SongListVm>> GetLikedSongsBySearchString(
+    public async Task<ActionResult<SongListVm>> GetLikedSongsNotInPlaylistBySearchString(
         Guid playlistId, string searchString, CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListForPlaylistBySearchQuery(

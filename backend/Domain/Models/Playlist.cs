@@ -44,7 +44,9 @@ public class Playlist : AggregateRoot<Guid>
     public void UpdateDetails(string title, string? description, FilePath imagePath)
     {
         if (string.IsNullOrWhiteSpace(title))
+        {
             throw new ArgumentException("Title cannot be empty", nameof(title));
+        }
 
         var oldImagePath = ImagePath;
         
@@ -55,7 +57,7 @@ public class Playlist : AggregateRoot<Guid>
 
         AddDomainEvent(new PlaylistDetailsUpdatedEvent(
             Id,
-            UserId, 
+            UserId,
             title,
             description!,
             imagePath,

@@ -19,9 +19,9 @@ export const FILE_CONFIG = {
 };
 
 const validateFile = (
-    file: File,
-    maxSize: number,
-    //allowedTypes: string[]
+  file: File,
+  maxSize: number,
+  //allowedTypes: string[]
 ): string | null => {
     if (file.size > maxSize) {
         return `File too large. Maximum size: ${Math.round(maxSize / 1024 / 1024)}MB`;
@@ -30,15 +30,15 @@ const validateFile = (
 };
 
 export const validateImage = (file: File) => validateFile(
-    file,
-    FILE_CONFIG.image.maxSize,
-    //FILE_CONFIG.image.allowedTypes
+  file,
+  FILE_CONFIG.image.maxSize,
+  //FILE_CONFIG.image.allowedTypes
 );
 
 export const validateAudio = (file: File) => validateFile(
-    file,
-    FILE_CONFIG.audio.maxSize,
-    //FILE_CONFIG.audio.allowedTypes
+  file,
+  FILE_CONFIG.audio.maxSize,
+  //FILE_CONFIG.audio.allowedTypes
 );
 
 export async function getPresignedUrl(type: fileUploadType): Promise<PresignedUrlResponse | null> {

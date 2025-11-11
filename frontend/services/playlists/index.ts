@@ -1,15 +1,23 @@
 import {authFetchClient, CLIENT_API_URL} from "@/helpers/api";
 
-export async function addSongToPlaylist (
+export async function addSongsToPlaylist(
   playlistId: string,
-  songId: string
-) {
-  return await authFetchClient(`${CLIENT_API_URL}/playlists/${playlistId}/songs/${songId}/`, {
+  songIds: string[],
+): Promise<boolean> {
+  try {
+    const response = await authFetchClient(`${CLIENT_API_URL}/playlists/${playlistId}/songs`, {
       method: "POST",
       credentials: "include",
-    }
-  );
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ songIds } ),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error("Error on adding songs to playlist", error);
+    return false;
+  }
 }
+
 export async function createPlaylist() {
   return await authFetchClient(`${CLIENT_API_URL}/playlists/`, {
     method: "POST",
@@ -25,9 +33,7 @@ export async function updatePlaylist(id: string, data: {
   try {
     const response = await authFetchClient(`${CLIENT_API_URL}/playlists/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(data),
     });

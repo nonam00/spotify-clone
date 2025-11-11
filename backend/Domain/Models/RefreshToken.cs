@@ -2,7 +2,6 @@
 
 namespace Domain.Models;
 
-// Refresh Token Entity (part of User aggregate)
 public class RefreshToken : Entity<Guid>
 {
     public Guid UserId { get; private set; }

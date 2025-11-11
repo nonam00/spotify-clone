@@ -44,7 +44,7 @@ const Library = memo(function Library({
         </div>
         <button
           onClick={onCreateClick}
-          className="text-neutral-400 hover:text-white transition-сolors"
+          className="text-neutral-400 hover:text-white transition-сolors cursor-pointer"
         >
           <AiOutlinePlus size={20}/>
         </button>
