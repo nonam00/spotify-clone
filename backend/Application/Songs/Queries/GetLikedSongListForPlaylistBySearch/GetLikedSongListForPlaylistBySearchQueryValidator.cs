@@ -20,6 +20,6 @@ public class GetLikedSongListForPlaylistBySearchQueryValidator
         RuleFor(q => q.SearchString)
             .NotEqual(string.Empty)
             .WithMessage("Search string is required")
-            .WithErrorCode("400");;
+            .WithErrorCode("400");
     }
 }

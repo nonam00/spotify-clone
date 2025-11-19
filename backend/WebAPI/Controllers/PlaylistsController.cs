@@ -8,6 +8,7 @@ using Application.Playlists.Commands.UpdatePlaylist;
 using Application.Playlists.Commands.AddSongToPlaylist;
 using Application.Playlists.Commands.AddSongsToPlaylist;
 using Application.Playlists.Commands.RemoveSongFromPlaylist;
+using Application.Playlists.Commands.ReorderSongsInPlaylist;
 using Application.Playlists.Errors;
 using Application.Playlists.Queries.GetFullPlaylistList;
 using Application.Playlists.Queries.GetPlaylistListByCount;
@@ -39,9 +40,8 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<PlaylistVm>> GetPlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetPlaylistByIdQuery(PlaylistId: playlistId, UserId: UserId);
-        
         var result = await Mediator.Send(query, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);
@@ -51,7 +51,7 @@ public class PlaylistsController : BaseController
         {
             return NotFound(new { Detail = result.Error.Description });
         }
-        
+
         return BadRequest(new { Detail = result.Error.Description });
     }
 
@@ -67,9 +67,8 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<PlaylistListVm>> GetPlaylistList(CancellationToken cancellationToken)
     {
         var query = new GetFullPlaylistListQuery(UserId);
-        
         var result = await Mediator.Send(query, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return result.Value;
@@ -93,14 +92,13 @@ public class PlaylistsController : BaseController
         int count, CancellationToken cancellationToken)
     {
         var query = new GetPlaylistListByCountQuery(UserId, count);
-        
         var result = await Mediator.Send(query, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);
         }
-        
+
         throw new Exception(result.Error.Description);
     }
 
@@ -116,13 +114,13 @@ public class PlaylistsController : BaseController
     public async Task<ActionResult<Guid>> CreatePlaylist(CancellationToken cancellationToken)
     {
         var command = new CreatePlaylistCommand(UserId);
-        
         var result = await Mediator.Send(command, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);
         }
+
         return BadRequest(new { Detail = result.Error.Description });
     }
 
@@ -146,17 +144,16 @@ public class PlaylistsController : BaseController
             Title: updatePlaylistDto.Title,
             Description: updatePlaylistDto.Description,
             ImagePath: updatePlaylistDto.ImageId);
-        
         var result = await Mediator.Send(updatePlaylistCommand, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return NoContent();
         }
-        
+
         return BadRequest(new { Detail = result.Error.Description });
     }
-        
+
     /// <summary>
     /// Deletes user playlist
     /// </summary>
@@ -170,17 +167,16 @@ public class PlaylistsController : BaseController
     public async Task<IActionResult> DeletePlaylist(Guid playlistId, CancellationToken cancellationToken)
     {
         var deletePlaylistCommand = new DeletePlaylistCommand(UserId: UserId, PlaylistId: playlistId);
-        
         var result = await Mediator.Send(deletePlaylistCommand, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return NoContent();
         }
-        
+
         return BadRequest(new { Detail = result.Error.Description });
     }
-        
+
     /// <summary>
     /// Gets songs from user playlist
     /// </summary>
@@ -196,12 +192,12 @@ public class PlaylistsController : BaseController
     {
         var query = new GetSongListByPlaylistIdQuery(playlistId);
         var result = await Mediator.Send(query, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);
         }
-        
+
         throw new Exception(result.Error.Description);
     }
 
@@ -236,8 +232,7 @@ public class PlaylistsController : BaseController
     /// Adds songs to the playlist
     /// </summary>
     /// <param name="playlistId">ID of the playlist to which the song is adding</param>
-    /// <param name="songId">ID of the song which is adding to the playlist</param>
-    /// <param name="addSongsToPlaylistDto"></param>
+    /// <param name="addSongsToPlaylistDto">List of songs to add to the playlist</param>
     /// <param name="cancellationToken"></param>
     /// <returns>Returns db key of created relation</returns>
     /// <response code="201">Success</response>
@@ -246,7 +241,7 @@ public class PlaylistsController : BaseController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AddSongsToPlaylist(
-            Guid playlistId, AddSongsToPlaylistDto addSongsToPlaylistDto, CancellationToken cancellationToken)
+        Guid playlistId, AddSongsToPlaylistDto addSongsToPlaylistDto, CancellationToken cancellationToken)
     {
         var command = new AddSongsToPlaylistCommand(
             UserId: UserId, PlaylistId: playlistId, SongIds: addSongsToPlaylistDto.SongIds);
@@ -259,7 +254,33 @@ public class PlaylistsController : BaseController
 
         return BadRequest(new { Detail = result.Error.Description });
     }
+
+    /// <summary>
+    /// Reorders songs in the playlist
+    /// </summary>
+    /// <param name="playlistId">ID of the playlist to which the song is adding</param>
+    /// <param name="reorderSongsDto">Song list in needed order</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Returns db key of created relation</returns>
+    /// <response code="201">Success</response>
+    /// <response code="401">If the user is unauthorized</response>
+    [HttpPut("{playlistId:guid}/songs/reorder")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ReorderSongsInPlaylist(
+        Guid playlistId, ReorderSongsDto reorderSongsDto, CancellationToken cancellationToken)
+    {
+        var command = new ReorderSongsInPlaylistCommand(playlistId, reorderSongsDto.SongIds);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
         
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+
     /// <summary>
     /// Removes the song from the playlist
     /// </summary>
@@ -298,7 +319,6 @@ public class PlaylistsController : BaseController
         Guid playlistId, CancellationToken cancellationToken)
     {
         var query = new GetLikedSongListForPlaylistQuery(UserId: UserId, PlaylistId: playlistId);
-        
         var result = await Mediator.Send(query, cancellationToken);
         
         if (result.IsSuccess)
@@ -326,7 +346,6 @@ public class PlaylistsController : BaseController
     {
         var query = new GetLikedSongListForPlaylistBySearchQuery(
             UserId: UserId, PlaylistId: playlistId, SearchString: searchString);
-        
         var result = await Mediator.Send(query, cancellationToken);
         
         if (result.IsSuccess)

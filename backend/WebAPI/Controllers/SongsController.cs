@@ -88,7 +88,7 @@ public class SongsController : BaseController
     [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<SongListVm>> GetSongListBySearch(
-        [FromQuery]SearchSongDto searchSongDto, CancellationToken cancellationToken)
+        [FromQuery] SearchSongDto searchSongDto, CancellationToken cancellationToken)
     {
         var query = new GetSongListBySearchQuery(
             SearchString: searchSongDto.SearchString, SearchCriteria: searchSongDto.SearchCriteria);

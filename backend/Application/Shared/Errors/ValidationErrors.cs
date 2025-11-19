@@ -1,4 +1,3 @@
-using System.Linq;
 using Application.Shared.Data;
 
 namespace Application.Shared.Errors;
@@ -13,9 +12,7 @@ public static class ValidationErrors
         
         var description = string.Join("; ", errors);
         
-        return new Error(
-            "ValidationError",
-            description);
+        return new Error("ValidationError", description);
     }
 }
 

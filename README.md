@@ -79,7 +79,6 @@ The project is built on a microservices architecture and includes:
 - [ ] **Moderation Service** - Automatic verification of uploaded content
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
-- [ ] **Mobile App** - React Native version
 
 ### Completed
 - [x] **Email Confirmation** - Account Verification System

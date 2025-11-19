@@ -28,13 +28,8 @@ const LikeButton = ({
     const abortController = new AbortController();
 
     const loadLike = async () => {
-      const response = await checkLikedSong(songId, abortController);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.check) {
-          setIsLiked(true);
-        }
-      }
+      const success = await checkLikedSong(songId, abortController);
+      setIsLiked(success);
     };
 
     loadLike();
@@ -51,16 +46,16 @@ const LikeButton = ({
 
     startTransition(async () => {
       if (isLiked) {
-        const response = await deleteLikedSong(songId);
-        if (response.ok) {
+        const success = await deleteLikedSong(songId);
+        if (success) {
           setIsLiked(false)
           toast.success("Like deleted")
         } else {
           toast.error("An error occurred while deleting the song from your favorites");
         }
       } else {
-        const response = await addLikedSong(songId);
-        if (response.ok) {
+        const success = await addLikedSong(songId);
+        if (success) {
           setIsLiked(true);
           toast.success('Liked');
         } else {

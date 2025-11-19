@@ -1,5 +1,4 @@
-﻿WebAPI/Files
-**/.dockerignore
+﻿**/.dockerignore
 **/.env
 **/.git
 **/.gitignore

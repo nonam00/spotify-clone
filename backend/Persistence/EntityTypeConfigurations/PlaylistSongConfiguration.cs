@@ -20,7 +20,9 @@ public class PlaylistSongConfiguration : IEntityTypeConfiguration<PlaylistSong>
             .WithMany()
             .HasForeignKey(ps => ps.SongId)
             .OnDelete(DeleteBehavior.Cascade);
-    
+
+        builder.Property(ps => ps.Order).IsRequired();
+        
         builder.Property(ps => ps.CreatedAt).IsRequired();
         builder.Property(ps => ps.UpdatedAt).IsRequired();
     } 

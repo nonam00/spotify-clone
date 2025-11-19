@@ -55,7 +55,7 @@ public class SongsRepository : ISongsRepository
         var songsInPlaylist = await _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.PlaylistId == playlistId)
-            .OrderByDescending(ps => ps.UpdatedAt)
+            .OrderByDescending(ps => ps.Order)
             .Include(ps => ps.Song)
             .Select(ps => ToVm(ps.Song)) 
             .ToListAsync(cancellationToken)
@@ -91,10 +91,9 @@ public class SongsRepository : ISongsRepository
                     .Where(song => EF.Functions.TrigramsSimilarity(song.Author, searchString) > 0.1)
                     .OrderBy(song => EF.Functions.TrigramsSimilarityDistance(song.Author, searchString))
                     .ThenByDescending(song => song.CreatedAt);
-
                 break;
             default:
-                throw new Exception("Invalid search criteria");
+                throw new ArgumentOutOfRangeException(nameof(searchCriteria), searchCriteria, "Invalid criteria");
         }
         
         var result = await songs

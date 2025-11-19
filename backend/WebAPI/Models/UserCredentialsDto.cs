@@ -2,8 +2,4 @@
 
 namespace WebAPI.Models;
 
-public class UserCredentialsDto
-{
-    [Required, EmailAddress] public string Email { get; init; } = null!;
-    [Required] public string Password { get; init; } = null!;
-}
+public record UserCredentialsDto([Required, EmailAddress] string Email, [Required] string Password);

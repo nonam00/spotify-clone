@@ -126,6 +126,7 @@ namespace Persistence.Migrations
                 {
                     playlist_id = table.Column<Guid>(type: "uuid", nullable: false),
                     song_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    order = table.Column<int>(type: "integer", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
