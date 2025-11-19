@@ -56,6 +56,7 @@ public class UsersController : BaseController
         var updateUserCommand = new UpdateUserCommand(
             UserId: UserId, FullName: updateUserInfoDto.FullName, AvatarPath: updateUserInfoDto.AvatarId);
         var result = await Mediator.Send(updateUserCommand, cancellationToken);
+        
         if (result.IsSuccess)
         {
             return NoContent();
@@ -80,7 +81,6 @@ public class UsersController : BaseController
             UserId: UserId,
             CurrentPassword: updateUserPasswordDto.CurrentPassword,
             NewPassword: updateUserPasswordDto.NewPassword);
-        
         var result = await Mediator.Send(updatePasswordCommand, cancellationToken);
         
         if (result.IsSuccess)

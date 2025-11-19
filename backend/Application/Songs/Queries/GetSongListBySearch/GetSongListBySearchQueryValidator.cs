@@ -9,6 +9,11 @@ public class GetSongListBySearchQueryValidator : AbstractValidator<GetSongListBy
         RuleFor(query => query.SearchString.Trim())
             .NotEqual(string.Empty)
             .WithMessage("Search string is required")
-            .WithErrorCode("400");;
+            .WithErrorCode("400");
+        
+        RuleFor(query => query.SearchCriteria)
+            .NotNull()
+            .WithMessage("Search criteria is required")
+            .WithErrorCode("400");
     }    
 }

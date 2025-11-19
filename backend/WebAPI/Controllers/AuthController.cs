@@ -28,6 +28,7 @@ public class AuthController : BaseController
     {
         var command = new CreateUserCommand(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
         var result = await Mediator.Send(command, cancellationToken);
+        
         if (result.IsSuccess)
         {
             return Created();
@@ -50,10 +51,12 @@ public class AuthController : BaseController
     {
         var command = new ActivateUserCommand(Email: activateUserDto.Email, ConfirmationCode: activateUserDto.Code);
         var result = await Mediator.Send(command, cancellationToken);
+        
         if (result.IsSuccess)
         {
             return Redirect("http://localhost:3000");
         }
+        
         return BadRequest(new { Detail = result.Error.Description });
     }
 
@@ -70,7 +73,6 @@ public class AuthController : BaseController
         [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
         var query = new LoginByCredentialsQuery(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
-        
         var result = await Mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)

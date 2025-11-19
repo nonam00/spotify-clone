@@ -1,17 +1,30 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {startTransition, useState} from "react";
 import { FaPlay } from "react-icons/fa";
-import { AiOutlinePlusCircle } from "react-icons/ai";
+import toast from "react-hot-toast";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 import { Song } from "@/types/types";
-
-import DeletePlaylistButton from "./DeletePlaylistButton";
-import RemoveButton from "./RemoveButton";
-
+import { reorderPlaylistSongs } from "@/services/playlists";
 import useOnPlay from "@/hooks/useOnPlay";
-import SongListItem from "@/components/SongListItem";
+import SongActionsMenu from "./SongActionsMenu";
+import PlaylistActionsMenu from "./PlaylistActionsMenu";
+import SortableSongListItem from "./SortableSongListItem";
 
 const PlaylistContent = ({
   id,
@@ -20,9 +33,19 @@ const PlaylistContent = ({
   id: string;
   initialSongs: Song[];
 }) => {
-  const router = useRouter();
   const [songs, setSongs] = useState<Song[]>(initialSongs);
   const onPlay = useOnPlay(songs);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const onPlayClick = () => {
     if (songs.length === 0) return;
@@ -30,14 +53,32 @@ const PlaylistContent = ({
   }
 
   const onRemoveClick = (songId: string) => {
-    startTransition(() =>{
-      setSongs(prevSongs => prevSongs.filter(song => song.id !== songId));
-    })
+    startTransition(() => setSongs(prevSongs => prevSongs.filter(song => song.id !== songId)));
   }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!(over && active.id !== over.id)) return;
+
+    const oldIndex = songs.findIndex((song) => song.id === active.id);
+    const newIndex = songs.findIndex((song) => song.id === over.id);
+
+    const newSongs = arrayMove(songs, oldIndex, newIndex);
+    setSongs(newSongs);
+
+    const songIds = newSongs.map((song) => song.id).reverse();
+    const success = await reorderPlaylistSongs(id, songIds);
+
+    if (!success) {
+      setSongs(songs);
+      toast.error("Failed to reorder songs");
+    }
+  };
 
   return (
     <div>
-      <div className="flex flex-row align-middle gap-y-2 items-center justify-start px-6 py-3">
+      <div className="flex flex-row align-middle gap-x-2 items-center justify-start px-6 py-3">
         <button
           onClick={onPlayClick}
           className="
@@ -48,36 +89,41 @@ const PlaylistContent = ({
         >
           <FaPlay className="text-black cursor-pointer" size="20" />
         </button>
-        <button
-          onClick={() => { router.push(`/playlist/${id}/add?searchString=&type=all`) }}
-          className="flex flex-end mx-5 rounded-full hover:scale-105 cursor-pointer"
-        >
-          <AiOutlinePlusCircle className="text-neutral-400" size="35" />
-        </button>
-        <DeletePlaylistButton playlistId={id} />
+        <PlaylistActionsMenu playlistId={id} />
       </div>
       <div className="h-0.5 bg-neutral-800/40 w-full" />
-      <div className="flex flex-col align-middle gap-y-5 w-full p-6">
-        {songs.length === 0
-          ?
-            <div className="flex flex-col text-neutral-400 items-center md:items-start">
-              There are no songs in this playlist.
-            </div>
-          : songs.map((song) => (
-              <SongListItem
-                key={song.id}
-                song={song}
-                onClickCallback={onPlay}
-              >
-                <RemoveButton
-                  playlistId={id}
-                  songId={song.id}
-                  callback={onRemoveClick}
-                />
-              </SongListItem>
-            ))
-        }
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={songs.map((song) => song.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col align-middle gap-y-5 w-full p-6">
+            {songs.length === 0
+              ?
+                <div className="flex flex-col text-neutral-400 items-center md:items-start">
+                  There are no songs in this playlist.
+                </div>
+              : songs.map((song) => (
+                  <SortableSongListItem
+                    key={song.id}
+                    song={song}
+                    onClickCallback={onPlay}
+                  >
+                    <SongActionsMenu
+                      playlistId={id}
+                      songId={song.id}
+                      callback={onRemoveClick}
+                    />
+                  </SortableSongListItem>
+                ))
+            }
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }

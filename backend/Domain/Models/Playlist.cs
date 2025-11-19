@@ -71,7 +71,8 @@ public class Playlist : AggregateRoot<Guid>
             return false;
         }
 
-        var playlistSong = PlaylistSong.Create(Id, songId);
+        var playlistSong = PlaylistSong.Create(Id, songId, _playlistSongs.Count + 1);
+        
         _playlistSongs.Add(playlistSong);
         
         UpdatedAt = DateTime.UtcNow;
@@ -87,4 +88,21 @@ public class Playlist : AggregateRoot<Guid>
     }
 
     private bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
+
+    // Song id index in list dictates what order it will get
+    public void ReorderSongs(List<Guid> songsToReorder)
+    {
+        for (var i = 0; i < _playlistSongs.Count; i++)
+        {
+            var songId = songsToReorder[i];
+            
+            var playlistSong = _playlistSongs.FirstOrDefault(ps => ps.SongId == songId)
+                ?? throw new ArgumentException("Songs not in playlist", nameof(songsToReorder));
+
+            if (playlistSong.Order != i + 1)
+            {
+                playlistSong.ChangeOrder(i + 1);
+            }
+        }
+    }
 }

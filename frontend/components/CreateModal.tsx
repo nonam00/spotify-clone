@@ -33,9 +33,8 @@ const CreateModal = () => {
       return openAuthModal();
     }
 
-    const response = await createPlaylist();
-
-    if (response.ok) {
+    const success = await createPlaylist();
+    if (success) {
       router.refresh();
     } else {
       toast("Failed on creating playlist");

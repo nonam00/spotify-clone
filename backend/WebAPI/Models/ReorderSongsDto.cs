@@ -2,4 +2,4 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Models;
 
-public record AddSongsToPlaylistDto([Required] List<Guid> SongIds);
+public record ReorderSongsDto([Required] List<Guid> SongIds);

@@ -2,8 +2,4 @@
 
 namespace WebAPI.Models;
 
-public class UpdateUserPasswordDto
-{
-    [Required] public string CurrentPassword { get; init; } = null!;
-    [Required] public string NewPassword { get; init; } = null!;
-}
+public record UpdateUserPasswordDto([Required] string CurrentPassword, [Required] string NewPassword);

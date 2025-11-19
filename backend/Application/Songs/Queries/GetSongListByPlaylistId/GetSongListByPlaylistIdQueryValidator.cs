@@ -10,6 +10,5 @@ public class GetSongListByPlaylistIdQueryValidator : AbstractValidator<GetSongLi
             .NotEqual(Guid.Empty)
             .WithMessage("Playlist ID is required")
             .WithErrorCode("400");
-        
     }
 }
