@@ -25,10 +25,22 @@ public class SongsRepository : ISongsRepository
         return song;
     }
 
+    public async Task<List<Song>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var songs = await _dbContext.Songs
+            .AsNoTracking()
+            .Where(s => ids.Contains(s.Id))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return songs;
+    }
+
     public async Task<List<SongVm>> GetList(CancellationToken cancellationToken = default)
     {
         var songs = await _dbContext.Songs
             .AsNoTracking()
+            .Where(s => s.IsPublished)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
             .ToListAsync(cancellationToken)
@@ -41,6 +53,7 @@ public class SongsRepository : ISongsRepository
     {
         var songs = await _dbContext.Songs
             .AsNoTracking()
+            .Where(s => s.IsPublished)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
             .Take(count)
@@ -67,7 +80,9 @@ public class SongsRepository : ISongsRepository
     public async Task<List<SongVm>> GetSearchList(string searchString, SearchCriteria searchCriteria,
         CancellationToken cancellationToken = default)
     {
-        var songs = _dbContext.Songs.AsNoTracking();
+        var songs = _dbContext.Songs
+            .AsNoTracking()
+            .Where(s => s.IsPublished);
 
         switch (searchCriteria)
         {
@@ -183,10 +198,29 @@ public class SongsRepository : ISongsRepository
         return result;
     }
 
+    public async Task<List<SongVm>> GetUnpublishedList(CancellationToken cancellationToken = default)
+    {
+        var songs = await _dbContext.Songs
+            .AsNoTracking()
+            .Where(s => !s.IsPublished)
+            .Select(s => ToVm(s))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return songs;
+    }
+
     public async Task Add(Song song, CancellationToken cancellationToken = default)
     {
         await _dbContext.Songs.AddAsync(song, cancellationToken);
     }
+
+    public void Update(Song song) => _dbContext.Songs.Update(song);
+    public void UpdateRange(IEnumerable<Song> songs) => _dbContext.Songs.UpdateRange(songs);
+
+    public void Delete(Song song) => _dbContext.Songs.Remove(song);
+
+    public void DeleteRange(IEnumerable<Song> songs) => _dbContext.Songs.RemoveRange(songs);
 
     private static SongVm ToVm(Song song) =>
         new(

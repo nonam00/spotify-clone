@@ -3,11 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using Application.Songs.Commands.CreateSong;
+using Application.Songs.Commands.DeleteSong;
+using Application.Songs.Commands.DeleteSongs;
+using Application.Songs.Commands.PublishSong;
+using Application.Songs.Commands.PublishSongs;
 using Application.Songs.Models;
 using Application.Songs.Queries.GetAllSongs;
 using Application.Songs.Queries.GetNewestSongList;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries.GetSongListBySearch;
+using Application.Songs.Queries.GetUnpublishedSongList;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -75,7 +80,7 @@ public class SongsController : BaseController
             return result.Value;
         }
         
-        return BadRequest(result.Error.Description);
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -100,6 +105,21 @@ public class SongsController : BaseController
         }
         
         throw new Exception(result.Error.Description);
+    }
+    
+    [HttpGet("unpublished")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<SongListVm>> GetUnpublishedSongs(CancellationToken cancellationToken)
+    {
+        var query = new GetUnpublishedSongListQuery();
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 
     /// <summary>
@@ -130,5 +150,65 @@ public class SongsController : BaseController
         }
         
         throw new Exception(result.Error.Description);
+    }
+
+    [HttpDelete("{songId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeleteSong(Guid songId, CancellationToken cancellationToken)
+    {
+        var command = new DeleteSongCommand(songId);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+    
+    [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeleteSongs(DeleteSongsDto deleteSongsDto, CancellationToken cancellationToken)
+    {
+        var command = new DeleteSongsCommand(deleteSongsDto.SongIds);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+
+    [HttpPut("publish/{songId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> PublishSong(Guid songId, CancellationToken cancellationToken)
+    {
+        var command = new PublishSongCommand(songId);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+    
+    [HttpPut("publish")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> PublishSongs(PublishSongsDto publishSongsDto, CancellationToken cancellationToken)
+    {
+        var command = new PublishSongsCommand(publishSongsDto.SongIds);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 }

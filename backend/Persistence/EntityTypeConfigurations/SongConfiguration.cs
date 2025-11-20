@@ -42,6 +42,10 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
             .IsRequired()
             .HasMaxLength(255);
         
+        builder.Property(s => s.IsPublished)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
         builder.Property(song => song.CreatedAt);
             
         builder.HasOne(song => song.Uploader)
