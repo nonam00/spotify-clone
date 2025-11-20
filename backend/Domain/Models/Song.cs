@@ -9,14 +9,14 @@ public class Song : AggregateRoot<Guid>
 {
     public string Title { get; private set; } = null!;
     public string Author { get; private set; } = null!;
-    public FilePath SongPath { get; private set; } = null!;
-    public FilePath ImagePath { get; private set; } = null!;
+    public FilePath SongPath { get; private init; } = null!;
+    public FilePath ImagePath { get; private init; } = null!;
     public Guid? UploaderId { get; private set; }
     public bool IsPublished { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     // Navigation properties for EF Core (not part of domain logic)
-    public virtual User? Uploader { get; private set; }
+    public virtual User? Uploader { get; private init; }
 
     private Song() { } // For EF Core
     

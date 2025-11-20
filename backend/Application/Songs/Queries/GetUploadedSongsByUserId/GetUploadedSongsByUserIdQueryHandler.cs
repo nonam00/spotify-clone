@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
@@ -10,14 +8,10 @@ namespace Application.Songs.Queries.GetUploadedSongsByUserId;
 public class GetUploadedSongsByUserIdQueryHandler : IQueryHandler<GetUploadedSongsByUserIdQuery, Result<SongListVm>>
 {
     private readonly ISongsRepository _songsRepository;
-    private readonly ILogger<GetUploadedSongsByUserIdQueryHandler> _logger;
 
-    public GetUploadedSongsByUserIdQueryHandler(
-        ISongsRepository songsRepository,
-        ILogger<GetUploadedSongsByUserIdQueryHandler> logger)
+    public GetUploadedSongsByUserIdQueryHandler(ISongsRepository songsRepository)
     {
         _songsRepository = songsRepository;
-        _logger = logger;
     }
 
     public async Task<Result<SongListVm>> Handle(GetUploadedSongsByUserIdQuery request, CancellationToken cancellationToken)

@@ -14,6 +14,6 @@ public class CheckLikeQueryValidator : AbstractValidator<CheckLikeQuery>
         RuleFor(q => q.SongId)
             .NotEqual(Guid.Empty)
             .WithMessage("Song ID is required")
-            .WithErrorCode("400");;
+            .WithErrorCode("400");
     }
 }
