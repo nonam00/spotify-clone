@@ -101,7 +101,7 @@ const SongUploadModal = () => {
       }
 
       router.refresh();
-      toast.success('Song created successfully!');
+      toast.success('Song uploaded successfully! Waiting for moderation...');
       onClose();
     });
   };

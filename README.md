@@ -17,9 +17,17 @@ The project is built on a microservices architecture and includes:
 
 ### Frontend (Next.js 16)
 - **React 19** with TypeScript
-- **Tailwind CSS** for styling
-- **Zustand** for state management
+- **Tailwind CSS** - utility-first CSS framework for styling
+- **Zustand** - for state management
 - **React Hot Toast** for notifications
+
+### Moderation App (React + Vite)
+- **React 19** with TypeScript
+- **Vite** - fast build tool and dev server
+- **React Router** - client-side routing
+- **Zustand** - for state management
+- **Tailwind CSS** - utility-first CSS framework for styling
+- **Feature-Sliced Design (FSD)** - architectural methodology
 
 ### File Service (Go)
 - File management microservice
@@ -51,6 +59,11 @@ The project is built on a microservices architecture and includes:
 - **User Profiles** - customize avatars and personal information
 - **Refresh tokens** - secure session refresh
 
+### 🔍 Content Moderation
+- **Unpublished Songs Management** - view and manage songs pending publication
+- **Bulk Operations** - publish or delete multiple songs at once
+- **Audio Preview** - listen to songs before moderation decisions
+
 ## 🚀 Tech Stack
 
 ### Backend
@@ -60,10 +73,12 @@ The project is built on a microservices architecture and includes:
 - **JWT Bearer** - authentication
 
 ### Frontend
-- **Next.js 16** - React framework
+- **Next.js 16** - React framework for main application
+- **Vite** - build tool for moderation app
 - **TypeScript** - for JavaScript type-safety
 - **Tailwind CSS** - utility-first CSS framework
 - **Zustand** - lightweight state management
+- **React Router** - client-side routing
 - **React Icons** - icons
 
 ### DevOps & Infrastructure
@@ -76,11 +91,12 @@ The project is built on a microservices architecture and includes:
 ## 📋 Development Plans
 
 ### Plans
-- [ ] **Moderation Service** - Automatic verification of uploaded content
+- [ ] **Automatic Moderation** - AI-powered content verification
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
 
 ### Completed
+- [x] **Moderation Service** - Manual content moderation interface
 - [x] **Email Confirmation** - Account Verification System
 - [x] **Basic Functionality** - Uploading, Playback, Playlists
 - [x] **Microservice Architecture** - Separation into Independent Services
