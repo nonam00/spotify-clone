@@ -7,9 +7,9 @@ namespace Persistence.Repositories;
 
 public class RefreshTokensRepository : IRefreshTokensRepository
 {
-    private readonly SongsDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
     
-    public RefreshTokensRepository(SongsDbContext dbContext)
+    public RefreshTokensRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }

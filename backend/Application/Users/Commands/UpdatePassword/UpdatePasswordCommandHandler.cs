@@ -2,6 +2,7 @@
 
 using Domain.ValueObjects;
 using Application.Shared.Data;
+using Application.Shared.Interfaces;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;

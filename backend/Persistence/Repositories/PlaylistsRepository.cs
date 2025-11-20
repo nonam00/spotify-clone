@@ -8,9 +8,9 @@ namespace Persistence.Repositories;
 
 public class PlaylistsRepository : IPlaylistsRepository
 {
-    private readonly SongsDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
     
-    public PlaylistsRepository(SongsDbContext dbContext)
+    public PlaylistsRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }

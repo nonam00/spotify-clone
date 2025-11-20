@@ -1,13 +1,18 @@
-import { authFetchClient, CLIENT_API_URL } from "@/shared/config/api";
+import { authFetchClient, MODERATORS_API_URL } from "@/shared/config/api";
 import type { SongListVm } from "@/entities/song";
 
 export async function getUnpublishedSongs(): Promise<SongListVm> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/songs/unpublished`, {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/unpublished`, {
     method: "GET",
-    credentials: "include",
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
     throw new Error("Failed to fetch unpublished songs");
   }
 
@@ -15,49 +20,85 @@ export async function getUnpublishedSongs(): Promise<SongListVm> {
 }
 
 export async function publishSong(songId: string): Promise<void> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/songs/publish/${songId}`, {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/publish/${songId}`, {
     method: "PUT",
-    credentials: "include",
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
     throw new Error("Failed to publish song");
   }
 }
 
 export async function publishSongs(songIds: string[]): Promise<void> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/songs/publish`, {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/publish`, {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ songIds }),
-    credentials: "include",
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
     throw new Error("Failed to publish songs");
   }
 }
 
-export async function deleteSong(songId: string): Promise<void> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/songs/${songId}`, {
-    method: "DELETE",
-    credentials: "include",
+export async function unpublishSong(songId: string): Promise<void> {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/unpublish/${songId}`, {
+    method: "PUT",
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
+    throw new Error("Failed to publish song");
+  }
+}
+
+export async function deleteSong(songId: string): Promise<void> {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/${songId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
     throw new Error("Failed to delete song");
   }
 }
 
 export async function deleteSongs(songIds: string[]): Promise<void> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/songs`, {
+  const response = await authFetchClient(`${MODERATORS_API_URL}/songs`, {
     method: "DELETE",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ songIds }),
-    credentials: "include",
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden: You must be a moderator or administrator");
+    }
     throw new Error("Failed to delete songs");
   }
 }

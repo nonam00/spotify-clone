@@ -14,6 +14,6 @@ public class LikeSongCommandValidator : AbstractValidator<LikeSongCommand>
         RuleFor(command => command.SongId)
             .NotEqual(Guid.Empty)
             .WithMessage("Song ID is required")
-            .WithErrorCode("400");;
+            .WithErrorCode("400");
     }
 }

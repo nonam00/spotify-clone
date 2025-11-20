@@ -7,11 +7,11 @@ namespace Persistence;
 
 public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
 {
-    private readonly SongsDbContext _context;
+    private readonly AppDbContext _context;
     private readonly IDomainEventDispatcher _domainEventDispatcher;
     private readonly ILogger<UnitOfWork> _logger;
 
-    public UnitOfWork(SongsDbContext context, IDomainEventDispatcher domainEventDispatcher, ILogger<UnitOfWork> logger)
+    public UnitOfWork(AppDbContext context, IDomainEventDispatcher domainEventDispatcher, ILogger<UnitOfWork> logger)
     {
         _context = context;
         _domainEventDispatcher = domainEventDispatcher;

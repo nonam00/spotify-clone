@@ -2,14 +2,15 @@
 
 using Domain.Models;
 using Application.Users.Interfaces;
+using Application.Users.Models;
 
 namespace Persistence.Repositories;
 
 public class UsersRepository : IUsersRepository
 {
-    private readonly SongsDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-    public UsersRepository(SongsDbContext dbContext)
+    public UsersRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -82,6 +83,25 @@ public class UsersRepository : IUsersRepository
             .ConfigureAwait(false);
             
         return nonActiveUsers;
+    }
+    
+    public async Task<List<UserVm>> GetListVm(CancellationToken cancellationToken = default)
+    {
+        var users = await _dbContext.Users
+            .AsNoTracking()
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new UserVm(
+                u.Id,
+                u.Email,
+                u.FullName ?? "",
+                u.IsActive,
+                u.CreatedAt,
+                u.PublishedSongs.Count
+            ))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return users;
     }
 
     public void Update(User user) => _dbContext.Update(user);

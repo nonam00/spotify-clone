@@ -9,9 +9,9 @@ namespace Persistence.Repositories;
 
 public class SongsRepository : ISongsRepository
 {
-    private readonly SongsDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-    public SongsRepository(SongsDbContext dbContext)
+    public SongsRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -67,7 +67,7 @@ public class SongsRepository : ISongsRepository
     {
         var songsInPlaylist = await _dbContext.PlaylistSongs
             .AsNoTracking()
-            .Where(ps => ps.PlaylistId == playlistId)
+            .Where(ps => ps.PlaylistId == playlistId && ps.Song.IsPublished)
             .OrderByDescending(ps => ps.Order)
             .Include(ps => ps.Song)
             .Select(ps => ToVm(ps.Song)) 
@@ -77,8 +77,8 @@ public class SongsRepository : ISongsRepository
         return songsInPlaylist;
     }
 
-    public async Task<List<SongVm>> GetSearchList(string searchString, SearchCriteria searchCriteria,
-        CancellationToken cancellationToken = default)
+    public async Task<List<SongVm>> GetSearchList(
+        string searchString, SearchCriteria searchCriteria, CancellationToken cancellationToken = default)
     {
         var songs = _dbContext.Songs
             .AsNoTracking()
@@ -124,7 +124,7 @@ public class SongsRepository : ISongsRepository
     {
         var liked = await _dbContext.LikedSongs
             .AsNoTracking()
-            .Where(ls => ls.UserId == userId)
+            .Where(ls => ls.UserId == userId && ls.Song.IsPublished)
             .OrderByDescending(ls => ls.CreatedAt)
             .Include(ls => ls.Song)
             .Select(ls => ToVm(ls.Song))
@@ -134,37 +134,17 @@ public class SongsRepository : ISongsRepository
         return liked;
     }
 
-    public async Task<List<SongVm>> GetSearchLikedByUserId(Guid userId, string searchString, CancellationToken cancellationToken = default)
-    {
-        var liked = await _dbContext.LikedSongs
-            .AsNoTracking()
-            .Where(ls => ls.UserId == userId)
-            .Include(ls => ls.Song)
-            .Where(ls =>
-                EF.Functions.TrigramsSimilarity(ls.Song.Title, searchString) > 0.1 ||
-                EF.Functions.TrigramsSimilarity(ls.Song.Author, searchString) > 0.1)
-            .OrderBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Title, searchString))
-            .ThenBy(ls => EF.Functions.TrigramsSimilarityDistance(ls.Song.Author, searchString))
-            .ThenByDescending(ls => ls.CreatedAt)
-            .Select(ls => ToVm(ls.Song))
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return liked;
-    }
-
     public async Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(
         Guid userId, Guid playlistId, CancellationToken cancellationToken = default)
     {
         var songsInPlaylist = _dbContext.PlaylistSongs
             .AsNoTracking()
-            .Where(ps => ps.PlaylistId == playlistId);
+            .Where(ps => ps.PlaylistId == playlistId && ps.Song.IsPublished);
         
         var result = await _dbContext.LikedSongs
             .AsNoTracking()
-            .Where(ls => ls.UserId == userId)
             .Include(ls => ls.Song)
-            .Where(ls => !songsInPlaylist.Any(ps => ps.SongId == ls.SongId))
+            .Where(ls => ls.UserId == userId && !songsInPlaylist.Any(ps => ps.SongId == ls.SongId))
             .OrderByDescending(ls => ls.CreatedAt)
             .Select(ls => ToVm(ls.Song))
             .ToListAsync(cancellationToken)
@@ -178,13 +158,14 @@ public class SongsRepository : ISongsRepository
     {
         var songsInPlaylist = _dbContext.PlaylistSongs
             .AsNoTracking()
-            .Where(ps => ps.PlaylistId == playlistId);
+            .Where(ps => ps.PlaylistId == playlistId && ps.Song.IsPublished);
         
         var result = await _dbContext.LikedSongs
             .AsNoTracking()
-            .Where(ls => ls.UserId == userId)
             .Include(ls => ls.Song)
             .Where(ls =>
+                ls.UserId == userId &&
+                ls.Song.IsPublished &&
                 !songsInPlaylist.Any(ps => ps.SongId == ls.SongId) &&
                 (EF.Functions.TrigramsSimilarity(ls.Song.Title, searchString) > 0.1 ||
                 EF.Functions.TrigramsSimilarity(ls.Song.Author, searchString) > 0.1))
@@ -203,6 +184,19 @@ public class SongsRepository : ISongsRepository
         var songs = await _dbContext.Songs
             .AsNoTracking()
             .Where(s => !s.IsPublished)
+            .Select(s => ToVm(s))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return songs;
+    }
+    
+    public async Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var songs = await _dbContext.Songs
+            .AsNoTracking()
+            .Where(s => s.UploaderId == userId)
+            .OrderByDescending(s => s.CreatedAt)
             .Select(s => ToVm(s))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -228,5 +222,7 @@ public class SongsRepository : ISongsRepository
             Title: song.Title,
             Author: song.Author,
             SongPath: song.SongPath,
-            ImagePath: song.ImagePath);
+            ImagePath: song.ImagePath,
+            IsPublished: song.IsPublished,
+            CreatedAt: song.CreatedAt);
 }

@@ -39,17 +39,20 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(255)
             .IsRequired(false);
 
-        builder.Property(u => u.IsActive).HasDefaultValue(false);
-        builder.Property(u => u.CreatedAt);
+        builder.Property(u => u.IsActive)
+            .HasDefaultValue(false)
+            .IsRequired();
+        
+        builder.Property(u => u.CreatedAt).IsRequired();
+
+        builder.HasMany(u => u.PublishedSongs)
+            .WithOne(s => s.Uploader)
+            .HasForeignKey(u => u.UploaderId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasMany(u => u.Playlists)
             .WithOne(p => p.User)
             .HasForeignKey(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(u => u.RefreshTokens)
-            .WithOne(rt => rt.User)
-            .HasForeignKey(rt => rt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

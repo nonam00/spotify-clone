@@ -19,7 +19,7 @@ const SongList = () => {
   const { onOpen } = useConfirmModalStore();
 
   useEffect(() => {
-    fetchSongs();
+    fetchSongs().catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

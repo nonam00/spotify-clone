@@ -45,11 +45,13 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.IsPublished)
             .IsRequired()
             .HasDefaultValue(false);
+
+        builder.Property(s => s.IsPublished);
         
         builder.Property(song => song.CreatedAt);
             
         builder.HasOne(song => song.Uploader)
-            .WithMany()
+            .WithMany(u => u.PublishedSongs)
             .HasForeignKey(song => song.UploaderId)
             .OnDelete(DeleteBehavior.SetNull);
     }

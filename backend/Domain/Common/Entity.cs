@@ -2,8 +2,6 @@ namespace Domain.Common;
 
 public abstract class Entity
 {
-    protected Entity() { }
-    
     public override bool Equals(object? obj)
     {
         if (obj is not Entity other)

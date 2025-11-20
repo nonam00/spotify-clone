@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Logging;
 
 using Application.Shared.Data;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
+using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByCredentials;
 
@@ -50,7 +51,7 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
             return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
         }
 
-        var accessToken = _jwtProvider.GenerateToken(user);
+        var accessToken = _jwtProvider.GenerateUserToken(user);
 
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -9,6 +10,32 @@ namespace WebAPI;
 
 public static class DependencyInjection
 {
+    // Setting CORS policy for local responds
+    public static IServiceCollection AddLocalCorsPolicy(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("MyPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:3000")
+                    .SetIsOriginAllowed(_ => true)
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+        
+                policy.WithOrigins("http://localhost:5173")
+                    .SetIsOriginAllowed(_ => true)
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+        });
+        
+        return services;
+    }
+    
     // Authentication final config in DI
     public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -33,7 +60,8 @@ public static class DependencyInjection
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    RoleClaimType = ClaimTypes.Role
                 };
         
                 // Getting JWT token from request cookies
@@ -54,6 +82,20 @@ public static class DependencyInjection
                 options.SaveToken = true;
             });
 
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.UserOnly, policy =>
+                policy.RequireClaim(CustomClaims.EntityType, EntityTypes.User))
+            .AddPolicy(AuthorizationPolicies.ModeratorOnly, policy =>
+                policy.RequireClaim(CustomClaims.EntityType, EntityTypes.Moderator))
+            .AddPolicy(AuthorizationPolicies.CanManageUsers, policy =>
+                policy.RequireClaim(CustomClaims.Permission, Permissions.ManageUsers))
+            .AddPolicy(AuthorizationPolicies.CanManageContent, policy =>
+                policy.RequireClaim(CustomClaims.Permission, Permissions.ManageContent))
+            .AddPolicy(AuthorizationPolicies.CanManageModerators, policy =>
+                policy.RequireClaim(CustomClaims.Permission, Permissions.ManageModerators))
+            .AddPolicy(AuthorizationPolicies.CanViewReports, policy =>
+                policy.RequireClaim(CustomClaims.Permission, Permissions.ViewReports));
+        
         return services;
     }
 
@@ -63,4 +105,14 @@ public static class DependencyInjection
         services.AddHostedService<NonActiveUsersCleanupService>();
         return services;
     }
+}
+
+public static class AuthorizationPolicies
+{
+    public const string UserOnly = "UserOnly";
+    public const string ModeratorOnly = "ModeratorOnly";
+    public const string CanManageUsers = "CanManageUsers";
+    public const string CanManageContent = "CanManageContent";
+    public const string CanManageModerators = "CanManageModerators";
+    public const string CanViewReports = "CanViewReports";
 }

@@ -1,8 +1,8 @@
+using Application.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
 using Application.Shared.Messaging;
-using Application.Shared.Clients;
 
 namespace Application.Playlists.Events.PlaylistDetailsUpdated;
 

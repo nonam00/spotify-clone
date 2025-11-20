@@ -1,4 +1,4 @@
-using Application.Shared.Clients;
+using Application.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Files;
