@@ -1,5 +1,4 @@
-import type { RefObject } from "react";
-import { useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 
 type UseSoundReturnType = {
   audioRef: RefObject<HTMLAudioElement | null>;

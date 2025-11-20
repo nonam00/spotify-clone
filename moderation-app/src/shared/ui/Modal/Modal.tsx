@@ -27,7 +27,7 @@ const Modal = ({
           className={twMerge(`
             fixed
             drop-shadow-2xl
-            border border-neutral-700/50
+            border border-neutral-800
             top-[50%] left-[50%]
             max-h-full h-full
             md:h-auto md:max-h-[85vh]
@@ -35,7 +35,7 @@ const Modal = ({
             md:w-[90vw] md:max-w-[500px]
             -translate-x-1/2 -translate-y-1/2
             rounded-xl
-            bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900
+            bg-neutral-950
             p-8
             focus:outline-none
             z-50

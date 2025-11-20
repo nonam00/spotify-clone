@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
-using Application.Shared.Clients;
+using Application.Shared.Interfaces;
 using Application.Users.Interfaces;
 using Infrastructure.Auth;
 using Infrastructure.Email;

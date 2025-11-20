@@ -47,14 +47,9 @@ public class Song : AggregateRoot<Guid>
         return song;
     }
 
-    public void Publish()
-    {
-        IsPublished = true;
-    }
+    public void Publish() => IsPublished = true;
 
-    public void Unpublish()
-    {
-        IsPublished = false;
-        AddDomainEvent(new SongDeletedEvent(Id, ImagePath, SongPath));
-    }
+    public void Unpublish() => IsPublished = false;
+    
+    public void Delete() => AddDomainEvent(new SongDeletedEvent(Id, ImagePath, SongPath));
 }

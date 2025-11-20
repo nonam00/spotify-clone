@@ -26,7 +26,14 @@ public class GetSongByIdQueryHandler : IQueryHandler<GetSongByIdQuery, Result<So
         if (song != null)
         {
             return Result<SongVm>.Success(
-                new SongVm(song.Id, song.Title, song.Author, song.SongPath, song.ImagePath));
+                new SongVm(
+                    song.Id,
+                    song.Title,
+                    song.Author,
+                    song.SongPath,
+                    song.ImagePath,
+                    song.IsPublished,
+                    song.CreatedAt));
         }
         
         _logger.LogError("Tried to get song {songId} but it does not exist", request.SongId); 

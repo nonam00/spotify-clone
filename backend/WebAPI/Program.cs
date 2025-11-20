@@ -20,26 +20,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPersistence(builder.Configuration);
 
-// Setting CORS policy for local responds
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .SetIsOriginAllowed(_ => true)
-              .SetIsOriginAllowedToAllowWildcardSubdomains()
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-        
-        policy.WithOrigins("http://localhost:5173")
-            .SetIsOriginAllowed(_ => true)
-            .SetIsOriginAllowedToAllowWildcardSubdomains()
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
-});
+builder.Services.AddLocalCorsPolicy();
 
 // Adding and configuration authentication by JWT Tokens
 builder.Services.AddAuthServices(builder.Configuration);
@@ -74,7 +55,7 @@ var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<SongsDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
         var notAppliedMigrations = await dbContext.Database.GetPendingMigrationsAsync();

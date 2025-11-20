@@ -19,6 +19,7 @@ public interface ISongsRepository
     Task<List<SongVm>> GetSearchLikedByUserIdExcludeInPlaylist(Guid userId, Guid playlistId, string searchString,
         CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetUnpublishedList(CancellationToken cancellationToken = default);
+    Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task Add(Song song, CancellationToken cancellationToken = default);
     void Update(Song song);
     void UpdateRange(IEnumerable<Song> songs);

@@ -10,6 +10,7 @@ export interface UserDetails {
   email: string;
   fullName: string | null;
   avatarPath: string | null;
+  role?: "User" | "Moderator" | "Admin";
 }
 
 export interface Playlist {

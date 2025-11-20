@@ -21,7 +21,7 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
 
         foreach (var song in songs)
         {
-            song.Unpublish();
+            song.Delete();
         }
         
         if (songs.Count != 0)

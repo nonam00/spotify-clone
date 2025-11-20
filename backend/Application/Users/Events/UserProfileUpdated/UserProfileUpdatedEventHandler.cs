@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
-using Application.Shared.Clients;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
 namespace Application.Users.Events.UserProfileUpdated;

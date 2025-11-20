@@ -25,7 +25,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
             return Result.Failure(SongErrors.NotFound);
         }
         
-        song.Unpublish();
+        song.Delete();
         _songsRepository.Update(song);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         

@@ -6,7 +6,6 @@ using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteRefreshToken;
 using Application.Users.Queries.LoginByCredentials;
 using Application.Users.Queries.LoginByRefreshToken;
-
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -23,7 +22,7 @@ public class AuthController : BaseController
     /// <response code="201">Created</response>
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> Register(
+    public async Task<IActionResult> RegisterUser(
         [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
         var command = new CreateUserCommand(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
@@ -46,7 +45,7 @@ public class AuthController : BaseController
     /// <response code="302">Found</response>
     [HttpGet("activate")]
     [ProducesResponseType(StatusCodes.Status302Found)]
-    public async Task<IActionResult> Activate(
+    public async Task<IActionResult> ActivateUser(
         [FromQuery] ActivateUserDto activateUserDto, CancellationToken cancellationToken)
     {
         var command = new ActivateUserCommand(Email: activateUserDto.Email, ConfirmationCode: activateUserDto.Code);
@@ -69,7 +68,7 @@ public class AuthController : BaseController
     /// <response code="200">Success</response>
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Login(
+    public async Task<IActionResult> UserLogin(
         [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
     {
         var query = new LoginByCredentialsQuery(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
@@ -104,7 +103,7 @@ public class AuthController : BaseController
     /// <returns>Returns access token in cookies</returns>
     /// <response code="200">Success</response>
     [Route("refresh"), AcceptVerbs("GET", "POST")]
-    public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
+    public async Task<IActionResult> UserRefresh(CancellationToken cancellationToken)
     {
         if (!HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
         {
@@ -144,7 +143,7 @@ public class AuthController : BaseController
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status205ResetContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    public async Task<IActionResult> UserLogout(CancellationToken cancellationToken)
     {
         Response.Cookies.Delete("access_token");
         
@@ -156,5 +155,39 @@ public class AuthController : BaseController
         }
         
         return StatusCode(205);
+    }
+    
+    [HttpPost("moderators/login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ModeratorLogin(
+        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
+    {
+        var query = new Application.Moderators.Queries.LoginByCredentials.LoginByCredentialsQuery(
+            Email: userCredentialsDto.Email,
+            Password: userCredentialsDto.Password);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new { Detail = result.Error.Description });
+        }
+        
+        HttpContext.Response.Cookies.Append("access_token", result.Value, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            MaxAge = TimeSpan.FromHours(24)
+        });
+        
+        return Ok();
+    }
+    
+    [HttpPost("moderators/logout")]
+    [ProducesResponseType(StatusCodes.Status205ResetContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public Task<IActionResult> ModeratorLogout()
+    {
+        Response.Cookies.Delete("access_token");
+        return Task.FromResult<IActionResult>(StatusCode(205));
     }
 }

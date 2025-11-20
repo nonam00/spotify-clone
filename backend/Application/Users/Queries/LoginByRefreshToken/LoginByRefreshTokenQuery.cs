@@ -1,6 +1,6 @@
 ﻿using Application.Shared.Data;
 using Application.Shared.Messaging;
-using Application.Users.Models;
+using Application.Shared.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 

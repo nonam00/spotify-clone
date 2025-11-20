@@ -18,13 +18,15 @@ namespace WebAPI.Controllers;
 [Route("{version:apiVersion}/users"), ApiVersionNeutral]
 public class UsersController : BaseController
 {
+    private Guid UserId => GetGuidClaim("userId");
+
     /// <summary>
     /// Gets user info
     /// </summary>
     /// <returns>Returns new user ID</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized (doesn't have jwt token)</response>
-    [HttpGet("info"), Authorize]
+    [HttpGet("info"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<UserInfo>> GetUserInfo(CancellationToken cancellationToken)
@@ -47,7 +49,7 @@ public class UsersController : BaseController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpPut, Authorize]
+    [HttpPut, Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateUserInfo(
@@ -71,7 +73,7 @@ public class UsersController : BaseController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpPut("password")]
+    [HttpPut("password"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateUserPassword(
@@ -97,7 +99,7 @@ public class UsersController : BaseController
     /// <returns>Returns LikedSongListVm</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpGet("songs"), Authorize]
+    [HttpGet("songs"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<SongListVm>> GetLikedSongList(CancellationToken cancellationToken)
@@ -121,7 +123,7 @@ public class UsersController : BaseController
     /// <returns>Returns LikedSongVm</returns>
     /// <response code="200">Success</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpGet("songs/{songId:guid}"), Authorize]
+    [HttpGet("songs/{songId:guid}"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetLikedSong(Guid songId, CancellationToken cancellationToken)
@@ -145,7 +147,7 @@ public class UsersController : BaseController
     /// <returns>Returns string</returns>
     /// <response code="201">Created</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpPost("songs/{songId:guid}"), Authorize]
+    [HttpPost("songs/{songId:guid}"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> LikeSong(Guid songId, CancellationToken cancellationToken)
@@ -168,7 +170,7 @@ public class UsersController : BaseController
     /// <param name="cancellationToken">Cancellation token</param>
     /// <response code="204">Success</response>
     /// <response code="401">If user is unauthorized</response>
-    [HttpDelete("songs/{songId:guid}"), Authorize]
+    [HttpDelete("songs/{songId:guid}"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UnlikeSong(Guid songId, CancellationToken cancellationToken)

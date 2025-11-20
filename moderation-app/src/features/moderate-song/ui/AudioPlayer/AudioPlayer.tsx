@@ -28,22 +28,21 @@ const AudioPlayer = ({ song }: AudioPlayerProps) => {
   const progress = duration > 0 ? currentTime / duration : 0;
   const isActive = activeSongId === song.id;
 
-  // Stop other players when this one starts playing
-  useEffect(() => {
-    if (isPlaying && !isActive) {
-      setActiveSongId(song.id);
-    }
-    if (!isPlaying && isActive) {
-      setActiveSongId(null);
-    }
-  }, [isPlaying, isActive, song.id, setActiveSongId]);
-
   // Pause this player if another one becomes active
   useEffect(() => {
     if (activeSongId !== null && activeSongId !== song.id && isPlaying && audioRef.current) {
       audioRef.current.pause();
     }
   }, [activeSongId, song.id, isPlaying, audioRef]);
+
+  // Sync activeSongId when playback state changes, but only if we're the active song
+  // This prevents circular updates
+  useEffect(() => {
+    if (isActive && !isPlaying) {
+      // If we were active but are now paused, clear activeSongId
+      setActiveSongId(null);
+    }
+  }, [isActive, isPlaying, setActiveSongId]);
 
   // Enhanced toggle play that stops other players
   const handleTogglePlay = useCallback(() => {

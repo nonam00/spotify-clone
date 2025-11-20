@@ -4,6 +4,8 @@ export type Song = {
   title: string;
   songPath: string;
   imagePath: string;
+  isPublished: boolean;
+  createdAt: string;
 }
 
 export type SongListVm = {

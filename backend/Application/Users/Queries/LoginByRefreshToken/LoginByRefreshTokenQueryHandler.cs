@@ -2,10 +2,11 @@
 using Microsoft.Extensions.Logging;
 
 using Application.Shared.Data;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
+using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Application.Users.Models;
 
 namespace Application.Users.Queries.LoginByRefreshToken;
 
@@ -38,7 +39,7 @@ public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshToken
             return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
         }
         
-        var accessToken = _jwtProvider.GenerateToken(refreshToken.User);
+        var accessToken = _jwtProvider.GenerateUserToken(refreshToken.User);
         
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         

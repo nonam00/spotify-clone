@@ -10,8 +10,18 @@ public abstract class BaseController : ControllerBase
     private IMediator? _mediator;
     protected IMediator Mediator =>
         _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+    
+    protected Guid GetGuidClaim(string claimType)
+    {
+        if (!User.Identity!.IsAuthenticated)
+        {
+            return Guid.Empty;
+        }
 
-    internal Guid UserId => !User.Identity!.IsAuthenticated
-        ? Guid.Empty
-        : Guid.Parse(User.Claims.First(c => c.Type == "userId").Value);
+        var claim = User.Claims.FirstOrDefault(c => c.Type == claimType);
+        
+        return claim is not null && Guid.TryParse(claim.Value, out var value)
+            ? value
+            : Guid.Empty;
+    }
 }

@@ -1,7 +1,7 @@
+using Application.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
-using Application.Shared.Clients;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Events.PlaylistDeleted;

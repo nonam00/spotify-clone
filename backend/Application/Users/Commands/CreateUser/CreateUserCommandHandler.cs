@@ -3,6 +3,7 @@
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Shared.Data;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;

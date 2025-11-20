@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Application.Moderators.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -24,7 +25,7 @@ public static class DependencyInjection
         var postgresConnectionString = configuration.GetConnectionString("Postgres") 
              ?? throw new NullReferenceException("Postgres connection string is null");
         
-        services.AddDbContext<SongsDbContext>(options =>
+        services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(postgresConnectionString)
                 .UseSnakeCaseNamingConvention();
@@ -45,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<ISongsRepository, SongsRepository>();
         services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
         services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+        services.AddScoped<IModeratorsRepository, ModeratorsRepository>();
 
         services.AddScoped<IConfirmationCodesRepository, ConfirmationCodesRepository>();
         

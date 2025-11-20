@@ -22,10 +22,11 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers;
 
-[Produces("application/json")]
-[Route("{version:apiVersion}/playlists"), Authorize, ApiVersionNeutral]
+[Route("{version:apiVersion}/playlists"), Authorize(Policy = AuthorizationPolicies.UserOnly), ApiVersionNeutral]
 public class PlaylistsController : BaseController
 {
+    private Guid UserId => GetGuidClaim("userId");
+
     /// <summary>
     /// Gets certain user playlist 
     /// </summary>
