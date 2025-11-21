@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ModeratorSummary } from "@/entities/moderator/model";
+import type { ModeratorSummary } from "@/entities/moderator";
 import {
   createModerator as createModeratorApi,
   getModerators,
@@ -7,7 +7,7 @@ import {
   updateModeratorStatus as updateModeratorStatusApi,
   type CreateModeratorPayload,
   type UpdateModeratorPermissionsPayload,
-} from "@/entities/moderator/api";
+} from "@/entities/moderator";
 
 type ModeratorsStore = {
   moderators: ModeratorSummary[];

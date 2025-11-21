@@ -1,1 +1,1 @@
-export { useAuthStore } from "./authStore.ts";
+export { useAuthStore } from "./authStore";

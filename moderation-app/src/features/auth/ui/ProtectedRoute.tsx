@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 import { Box } from "@/shared/ui";
+import type { ModeratorPermissions } from "@/entities/moderator";
 import { useAuthStore } from "../model";
-import type { ModeratorPermissions } from "@/entities/moderator/model";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

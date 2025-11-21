@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { getModeratorInfo, type ModeratorInfo } from "@/entities/auth/api";
-import { AUTH_API_URL } from "@/shared/config/api.ts";
-import type { ModeratorPermissions } from "@/entities/moderator/model";
+import { AUTH_API_URL } from "@/shared/config/api";
+import { getModeratorInfo, type ModeratorInfo } from "@/entities/auth";
+import type { ModeratorPermissions } from "@/entities/moderator";
 
 interface AuthStore {
   user: ModeratorInfo | null;

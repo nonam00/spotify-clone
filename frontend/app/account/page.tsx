@@ -2,14 +2,16 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { IoMdPerson, IoMdMail } from "react-icons/io";
 
-import getUserInfo from "@/actions/user/getUserInfo";
-import Header from "@/components/Header";
-import ChangeUserInfoForm from "@/app/account/components/ChangeUserInfoForm";
-import ChangeUserPasswordForm from "@/app/account/components/ChangeUserPasswordForm";
-import {CLIENT_FILES_URL} from "@/helpers/api";
+import { CLIENT_FILES_URL } from "@/shared/config/api";
+import {getUserInfoServer} from "@/entities/user/api";
+import { Header } from "@/widgets/header";
+import {
+  ChangeUserInfoForm,
+  ChangeUserPasswordForm,
+} from "@/widgets/account-settings";
 
 export default async function AccountPage() {
-  const userDetails = await getUserInfo();
+  const userDetails = await getUserInfoServer();
 
   if (!userDetails) {
     redirect("/");
@@ -19,16 +21,12 @@ export default async function AccountPage() {
     <div className="h-full w-full bg-neutral-900 rounded-lg overflow-y-auto">
       <Header>
         <div className="mb-2 flex flex-col gap-y-6">
-          <h1 className="text-white text-3xl font-bold">
-            Account Settings
-          </h1>
+          <h1 className="text-white text-3xl font-bold">Account Settings</h1>
         </div>
       </Header>
       <div className="h-full py-6">
         <div className="max-w-4xl mx-auto px-4">
-          <p className="text-neutral-400 mb-1">
-            Manage your account information and preferences
-          </p>
+          <p className="text-neutral-400 mb-1">Manage your account information and preferences</p>
 
           {/* User Info Card */}
           <div className="bg-neutral-800/50 rounded-lg p-6 mb-8">

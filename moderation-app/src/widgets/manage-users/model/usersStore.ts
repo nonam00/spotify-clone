@@ -1,6 +1,9 @@
 import { create } from "zustand";
-import type { ManagedUser } from "@/entities/user/model";
-import { getUsersForModeration, updateUserStatus as updateUserStatusApi } from "@/entities/user/api";
+import {
+  type ManagedUser,
+  getUsersForModeration,
+  updateUserStatus as updateUserStatusApi
+} from "@/entities/user";
 
 type UsersStore = {
   users: ManagedUser[];

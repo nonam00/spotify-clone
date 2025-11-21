@@ -1,8 +1,7 @@
 import { type FormEvent, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { Box, Button, Input } from "@/shared/ui";
-import { useAuthStore } from "@/features/auth/model/authStore.ts";
+import { useAuthStore } from "@/features/auth";
 
 const LoginPage = () => {
   const navigate = useNavigate();

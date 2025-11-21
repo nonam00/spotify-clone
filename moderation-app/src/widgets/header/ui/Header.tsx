@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 
-import { useAuthStore } from "@/features/auth/model";
+import { useAuthStore } from "@/features/auth";
 import { Button } from "@/shared/ui";
 
 interface HeaderProps {

@@ -1,1 +1,1 @@
-export { useModeratorsStore } from "./moderatorStore.ts";
+export { useModeratorsStore } from "./moderatorStore";

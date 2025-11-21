@@ -1,5 +1,5 @@
-import { Header, NavigationTabs } from "@/widgets/header/ui";
-import { CreateModeratorForm, ModeratorsTable } from "@/widgets/manage-moderators/ui";
+import { Header, NavigationTabs } from "@/widgets/header";
+import { CreateModeratorForm, ModeratorsTable } from "@/widgets/manage-moderators";
 
 const ModeratorsPage = () => {
   return (

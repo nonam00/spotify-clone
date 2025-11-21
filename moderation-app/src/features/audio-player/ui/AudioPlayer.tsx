@@ -3,8 +3,7 @@ import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 
 import { Slider } from "@/shared/ui";
 import { CLIENT_FILES_URL } from "@/shared/config/api";
-
-import type { Song } from "@/entities/song/model";
+import type { Song } from "@/entities/song";
 import { useSound } from "../lib";
 import { useAudioStore } from "../model";
 

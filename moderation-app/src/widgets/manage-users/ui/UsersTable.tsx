@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 
-import { useConfirmModalStore } from "@/features/confirm-modal/model/confirmModalStore.ts";
 import { Box, Button } from "@/shared/ui";
-import type { ManagedUser } from "@/entities/user/model";
+import type { ManagedUser } from "@/entities/user";
+import { useConfirmModalStore } from "@/features/confirm-modal";
 import { useUserSongsModalStore, useUsersStore } from "../model";
 import UserSongsModal from "./UserSongsModal";
 

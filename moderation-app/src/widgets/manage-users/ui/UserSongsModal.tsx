@@ -1,7 +1,7 @@
 import { Modal, Box, Button } from "@/shared/ui";
-import { SongItem } from "@/entities/song/ui";
-import { useConfirmModalStore } from "@/features/confirm-modal/model";
-import { AudioPlayer } from "@/features/audio-player/ui";
+import { SongItem } from "@/entities/song";
+import { useConfirmModalStore } from "@/features/confirm-modal";
+import { AudioPlayer } from "@/features/audio-player";
 import { useUserSongsModalStore } from "../model";
 
 const UserSongsModal = () => {

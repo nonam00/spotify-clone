@@ -1,15 +1,15 @@
 import Image from "next/image"
 import {redirect} from "next/navigation";
 
-import getLikedSongs from "@/actions/liked/getLikedSongs";
-import getUserInfo from "@/actions/user/getUserInfo";
-import Header from "@/components/Header"
-import LikedContent from "./components/LikedContent";
+import {getUserInfoServer} from "@/entities/user/api";
+import {getLikedSongs} from "@/entities/song/api";
+import { Header } from "@/widgets/header";
+import { LikedContent } from "@/_pages/liked";
 
 export const revalidate = 0;
 
 const Liked = async () => {
-  const user = await getUserInfo();
+  const user = await getUserInfoServer();
 
   if (!user) {
     redirect("/");
@@ -31,9 +31,7 @@ const Liked = async () => {
               />
             </div>
             <div className="flex flex-col gap-y-2 mt-4 md:mt-0">
-              <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-bold">
-                Liked Songs
-              </h1>
+              <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-bold">Liked Songs</h1>
             </div>
           </div>
         </div>

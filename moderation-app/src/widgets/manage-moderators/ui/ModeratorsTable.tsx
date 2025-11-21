@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
 import { Box, Button } from "@/shared/ui";
-import type { ModeratorPermissions } from "@/entities/moderator/model";
-import { useConfirmModalStore } from "@/features/confirm-modal/model";
-import { useAuthStore } from "@/features/auth/model/authStore.ts";
+import type { ModeratorPermissions } from "@/entities/moderator";
+import { useConfirmModalStore } from "@/features/confirm-modal";
+import { useAuthStore } from "@/features/auth";
 import { useModeratorsStore } from "../model";
 
 const permissionLabels: Record<keyof ModeratorPermissions, string> = {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Button } from "@/shared/ui";
-import { useConfirmModalStore } from "@/features/confirm-modal/model/confirmModalStore.ts";
+import { useConfirmModalStore } from "../model";
 
 const ConfirmModal = () => {
   const { isOpen, title, description, onConfirm, onClose } = useConfirmModalStore();

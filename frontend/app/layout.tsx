@@ -2,14 +2,10 @@ import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import "./globals.css";
 
-import Sidebar from "@/components/Sidebar";
-import Player from "@/components/Player";
-
-import UserProvider from "@/providers/UserProvider";
-import ModalProvider from "@/providers/ModalProvider";
-import ToasterProvider from "@/providers/ToasterProvider";
-
-import getUserPlaylists from "@/actions/playlists/getUserPlaylists";
+import {getUserPlaylists} from "@/entities/playlist/api";
+import { Player } from "@/widgets/player";
+import { Sidebar } from "@/_app/ui";
+import { AuthProvider, ModalProvider, ToasterProvider }from "@/_app/providers";
 
 const font = Figtree({ subsets: ["latin"] });
 
@@ -32,14 +28,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={font.className}>
-        <ToasterProvider/>
-        <UserProvider>
-          <ModalProvider/>
+        <ToasterProvider />
+        <AuthProvider>
+          <ModalProvider />
           <Sidebar playlists={playlists}>
             {children}
           </Sidebar>
           <Player />
-        </UserProvider>
+        </AuthProvider>
       </body>
     </html>
   );

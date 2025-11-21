@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
 import { Box, Button } from "@/shared/ui";
-import { useConfirmModalStore } from "@/features/confirm-modal/model";
+import { useConfirmModalStore } from "@/features/confirm-modal";
 import { useSongsStore } from "../model";
-import SongModerationItem from "./SongModerationItem.tsx";
+import SongModerationItem from "./SongModerationItem";
 
 const SongList = () => {
   const { 

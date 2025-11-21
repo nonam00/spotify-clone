@@ -1,13 +1,12 @@
 import { create } from "zustand";
-
-import type { Song } from "@/entities/song/model";
-import { 
+import {
+  type Song,
   getUnpublishedSongs, 
   publishSong as publishSongApi,
   publishSongs as publishSongsApi,
   deleteSong as deleteSongApi, 
   deleteSongs as deleteSongsApi 
-} from "@/entities/song/api";
+} from "@/entities/song";
 
 type SongsStore = {
   songs: Song[];

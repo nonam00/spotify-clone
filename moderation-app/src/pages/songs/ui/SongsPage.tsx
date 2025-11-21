@@ -1,5 +1,5 @@
-import { Header, NavigationTabs } from "@/widgets/header/ui";
-import { SongList } from "@/widgets/moderate-songs/ui";
+import { Header, NavigationTabs } from "@/widgets/header";
+import { SongList } from "@/widgets/moderate-songs";
 
 const SongsPage = () => {
   return (

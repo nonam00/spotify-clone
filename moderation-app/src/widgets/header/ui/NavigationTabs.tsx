@@ -1,6 +1,5 @@
 import { NavLink } from "react-router-dom";
-
-import { useAuthStore } from "@/features/auth/model";
+import { useAuthStore } from "@/features/auth";
 
 const navItems = [
   { to: "/", label: "Songs", permission: "canManageContent" as const },

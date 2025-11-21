@@ -1,5 +1,5 @@
-import { Header, NavigationTabs } from "@/widgets/header/ui";
-import { UsersTable } from "@/widgets/manage-users/ui";
+import { Header, NavigationTabs } from "@/widgets/header";
+import { UsersTable } from "@/widgets/manage-users";
 
 const UsersPage = () => {
   return (

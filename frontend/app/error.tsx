@@ -1,13 +1,11 @@
 "use client";
 
-import Box from "@/components/ui/Box";
+import { Box } from "@/shared/ui";
 
 const Error = () => {
   return (
     <Box className="h-full flex items-center justify-center">
-      <div className="text-neutral-400">
-        Something went wrong.
-      </div>
+      <div className="text-neutral-400">Something went wrong.</div>
     </Box>
   );
 }
