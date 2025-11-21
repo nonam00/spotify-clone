@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { ModeratePage } from "@/pages/songs";
-import { LoginPage } from "@/pages/login";
-import { ModeratorsPage } from "@/pages/moderators";
-import { UsersPage } from "@/pages/users";
+import { ModeratePage } from "@/pages/songs/ui";
+import { LoginPage } from "@/pages/login/ui";
+import { ModeratorsPage } from "@/pages/moderators/ui";
+import { UsersPage } from "@/pages/users/ui";
 
-import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
 import { ConfirmModal } from "@/shared/ui";
+import { ProtectedRoute } from "@/features/auth/ui";
 
 function App() {
   return (

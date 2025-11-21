@@ -7,9 +7,3 @@ body,
   background-color: black;
   color-scheme: dark;
 }
-
-/* Smooth transitions for better UX */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}

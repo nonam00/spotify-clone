@@ -9,4 +9,3 @@ export async function authFetchClient(input: string | URL, init: RequestInit = {
     ...init,
   });
 }
-
