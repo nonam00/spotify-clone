@@ -21,7 +21,7 @@ public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, Result<Us
 
     public async Task<Result<UserInfo>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetById(request.UserId, cancellationToken);
+        var user = await _usersRepository.GetById(request.UserId, cancellationToken).ConfigureAwait(false);
 
         if (user != null)
         {

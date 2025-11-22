@@ -16,7 +16,10 @@ public class GetSongListByPlaylistIdQueryHandler: IQueryHandler<GetSongListByPla
 
     public async Task<Result<SongListVm>> Handle(GetSongListByPlaylistIdQuery request, CancellationToken cancellationToken)
     {
-        var songs = await _songsRepository.GetListByPlaylistId(request.PlaylistId, cancellationToken);
+        var songs = await _songsRepository
+            .GetListByPlaylistId(request.PlaylistId, cancellationToken)
+            .ConfigureAwait(false);
+        
         return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

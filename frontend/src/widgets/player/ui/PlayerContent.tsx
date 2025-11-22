@@ -8,10 +8,9 @@ import { useShallow } from "zustand/shallow";
 
 import { Slider } from "@/shared/ui";
 import type { Song } from "@/entities/song/model";
-import { usePlayerStore } from "@/features/player";
-
-import { LikeButton } from "@/widgets/like-button/ui";
 import {SongListItem} from "@/entities/song/ui";
+import { usePlayerStore } from "@/features/player";
+import { LikeButton } from "@/features/like-button";
 import {useSound} from "../lib";
 
 // Helper function to format time

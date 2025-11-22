@@ -2,7 +2,7 @@
 
 is a modern music streaming web application built using a microservices architecture. It allows users to upload, listen, and organize music tracks into personalized playlists.
 
-https://github.com/user-attachments/assets/e064eb61-1632-4a06-ac58-bdb705514cf3
+https://github.com/user-attachments/assets/83bd7c31-7573-4925-b783-11156097a753
 
 ## 🏗️ Architecture
 
@@ -17,9 +17,10 @@ The project is built on a microservices architecture and includes:
 
 ### Frontend (Next.js 16)
 - **React 19** with TypeScript
-- **Tailwind CSS** - utility-first CSS framework for styling
 - **Zustand** - for state management
+- **Tailwind CSS** - utility-first CSS framework for styling
 - **React Hot Toast** for notifications
+- **Feature-Sliced Design (FSD)** - architectural methodology
 
 ### Moderation App (React + Vite)
 - **React 19** with TypeScript
@@ -60,7 +61,10 @@ The project is built on a microservices architecture and includes:
 - **Refresh tokens** - secure session refresh
 
 ### 🔍 Content Moderation
+- **Authorization with Permissions** - every moderator has an account with own permissions
 - **Unpublished Songs Management** - view and manage songs pending publication
+- **User Accounts Management** - view information and statistics about users, manage user accounts or songs published by users
+- **Moderator Accounts Management** - view and manage moderator accounts, give or revoke permissions if you are super-moderator
 - **Bulk Operations** - publish or delete multiple songs at once
 - **Audio Preview** - listen to songs before moderation decisions
 

@@ -21,7 +21,7 @@ public class GetSongByIdQueryHandler : IQueryHandler<GetSongByIdQuery, Result<So
 
     public async Task<Result<SongVm>> Handle(GetSongByIdQuery request, CancellationToken cancellationToken)
     {
-        var song = await _songsRepository.GetById(request.SongId, cancellationToken);
+        var song = await _songsRepository.GetById(request.SongId, cancellationToken).ConfigureAwait(false);
 
         if (song != null)
         {

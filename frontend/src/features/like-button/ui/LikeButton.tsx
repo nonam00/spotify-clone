@@ -3,8 +3,6 @@
 import { toast } from "react-hot-toast";
 import { useLayoutEffect, useState, useTransition } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-
-import { useAuthModalStore, useAuthStore } from "@/features/auth";
 import {
   addLikedSong,
   checkLikedSong,
@@ -18,16 +16,10 @@ const LikeButton = ({
   songId: string;
   defaultValue?: boolean;
 }) => {
-  const openAuthModal = useAuthModalStore((s) => s.onOpen);
-  const { isAuthenticated } = useAuthStore();
   const [isLiked, setIsLiked] = useState<boolean>(defaultValue ?? false);
   const [isPending, startTransition] = useTransition();
 
   useLayoutEffect(() => {
-    if (!isAuthenticated || defaultValue !== undefined) {
-      return;
-    }
-
     const abortController = new AbortController();
 
     const loadLike = async () => {
@@ -40,13 +32,9 @@ const LikeButton = ({
     return () => {
       abortController.abort();
     };
-  }, [songId, isAuthenticated, defaultValue]);
+  }, [songId, defaultValue]);
 
   const handleLike = async () => {
-    if (!isAuthenticated) {
-      return openAuthModal();
-    }
-
     startTransition(async () => {
       if (isLiked) {
         const success = await deleteLikedSong(songId);

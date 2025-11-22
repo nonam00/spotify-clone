@@ -16,7 +16,7 @@ public class GetUnpublishedSongListQueryHandler : IQueryHandler<GetUnpublishedSo
 
     public async Task<Result<SongListVm>> Handle(GetUnpublishedSongListQuery query, CancellationToken cancellationToken)
     {
-        var songs = await _songsRepository.GetUnpublishedList(cancellationToken);
+        var songs = await _songsRepository.GetUnpublishedList(cancellationToken).ConfigureAwait(false);
         return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

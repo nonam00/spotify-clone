@@ -16,8 +16,10 @@ public class GetPlaylistListByCountQueryHandler : IQueryHandler<GetPlaylistListB
 
     public async Task<Result<PlaylistListVm>> Handle(GetPlaylistListByCountQuery request, CancellationToken cancellationToken)
     {
-        var playlists = await _playlistsRepository.TakeList(
-            request.UserId, request.Count, cancellationToken);
+        var playlists = await _playlistsRepository
+            .TakeList(request.UserId, request.Count, cancellationToken)
+            .ConfigureAwait(false);
+        
         return Result<PlaylistListVm>.Success(new PlaylistListVm(playlists));
     }
 }

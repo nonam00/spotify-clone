@@ -16,7 +16,10 @@ public class GetLikedSongListQueryHandler : IQueryHandler<GetLikedSongListQuery,
 
     public async Task<Result<SongListVm>> Handle(GetLikedSongListQuery request, CancellationToken cancellationToken)
     {
-        var songs = await _songsRepository.GetLikedByUserId(request.UserId, cancellationToken);
+        var songs = await _songsRepository
+            .GetLikedByUserId(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
+        
         return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }
