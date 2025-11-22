@@ -1,11 +1,8 @@
-import getSongs from "@/actions/songs/getSongs";
-import getUserPlaylistsByQuantity from "@/actions/playlists/getUserPlaylistsByQuantity";
-
-import Header from "@/components/Header";
-import PlaylistHomeItem from "./components/PlaylistHomeItem";
-import PageContent from "./components/PageContent";
-
-import {CLIENT_FILES_URL} from "@/helpers/api";
+import { CLIENT_FILES_URL } from "@/shared/config/api";
+import {getSongs} from "@/entities/song/api";
+import {getUserPlaylistsByQuantity} from "@/entities/playlist/api";
+import { Header } from "@/widgets/header";
+import { PlaylistHomeItem, PageContent } from "@/_pages/home";
 
 export const revalidate = 0;
 

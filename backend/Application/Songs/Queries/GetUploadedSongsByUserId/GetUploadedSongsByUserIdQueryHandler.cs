@@ -16,7 +16,10 @@ public class GetUploadedSongsByUserIdQueryHandler : IQueryHandler<GetUploadedSon
 
     public async Task<Result<SongListVm>> Handle(GetUploadedSongsByUserIdQuery request, CancellationToken cancellationToken)
     {
-        var songs = await _songsRepository.GetUploadedByUserId(request.UserId, cancellationToken);
+        var songs = await _songsRepository
+            .GetUploadedByUserId(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
+        
         return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

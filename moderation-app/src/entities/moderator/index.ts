@@ -1,6 +1,2 @@
-export type { 
-  ModeratorPermissions, 
-  ModeratorSummary, 
-  ModeratorListVm 
-} from "./types";
-
+export * from "./api";
+export * from "./model";

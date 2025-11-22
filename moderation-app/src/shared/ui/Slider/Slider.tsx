@@ -30,4 +30,3 @@ const Slider = memo(function Slider({
 });
 
 export default Slider;
-

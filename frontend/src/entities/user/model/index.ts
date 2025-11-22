@@ -1,0 +1,1 @@
+export type { UserDetails } from "./types";

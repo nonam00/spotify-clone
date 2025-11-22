@@ -4,9 +4,8 @@ import { ModeratePage } from "@/pages/songs";
 import { LoginPage } from "@/pages/login";
 import { ModeratorsPage } from "@/pages/moderators";
 import { UsersPage } from "@/pages/users";
-
-import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
-import { ConfirmModal } from "@/shared/ui";
+import { ProtectedRoute } from "@/features/auth";
+import {ConfirmModal} from "@/features/confirm-modal";
 
 function App() {
   return (

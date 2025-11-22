@@ -16,8 +16,10 @@ public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearch
 
     public async Task<Result<SongListVm>> Handle(GetSongListBySearchQuery request, CancellationToken cancellationToken)
     {
-        var songs = await _songsRepository.GetSearchList(
-            request.SearchString, request.SearchCriteria, cancellationToken);
+        var songs = await _songsRepository
+            .GetSearchList(request.SearchString, request.SearchCriteria, cancellationToken)
+            .ConfigureAwait(false);
+        
         return Result<SongListVm>.Success(new SongListVm(songs));
     }
 }

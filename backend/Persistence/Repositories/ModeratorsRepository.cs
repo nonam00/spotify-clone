@@ -42,9 +42,10 @@ public class ModeratorsRepository : IModeratorsRepository
     {
         var moderators = await _dbContext.Moderators
             .AsNoTracking()
-            .Select(m => ToVm(m))
             .OrderByDescending(m => m.CreatedAt)
-            .ToListAsync(cancellationToken);
+            .Select(m => ToVm(m))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         
         return moderators;
     }

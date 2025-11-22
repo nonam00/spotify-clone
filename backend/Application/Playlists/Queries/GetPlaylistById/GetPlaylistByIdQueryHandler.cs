@@ -23,7 +23,7 @@ public class GetPlaylistByIdQueryHandler : IQueryHandler<GetPlaylistByIdQuery, R
 
     public async Task<Result<PlaylistVm>> Handle(GetPlaylistByIdQuery request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken);
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken).ConfigureAwait(false);
         
         if (playlist != null)
         {

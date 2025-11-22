@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
-import getLikedSongsForPlaylist from "@/actions/liked/getLikedSongsForPlaylist";
-import getPlaylistById from "@/actions/playlists/getPlaylistById";
 
-import Header from "@/components/Header"
-import AddContent from "./components/AddContent";
-import SearchInput from "@/components/SearchInput";
+import {getPlaylistById} from "@/entities/playlist/api";
+import {getLikedSongsForPlaylist} from "@/entities/song/api";
+import { SearchInput } from "@/features/search-input/ui";
+import { Header } from "@/widgets/header";
+import {AddSongsToPlaylistContent} from "@/_pages/playlist";
 
 export const revalidate = 0;
 
-interface AddProps {
+type AddProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ searchString: string }>;
 }
@@ -36,7 +36,7 @@ const Add = async ({
           <SearchInput pageUrl={`/playlist/${id}/add/`} types={false}/>
         </div>
       </Header>
-      <AddContent playlistId={playlist.id} songs={ songs} />
+      <AddSongsToPlaylistContent playlistId={playlist.id} songs={ songs} />
     </div>
   )
 }

@@ -1,12 +1,11 @@
 import { redirect }  from "next/navigation";
 
-import getPlaylistById from "@/actions/playlists/getPlaylistById";
-import getSongsByPlaylistId from "@/actions/songs/getSongsByPlaylistId";
-import getUserInfo from "@/actions/user/getUserInfo";
-
-import Header from "@/components/Header"
-import PlaylistContent from "./components/PlaylistContent";
-import PlaylistImage from "./components/PlaylistImage";
+import {getUserInfoServer} from "@/entities/user/api";
+import {getPlaylistById} from "@/entities/playlist/api";
+import {getSongsByPlaylistId} from "@/entities/song/api";
+import { Header } from "@/widgets/header";
+import { PlaylistImage } from "@/widgets/playlist";
+import { PlaylistContent} from "@/_pages/playlist";
 
 export const revalidate = 0;
 
@@ -17,7 +16,7 @@ const Playlist = async ({
     id: string
   }>
 }) => {
-  const user = await getUserInfo();
+  const user = await getUserInfoServer();
 
   if (!user) {
     redirect("/");

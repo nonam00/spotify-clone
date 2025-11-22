@@ -1,2 +1,1 @@
-export { default as ModeratorsPage } from "./ModeratorsPage";
-
+export * from "./ui";

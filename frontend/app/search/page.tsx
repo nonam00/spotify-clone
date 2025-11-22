@@ -1,10 +1,8 @@
-import getSongs from "@/actions/songs/getSongs";
-import getSongsBySearch from "@/actions/songs/getSongsBySearch";
-
-import Header from "@/components/Header";
-import SearchInput from "@/components/SearchInput";
-import SearchContent from "./components/SearchContent";
-import {SearchType} from "@/types/types";
+import type { SearchType } from "@/entities/song/model";
+import {getSongs, getSongsBySearch} from "@/entities/song/api";
+import { Header } from "@/widgets/header";
+import { SearchInput } from "@/features/search-input";
+import { SearchContent } from "@/_pages/songs-search";
 
 type SearchProps = {
   searchParams: Promise<{

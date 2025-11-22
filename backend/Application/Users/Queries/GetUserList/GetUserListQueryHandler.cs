@@ -16,7 +16,7 @@ public class GetUserListQueryHandler : IQueryHandler<GetUserListQuery, Result<Us
 
     public async Task<Result<UserListVm>> Handle(GetUserListQuery request, CancellationToken cancellationToken)
     {
-        var users = await _usersRepository.GetListVm(cancellationToken);
+        var users = await _usersRepository.GetListVm(cancellationToken).ConfigureAwait(false);
         return Result<UserListVm>.Success(new UserListVm(users));
     }
 }

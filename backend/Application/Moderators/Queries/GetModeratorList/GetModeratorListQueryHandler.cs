@@ -16,7 +16,7 @@ public class GetModeratorListQueryHandler : IQueryHandler<GetModeratorListQuery,
 
     public async Task<Result<ModeratorListVm>> Handle(GetModeratorListQuery request, CancellationToken cancellationToken)
     {
-        var moderators = await _moderatorsRepository.GetList(cancellationToken);
+        var moderators = await _moderatorsRepository.GetList(cancellationToken).ConfigureAwait(false);
         return Result<ModeratorListVm>.Success(new ModeratorListVm(moderators));
     }
 }

@@ -1,2 +1,1 @@
-export { default as ModeratePage } from "./SongsPage.tsx";
-
+export * from "./ui";
