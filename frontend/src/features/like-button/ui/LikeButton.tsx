@@ -1,7 +1,7 @@
 "use client";
 
-import { toast } from "react-hot-toast";
 import { useLayoutEffect, useState, useTransition } from "react";
+import { toast } from "react-hot-toast";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import {
   addLikedSong,
@@ -20,19 +20,21 @@ const LikeButton = ({
   const [isPending, startTransition] = useTransition();
 
   useLayoutEffect(() => {
+    if (defaultValue !== undefined) {
+      return;
+    }
     const abortController = new AbortController();
 
-    const loadLike = async () => {
+    async function loadLike(){
       const success = await checkLikedSong(songId, abortController);
       setIsLiked(success);
-    };
-
+    }
     loadLike();
 
     return () => {
       abortController.abort();
     };
-  }, [songId, defaultValue]);
+  }, [defaultValue, songId]);
 
   const handleLike = async () => {
     startTransition(async () => {
@@ -42,9 +44,7 @@ const LikeButton = ({
           setIsLiked(false);
           toast.success("Like deleted");
         } else {
-          toast.error(
-            "An error occurred while deleting the song from your favorites"
-          );
+          toast.error("An error occurred while deleting the song from your favorites");
         }
       } else {
         const success = await addLikedSong(songId);
@@ -52,9 +52,7 @@ const LikeButton = ({
           setIsLiked(true);
           toast.success("Liked");
         } else {
-          toast.error(
-            "An error occurred while adding the song to the favorites"
-          );
+          toast.error("An error occurred while adding the song to the favorites");
         }
       }
     });
@@ -64,7 +62,7 @@ const LikeButton = ({
     <button
       onClick={handleLike}
       disabled={isPending}
-      className="hover:opacity-75 transition cursor-pointer"
+      className="p-2 hover:opacity-75 transition cursor-pointer"
     >
       {isLiked ? (
         <AiFillHeart color="#22c55e" size={25} />
