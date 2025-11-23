@@ -1,5 +1,3 @@
-import type { Playlist } from "@/entities/playlist/model";
-import type { Song } from "@/entities/song/model";
 import Image from "next/image";
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 
@@ -38,7 +36,7 @@ const MediaItem = ({
         />
       </div>
       <div className="flex flex-col gap-y-1 overflow-hidden">
-        <p className="text-white trancate">{title}</p>
+        <p className="text-white truncate">{title}</p>
         {author && (<p className="text-neutral-400 text-sm truncate">{author}</p>)}
       </div>
     </div>

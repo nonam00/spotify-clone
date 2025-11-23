@@ -77,4 +77,3 @@ export function useSound(songUrl: string, volume: number = 1): UseSoundReturnTyp
     setCurrentTime: setCurrentTimeHandler
   };
 }
-

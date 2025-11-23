@@ -75,8 +75,7 @@ const OptionsMenu = ({
         onClick={toggleMenu}
         disabled={disabled}
         className={twMerge(
-          "flex items-center justify-center group p-2 rounded-full hover:bg-neutral-800/60" +
-            "transition focus:outline-none cursor-pointer",
+          "flex items-center justify-center group p-2 rounded-full hover:bg-neutral-800/60 transition cursor-pointer",
           disabled ? "opacity-50 cursor-not-allowed" : ""
         )}
       >

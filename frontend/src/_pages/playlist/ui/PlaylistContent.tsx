@@ -23,7 +23,7 @@ import type { Song } from "@/entities/song/model";
 import { SortableSongListItem} from "@/entities/song/ui";
 import { reorderPlaylistSongs } from "@/entities/playlist/api";
 import { useOnPlay } from "@/features/player";
-import { SongActionsMenu, PlaylistActionsMenu } from "@/widgets/playlist";
+import { PlaylistSongActionsMenu, PlaylistActionsMenu } from "@/widgets/playlist";
 
 const PlaylistContent = ({
   id,
@@ -114,7 +114,7 @@ const PlaylistContent = ({
                   song={song}
                   onClickCallback={onPlay}
                 >
-                  <SongActionsMenu
+                  <PlaylistSongActionsMenu
                     playlistId={id}
                     songId={song.id}
                     callback={onRemoveClick}
