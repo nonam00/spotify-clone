@@ -144,11 +144,11 @@ The application requires the following environment variables to be configured:
 
 ### 📝 Important Notes
 
-- **EF Core migrations** must be run before the first run of the application
 - All configuration settings must be specified in .env files
 - For production, it is recommended to use external services instead of MailHog
 - MinIO is used for file storage, make sure access is configured correctly
-
+- Default moderator credentials: *admin@gmail.com, adminpassword*
+  
 ## 🤝 Contributing to the Project
 
 I welcome contributions! Please:
