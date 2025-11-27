@@ -1,30 +1,28 @@
 "use client";
 
-import { memo } from "react";
+import {memo, useState} from "react";
 import * as RadixSlider from "@radix-ui/react-slider";
 import {twMerge} from "tailwind-merge";
 
+type CustomSliderProps = RadixSlider.SliderProps & { isLoading?: boolean };
+
 const Slider = memo(function Slider({
-  value = 1,
-  onChange,
+  value = [1],
+  onValueCommit,
   isLoading,
-  disabled
-}: {
-  value: number;
-  onChange: (value: number[]) => void;
-  isLoading?: boolean
-  disabled?: boolean
-}) {
+  disabled,
+}: CustomSliderProps) {
+  const [sliderValue, setValue] = useState(value);
   return (
     <RadixSlider.Root
       className="relative flex items-center select-none touch-none w-full h-7 cursor-pointer"
       defaultValue={[1]}
-      value={[value]}
-      onValueChange={onChange}
+      value={sliderValue}
+      onValueChange={setValue}
+      onValueCommit={onValueCommit}
       max={1}
       step={0.01}
       disabled={disabled}
-      aria-label="Volume"
     >
       <RadixSlider.Track
         className={twMerge(

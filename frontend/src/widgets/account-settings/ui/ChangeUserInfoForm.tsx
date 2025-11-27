@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import React, { useRef, useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { IoMdCloudUpload } from "react-icons/io";
 
 import {
+  FILE_CONFIG,
   getPresignedUrl,
   uploadFileToS3,
   validateImage,
@@ -32,12 +32,15 @@ const ChangeUserInfoForm = ({
     const newErrors: typeof errors = errors;
     const file = e.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const validationResult = validateImage(file);
     if (validationResult) {
       newErrors.file = validationResult;
       setErrors(newErrors);
+      e.target.value = "";
       return;
     }
 
@@ -146,7 +149,7 @@ const ChangeUserInfoForm = ({
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept={FILE_CONFIG.image.allowedTypes.join(", ")}
                   className="hidden"
                   onChange={handleFileChange}
                   disabled={isPending}

@@ -7,27 +7,72 @@ type PresignedUrlResponse = {
   file_id: string;
 };
 
-export const FILE_CONFIG = {
+
+type FileConfigElementType = {
+  allowedTypes: string[],
+  maxSize: number
+}
+
+type FileConfigType = Record<string, FileConfigElementType>;
+
+export const FILE_CONFIG: FileConfigType = {
   image: {
+    allowedTypes: [".png", ".jpg", ".jpeg", ".webp", ".svg", ".heif", ".raw"],
     maxSize: 32 * 1024 * 1024, // 32MB
   },
   audio: {
+    allowedTypes: [".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg"],
     maxSize: 256 * 1024 * 1024, // 256MB
   },
 };
 
-const validateFile = (file: File, maxSize: number): string | null => {
+const validateSize = (file: File, maxSize: number): string | null => {
   if (file.size > maxSize) {
     return `File too large. Maximum size: ${Math.round(maxSize / 1024 / 1024)}MB`;
   }
   return null;
 };
 
-export const validateImage = (file: File) =>
-  validateFile(file, FILE_CONFIG.image.maxSize);
+const validateType = (file: File, allowedTypes: string[]): string | null => {
+  const extension = file.name.split(".").pop();
 
-export const validateAudio = (file: File) =>
-  validateFile(file, FILE_CONFIG.audio.maxSize);
+  if (extension === undefined) {
+    return "Invalid file extension.";
+  }
+
+  if (!allowedTypes.includes("." + extension)) {
+    return "Invalid file type. Allowed types: " + allowedTypes.join(" ");
+  }
+
+  return null;
+}
+
+export function validateImage(file: File): string | null {
+  const sizeError = validateSize(file, FILE_CONFIG.image.maxSize);
+  if (sizeError) {
+    return sizeError;
+  }
+
+  const typeError = validateType(file, FILE_CONFIG.image.allowedTypes);
+  if (typeError) {
+    return typeError;
+  }
+
+  return null;
+}
+
+export function validateAudio(file: File): string | null {
+  const sizeError = validateSize(file, FILE_CONFIG.audio.maxSize);
+  if (sizeError) {
+    return sizeError;
+  }
+
+  const typeError = validateType(file, FILE_CONFIG.audio.allowedTypes);
+  if (typeError) {
+    return typeError;
+  }
+  return null;
+}
 
 export async function getPresignedUrl(
   type: FileUploadType
