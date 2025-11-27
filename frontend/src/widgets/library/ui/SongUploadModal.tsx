@@ -150,7 +150,7 @@ const SongUploadModal = () => {
             name="Audio"
             type="file"
             disabled={isPending}
-            accept=".mp3,.wav,.flac,.m4a,.aac,.ogg"
+            accept={FILE_CONFIG.audio.allowedTypes.join(", ")}
             required
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -165,12 +165,12 @@ const SongUploadModal = () => {
             name="Image"
             type="file"
             disabled={isPending}
-            accept="image/*"
+            accept={FILE_CONFIG.image.allowedTypes.join(", ")}
             required
           />
           <p className="text-xs text-gray-500 mt-1">
             Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB
-            • Supported formats: JPEG, PNG, WebP, GIF
+            • Supported formats: JPEG, PNG, WebP, SVG, HEIF, RAW
           </p>
         </div>
         <Button disabled={isPending} type="submit" className="my-4">

@@ -40,30 +40,45 @@ const Player = () => {
     setPreviousId
   );
 
-  const Icon = isPlaying ? BsPauseFill : BsPlayFill;
-  const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
+  const pause = useCallback(
+    () => {
+      if (!audioRef.current) return;
+      audioRef.current.pause();
+    },
+    [audioRef]
+  );
 
-  const progress = duration > 0 ? currentTime / duration : 0;
+  const play = useCallback(
+    () => {
+      if (!audioRef.current) return;
+      audioRef.current.play().catch((error: unknown) => {
+        console.error("Player error:", error);
+      });
+    },
+    [audioRef]
+  )
 
   // Play/pause button handler
   const togglePlay = useCallback(() => {
-    if (!audioRef.current) return;
-
     if (isPlaying) {
-      audioRef.current.pause();
+      pause();
     } else {
-      audioRef.current.play().catch((error: unknown) => {
-        console.log("Play error:", error);
-      });
+      play()
     }
-  }, [audioRef, isPlaying]);
-
-  const toggleMute = () => setVolume(volume === 0 ? 1 : 0);
+  }, [isPlaying, pause, play]);
 
   // Progress slider callback
   const handleProgressChange = useCallback(
     (values: number[]) => {
-      if (audioRef.current) {
+      if (!audioRef.current) {
+        return;
+      }
+
+      const value = values[0];
+
+      if (value === 1) {
+        audioRef.current.currentTime = audioRef.current.duration - 1;
+      } else {
         audioRef.current.currentTime = values[0] * audioRef.current.duration;
       }
     },
@@ -104,6 +119,13 @@ const Player = () => {
     return null;
   }
 
+  const toggleMute = () => setVolume(volume === 0 ? 1 : 0);
+
+  const Icon = isPlaying ? BsPauseFill : BsPlayFill;
+  const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
+
+  const progress = duration > 0 ? currentTime / duration : 0;
+
   return (
     <div className="fixed bottom-0 bg-black w-full h-[80px]">
       <audio ref={audioRef} preload="auto" />
@@ -123,7 +145,7 @@ const Player = () => {
           <button
             onClick={togglePlay}
             className="flex items-center justify-center h-10 w-10 rounded-full bg-white cursor-pointer"
-            disabled={!currentSong || isLoading || isStalled}
+            disabled={!currentSong || isLoading}
           >
             <Icon size={30} className="text-black" />
           </button>
@@ -144,7 +166,7 @@ const Player = () => {
               onClick={togglePlay}
               className="flex items-center justify-center h-8 w-8 rounded-full bg-white cursor-pointer disabled:opacity-50"
               aria-label={isPlaying ? "Pause" : "Play"}
-              disabled={!currentSong || isLoading || isStalled}
+              disabled={!currentSong || isLoading}
             >
               <Icon size={24} className="text-black" />
             </button>
@@ -165,8 +187,8 @@ const Player = () => {
             </span>
             <div className="flex-1">
               <Slider
-                value={progress}
-                onChange={handleProgressChange}
+                value={[progress]}
+                onValueCommit={handleProgressChange}
                 isLoading={isLoading || isStalled}
                 disabled={!currentSong || isLoading || isStalled}
               />
@@ -189,8 +211,8 @@ const Player = () => {
               <VolumeIcon size={20} />
             </button>
             <Slider
-              value={volume}
-              onChange={handleVolumeChange}
+              value={[volume]}
+              onValueCommit={handleVolumeChange}
               disabled={!currentSong || isLoading || isStalled}
             />
           </div>
