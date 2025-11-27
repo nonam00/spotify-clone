@@ -11,6 +11,16 @@ public class ModeratorConfiguration : IEntityTypeConfiguration<Moderator>
     {
         builder.HasKey(m => m.Id);
         
+        builder.HasData(new
+        {
+            Id = Guid.Parse("12DBC10A-A7A9-47A3-9A1B-513AAE383F1F"),
+            Email = new Email("admin@gmail.com"),
+            FullName = "Admin",
+            PasswordHash = new PasswordHash("$2a$11$3KFLHu7fxhVL4ghH.tTwV.uhnOji/FDS2dX7PFo.ime3cvsSjeTlC"),
+            IsActive = true,
+            CreatedAt = DateTime.Parse("2025-11-22 00:33:31").ToUniversalTime(),
+        });
+        
         builder.OwnsOne(m => m.Permissions, permissionsBuilder =>
         {
             permissionsBuilder.Property(p => p.CanManageUsers)
@@ -28,6 +38,15 @@ public class ModeratorConfiguration : IEntityTypeConfiguration<Moderator>
             permissionsBuilder.Property(p => p.CanManageModerators)
                 .HasColumnName("can_manage_moderators")
                 .IsRequired();
+
+            permissionsBuilder.HasData(new
+            {
+                ModeratorId = Guid.Parse("12DBC10A-A7A9-47A3-9A1B-513AAE383F1F"),
+                CanManageUsers = true,
+                CanManageContent = true,
+                CanViewReports = true,
+                CanManageModerators = true,
+            });
         });
         
         builder.Property(u => u.Email)
