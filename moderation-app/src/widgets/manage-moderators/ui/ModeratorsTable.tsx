@@ -88,12 +88,6 @@ const ModeratorsTable = () => {
 
   return (
     <Box className="p-0 overflow-hidden">
-      {isLoading && (
-        <div className="flex items-center gap-2 px-6 py-3 bg-neutral-900/60 border-b border-neutral-800 text-sm text-neutral-300">
-          <div className="h-4 w-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          Updating data…
-        </div>
-      )}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-neutral-800 text-sm">
           <thead className="bg-neutral-900/80">
@@ -135,7 +129,7 @@ const ModeratorsTable = () => {
                             onChange={(event) =>
                               handlePermissionToggle(moderator.id, key, event.target.checked)}
                             className="h-4 w-4 rounded border-neutral-600 bg-neutral-800 text-emerald-500 focus:ring-emerald-500"
-                            disabled={isLoading || !moderator.isActive}
+                            disabled={isLoading || !moderator.isActive || isSelf}
                           />
                           {permissionLabels[key]}
                         </label>
