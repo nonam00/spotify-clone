@@ -43,8 +43,22 @@ export const useModeratorsStore = create<ModeratorsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await updateModeratorPermissionsApi(moderatorId, payload);
-      await get().fetchModerators();
-      set({ isLoading: false });
+      const moderators = get().moderators;
+      const index = moderators.findIndex(moderator => moderator.id === moderatorId);
+      const moderator = moderators[index];
+      set({
+        isLoading: false,
+        moderators: [
+          ...moderators.slice(0, index),
+          {
+            ...moderator,
+            permissions: {
+              ...payload
+            },
+          },
+          ...moderators.slice(index + 1),
+        ]
+      });
     } catch (error) {
       set({ error: extractError(error, "Failed to update permissions"), isLoading: false });
       throw error;
@@ -55,8 +69,20 @@ export const useModeratorsStore = create<ModeratorsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await updateModeratorStatusApi(moderatorId, isActive);
-      await get().fetchModerators();
-      set({ isLoading: false });
+      const moderators = get().moderators;
+      const index = moderators.findIndex(moderator => moderator.id === moderatorId);
+      const moderator = moderators[index];
+      set({
+        isLoading: false,
+        moderators: [
+          ...moderators.slice(0, index),
+          {
+            ...moderator,
+            isActive
+          },
+          ...moderators.slice(index + 1),
+        ]
+      });
     } catch (error) {
       set({ error: extractError(error, "Failed to update moderator status"), isLoading: false });
       throw error;

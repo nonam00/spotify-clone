@@ -28,4 +28,3 @@ EXPOSE 5173
 
 # For production, use preview mode
 CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
-

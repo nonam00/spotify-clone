@@ -37,8 +37,20 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await updateUserStatusApi(userId, isActive);
-      await get().fetchUsers();
-      set({ isLoading: false });
+      const users = get().users;
+      const index = users.findIndex(user => user.id === userId);
+      const user = users[index];
+      set({
+        isLoading: false,
+        users: [
+          ...users.slice(0, index),
+          {
+            ...user,
+            isActive,
+          },
+          ...users.slice(index + 1),
+        ]
+      });
     } catch (error) {
       set({ error: extractError(error, "Failed to update user status"), isLoading: false });
       throw error;

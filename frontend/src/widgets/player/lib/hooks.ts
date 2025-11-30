@@ -10,6 +10,7 @@ type UseSoundReturnType = {
   duration: number;
   currentTime: number;
   isStalled: boolean;
+  isSeeking: boolean;
 };
 
 // Manages audio component and Media API
@@ -25,6 +26,7 @@ export function useSound(
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isStalled, setIsStalled] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
 
   const isMountedRef = useRef(true);
 
@@ -41,6 +43,7 @@ export function useSound(
     setCurrentTime(0);
     setDuration(0);
     setIsStalled(false);
+    setIsSeeking(false);
   }, [song?.id]);
 
   // Handle song URL changes
@@ -52,6 +55,7 @@ export function useSound(
       }
       setIsPlaying(false);
       setIsStalled(false);
+      setIsSeeking(false);
       return;
     }
 
@@ -109,6 +113,18 @@ export function useSound(
       }
     }
 
+    const handleSeeking = () => {
+      if (isMountedRef.current && isCurrentAudioValid) {
+        setIsSeeking(true);
+      }
+    }
+
+    const handleSeekingEnd = () => {
+      if (isMountedRef.current && isCurrentAudioValid) {
+        setIsSeeking(false);
+      }
+    }
+
     const handleError = (e: ErrorEvent) => {
       console.error("Audio error:", e.error);
       setNextSong();
@@ -154,6 +170,9 @@ export function useSound(
     audio.addEventListener("canplay", handleCanPlay);
     audio.addEventListener("waiting", handleWaiting);
     audio.addEventListener("playing", handlePlaying);
+
+    audio.addEventListener("seeking", handleSeeking);
+    audio.addEventListener("seeked", handleSeekingEnd);
 
     audio.addEventListener('error', handleError);
 
@@ -213,6 +232,9 @@ export function useSound(
         audio.removeEventListener("waiting", handleWaiting);
         audio.removeEventListener("playing", handlePlaying);
 
+        audio.removeEventListener("seeking", handleSeeking);
+        audio.removeEventListener("seeked", handleSeekingEnd);
+
         audio.removeEventListener('error', handleError);
       }
 
@@ -226,6 +248,7 @@ export function useSound(
         navigator.mediaSession.setActionHandler("seekto", null);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songUrl, song, setNextSong, setPreviousSong]);
 
   // Handle volume changes
@@ -235,7 +258,7 @@ export function useSound(
     }
   }, [volume]);
 
-  return { audioRef, isPlaying, duration, currentTime, isStalled };
+  return { audioRef, isPlaying, duration, currentTime, isStalled, isSeeking };
 }
 
 

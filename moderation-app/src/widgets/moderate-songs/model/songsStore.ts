@@ -46,8 +46,11 @@ export const useSongsStore = create<SongsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await publishSongApi(songId);
-      await get().fetchSongs();
-      set({ isLoading: false });
+      const songs= get().songs;
+      set({
+        isLoading: false,
+        songs: songs.filter(song => song.id !== songId)
+      });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : "Failed to publish song",
@@ -57,14 +60,18 @@ export const useSongsStore = create<SongsStore>((set, get) => ({
   },
 
   publishSelectedSongs: async () => {
-    const { selectedSongs } = get();
+    const selectedSongs = get().selectedSongs;
     if (selectedSongs.length === 0) return;
 
     set({ isLoading: true, error: null });
     try {
       await publishSongsApi(selectedSongs);
-      await get().fetchSongs();
-      set({ selectedSongs: [], isLoading: false });
+      const songs = get().songs;
+      set({
+        isLoading: false,
+        songs: songs.filter(song => !selectedSongs.includes(song.id)),
+        selectedSongs: [],
+      });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : "Failed to publish songs",
@@ -77,8 +84,11 @@ export const useSongsStore = create<SongsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await deleteSongApi(songId);
-      await get().fetchSongs();
-      set({ isLoading: false });
+      const songs = get().songs;
+      set({
+        isLoading: false,
+        songs: songs.filter(song => song.id !== songId)
+      });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : "Failed to delete song",
@@ -94,8 +104,12 @@ export const useSongsStore = create<SongsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await deleteSongsApi(selectedSongs);
-      await get().fetchSongs();
-      set({ selectedSongs: [], isLoading: false });
+      const songs = get().songs;
+      set({
+        isLoading: false,
+        songs: songs.filter(song => !selectedSongs.includes(song.id)),
+        selectedSongs: [],
+      });
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : "Failed to delete songs",

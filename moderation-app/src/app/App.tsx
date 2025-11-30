@@ -5,7 +5,7 @@ import { LoginPage } from "@/pages/login";
 import { ModeratorsPage } from "@/pages/moderators";
 import { UsersPage } from "@/pages/users";
 import { ProtectedRoute } from "@/features/auth";
-import {ConfirmModal} from "@/features/confirm-modal";
+import { ConfirmModal } from "@/features/confirm-modal";
 
 function App() {
   return (
@@ -43,4 +43,3 @@ function App() {
 }
 
 export default App;
-

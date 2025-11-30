@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251127223052_InitialModerator")]
-    partial class InitialModerator
+    [Migration("20251129230017_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,11 +96,11 @@ namespace Persistence.Migrations
                         new
                         {
                             Id = new Guid("12dbc10a-a7a9-47a3-9a1b-513aae383f1f"),
-                            CreatedAt = new DateTime(2025, 11, 21, 21, 33, 31, 0, DateTimeKind.Utc),
-                            Email = "admin@gmail.com",
+                            CreatedAt = new DateTime(2023, 4, 14, 21, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "admin@admin.com",
                             FullName = "Admin",
                             IsActive = true,
-                            PasswordHash = "$2a$11$3KFLHu7fxhVL4ghH.tTwV.uhnOji/FDS2dX7PFo.ime3cvsSjeTlC"
+                            PasswordHash = "$2a$11$1Aw9/S0I8DnN7VDPmP4EuOl3qREfsNBFwfc8JOIqhldNYDYMBARLC"
                         });
                 });
 
