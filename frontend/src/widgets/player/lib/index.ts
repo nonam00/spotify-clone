@@ -1,2 +1,2 @@
 export { useSound, useGetCurrentSong } from "./hooks";
-export { formatTime } from "./helpers";
+export { formatTime, calculateProgress } from "./helpers";

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import {useCallback, useEffect, useState} from "react";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
 
 import { Slider } from "@/shared/ui";
@@ -15,17 +15,27 @@ function formatTime(timeInSeconds: number): string {
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
-type AudioPlayerProps = {
-  song: Song;
+function calculateProgress(current: number, duration: number): number {
+  return duration > 0 ? current / duration : 0;
 }
 
-const AudioPlayer = ({ song }: AudioPlayerProps) => {
+function AudioPlayer({ song }: { song: Song}) {
   const songUrl = `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${song.songPath}`;
-  const { audioRef, isPlaying, duration, currentTime, togglePlay, setCurrentTime } = useSound(songUrl);
+  const {
+    audioRef,
+    isPlaying,
+    isStalled,
+    duration,
+    currentTime,
+    togglePlay,
+    isSeeking,
+  } = useSound(songUrl);
   const { activeSongId, setActiveSongId } = useAudioStore();
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragProgress, setDragProgress] = useState(0);
+
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
-  const progress = duration > 0 ? currentTime / duration : 0;
   const isActive = activeSongId === song.id;
 
   // Pause this player if another one becomes active
@@ -53,13 +63,41 @@ const AudioPlayer = ({ song }: AudioPlayerProps) => {
     togglePlay();
   }, [isPlaying, song.id, setActiveSongId, togglePlay]);
 
-  // Progress slider callback
-  const handleProgressChange = useCallback((values: number[]) => {
-    if (audioRef.current) {
-      const newTime = values[0] * duration;
-      setCurrentTime(newTime);
-    }
-  }, [audioRef, duration, setCurrentTime]);
+  // Progress slider callback (handling local progress without seeking audio)
+  const handleProgressChange = useCallback(
+    (values: number[]) => {
+      if (!audioRef.current) return;
+      setDragProgress(values[0]);
+    },
+    [audioRef]
+  );
+
+  const handleProgressCommit = useCallback(
+    (values: number[]) => {
+      if (!audioRef.current) return;
+
+      const value = values[0];
+
+      if (value === 1) {
+        audioRef.current.currentTime = audioRef.current.duration - 1;
+      } else {
+        audioRef.current.currentTime = value * audioRef.current.duration;
+      }
+
+      setIsDragging(false);
+    },
+    [audioRef]
+  );
+
+  const handleDragStart = useCallback(() => {
+    if (!audioRef.current) return;
+    setIsDragging(true);
+    setDragProgress(calculateProgress(audioRef.current.currentTime, audioRef.current.duration));
+  }, [audioRef]);
+
+  // eslint-disable-next-line react-hooks/refs
+  const progress = calculateProgress(audioRef.current?.currentTime ?? 0, audioRef.current?.duration ?? 0);
+  const displayProgress = (isDragging || isSeeking) ? dragProgress : progress;
 
   return (
     <div className="flex items-center gap-x-4 w-full max-w-md">
@@ -77,8 +115,12 @@ const AudioPlayer = ({ song }: AudioPlayerProps) => {
       {/* Progress bar and time */}
       <div className="flex-1 flex flex-col gap-y-2">
         <Slider
-          value={progress}
-          onChange={handleProgressChange}
+          value={displayProgress}
+          onValueChange={handleProgressChange}
+          onValueCommit={handleProgressCommit}
+          onDragStart={handleDragStart}
+          disabled={isStalled}
+          isLoading={isStalled}
           max={1}
         />
         <div className="flex items-center justify-between text-xs text-neutral-400 font-mono">
@@ -88,7 +130,6 @@ const AudioPlayer = ({ song }: AudioPlayerProps) => {
       </div>
     </div>
   );
-};
+}
 
 export default AudioPlayer;
-

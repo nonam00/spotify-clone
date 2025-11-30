@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
@@ -11,7 +11,7 @@ import { Slider } from "@/shared/ui";
 import { SongListItem } from "@/entities/song/ui";
 import { LikeButton } from "@/features/like-button";
 import {usePlayerStore} from "@/features/player";
-import { useSound, useGetCurrentSong, formatTime } from "../lib";
+import { useSound, useGetCurrentSong, formatTime, calculateProgress } from "../lib";
 
 const Player = () => {
   const [activeId, ids, volume, setNextId, setPreviousId, setVolume] = usePlayerStore(
@@ -32,13 +32,16 @@ const Player = () => {
     return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.songPath}`;
   }, [currentSong]);
 
-  const { audioRef, isPlaying, duration, currentTime, isStalled } = useSound(
+  const { audioRef, duration, currentTime, isPlaying, isStalled, isSeeking } = useSound(
     currentSong,
     songUrl,
     volume,
     setNextId,
     setPreviousId
   );
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragProgress, setDragProgress] = useState(0);
 
   const pause = useCallback(
     () => {
@@ -67,23 +70,28 @@ const Player = () => {
     }
   }, [isPlaying, pause, play]);
 
-  // Progress slider callback
-  const handleProgressChange = useCallback(
-    (values: number[]) => {
-      if (!audioRef.current) {
-        return;
-      }
+  // Progress slider callback (handling local progress without seeking audio)
+  const handleProgressChange = useCallback((values: number[]) => {
+    setDragProgress(values[0]);
+  }, []);
 
+  const handleProgressCommit = useCallback((values: number[]) => {
+      if (!audioRef.current) return;
       const value = values[0];
 
       if (value === 1) {
         audioRef.current.currentTime = audioRef.current.duration - 1;
       } else {
-        audioRef.current.currentTime = values[0] * audioRef.current.duration;
+        audioRef.current.currentTime = value * audioRef.current.duration;
       }
-    },
-    [audioRef]
-  );
+      setIsDragging(false);
+  }, [audioRef]);
+
+  const handleDragStart = useCallback(() => {
+    if (!audioRef.current) return;
+    setIsDragging(true);
+    setDragProgress(calculateProgress(audioRef.current.currentTime, audioRef.current.duration));
+  }, [audioRef]);
 
   // Next button handler
   const handleNext = useCallback(
@@ -124,7 +132,8 @@ const Player = () => {
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = volume === 0 ? HiSpeakerXMark : HiSpeakerWave;
 
-  const progress = duration > 0 ? currentTime / duration : 0;
+  const progress = calculateProgress(audioRef.current?.currentTime ?? 0, audioRef.current?.duration ?? 0);
+  const displayProgress = (isDragging || isSeeking) ? dragProgress : progress;
 
   return (
     <div className="fixed bottom-0 bg-black w-full h-[80px]">
@@ -158,7 +167,6 @@ const Player = () => {
               onClick={handlePrevious}
               className="text-neutral-400 hover:text-white transition-colors focus:outline-none cursor-pointer"
               aria-label="Previous song"
-              disabled={!currentSong || isLoading || isStalled}
             >
               <AiFillStepBackward size={23} />
             </button>
@@ -174,7 +182,6 @@ const Player = () => {
               onClick={handleNext}
               className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
               aria-label="Next song"
-              disabled={!currentSong || isLoading || isStalled}
             >
               <AiFillStepForward size={23} />
             </button>
@@ -187,9 +194,11 @@ const Player = () => {
             </span>
             <div className="flex-1">
               <Slider
-                value={[progress]}
-                onValueCommit={handleProgressChange}
-                isLoading={isLoading || isStalled}
+                value={displayProgress}
+                onValueChange={handleProgressChange}
+                onValueCommit={handleProgressCommit}
+                onDragStart={handleDragStart}
+                isLoading={isLoading || isStalled || isSeeking}
                 disabled={!currentSong || isLoading || isStalled}
               />
             </div>
@@ -211,8 +220,8 @@ const Player = () => {
               <VolumeIcon size={20} />
             </button>
             <Slider
-              value={[volume]}
-              onValueCommit={handleVolumeChange}
+              value={volume}
+              onValueChange={handleVolumeChange}
               disabled={!currentSong || isLoading || isStalled}
             />
           </div>
