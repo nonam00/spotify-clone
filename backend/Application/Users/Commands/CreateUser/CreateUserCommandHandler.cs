@@ -52,7 +52,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
         var email = new Email(request.Email);
         var passwordHash = new PasswordHash(hashedPassword);
         
-        var user = User.Create(email, passwordHash);
+        var user = User.Create(email, passwordHash, request.FullName);
         
         await _usersRepository.Add(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

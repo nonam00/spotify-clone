@@ -1,7 +1,8 @@
+// features/auth/model.ts
 import { create } from "zustand";
 import { CLIENT_API_URL } from "@/shared/config/api";
 import { getUserInfo } from "@/entities/user/api";
-import {UserDetails} from "@/entities/user/model";
+import { UserDetails } from "@/entities/user/model";
 
 type AuthStore = {
   user: UserDetails | null;
@@ -10,8 +11,10 @@ type AuthStore = {
   isAuthenticated: boolean;
   checkAuth: () => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string, fullName: string) => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  cleanError: () => void;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -24,7 +27,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const userInfo = await getUserInfo();
-
       set({
         user: userInfo,
         isLoading: false,
@@ -85,12 +87,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
-  register: async (email: string, password: string) => {
+  register: async (email: string, password: string, fullName: string) => {
     set({ isLoading: true, error: null });
     try {
       const formData = new FormData();
       formData.append("Email", email);
       formData.append("Password", password);
+      formData.append("FullName", fullName);
 
       const response = await fetch(`${CLIENT_API_URL}/auth/register/`, {
         method: "POST",
@@ -128,6 +131,43 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 
+  forgotPassword: async (email: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${CLIENT_API_URL}/auth/send-restore-code?email=${email}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          const error = await response.json();
+          set({
+            error: error.detail || "Failed to process password reset",
+            isLoading: false,
+          });
+          return false;
+        }
+        set({
+          error: "An error occurred when processing your request.",
+          isLoading: false,
+        });
+        return false;
+      }
+
+      set({
+        error: null,
+        isLoading: false,
+      });
+      return true;
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : "Failed to process password reset",
+        isLoading: false,
+      });
+      return false;
+    }
+  },
+
   logout: async () => {
     try {
       await fetch(`${CLIENT_API_URL}/auth/logout/`, {
@@ -144,4 +184,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       console.error("Logout error:", error);
     }
   },
+  cleanError: () => {
+    set({
+      error: null,
+    })
+  }
 }));
