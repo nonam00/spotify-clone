@@ -8,39 +8,36 @@ https://github.com/user-attachments/assets/83bd7c31-7573-4925-b783-11156097a753
 
 The project is built on a microservices architecture and includes:
 
-### Backend (ASP.NET Core)
-- **Domain Layer** - rich domain models with business logic, entities, value objects, domain events
-- **Application Layer** - implements use cases using CQRS pattern, domain event handlers and result pattern
-- **Infrastructure Layer** - external services (JWT, Email, password hashing)
-- **Persistence Layer** - database interaction (ORM - Entity Framework Core) with repository pattern
+### Backend (ASP.NET Core 10)
+- **Domain Layer** - Rich domain models with business logic, entities, value objects, domain events
+- **Application Layer** - Implements use cases using CQRS pattern, domain event handlers and result pattern
+- **Infrastructure Layer** - External services (JWT, Email, password hashing)
+- **Persistence Layer** - Database interaction (ORM - Entity Framework Core) with repository pattern
 - **WebAPI Layer** - REST API controllers, DTOs and middleware
 
 ### Frontend (Next.js 16)
-- **React 19** with TypeScript
-- **Zustand** - for state management
-- **Tailwind CSS** - utility-first CSS framework for styling
-- **React Hot Toast** for notifications
-- **Feature-Sliced Design (FSD)** - architectural methodology
+- Using Feature-Sliced Design (FSD) methodology with clear separation of concerns
+- Primary user-facing interface for music streaming and management
+- User authorization with JWT tokens
 
 ### Moderation App (React + Vite)
-- **React 19** with TypeScript
-- **Vite** - fast build tool and dev server
-- **React Router** - client-side routing
-- **Zustand** - for state management
-- **Tailwind CSS** - utility-first CSS framework for styling
-- **Feature-Sliced Design (FSD)** - architectural methodology
+- Administrative interface for content moderation and system management
+- Using Feature-Sliced Design (FSD) methodology with clear separation of concerns
+- Permissions-based access control with JWT tokens
 
 ### File Service (Go)
-- File management microservice
+- Independent HTTP microservice for S3 interactions
 - Integration with MinIO (S3-compatible storage)
-- Uploading and downloading audio files and images
+- Using distributed cache based on Redis for better performance on getting files
 
 ### Infrastructure
-- **PostgreSQL** - main database
-- **Redis** - storage for confirmation codes (and cache in future)
-- **MinIO** - object storage for files
-- **Nginx** - reverse proxy and load balancer
-- **MailHog** - test SMTP server for development
+- **PostgreSQL** - Main database for primary data
+- **Redis** - Storage for tokens and distributed cache
+- **MinIO** - Object storage for audio and image files
+- **Nginx** - Reverse proxy and load balancer
+- **MailHog** - Test SMTP server for development
+- **Prometheus** - Metrics collection and storage
+- **Grafana** - Metrics visualization and dashboards
 
 ## ✨ Main Features
 
@@ -68,29 +65,60 @@ The project is built on a microservices architecture and includes:
 - **Bulk Operations** - publish or delete multiple songs at once
 - **Audio Preview** - listen to songs before moderation decisions
 
+### 📊 Monitoring & Observability
+- **Real-time Metrics** - track application performance and health
+- **Custom Dashboards** - visualize key metrics in Grafana
+- **System Monitoring** - monitor server resources and infrastructure
+- **HTTP Metrics** - request rates, response times, error rates
+- **Database Metrics** - query performance and connection pools
+
 ## 🚀 Tech Stack
 
 ### Backend
-- **.NET Core** - the main technology
-- **Entity Framework Core** - ORM for working with the database
-- **FluentValidation** - data validation
-- **JWT Bearer** - authentication
+- **.NET Core 10** - Modern, cross-platform runtime for high-performance applications
+- **Entity Framework Core** - Modern ORM with LINQ support, migrations, and change tracking
+- **Npgsql** - .NET data provider for PostgreSQL
+- **FluentValidation** - Strongly-typed validation library with fluent API
+- **JWT Bearer Authentication** - Secure token-based authentication with refresh token support
+- **Prometheus .NET Client** - Metrics exposure for monitoring integration
+- **BCrypt.Net** - Secure password hashing and verification
+- **MailKit 4** - Cross-platform .NET mail client for SMTP communication
 
 ### Frontend
-- **Next.js 16** - React framework for main application
-- **Vite** - build tool for moderation app
-- **TypeScript** - for JavaScript type-safety
-- **Tailwind CSS** - utility-first CSS framework
-- **Zustand** - lightweight state management
-- **React Router** - client-side routing
-- **React Icons** - icons
+**Shared**:
+- **React 19** - Latest React version with concurrent features and improved performance
+- **TypeScript** - Type-safe JavaScript with strict configuration
+- **Tailwind CSS 4** - Utility-first CSS framework with JIT compilation
+- **Zustand** - Minimalist state management with hooks and middleware support
+- **Radix UI** - UI kit for shared common components
+- **React Icons** - Icon library with various icon sets
+
+**Main Application**:
+- **Next.js 16** - React framework with server-side rendering, static generation, and API routes
+- **Dnd Kit** - Library for dragging UI elements 
+- **React Hot Toast** - Elegant toast notifications with promise support
+
+**Moderation Application**:
+- **Vite** - Modern frontend build tool
+- **React Router DOM** - Declarative routing for React single-page applications
+
+### File Service
+- **Go 1.25** - High-performance language 
+- **Gin Web Framework** - Lightweight and efficient HTTP web framework
+- **MinIO Go SDK** - S3-compatible object storage client for file management
+- **Redis Go Client** - Redis integration for caching and temporary storage
+- **Zerolog** - High-performance, structured logging
+- **Viper** - Configuration management with support for multiple formats
+- **Prometheus Go Client** - Metrics exposure for monitoring integration
 
 ### DevOps & Infrastructure
-- **Docker & Docker Compose** - containerization
-- **PostgreSQL** - relational database
-- **Redis** - in-memory storage
-- **MinIO** - S3-compatible storage
-- **Nginx** - web server and proxy
+- **Docker & Docker Compose** - Containerization and basic orchestration
+- **PostgreSQL** - Advanced relational database
+- **Redis** - In-memory data structure store with persistence
+- **MinIO** - High-performance S3-compatible object storage
+- **Nginx** - High-performance HTTP server and reverse proxy
+- **Prometheus** - Monitoring toolkit
+- **Grafana** - Multi-platform analytics and visualization
 
 ## 📋 Development Plans
 
@@ -98,18 +126,19 @@ The project is built on a microservices architecture and includes:
 - [ ] **Automatic Moderation** - AI-powered content verification
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
+- [ ] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment
+- [ ] **Performance Testing** - Load testing with k6 or Locust
 
 ### Completed
+- [x] **Monitoring Stack** - Prometheus and Grafana integration
 - [x] **Moderation Service** - Manual content moderation interface
 - [x] **Email Confirmation** - Account Verification System
-- [x] **Basic Functionality** - Uploading, Playback, Playlists
-- [x] **Microservice Architecture** - Separation into Independent Services
 
 ## 🛠️ Installation and Launch
 
 ### Requirements
 - Docker and Docker Compose
-- .NET 9 SDK (for local development)
+- .NET 10 SDK (for local development)
 - Node.js 18+ (for local development)
 
 ### ⚙️ Configuration
@@ -128,6 +157,10 @@ The application requires the following environment variables to be configured:
 #### MinIO
 - `MINIO_ROOT_USER` - MinIO user
 - `MINIO_ROOT_PASSWORD` - MinIO password
+
+#### Grafana 
+- `GRAFANA_USER` - Grafana user
+- `GRAFANA_PASSWORD` - Grafana password
 
 #### JWT
 - `JwtOptions__SecretKey` - JWT token secret key
