@@ -2,27 +2,52 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'docker-monitor'
+    monitor: 'spotify-clone-monitor'
 
 scrape_configs:
-  # Мониторинг самого Prometheus
+  # Prometheus metrics
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['prometheus:9090']
 
-  # Мониторинг Docker контейнеров через cAdvisor
-  - job_name: 'cadvisor'
+  # PostgreSQL metrics
+  - job_name: 'postgresql'
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ['postgres-exporter:9187']
+        labels:
+          database: 'postgresql'
+          service: 'database'
 
-  # Мониторинг Node Exporter (для мониторинга хоста)
-  - job_name: 'node-exporter'
+  # Redis metrics
+  - job_name: 'redis'
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'cache'
 
-  # Мониторинг приложений
-  - job_name: 'my-application'
+  # Backend API (.NET)
+  - job_name: 'backend-api'
     static_configs:
-      - targets: ['host.docker.internal:8080']
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: 10s
+      - targets: ['webapi:8080']
+        labels:
+          service: 'backend'
+          language: 'dotnet'
+    metrics_path: '/metrics'
+
+  # File Service metrics (Go)
+  - job_name: 'file-service'
+    static_configs:
+      - targets: ['file-service:8005']
+        labels:
+          service: 'file-service'
+          language: 'go'
+    metrics_path: '/metrics'
+
+  # Frontend metrics (Next.js)
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+        labels:
+          service: 'frontend'
+          language: 'nextjs'
+    metrics_path: '/api/metrics'
