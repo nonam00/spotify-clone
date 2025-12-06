@@ -1,121 +1,79 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Form from "next/form";
-import { useLayoutEffect, useState, useTransition } from "react";
+import { useLayoutEffect } from "react";
 import { useShallow } from "zustand/shallow";
-import toast from "react-hot-toast";
 
-import { Button, Input, Modal } from "@/shared/ui";
+import { Modal } from "@/shared/ui";
 import { useAuthStore, useAuthModalStore } from "../model";
-
-type AuthSubmitType = "login" | "register";
+import { LoginForm, RegisterForm, ForgotPasswordForm } from "../ui";
 
 const AuthModal = () => {
   const router = useRouter();
-  const [onClose, isOpen] = useAuthModalStore(
-    useShallow((s) => [s.onClose, s.isOpen])
+  const [isOpen, onClose, currentView, setView] = useAuthModalStore(
+    useShallow((s) => [s.isOpen, s.onClose, s.currentView, s.setView])
   );
-  const { isAuthenticated, login, register, isLoading, error } = useAuthStore();
-
-  const [submitType, setSubmitType] = useState<AuthSubmitType>();
-  const [isPending, startTransition] = useTransition();
+  const { isAuthenticated, cleanError } = useAuthStore();
 
   useLayoutEffect(() => {
     if (isAuthenticated) {
       router.refresh();
       onClose();
+      cleanError();
     }
-  }, [isAuthenticated, router, onClose]);
+  }, [isAuthenticated, router, onClose, cleanError]);
 
   const onChange = (open: boolean) => {
     if (!open) {
+      cleanError();
       onClose();
     }
   };
 
-  const onSubmit = async (form: FormData) => {
-    startTransition(async () => {
-      const email = form.get("Email") as string;
-      const password = form.get("Password") as string;
+  const changeView = (view: "login" | "register" | "forgot-password") => {
+    cleanError();
+    setView(view);
+  }
 
-      if (submitType === "login") {
-        const success = await login(email, password);
-        if (success) {
-          toast.success("Logged in");
-        }
-      } else if (submitType === "register") {
-        const success = await register(email, password);
-        if (success) {
-          toast.success(
-            "The confirmation code has been sent to your email. Activate your account and then login."
-          );
-        }
-      }
-    });
+  const getModalConfig = () => {
+    switch (currentView) {
+      case 'login':
+        return {
+          title: "Welcome back",
+          description: "Log in to your account"
+        };
+      case 'register':
+        return {
+          title: "Create an account",
+          description: "Sign up to get started"
+        };
+      case 'forgot-password':
+        return {
+          title: "Reset your password",
+          description: "Enter your email to receive reset instructions"
+        };
+    }
   };
+
+  const { title, description } = getModalConfig();
 
   return (
     <Modal
-      title="Welcome back"
-      description="Log in into your account"
+      title={title}
+      description={description}
       isOpen={isOpen}
       onChange={onChange}
     >
-      <Form
-        action={onSubmit}
-        className="flex flex-col items-center justify-center gap-y-4"
-      >
-        <div className="flex flex-col gap-y-1 w-full">
-          <label className="w-full text-base font-bold">Email:</label>
-          <Input
-            name="Email"
-            type="email"
-            placeholder="Email"
-            disabled={isPending || isLoading}
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-y-1 w-full">
-          <label className="w-full font-bold">Password:</label>
-          <Input
-            name="Password"
-            type="password"
-            placeholder="Password"
-            disabled={isPending || isLoading}
-            required
-            minLength={8}
-          />
-        </div>
-        <div
-          className={`
-            w-full text-red-400 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-md py-1 px-3
-            ${error ? "visible" : "invisible"} 
-          `}
-        >
-          {error ?? "no errors"}
-        </div>
-        <div className="flex flex-col gap-y-3 w-full">
-          <Button
-            onClick={() => setSubmitType("login")}
-            type="submit"
-            disabled={isPending || isLoading}
-          >
-            {isLoading ? "Signing in..." : "Login"}
-          </Button>
-          <Button
-            onClick={() => setSubmitType("register")}
-            type="submit"
-            disabled={isPending || isLoading}
-            className="bg-transparent hover:bg-neutral-700 text-neutral-300 font-medium"
-          >
-            Register
-          </Button>
-        </div>
-      </Form>
+      {currentView === 'login' &&
+        <LoginForm
+          onForgotPassword={() => changeView("forgot-password")}
+          onSwitchToRegister={() => changeView("register")}
+        />
+      }
+      {currentView === "register" && <RegisterForm onSwitchToLogin={() => changeView("login")} />}
+      {currentView === "forgot-password" && <ForgotPasswordForm onSwitchToLogin={() => changeView("login")} />}
     </Modal>
   );
 };
 
 export default AuthModal;
-

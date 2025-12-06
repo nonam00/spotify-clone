@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Prometheus;
+using Prometheus.SystemMetrics;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
 using Application;
 using Infrastructure;
 using Persistence;
-
 using WebAPI;
 using WebAPI.Middleware;
 
@@ -33,7 +34,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddApiVersioning()
                 .AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+                .ForwardToPrometheus();
+
+// Adding Prometheus metrics
+builder.Services.AddMetrics()
+                .AddSystemMetrics();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -49,7 +55,6 @@ if (builder.Environment.IsDevelopment())
         config.IncludeXmlComments(xmlPath);
     });
 }
-
 
 var app = builder.Build();
 
@@ -90,6 +95,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+
+// Prometheus metrics middleware
+app.UseHttpMetrics(options =>
+{
+    options.ReduceStatusCodeCardinality();
+});
+app.UseMetricServer();
+
 app.UseCors("MyPolicy");
 
 app.UseCookiePolicy(new CookiePolicyOptions
@@ -103,6 +116,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
+app.MapMetrics();
 app.MapControllers();
 
 app.Run();

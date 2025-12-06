@@ -32,7 +32,7 @@ public static class DependencyInjection
     {
         services.Configure<SmtpOptions>(configuration.GetRequiredSection(nameof(SmtpOptions)));
         services.AddScoped<EmailSenderService>();
-        services.AddScoped<IEmailVerificator, EmailVerificator>();
+        services.AddScoped<ICodesClient, CodesClient>();
         return services;
     }
 

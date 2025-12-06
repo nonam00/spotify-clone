@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Users.Commands.ActivateUser;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteRefreshToken;
+using Application.Users.Commands.RestoreUserAccess;
+using Application.Users.Commands.SendRestoreToken;
 using Application.Users.Queries.LoginByCredentials;
 using Application.Users.Queries.LoginByRefreshToken;
 using WebAPI.Models;
@@ -16,16 +18,19 @@ public class AuthController : BaseController
     /// <summary>
     /// Registries the new user
     /// </summary>
-    /// <param name="userCredentialsDto">UserCredentials object</param>
+    /// <param name="loginCredentialsDto">UserCredentials object</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="201">Created</response>
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> RegisterUser(
-        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
+        [FromForm] UserRegistrationDto loginCredentialsDto, CancellationToken cancellationToken)
     {
-        var command = new CreateUserCommand(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
+        var command = new CreateUserCommand(
+            Email: loginCredentialsDto.Email,
+            Password: loginCredentialsDto.Password,
+            FullName: loginCredentialsDto.FullName);
         var result = await Mediator.Send(command, cancellationToken);
         
         if (result.IsSuccess)
@@ -39,39 +44,42 @@ public class AuthController : BaseController
     /// <summary>
     /// Activates user account using confirmation code from email
     /// </summary>
-    /// <param name="activateUserDto">User email and confirmation code from email</param>
+    /// <param name="email">Account email</param>
+    /// <param name="code">Confirmation code</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="302">Found</response>
     [HttpGet("activate")]
     [ProducesResponseType(StatusCodes.Status302Found)]
     public async Task<IActionResult> ActivateUser(
-        [FromQuery] ActivateUserDto activateUserDto, CancellationToken cancellationToken)
+        [FromQuery] string email, [FromQuery] string code, CancellationToken cancellationToken)
     {
-        var command = new ActivateUserCommand(Email: activateUserDto.Email, ConfirmationCode: activateUserDto.Code);
+        var command = new ActivateUserCommand(email, code);
         var result = await Mediator.Send(command, cancellationToken);
         
-        if (result.IsSuccess)
+        if (!result.IsSuccess)
         {
-            return Redirect("http://localhost:3000");
+            return BadRequest(new { Detail = result.Error.Description });
         }
+                
+        SetAuthCookies(result.Value.AccessToken, result.Value.RefreshToken);
         
-        return BadRequest(new { Detail = result.Error.Description });
+        return Redirect("http://localhost:3000");
     }
 
     /// <summary>
     /// Request to get token pair
     /// </summary>
-    /// <param name="userCredentialsDto">LoginDto object</param>
+    /// <param name="loginCredentialsDto">LoginDto object</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns access token in cookies</returns>
     /// <response code="200">Success</response>
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> UserLogin(
-        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
+        [FromForm] LoginCredentialsDto loginCredentialsDto, CancellationToken cancellationToken)
     {
-        var query = new LoginByCredentialsQuery(Email: userCredentialsDto.Email, Password: userCredentialsDto.Password);
+        var query = new LoginByCredentialsQuery(Email: loginCredentialsDto.Email, Password: loginCredentialsDto.Password);
         var result = await Mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)
@@ -79,19 +87,7 @@ public class AuthController : BaseController
             return BadRequest(new { Detail = result.Error.Description });
         }
         
-        HttpContext.Response.Cookies.Append("access_token", result.Value.AccessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(12)
-        });
-        
-        HttpContext.Response.Cookies.Append("refresh_token", result.Value.RefreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromDays(7)
-        });
+        SetAuthCookies(result.Value.AccessToken, result.Value.RefreshToken);
         
         return Ok();
     }
@@ -118,19 +114,7 @@ public class AuthController : BaseController
             return BadRequest(new { Detail = result.Error.Description });
         }
         
-        HttpContext.Response.Cookies.Append("access_token", result.Value.AccessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(12)
-        });
-        
-        HttpContext.Response.Cookies.Append("refresh_token", result.Value.RefreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromDays(7)
-        });
+        SetAuthCookies(result.Value.AccessToken, result.Value.RefreshToken);
 
         return Ok();
     }
@@ -157,14 +141,47 @@ public class AuthController : BaseController
         return StatusCode(205);
     }
     
+    [HttpPost("send-restore-code")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendRestoreCode([FromQuery] string email, CancellationToken cancellationToken)
+    {
+        var command = new SendRestoreTokenCommand(email);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { Detail = result.Error.Description });
+        }
+
+        return Created();
+    }
+    
+    [HttpGet("restore-access")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> RestoreAccess(
+        [FromQuery] string email, [FromQuery] string code, CancellationToken cancellationToken)
+    {
+        var command = new RestoreUserAccessCommand(email, code);
+        var result = await Mediator.Send(command, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { Detail = result.Error.Description });
+        }
+        
+        SetAuthCookies(result.Value.AccessToken, result.Value.RefreshToken);
+
+        return Redirect("http://localhost:3000");
+    }
+    
     [HttpPost("moderators/login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> ModeratorLogin(
-        [FromForm] UserCredentialsDto userCredentialsDto, CancellationToken cancellationToken)
+        [FromForm] LoginCredentialsDto loginCredentialsDto, CancellationToken cancellationToken)
     {
         var query = new Application.Moderators.Queries.LoginByCredentials.LoginByCredentialsQuery(
-            Email: userCredentialsDto.Email,
-            Password: userCredentialsDto.Password);
+            Email: loginCredentialsDto.Email,
+            Password: loginCredentialsDto.Password);
         var result = await Mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)
@@ -172,12 +189,7 @@ public class AuthController : BaseController
             return BadRequest(new { Detail = result.Error.Description });
         }
         
-        HttpContext.Response.Cookies.Append("access_token", result.Value, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            MaxAge = TimeSpan.FromHours(24)
-        });
+        SetAuthCookies(result.Value);
         
         return Ok();
     }
@@ -189,5 +201,25 @@ public class AuthController : BaseController
     {
         Response.Cookies.Delete("access_token");
         return Task.FromResult<IActionResult>(StatusCode(205));
+    }
+
+    private void SetAuthCookies(string accessToken, string? refreshToken = null)
+    {
+        HttpContext.Response.Cookies.Append("access_token", accessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            MaxAge = TimeSpan.FromHours(12)
+        });
+
+        if (refreshToken != null)
+        {
+            HttpContext.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                MaxAge = TimeSpan.FromDays(7)
+            });
+        }
     }
 }

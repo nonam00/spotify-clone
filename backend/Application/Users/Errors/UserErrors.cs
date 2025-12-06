@@ -30,5 +30,5 @@ public static class UserErrors
     
     public static readonly Error InvalidVerificationCode = new(
         nameof(InvalidVerificationCode),
-        "Invalid verification code.");
+        "Invalid code.");
 }

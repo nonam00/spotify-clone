@@ -27,5 +27,10 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .MaximumLength(100)
             .WithMessage("Password cannot exceed 100 characters")
             .WithErrorCode("400");
+        
+        RuleFor(command => command.FullName)
+            .MaximumLength(100)
+            .WithMessage("User name cannot exceed 100 characters")
+            .WithErrorCode("400");
     }
 }

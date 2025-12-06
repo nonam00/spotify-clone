@@ -8,6 +8,8 @@ using Application.Playlists.Interfaces;
 using Application.Shared.Data;
 using Application.Songs.Interfaces;
 using Application.Users.Interfaces;
+using Infrastructure.Email;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Persistence.Repositories;
 
 namespace Persistence;
@@ -29,6 +31,11 @@ public static class DependencyInjection
         {
             options.UseNpgsql(postgresConnectionString)
                 .UseSnakeCaseNamingConvention();
+            
+            options.ConfigureWarnings(c =>
+            {
+                c.Ignore(RelationalEventId.PendingModelChangesWarning);
+            });
         });
         
         var redisConnectionString = configuration.GetConnectionString("Redis")
@@ -48,7 +55,7 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
         services.AddScoped<IModeratorsRepository, ModeratorsRepository>();
 
-        services.AddScoped<IConfirmationCodesRepository, ConfirmationCodesRepository>();
+        services.AddScoped<ICodesRepository, CodesRepository>();
         
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         

@@ -13,10 +13,44 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 )
+
+var (
+	metricsOnce sync.Once
+)
+
+func initMetrics() {
+	metricsOnce.Do(func() {
+		// Register default Go metrics only once
+		// Use Register instead of MustRegister to handle AlreadyRegisteredError gracefully
+		goCollector := collectors.NewGoCollector()
+		processCollector := collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
+
+		if err := prometheus.Register(goCollector); err != nil {
+			var alreadyRegisteredError prometheus.AlreadyRegisteredError
+			// Only panic if it's not an AlreadyRegisteredError
+			if !errors.As(err, &alreadyRegisteredError) {
+				panic(err)
+			}
+			// AlreadyRegisteredError is fine, collector is already registered
+		}
+
+		if err := prometheus.Register(processCollector); err != nil {
+			var alreadyRegisteredError prometheus.AlreadyRegisteredError
+			// Only panic if it's not an AlreadyRegisteredError
+			if !errors.As(err, &alreadyRegisteredError) {
+				panic(err)
+			}
+			// AlreadyRegisteredError is fine, collector is already registered
+		}
+	})
+}
 
 func main() {
 	// Load configuration
@@ -28,8 +62,17 @@ func main() {
 	// Initialize logger
 	l := logger.New("file-service")
 
+	// Initialize metrics
+	initMetrics()
+
+	// Initialize cache
+	urlCache, err := storage.NewURLCache(&cfg.Cache, l)
+	if err != nil {
+		l.Fatal().Err(err).Msg("Failed to initialize cache")
+	}
+
 	// Initialize Minio client
-	minioClient, err := storage.NewMinioClient(&cfg.Minio, l)
+	minioClient, err := storage.NewMinioClient(&cfg.Minio, urlCache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize Minio client")
 	}
@@ -82,10 +125,14 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	// Global middleware
 	router.Use(gin.Recovery())
 	router.Use(middleware.LoggerMiddleware(log))
+	router.Use(middleware.PrometheusMiddleware())
 	router.Use(middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins))
 
 	// Health check
 	router.GET("/health", fileHandler.HealthCheck)
+
+	// Metrics endpoint
+	router.GET("/metrics", middleware.PrometheusHandler())
 
 	// API routes
 	api := router.Group("/api/v1")

@@ -2,7 +2,7 @@
 services:
   db:
     container_name: postgresql_db
-    image: postgres:18
+    image: postgres:18.1-alpine
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -94,8 +94,15 @@ services:
       - MINIO_SECRET_ACCESS_KEY=$MINIO_ROOT_PASSWORD
       - MINIO_USE_SSL=false
       - MINIO_PRESIGN_EXPIRY=15m
+      - CACHE_TYPE=redis
+      - REDIS_ENDPOINT=redis:6379
+      - REDIS_PASSWORD=$REDIS_PASSWORD
+      - REDIS_DB=1
     depends_on:
       minio:
+        condition: service_healthy
+        restart: true
+      redis:
         condition: service_healthy
         restart: true
     healthcheck:
@@ -174,7 +181,78 @@ services:
       - "8025:8025"
     entrypoint: ["/bin/sh", "-c", "MailHog | awk '!/KEEPALIVE/'"]
 
+  postgres-exporter:
+    container_name: postgres_exporter
+    image: prometheuscommunity/postgres-exporter:latest
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "host=db port=5432 user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} database=${POSTGRES_DB:-postgres} sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis-exporter:
+    container_name: redis_exporter
+    image: oliver006/redis_exporter:latest
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    ports:
+      - "9121:9121"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - postgres-exporter
+      - redis-exporter
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
 volumes:
   db_data:
   minio_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
