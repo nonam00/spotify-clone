@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Minio    MinioConfig
+	Cache    CacheConfig
 	Security SecurityConfig
 }
 
@@ -28,6 +29,18 @@ type MinioConfig struct {
 	PresignExpiry   time.Duration
 }
 
+type CacheConfig struct {
+	Type  string // "redis" or "memory"
+	Redis RedisConfig
+}
+
+type RedisConfig struct {
+	Addr      string
+	Password  string
+	DB        int
+	KeyPrefix string
+}
+
 type SecurityConfig struct {
 	CORSAllowedOrigins []string
 }
@@ -44,6 +57,11 @@ func Load() (*Config, error) {
 	viper.SetDefault("MINIO_AUDIO_BUCKET", "audio")
 	viper.SetDefault("MINIO_PRESIGN_EXPIRY", "15m")
 	viper.SetDefault("MINIO_REGION", "us-east-1")
+	viper.SetDefault("CACHE_TYPE", "redis") // "redis" or "memory"
+	viper.SetDefault("REDIS_ENDPOINT", "redis:6379")
+	viper.SetDefault("REDIS_PASSWORD", "redispassword")
+	viper.SetDefault("REDIS_DB", 1)
+	viper.SetDefault("REDIS_KEY_PREFIX", "file-service:presigned-url:")
 	viper.SetDefault("SECURITY_CORS_ALLOWED_ORIGINS", []string{"*"})
 
 	viper.AutomaticEnv()
@@ -62,6 +80,15 @@ func Load() (*Config, error) {
 			AudioBucket:     viper.GetString("MINIO_AUDIO_BUCKET"),
 			PresignExpiry:   viper.GetDuration("MINIO_PRESIGN_EXPIRY"),
 			Region:          viper.GetString("MINIO_REGION"),
+		},
+		Cache: CacheConfig{
+			Type: viper.GetString("CACHE_TYPE"),
+			Redis: RedisConfig{
+				Addr:      viper.GetString("REDIS_ENDPOINT"),
+				Password:  viper.GetString("REDIS_PASSWORD"),
+				DB:        viper.GetInt("REDIS_DB"),
+				KeyPrefix: viper.GetString("REDIS_KEY_PREFIX"),
+			},
 		},
 		Security: SecurityConfig{
 			CORSAllowedOrigins: viper.GetStringSlice("SECURITY_CORS_ALLOWED_ORIGINS"),

@@ -50,7 +50,6 @@ if (builder.Environment.IsDevelopment())
     });
 }
 
-
 var app = builder.Build();
 
 await using (var scope = app.Services.CreateAsyncScope())

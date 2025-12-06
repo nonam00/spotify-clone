@@ -28,8 +28,14 @@ func main() {
 	// Initialize logger
 	l := logger.New("file-service")
 
+	// Initialize cache
+	urlCache, err := storage.NewURLCache(&cfg.Cache, l)
+	if err != nil {
+		l.Fatal().Err(err).Msg("Failed to initialize cache")
+	}
+
 	// Initialize Minio client
-	minioClient, err := storage.NewMinioClient(&cfg.Minio, l)
+	minioClient, err := storage.NewMinioClient(&cfg.Minio, urlCache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize Minio client")
 	}
