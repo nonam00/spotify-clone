@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
 using Application.Shared.Interfaces;
@@ -15,7 +15,7 @@ public static class DependencyInjection
     {
         services.AddAuthServices(configuration)
             .AddEmailServices(configuration)
-            .AddFilesServices();
+            .AddFilesServices(configuration);
         
         return services;
     }
@@ -36,8 +36,9 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddFilesServices(this IServiceCollection services)
+    private static IServiceCollection AddFilesServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<FileServiceOptions>(configuration.GetRequiredSection(nameof(FileServiceOptions)));
         services.AddScoped<IFileServiceClient, FileServiceClient>();
         return services;
     }

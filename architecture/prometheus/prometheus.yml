@@ -42,12 +42,3 @@ scrape_configs:
           service: 'file-service'
           language: 'go'
     metrics_path: '/metrics'
-
-  # Frontend metrics (Next.js)
-  - job_name: 'frontend'
-    static_configs:
-      - targets: ['frontend:3000']
-        labels:
-          service: 'frontend'
-          language: 'nextjs'
-    metrics_path: '/api/metrics'

@@ -99,7 +99,7 @@ func CORSMiddleware(allowedOrigins []string) gin.HandlerFunc {
 		}
 
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
@@ -147,6 +147,36 @@ func PrometheusMiddleware() gin.HandlerFunc {
 
 func PrometheusHandler() gin.HandlerFunc {
 	return gin.WrapH(promhttp.Handler())
+}
+
+// APIKeyMiddleware проверяет наличие и валидность API ключа в заголовке X-API-Key
+func APIKeyMiddleware(apiKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Если API ключ не настроен, пропускаем проверку
+		if apiKey == "" {
+			c.Next()
+			return
+		}
+
+		providedKey := c.GetHeader("X-API-Key")
+		if providedKey == "" {
+			c.JSON(401, gin.H{
+				"error": "Missing API key. Please provide X-API-Key header",
+			})
+			c.Abort()
+			return
+		}
+
+		if providedKey != apiKey {
+			c.JSON(403, gin.H{
+				"error": "Invalid API key",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
 }
 
 type responseWriter struct {
