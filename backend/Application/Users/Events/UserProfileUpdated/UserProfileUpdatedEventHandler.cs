@@ -21,7 +21,7 @@ public class UserProfileUpdatedEventHandler : IDomainEventHandler<UserProfileUpd
     {
         _logger.LogDebug("Handling user {userId} profile updated event", @event.UserId);
 
-        if (@event.OldAvatarPath != @event.NewAvatarPath)
+        if (!string.IsNullOrWhiteSpace(@event.OldAvatarPath) && @event.OldAvatarPath != @event.NewAvatarPath)
         { 
             _logger.LogDebug("Deleting user {userId} old avatar image {imagePath}",
                 @event.UserId, @event.OldAvatarPath.Value);

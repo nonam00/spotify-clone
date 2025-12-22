@@ -1,7 +1,7 @@
-using Application.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Events.PlaylistDeleted;
@@ -20,8 +20,12 @@ public class PlaylistDeletedEventHandler : IDomainEventHandler<PlaylistDeletedEv
     public async Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Handling playlist {playlistId} deleted event", @event.PlaylistId);
-        _logger.LogDebug("Deleting playlist {playlistId} cover image {imagePath}",
-            @event.PlaylistId, @event.ImagePath.Value);
-        await _fileServiceClient.DeleteAsync(@event.ImagePath, cancellationToken).ConfigureAwait(false);
+
+        if (!string.IsNullOrWhiteSpace(@event.ImagePath))
+        {
+            _logger.LogDebug("Deleting playlist {playlistId} cover image {imagePath}",
+                @event.PlaylistId, @event.ImagePath.Value);
+            await _fileServiceClient.DeleteAsync(@event.ImagePath, cancellationToken).ConfigureAwait(false);   
+        }
     }
 }

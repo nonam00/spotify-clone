@@ -58,21 +58,11 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
+// Performing migrations if not applied
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    try
-    {
-        var notAppliedMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-        if (notAppliedMigrations.Any())
-        {
-            await dbContext.Database.MigrateAsync();
-        }
-    }
-    catch
-    {
-        await dbContext.Database.MigrateAsync();
-    }
+    await dbContext.Database.MigrateAsync();
 }
 
 app.UseExceptionHandler();
