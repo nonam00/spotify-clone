@@ -39,10 +39,9 @@ public class UsersRepository : IUsersRepository
 
     public async Task<User?> GetByIdWithPlaylists(Guid id, CancellationToken cancellationToken = default)
     {
-        var user =  await _dbContext.Users
+        var user = await _dbContext.Users
             .Include(u => u.Playlists)
-            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken)
-            ?? throw new Exception("Invalid user id");
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
         
         return user;
     }

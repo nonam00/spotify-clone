@@ -8,31 +8,33 @@ using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
 
-namespace Application.Users.Commands.ActivateUser;
+namespace Application.Users.Commands.ActivateUserByConfirmationCode;
 
-public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, Result<TokenPair>>
+public class ActivateUserByConfirmationCodeCommandHandler
+    : ICommandHandler<ActivateUserByConfirmationCodeCommand, Result<TokenPair>>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly ICodesClient _codesClient;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<ActivateUserCommandHandler> _logger;
+    private readonly ILogger<ActivateUserByConfirmationCodeCommandHandler> _logger;
     
-    public ActivateUserCommandHandler(
+    public ActivateUserByConfirmationCodeCommandHandler(
         IUsersRepository usersRepository,
         ICodesClient codesClient,
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork,
-        ILogger<ActivateUserCommandHandler> logger)
+        ILogger<ActivateUserByConfirmationCodeCommandHandler> logger)
     {
         _codesClient = codesClient;
         _usersRepository = usersRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger;
         _jwtProvider = jwtProvider;
+        _logger = logger;
     }
 
-    public async Task<Result<TokenPair>> Handle(ActivateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<TokenPair>> Handle(
+        ActivateUserByConfirmationCodeCommand request, CancellationToken cancellationToken)
     {
         var codeVerificationStatus = await _codesClient
             .VerifyConfirmationCodeAsync(request.Email, request.ConfirmationCode)

@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace Application.Users.Commands.ActivateUser;
+namespace Application.Users.Commands.ActivateUserByConfirmationCode;
 
-public class ActivateUserCommandValidator : AbstractValidator<ActivateUserCommand>
+public class ActivateUserByConfirmationCodeCommandValidator : AbstractValidator<ActivateUserByConfirmationCodeCommand>
 {
-    public ActivateUserCommandValidator()
+    public ActivateUserByConfirmationCodeCommandValidator()
     {
         RuleFor(command => command.Email)
             .NotEmpty()

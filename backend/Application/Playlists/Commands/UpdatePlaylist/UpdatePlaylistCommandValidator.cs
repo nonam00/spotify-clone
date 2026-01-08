@@ -15,7 +15,7 @@ public class UpdatePlaylistCommandValidator : AbstractValidator<UpdatePlaylistCo
             .NotEqual(Guid.Empty)
             .WithMessage("User ID is required")
             .WithErrorCode("400");
-        
-        // Other validations
+
+        RuleFor(command => command.Title).NotEqual(string.Empty);
     }
 }

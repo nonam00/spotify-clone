@@ -46,7 +46,10 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         
         var title = request.Title;
         var description = request.Description != "" ? request.Description : null;
-        var newImagePath = new FilePath(request.ImagePath ?? playlist.ImagePath.Value);
+        var newImagePath = new FilePath(
+            !string.IsNullOrWhiteSpace(request.ImagePath)
+                ? request.ImagePath
+                : playlist.ImagePath.Value);
 
         playlist.UpdateDetails(title, description, newImagePath);
         _playlistsRepository.Update(playlist);
