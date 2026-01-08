@@ -27,11 +27,11 @@ const SongUploadModal = () => {
   const router = useRouter();
 
   useLayoutEffect(() => {
-    if (!isAuthenticated) {
+    if (isOpen && !isAuthenticated) {
       router.refresh();
       onClose();
     }
-  }, [isAuthenticated, router, onClose]);
+  }, [isAuthenticated, router, onClose, isOpen]);
 
   const onChange = (open: boolean) => {
     if (!open) {

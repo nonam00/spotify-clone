@@ -1,4 +1,3 @@
-// features/auth/model.ts
 import { create } from "zustand";
 import { CLIENT_API_URL } from "@/shared/config/api";
 import { getUserInfo } from "@/entities/user/api";

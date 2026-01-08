@@ -34,7 +34,7 @@ const Header = ({
   };
 
   return (
-    <div className={twMerge(`h-fit bg-gradient-to-b from-emerald-800 p-6`, className)}>
+    <div className={twMerge(`h-fit bg-linear-to-b from-emerald-800 p-6`, className)}>
       <div className="w-full mb-4 flex items-center justify-between">
         <div className="hidden md:flex gap-x-2 items-center">
           <button
@@ -69,13 +69,16 @@ const Header = ({
             <Button onClick={handleLogout} className="bg-white px-6 py-2">Logout</Button>
             <Button onClick={() => router.push("/account")} className="bg-white p-0">
               {user?.avatarPath ? (
-                <Image
-                  src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${user.avatarPath}`}
-                  alt="Avatar"
-                  className="w-11 h-11 rounded-full object-cover"
-                  loading="lazy"
-                  unoptimized
-                />
+                <div className="relative w-11 h-11 rounded-full overflow-hidden">
+                  <Image
+                    fill
+                    src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${user.avatarPath}`}
+                    alt="Avatar"
+                    className="object-cover"
+                    loading="lazy"
+                    unoptimized
+                  />
+                </div>
               ) : (
                 <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center">
                   <IoMdPerson className="w-6 h-6 text-black" />

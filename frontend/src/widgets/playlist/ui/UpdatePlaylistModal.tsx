@@ -26,11 +26,11 @@ const UpdatePlaylistModal = () => {
   const [isPending, startTransition] = useTransition();
 
   useLayoutEffect(() => {
-    if (!isAuthenticated || !playlist) {
+    if (isOpen && (!isAuthenticated || !playlist)) {
       router.refresh();
       onClose();
     }
-  }, [isAuthenticated, router, onClose, playlist]);
+  }, [isAuthenticated, router, onClose, playlist, isOpen]);
 
   if (!playlist) {
     onClose();

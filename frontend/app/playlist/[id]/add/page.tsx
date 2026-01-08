@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import {getPlaylistById} from "@/entities/playlist/api";
 import {getLikedSongsForPlaylist} from "@/entities/song/api";
@@ -21,7 +21,7 @@ const Add = async ({
   const playlist = await getPlaylistById(id);
 
   if (!playlist) {
-    redirect("/");
+    notFound();
   }
 
   const songs = await getLikedSongsForPlaylist(playlist.id, searchString ?? "");

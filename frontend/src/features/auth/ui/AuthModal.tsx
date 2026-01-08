@@ -16,12 +16,12 @@ const AuthModal = () => {
   const { isAuthenticated, cleanError } = useAuthStore();
 
   useLayoutEffect(() => {
-    if (isAuthenticated) {
+    if (isOpen && isAuthenticated) {
       router.refresh();
       onClose();
       cleanError();
     }
-  }, [isAuthenticated, router, onClose, cleanError]);
+  }, [isAuthenticated, router, onClose, cleanError, isOpen]);
 
   const onChange = (open: boolean) => {
     if (!open) {
