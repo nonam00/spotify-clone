@@ -37,7 +37,7 @@ services:
         restart: true
       minio:
         condition: service_healthy
-      redis:
+      backend-redis:
         condition: service_healthy
       mailhog:
         condition: service_started
@@ -96,15 +96,15 @@ services:
       - MINIO_USE_SSL=false
       - MINIO_PRESIGN_EXPIRY=15m
       - CACHE_TYPE=redis
-      - REDIS_ENDPOINT=redis:6379
+      - REDIS_ENDPOINT=file-service-redis:6379
       - REDIS_PASSWORD=$REDIS_PASSWORD
-      - REDIS_DB=1
+      - REDIS_DB=0
       - SECURITY_API_KEY=${FILE_SERVICE_SECURITY_API_KEY}
     depends_on:
       minio:
         condition: service_healthy
         restart: true
-      redis:
+      file-service-redis:
         condition: service_healthy
         restart: true
     healthcheck:
@@ -154,8 +154,8 @@ services:
       webapi:
         condition: service_healthy
 
-  redis:
-    container_name: redis
+  backend-redis:
+    container_name: backend_redis
     image: redis:8.4-alpine
     restart: unless-stopped
     command: >
@@ -170,6 +170,26 @@ services:
       - redis_data:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      
+  file-service-redis:
+    container_name: file_service_redis
+    image: redis:8.4-alpine
+    restart: unless-stopped
+    command: >
+      redis-server --requirepass ${REDIS_PASSWORD} --appendfsync everysec
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER}
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -195,17 +215,30 @@ services:
       db:
         condition: service_healthy
 
-  redis-exporter:
-    container_name: redis_exporter
+  backend-redis-exporter:
+    container_name: backend_redis_exporter
     image: oliver006/redis_exporter:v1.80.1-alpine
     restart: unless-stopped
     environment:
-      REDIS_ADDR: "redis://redis:6379"
+      REDIS_ADDR: "redis://backend-redis:6379"
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
     ports:
       - "9121:9121"
     depends_on:
-      redis:
+      backend-redis:
+        condition: service_healthy
+        
+  file-service-redis-exporter:
+    container_name: file_service_redis_exporter
+    image: oliver006/redis_exporter:v1.80.1-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://file-service-redis:6379"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    ports:
+      - "9122:9121"
+    depends_on:
+      file-service-redis:
         condition: service_healthy
 
   prometheus:
@@ -232,7 +265,8 @@ services:
       start_period: 10s
     depends_on:
       - postgres-exporter
-      - redis-exporter
+      - backend-redis-exporter
+      - file-service-redis-exporter
 
   grafana:
     container_name: grafana

@@ -60,9 +60,9 @@ func Load() (*Config, error) {
 	viper.SetDefault("MINIO_PRESIGN_EXPIRY", "15m")
 	viper.SetDefault("MINIO_REGION", "us-east-1")
 	viper.SetDefault("CACHE_TYPE", "redis") // "redis" or "memory"
-	viper.SetDefault("REDIS_ENDPOINT", "redis:6379")
+	viper.SetDefault("REDIS_ENDPOINT", "file-service-redis:6379")
 	viper.SetDefault("REDIS_PASSWORD", "redispassword")
-	viper.SetDefault("REDIS_DB", 1)
+	viper.SetDefault("REDIS_DB", 0)
 	viper.SetDefault("REDIS_KEY_PREFIX", "file-service:presigned-url:")
 	viper.SetDefault("SECURITY_CORS_ALLOWED_ORIGINS", []string{"*"})
 	viper.SetDefault("SECURITY_API_KEY", "")

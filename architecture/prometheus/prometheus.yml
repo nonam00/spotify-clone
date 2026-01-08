@@ -21,8 +21,13 @@ scrape_configs:
   # Redis metrics
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis-exporter:9121']
+      - targets: ['backend-redis-exporter:9121']
         labels:
+          instance: 'backend-redis-instance'
+          service: 'database'
+      - targets: ['file-service-redis-exporter:9121' ]
+        labels:
+          instance: 'file-service-redis-instance'
           service: 'cache'
 
   # Backend API (.NET)
