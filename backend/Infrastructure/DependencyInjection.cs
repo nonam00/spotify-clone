@@ -11,35 +11,38 @@ namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        services.AddAuthServices(configuration)
-            .AddEmailServices(configuration)
-            .AddFilesServices(configuration);
+        public IServiceCollection AddInfrastructure(IConfiguration configuration)
+        {
+            services.AddAuthServices(configuration)
+                .AddEmailServices(configuration)
+                .AddFilesServices(configuration);
         
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<JwtOptions>(configuration.GetRequiredSection(nameof(JwtOptions)));
-        services.AddScoped<IJwtProvider, JwtProvider>();
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-        return services;
-    }
+        private IServiceCollection AddAuthServices(IConfiguration configuration)
+        {
+            services.Configure<JwtOptions>(configuration.GetRequiredSection(nameof(JwtOptions)));
+            services.AddScoped<IJwtProvider, JwtProvider>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            return services;
+        }
 
-    private static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<SmtpOptions>(configuration.GetRequiredSection(nameof(SmtpOptions)));
-        services.AddScoped<EmailSenderService>();
-        services.AddScoped<ICodesClient, CodesClient>();
-        return services;
-    }
+        private IServiceCollection AddEmailServices(IConfiguration configuration)
+        {
+            services.Configure<SmtpOptions>(configuration.GetRequiredSection(nameof(SmtpOptions)));
+            services.AddScoped<EmailSenderService>();
+            services.AddScoped<ICodesClient, CodesClient>();
+            return services;
+        }
 
-    private static IServiceCollection AddFilesServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<FileServiceOptions>(configuration.GetRequiredSection(nameof(FileServiceOptions)));
-        services.AddScoped<IFileServiceClient, FileServiceClient>();
-        return services;
+        private IServiceCollection AddFilesServices(IConfiguration configuration)
+        {
+            services.Configure<FileServiceOptions>(configuration.GetRequiredSection(nameof(FileServiceOptions)));
+            services.AddScoped<IFileServiceClient, FileServiceClient>();
+            return services;
+        }
     }
 }
