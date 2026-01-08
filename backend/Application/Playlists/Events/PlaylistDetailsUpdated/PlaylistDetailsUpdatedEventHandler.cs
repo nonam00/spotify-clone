@@ -1,7 +1,7 @@
-using Application.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
+using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Events.PlaylistDetailsUpdated;
@@ -23,7 +23,7 @@ public class PlaylistDetailsUpdatedEventHandler : IDomainEventHandler<PlaylistDe
     {
         _logger.LogDebug("Handling playlist {playlistId} details updated event",  @event.PlaylistId);
 
-        if (@event.OldImagePath != @event.NewImagePath)
+        if (!string.IsNullOrWhiteSpace(@event.OldImagePath) && @event.OldImagePath != @event.NewImagePath)
         {
             _logger.LogDebug("Deleting playlist {playlistId} old cover image {imagePath}",
                 @event.PlaylistId, @event.OldImagePath.Value);

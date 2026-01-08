@@ -115,10 +115,3 @@ func (h *FileHandler) DeleteFile(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
-
-func (h *FileHandler) HealthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":  "healthy",
-		"service": "file-service",
-	})
-}

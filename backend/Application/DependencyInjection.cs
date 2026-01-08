@@ -9,43 +9,46 @@ namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        
-        // Register all handlers from assembly
-        var handlerTypes = assembly.GetTypes()
-            .Where(t => t.GetInterfaces().Any(i => 
-                i.IsGenericType && 
-                (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                 i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
-                 i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))))
-            .ToList();
-
-        foreach (var handlerType in handlerTypes)
+        public IServiceCollection AddApplication()
         {
-            // Register handler as its implemented interface
-            var implementedInterfaces = handlerType.GetInterfaces()
-                .Where(i => i.IsGenericType && 
+            var assembly = Assembly.GetExecutingAssembly();
+        
+            // Register all handlers from assembly
+            var handlerTypes = assembly.GetTypes()
+                .Where(t => t.GetInterfaces().Any(i => 
+                    i.IsGenericType && 
                     (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
                      i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
-                     i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
+                     i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))))
                 .ToList();
 
-            foreach (var interfaceType in implementedInterfaces)
+            foreach (var handlerType in handlerTypes)
             {
-                services.AddScoped(interfaceType, handlerType);
+                // Register handler as its implemented interface
+                var implementedInterfaces = handlerType.GetInterfaces()
+                    .Where(i => i.IsGenericType && 
+                        (i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
+                         i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+                         i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)))
+                    .ToList();
+
+                foreach (var interfaceType in implementedInterfaces)
+                {
+                    services.AddScoped(interfaceType, handlerType);
+                }
             }
+        
+            // Register validators
+            services.AddValidatorsFromAssemblies([assembly]);
+        
+            // Register custom mediator
+            services.AddScoped<IMediator, Mediator>();
+        
+            services.AddScoped<IDomainEventDispatcher, InMemoryDomainEventDispatcher>();
+        
+            return services;
         }
-        
-        // Register validators
-        services.AddValidatorsFromAssemblies([assembly]);
-        
-        // Register custom mediator
-        services.AddScoped<IMediator, Mediator>();
-        
-        services.AddScoped<IDomainEventDispatcher, InMemoryDomainEventDispatcher>();
-        
-        return services;
     }
 }

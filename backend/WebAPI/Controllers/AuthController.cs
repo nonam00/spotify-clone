@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-
-using Application.Users.Commands.ActivateUser;
+using Application.Users.Commands.ActivateUserByConfirmationCode;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteRefreshToken;
 using Application.Users.Commands.RestoreUserAccess;
@@ -54,7 +53,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> ActivateUser(
         [FromQuery] string email, [FromQuery] string code, CancellationToken cancellationToken)
     {
-        var command = new ActivateUserCommand(email, code);
+        var command = new ActivateUserByConfirmationCodeCommand(email, code);
         var result = await Mediator.Send(command, cancellationToken);
         
         if (!result.IsSuccess)

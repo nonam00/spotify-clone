@@ -7,6 +7,8 @@ public class PublishSongsCommandValidator : AbstractValidator<PublishSongsComman
     public PublishSongsCommandValidator()
     {
         RuleFor(c => c.SongIds)
+            .NotEmpty()
+                .WithMessage("Song ids list cannot be empty")
             .ForEach(c => c
                 .NotEqual(Guid.Empty)
                 .WithMessage("Song ID is required")

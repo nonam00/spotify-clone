@@ -129,7 +129,12 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	router.Use(middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins))
 
 	// Health check
-	router.GET("/health", fileHandler.HealthCheck)
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "healthy",
+			"service": "file-service",
+		})
+	})
 
 	// Metrics endpoint
 	router.GET("/metrics", middleware.PrometheusHandler())
@@ -139,7 +144,8 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	{
 		api.POST("/upload-url", fileHandler.GenerateUploadURL)
 		api.GET("/download-url", fileHandler.GenerateDownloadURL)
-		api.DELETE("", fileHandler.DeleteFile)
+		// Защищенный эндпоинт удаления файлов - требует API ключ
+		api.DELETE("", middleware.APIKeyMiddleware(cfg.Security.APIKey), fileHandler.DeleteFile)
 	}
 
 	return router

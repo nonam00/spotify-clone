@@ -15,6 +15,7 @@ type Config struct {
 
 type ServerConfig struct {
 	Port            string
+	AccessToken     string
 	ShutdownTimeout time.Duration
 }
 
@@ -43,6 +44,7 @@ type RedisConfig struct {
 
 type SecurityConfig struct {
 	CORSAllowedOrigins []string
+	APIKey             string
 }
 
 // Load function loads config from environment or sets default values
@@ -58,11 +60,12 @@ func Load() (*Config, error) {
 	viper.SetDefault("MINIO_PRESIGN_EXPIRY", "15m")
 	viper.SetDefault("MINIO_REGION", "us-east-1")
 	viper.SetDefault("CACHE_TYPE", "redis") // "redis" or "memory"
-	viper.SetDefault("REDIS_ENDPOINT", "redis:6379")
+	viper.SetDefault("REDIS_ENDPOINT", "file-service-redis:6379")
 	viper.SetDefault("REDIS_PASSWORD", "redispassword")
-	viper.SetDefault("REDIS_DB", 1)
+	viper.SetDefault("REDIS_DB", 0)
 	viper.SetDefault("REDIS_KEY_PREFIX", "file-service:presigned-url:")
 	viper.SetDefault("SECURITY_CORS_ALLOWED_ORIGINS", []string{"*"})
+	viper.SetDefault("SECURITY_API_KEY", "")
 
 	viper.AutomaticEnv()
 
@@ -92,6 +95,7 @@ func Load() (*Config, error) {
 		},
 		Security: SecurityConfig{
 			CORSAllowedOrigins: viper.GetStringSlice("SECURITY_CORS_ALLOWED_ORIGINS"),
+			APIKey:             viper.GetString("SECURITY_API_KEY"),
 		},
 	}
 

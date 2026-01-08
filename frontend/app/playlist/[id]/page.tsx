@@ -1,4 +1,4 @@
-import { redirect }  from "next/navigation";
+import { redirect, notFound }  from "next/navigation";
 
 import {getUserInfoServer} from "@/entities/user/api";
 import {getPlaylistById} from "@/entities/playlist/api";
@@ -26,7 +26,7 @@ const Playlist = async ({
   const playlist = await getPlaylistById(id);
 
   if (!playlist) {
-    redirect("/");
+    notFound();
   }
 
   const songs = await getSongsByPlaylistId(playlist.id);

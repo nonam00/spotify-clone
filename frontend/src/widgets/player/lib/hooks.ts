@@ -127,7 +127,6 @@ export function useSound(
 
     const handleError = (e: ErrorEvent) => {
       console.error("Audio error:", e.error);
-      setNextSong();
     };
 
     const handleCanPlay = () => {
