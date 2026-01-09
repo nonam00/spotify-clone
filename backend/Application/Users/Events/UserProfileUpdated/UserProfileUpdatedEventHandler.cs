@@ -25,7 +25,7 @@ public class UserProfileUpdatedEventHandler : IDomainEventHandler<UserProfileUpd
         { 
             _logger.LogDebug("Deleting user {userId} old avatar image {imagePath}",
                 @event.UserId, @event.OldAvatarPath.Value);
-            await _fileServiceClient.DeleteAsync(@event.OldAvatarPath, cancellationToken).ConfigureAwait(false);
+            await _fileServiceClient.DeleteAsync(@event.OldAvatarPath, "image", cancellationToken).ConfigureAwait(false);
         }
     }
 }
