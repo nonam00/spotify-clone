@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/features/auth";
 
-type AuthProviderProps = {
+const AuthProvider = ({
+  children
+}: {
   children: React.ReactNode;
-}
-
-const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+}) => {
   const { checkAuth, isAuthenticated } = useAuthStore();
 
   useEffect(() => {

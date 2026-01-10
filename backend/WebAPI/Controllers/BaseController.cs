@@ -7,9 +7,8 @@ namespace WebAPI.Controllers;
 [ApiController]
 public abstract class BaseController : ControllerBase
 {
-    private IMediator? _mediator;
     protected IMediator Mediator =>
-        _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+        field ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
     
     protected Guid GetGuidClaim(string claimType)
     {

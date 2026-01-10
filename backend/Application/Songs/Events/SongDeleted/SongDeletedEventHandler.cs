@@ -23,10 +23,10 @@ public class SongDeletedEventHandler : IDomainEventHandler<SongDeletedEvent>
         _logger.LogDebug("Handling song {songId} deleted event", @event.SongId);
         
         _logger.LogDebug("Deleting song {songId} image {image}", @event.SongId, @event.Image.Value);
-        var deleteImageTask = _fileServiceClient.DeleteAsync(@event.Image, cancellationToken);
+        var deleteImageTask = _fileServiceClient.DeleteAsync(@event.Image, "image", cancellationToken);
         
         _logger.LogDebug("Deleting song {songId} audio {audio}", @event.SongId, @event.Audio.Value);
-        var deleteAudioTask = _fileServiceClient.DeleteAsync(@event.Audio, cancellationToken);
+        var deleteAudioTask = _fileServiceClient.DeleteAsync(@event.Audio, "image", cancellationToken);
         
         await Task.WhenAll(deleteImageTask, deleteAudioTask).ConfigureAwait(false);
     }

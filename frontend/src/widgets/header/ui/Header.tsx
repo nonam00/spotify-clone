@@ -11,6 +11,7 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { Button } from "@/shared/ui";
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
+import {usePlayerStore} from "@/features/player";
 
 const Header = ({
   children,
@@ -19,14 +20,17 @@ const Header = ({
   children: React.ReactNode;
   className?: string;
 }>) => {
-  const openAuthModal = useAuthModalStore((s) => s.onOpen);
   const router = useRouter();
+  const openAuthModal = useAuthModalStore((s) => s.onOpen);
   const { isAuthenticated, user, logout } = useAuthStore();
 
   const handleLogout = async () => {
     try {
       await logout();
+
+      usePlayerStore.persist.clearStorage();
       router.refresh();
+
       toast.error("Logged out");
     } catch (error) {
       toast.error((error as Error)?.message || "Failed to logout");

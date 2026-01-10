@@ -19,19 +19,20 @@ public class FileServiceClient :  IFileServiceClient, IDisposable
         _httpClient.BaseAddress = new Uri(BaseUrl);
     }
 
-    public async Task DeleteAsync(string path, CancellationToken cancellationToken)
+    public async Task DeleteAsync(string id, string bucket, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Sending request to delete file {path}", path);
+        _logger.LogInformation("Sending request to delete file {path} from bucket {bucket}", id, bucket);
         
-        var request = new HttpRequestMessage(HttpMethod.Delete, "?type=image&file_id=" + path);
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"?type={bucket}&file_id={id}");
         
-        // Добавляем API ключ в заголовок, если он настроен
+        // Adding API Key to headers 
         if (!string.IsNullOrEmpty(_apiKey))
         {
             request.Headers.Add("X-API-Key", _apiKey);
         }
         
         var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        
         response.EnsureSuccessStatusCode();
     }
 
