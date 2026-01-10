@@ -28,7 +28,6 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         song.Unpublish();
         
         _songsRepository.Update(song);
-        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result.Success();

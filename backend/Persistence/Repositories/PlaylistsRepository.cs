@@ -60,11 +60,9 @@ public class PlaylistsRepository : IPlaylistsRepository
         return playlists;
     }
 
-    public void Update(Playlist playlist) =>
-        _dbContext.Playlists.Update(playlist);
+    public void Update(Playlist playlist) => _dbContext.Playlists.Update(playlist);
     
 
     private static PlaylistVm ToVm(Playlist playlist) =>
         new (playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath.Value);
-    
 }

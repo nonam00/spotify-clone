@@ -29,9 +29,6 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
         {
             song.Delete();
         }
-
-        _songsRepository.UpdateRange(songs);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
             
         _songsRepository.DeleteRange(songs);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

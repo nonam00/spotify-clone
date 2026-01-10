@@ -26,7 +26,7 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
         }
 
         playlist.ReorderSongs(command.SongIds);
-
+        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result.Success();
