@@ -19,15 +19,17 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     }
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var domainEvents = CollectAndCleanDomainEvents();
+        
         var result = await _context.SaveChangesAsync(cancellationToken);
         
         // Dispatch domain events after successful save
-        await DispatchDomainEventsAsync(cancellationToken).ConfigureAwait(false);
+        await DispatchDomainEventsAsync(domainEvents, cancellationToken).ConfigureAwait(false);
         
         return result;
     }
-    
-    private async Task DispatchDomainEventsAsync(CancellationToken cancellationToken = default)
+
+    private List<DomainEvent> CollectAndCleanDomainEvents()
     {
         var domainEntities = _context.ChangeTracker
             .Entries<AggregateRoot<Guid>>()
@@ -39,7 +41,12 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
             .ToList();
 
         domainEntities.ForEach(entity => entity.Entity.CleanDomainEvents());
-        
+
+        return domainEvents;
+    }
+    private async Task DispatchDomainEventsAsync(
+        List<DomainEvent> domainEvents, CancellationToken cancellationToken = default)
+    {
         if (domainEvents.Count != 0)
         {
             _logger.LogDebug("Dispatching {EventCount} domain events", domainEvents.Count);

@@ -28,7 +28,6 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         song.Publish();
         
         _songsRepository.Update(song);
-        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result.Success();

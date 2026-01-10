@@ -77,6 +77,7 @@ public class UsersRepository : IUsersRepository
     public async Task<List<User>> GetNonActiveList(CancellationToken cancellationToken = default)
     {
         var nonActiveUsers = await _dbContext.Users
+            .AsNoTracking()
             .Where(u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

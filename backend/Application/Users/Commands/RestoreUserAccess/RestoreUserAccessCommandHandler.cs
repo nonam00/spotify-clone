@@ -69,7 +69,6 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
         
-        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
