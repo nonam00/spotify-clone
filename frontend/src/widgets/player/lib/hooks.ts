@@ -1,7 +1,7 @@
-import {RefObject, useEffect, useLayoutEffect, useRef, useState} from "react";
+import {RefObject, useEffect, useLayoutEffect, useRef, useState, useTransition} from "react";
 import {useShallow} from "zustand/shallow";
-import {CLIENT_API_URL} from "@/shared/config/api";
 import type { Song } from "@/entities/song/model";
+import {getSongById} from "@/entities/song/api";
 import {usePlayerStore} from "@/features/player";
 
 type UseSoundReturnType = {
@@ -260,29 +260,28 @@ export function useSound(
   return { audioRef, isPlaying, duration, currentTime, isStalled, isSeeking };
 }
 
-
 // Get song by active id from track list store
 export function useGetCurrentSong(): {
   currentSong: Song | undefined;
   isLoading: boolean;
 } {
-  const [activeId, cache, setCachedSong] = usePlayerStore(
+  const [activeId, cache, setCachedSong, removeSongId] = usePlayerStore(
     useShallow((s) => [
       s.activeId,
       s.cache,
       s.setCachedSong,
+      s.removeId,
     ])
   );
 
   const [currentSong, setCurrentSong] = useState<Song | undefined>(
     activeId ? cache[activeId] : undefined
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, startTransition] = useTransition();
 
   // Fetch song data when activeId changes
   useLayoutEffect(() => {
     if (!activeId) {
-      setIsLoading(false);
       setCurrentSong(undefined);
       return;
     }
@@ -290,32 +289,26 @@ export function useGetCurrentSong(): {
     // Check cache first
     if (cache[activeId]) {
       setCurrentSong(cache[activeId]);
-      setIsLoading(false);
       return;
     }
 
     const abortController = new AbortController();
 
-    setIsLoading(true);
-
-    fetch(`${CLIENT_API_URL}/songs/${activeId}`, {
-      signal: abortController.signal,
-    })
-      .then((res) => res.json())
-      .then((data: Song) => {
-        setCurrentSong(data);
-        setCachedSong(data);
-        setIsLoading(false);
-      })
-      .catch(() => {
+    startTransition(async () => {
+      const song = await getSongById(activeId, abortController);
+      if (!song) {
         setCurrentSong(undefined);
-        setIsLoading(false);
-      });
+        removeSongId(activeId);
+      } else {
+        setCurrentSong(song);
+        setCachedSong(song);
+      }
+    })
 
     return () => {
       abortController.abort();
     };
-  }, [activeId, cache, setCachedSong]);
+  }, [activeId, cache, removeSongId, setCachedSong]);
 
   return { currentSong, isLoading }
 }

@@ -14,6 +14,7 @@ type PlayerStore = {
   setIds: (ids: string[]) => void;
   setNextId: () => void;
   setPreviousId: () => void;
+  removeId: (id: string) => void;
   setVolume: (value: number) => void;
   setCachedSong: (song: Song) => void;
   reset: () => void;
@@ -46,6 +47,13 @@ export const usePlayerStore = create<PlayerStore>()(
         const currentIndex = state.ids.findIndex((id) => id === state.activeId);
         const previousId = state.ids[currentIndex - 1];
         set({ activeId: previousId ?? state.ids[state.ids.length - 1], timestamp: Date.now() });
+      },
+      removeId: (id: string) => {
+        const state = get();
+        if (id === state.activeId) {
+          set({ activeId: undefined });
+        }
+        set({ ids: state.ids.filter((id) => id !== state.activeId), timestamp: Date.now() });
       },
       setVolume: (value: number) => set({ volume: value, timestamp: Date.now() }),
       setCachedSong: (song: Song) =>
