@@ -1,0 +1,54 @@
+name: Moderation App Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'moderation-app/**'
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  test:
+    name: Run Moderation App Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for moderation-app changes
+        id: moderation-app-changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            moderation-app:
+              - 'moderation-app/**'
+      
+      - name: Setup Node.js
+        if: steps.moderation-app-changes.outputs.moderation-app == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: moderation-app/package-lock.json
+      
+      - name: Install dependencies
+        if: steps.moderation-app-changes.outputs.moderation-app == 'true'
+        working-directory: ./moderation-app
+        run: npm ci
+      
+      - name: Run linter
+        if: steps.moderation-app-changes.outputs.moderation-app == 'true'
+        working-directory: ./moderation-app
+        run: npm run lint
+      
+      - name: Build application
+        if: steps.moderation-app-changes.outputs.moderation-app == 'true'
+        working-directory: ./moderation-app
+        run: npm run build
