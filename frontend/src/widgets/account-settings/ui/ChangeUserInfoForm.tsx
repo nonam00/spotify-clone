@@ -12,8 +12,7 @@ import {
   validateImage,
 } from "@/shared/lib/files";
 import { Input, Button } from "@/shared/ui";
-import type { UserDetails } from "@/entities/user/model";
-import {updateUserInfo} from "@/entities/user/api";
+import { type UserDetails, updateUserInfo } from "@/entities/user/";
 import {useAuthStore} from "@/features/auth";
 
 const ChangeUserInfoForm = ({

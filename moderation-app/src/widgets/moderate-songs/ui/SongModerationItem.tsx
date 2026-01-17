@@ -1,8 +1,7 @@
 import { Button } from "@/shared/ui";
-import type { Song } from "@/entities/song/model";
-import { SongItem } from "@/entities/song/ui";
-import { AudioPlayer}  from "@/features/audio-player/ui";
-import { useConfirmModalStore } from "@/features/confirm-modal/model";
+import {type Song, SongItem } from "@/entities/song"
+import { AudioPlayer}  from "@/features/audio-player";
+import { useConfirmModalStore } from "@/features/confirm-modal";
 import { useSongsStore } from "../model";
 
 type SongModerationItemProps = {

@@ -11,4 +11,3 @@ export type Song = {
 export type SongListVm = {
   songs: Song[];
 }
-

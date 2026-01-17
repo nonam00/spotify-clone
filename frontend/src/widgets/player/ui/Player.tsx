@@ -8,7 +8,7 @@ import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 import { Slider } from "@/shared/ui";
-import { SongListItem } from "@/entities/song/ui";
+import { SongListItem } from "@/entities/song";
 import { LikeButton } from "@/features/like-button";
 import {usePlayerStore} from "@/features/player";
 import { useSound, useGetCurrentSong, formatTime, calculateProgress } from "../lib";

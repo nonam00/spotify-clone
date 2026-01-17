@@ -8,7 +8,7 @@ import { FaTrash } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 import { OptionsMenu } from "@/shared/ui";
-import { deletePlaylist } from "@/entities/playlist/api";
+import { deletePlaylist } from "@/entities/playlist";
 import { useConfirmModalStore } from "@/features/confirm-modal";
 
 type PlaylistActionsMenuProps = {

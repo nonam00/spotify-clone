@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useShallow } from "zustand/shallow";
 
 import { CLIENT_FILES_URL } from "@/shared/config/api";
-import type { Playlist } from "@/entities/playlist/model";
+import type { Playlist } from "@/entities/playlist";
 import { useUpdatePlaylistModalStore } from "../model";
 
 const PlaylistImage = ({ playlist }: { playlist: Playlist }) => {

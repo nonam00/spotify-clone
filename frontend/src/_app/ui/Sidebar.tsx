@@ -9,9 +9,9 @@ import { HiHome } from "react-icons/hi";
 import { twMerge } from "tailwind-merge";
 
 import { Box } from "@/shared/ui";
-import type { Playlist } from "@/entities/playlist/model";
-import { usePlayerStore } from "@/features/player/model";
-import { Library } from "@/widgets/library/ui";
+import type { Playlist } from "@/entities/playlist";
+import { usePlayerStore } from "@/features/player";
+import { Library } from "@/widgets/library";
 
 const Sidebar = ({
   children,

@@ -5,7 +5,7 @@ import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
 import { Button, Modal } from "@/shared/ui";
-import { createPlaylist } from "@/entities/playlist/api";
+import { createPlaylist } from "@/entities/playlist";
 import { useCreateModalStore, useUploadModalStore } from "../model";
 
 const CreateModal = () => {

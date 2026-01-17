@@ -1,7 +1,6 @@
 import {RefObject, useEffect, useLayoutEffect, useRef, useState, useTransition} from "react";
 import {useShallow} from "zustand/shallow";
-import type { Song } from "@/entities/song/model";
-import {getSongById} from "@/entities/song/api";
+import {type Song, getSongById } from "@/entities/song";
 import {usePlayerStore} from "@/features/player";
 
 type UseSoundReturnType = {

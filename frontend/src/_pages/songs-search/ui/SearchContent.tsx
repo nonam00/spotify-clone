@@ -1,7 +1,6 @@
 "use client";
 
-import type { Song } from "@/entities/song/model";
-import { SongListItem } from "@/entities/song/ui";
+import { type Song, SongListItem } from "@/entities/song";
 import { useOnPlay } from "@/features/player";
 
 const SearchContent = ({ songs }: { songs: Song[] }) => {

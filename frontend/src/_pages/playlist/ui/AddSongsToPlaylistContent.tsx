@@ -5,9 +5,8 @@ import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/shared/ui";
-import type { Song } from "@/entities/song/model";
-import { SongListItem } from "@/entities/song/ui";
-import { addSongsToPlaylist } from "@/entities/playlist/api";
+import { type Song, SongListItem } from "@/entities/song";
+import { addSongsToPlaylist } from "@/entities/playlist";
 
 const AddSongsToPlaylistContent = ({
   playlistId,

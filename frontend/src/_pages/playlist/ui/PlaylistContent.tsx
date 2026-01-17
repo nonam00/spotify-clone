@@ -19,9 +19,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-import type { Song } from "@/entities/song/model";
-import { SortableSongListItem} from "@/entities/song/ui";
-import { reorderPlaylistSongs } from "@/entities/playlist/api";
+import { SortableSongListItem, type Song } from "@/entities/song";
+import { reorderPlaylistSongs } from "@/entities/playlist";
 import { useOnPlay } from "@/features/player";
 import { PlaylistSongActionsMenu, PlaylistActionsMenu } from "@/widgets/playlist";
 

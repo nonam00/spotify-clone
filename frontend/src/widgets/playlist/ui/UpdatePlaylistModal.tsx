@@ -13,8 +13,8 @@ import {
   validateImage,
 } from "@/shared/lib/files";
 import { Button, Input, Modal } from "@/shared/ui";
-import { updatePlaylist } from "@/entities/playlist/api";
-import { useAuthStore } from "@/features/auth/model";
+import { updatePlaylist } from "@/entities/playlist";
+import { useAuthStore } from "@/features/auth";
 import { useUpdatePlaylistModalStore } from "../model";
 
 const UpdatePlaylistModal = () => {

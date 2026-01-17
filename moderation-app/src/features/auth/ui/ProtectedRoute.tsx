@@ -69,4 +69,3 @@ const ProtectedRoute = ({ children, requiredPermission }: ProtectedRouteProps) =
 };
 
 export default ProtectedRoute;
-
