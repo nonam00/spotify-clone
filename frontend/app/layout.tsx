@@ -5,7 +5,7 @@ import "./globals.css";
 import {getUserPlaylists} from "@/entities/playlist/api";
 import { Player } from "@/widgets/player";
 import { Sidebar } from "@/_app/ui";
-import { AuthProvider, ModalProvider, ToasterProvider }from "@/_app/providers";
+import { AuthProvider, ModalProvider, ToasterProvider } from "@/_app/providers";
 
 const font = Figtree({ subsets: ["latin"] });
 
