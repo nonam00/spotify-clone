@@ -1,5 +1,3 @@
-"use client";
-
 import { BounceLoader } from "react-spinners";
 import { Box } from "@/shared/ui";
 

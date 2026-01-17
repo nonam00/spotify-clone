@@ -1,0 +1,51 @@
+name: Backend Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      
+      - name: Restore dependencies
+        working-directory: ./backend
+        run: dotnet restore
+      
+      - name: Build solution
+        working-directory: ./backend
+        run: dotnet build --no-restore --configuration Release
+      
+      - name: Run tests
+        working-directory: ./backend
+        run: dotnet test --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: backend/**/TestResults/*.trx
+          retention-days: 30
+      
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: backend/**/TestResults/**/coverage.cobertura.xml
+          retention-days: 30
