@@ -8,6 +8,9 @@ on:
     paths:
       - 'backend/**'
 
+env:
+  DOTNET_VERSION: '10.0.x'
+
 jobs:
   test:
     name: Run Backend Tests
@@ -16,26 +19,40 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for backend changes
+        id: backend-changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
       
       - name: Setup .NET
+        if: steps.backend-changes.outputs.backend == 'true'
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       
       - name: Restore dependencies
+        if: steps.backend-changes.outputs.backend == 'true'
         working-directory: ./backend
         run: dotnet restore
       
       - name: Build solution
+        if: steps.backend-changes.outputs.backend == 'true'
         working-directory: ./backend
         run: dotnet build --no-restore --configuration Release
       
       - name: Run tests
+        if: steps.backend-changes.outputs.backend == 'true'
         working-directory: ./backend
         run: dotnet test --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
       
       - name: Upload test results
-        if: always()
+        if: steps.backend-changes.outputs.backend == 'true' && !cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -43,7 +60,7 @@ jobs:
           retention-days: 30
       
       - name: Upload coverage reports
-        if: always()
+        if: steps.backend-changes.outputs.backend == 'true' && !cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
