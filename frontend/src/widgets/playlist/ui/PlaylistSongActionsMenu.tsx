@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { HiOutlineTrash } from "react-icons/hi";
 
 import { OptionsMenu } from "@/shared/ui";
-import { removeSongFromPlaylist } from "@/entities/playlist/api";
+import { removeSongFromPlaylist } from "@/entities/playlist";
 
 type SongActionsMenuProps = {
   playlistId: string;

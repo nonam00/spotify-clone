@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {Song} from "@/entities/song/model";
+import {Song} from "@/entities/song";
 
 type SongCache = Record<string, Song>;
 

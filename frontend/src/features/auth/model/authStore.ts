@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { CLIENT_API_URL } from "@/shared/config/api";
-import { getUserInfo } from "@/entities/user/api";
-import { UserDetails } from "@/entities/user/model";
+import { type UserDetails, getUserInfo } from "@/entities/user";
 
 type AuthStore = {
   user: UserDetails | null;

@@ -1,8 +1,8 @@
-import { authFetchClient, MODERATORS_API_URL } from "@/shared/config/api.ts";
-import type { SongListVm } from "@/entities/song/model";
+import {authFetchClient, CLIENT_API_URL} from "@/shared/config/api";
+import type {SongListVm} from "../model";
 
 export async function getUnpublishedSongs(): Promise<SongListVm> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/unpublished`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs/unpublished`, {
     method: "GET",
   });
 
@@ -20,7 +20,7 @@ export async function getUnpublishedSongs(): Promise<SongListVm> {
 }
 
 export async function publishSong(songId: string): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/publish/${songId}`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs/publish/${songId}`, {
     method: "PUT",
   });
 
@@ -36,7 +36,7 @@ export async function publishSong(songId: string): Promise<void> {
 }
 
 export async function publishSongs(songIds: string[]): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/publish`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs/publish`, {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ songIds }),
@@ -54,7 +54,7 @@ export async function publishSongs(songIds: string[]): Promise<void> {
 }
 
 export async function unpublishSong(songId: string): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/unpublish/${songId}`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs/unpublish/${songId}`, {
     method: "PUT",
   });
 
@@ -70,7 +70,7 @@ export async function unpublishSong(songId: string): Promise<void> {
 }
 
 export async function deleteSong(songId: string): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs/${songId}`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs/${songId}`, {
     method: "DELETE",
   });
 
@@ -86,7 +86,7 @@ export async function deleteSong(songId: string): Promise<void> {
 }
 
 export async function deleteSongs(songIds: string[]): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/songs`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/songs`, {
     method: "DELETE",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ songIds }),
@@ -103,3 +103,14 @@ export async function deleteSongs(songIds: string[]): Promise<void> {
   }
 }
 
+export async function getUserSongs(userId: string): Promise<SongListVm> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users/${userId}/songs`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user songs");
+  }
+
+  return response.json();
+}

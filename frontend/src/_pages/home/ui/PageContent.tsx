@@ -1,8 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import type { Song } from "@/entities/song/model";
-import { SongGridItem } from "@/entities/song/ui";
+import {type Song, SongGridItem } from "@/entities/song";
 import { useOnPlay } from "@/features/player";
 
 const PageContent = memo(function PageContent({ songs }: { songs: Song[] }) {

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { Song } from "@/entities/song/model";
-import { useAuthStore, useAuthModalStore } from "@/features/auth/model";
+import type { Song } from "@/entities/song";
+import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { usePlayerStore } from "../model";
 
 const useOnPlay = (songs: Song[]) => {

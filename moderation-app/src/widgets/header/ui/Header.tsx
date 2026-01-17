@@ -22,7 +22,7 @@ const Header = ({ title, description, children, className }: Readonly<HeaderProp
 
   return (
     <div
-      className={twMerge(`h-fit bg-gradient-to-b from-emerald-800 p-8 shadow-2xl`, className)}
+      className={twMerge(`h-fit bg-linear-to-b from-emerald-800 p-8 shadow-2xl`, className)}
     >
       <div className="w-full mb-4 flex items-center justify-between flex-wrap gap-4">
         <div>

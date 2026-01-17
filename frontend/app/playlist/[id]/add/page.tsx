@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import {getPlaylistById} from "@/entities/playlist/api";
-import {getLikedSongsForPlaylist} from "@/entities/song/api";
-import { SearchInput } from "@/features/search-input/ui";
+import {getPlaylistById} from "@/entities/playlist";
+import {getLikedSongsForPlaylist} from "@/entities/song";
+import { SearchInput } from "@/features/search-input";
 import { Header } from "@/widgets/header";
 import {AddSongsToPlaylistContent} from "@/_pages/playlist";
 

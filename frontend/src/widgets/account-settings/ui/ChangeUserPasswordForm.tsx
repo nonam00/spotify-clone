@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 
 import { Input, Button } from "@/shared/ui";
-import {changePassword} from "@/entities/user/api";
+import {changePassword} from "@/entities/user";
 
 const ChangeUserPasswordForm = () => {
   const [isPending, startTransition] = useTransition();

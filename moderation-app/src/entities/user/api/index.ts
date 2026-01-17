@@ -1,6 +1,5 @@
-import { authFetchClient, MODERATORS_API_URL } from "@/shared/config/api.ts";
-import type { UserListVm } from "@/entities/user/model";
-import type { SongListVm } from "@/entities/song/model";
+import {authFetchClient, CLIENT_API_URL} from "@/shared/config/api";
+import type {UserListVm} from "../model";
 
 function getErrorMessage(status: number, defaultMessage: string) {
   if (status === 401) {
@@ -13,7 +12,7 @@ function getErrorMessage(status: number, defaultMessage: string) {
 }
 
 export async function getUsersForModeration(): Promise<UserListVm> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/users`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users`, {
     method: "GET",
   });
 
@@ -25,7 +24,7 @@ export async function getUsersForModeration(): Promise<UserListVm> {
 }
 
 export async function updateUserStatus(userId: string, isActive: boolean): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/users/${userId}/status`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users/${userId}/status`, {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ isActive }),
@@ -35,16 +34,3 @@ export async function updateUserStatus(userId: string, isActive: boolean): Promi
     throw new Error(getErrorMessage(response.status, "Failed to update user status"));
   }
 }
-
-export async function getUserSongs(userId: string): Promise<SongListVm> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/users/${userId}/songs`, {
-    method: "GET",
-  });
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(response.status, "Failed to fetch user songs"));
-  }
-
-  return response.json();
-}
-

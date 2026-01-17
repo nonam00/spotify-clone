@@ -1,5 +1,4 @@
-import type { SearchType } from "@/entities/song/model";
-import {getSongs, getSongsBySearch} from "@/entities/song/api";
+import {type SearchType, getSongs, getSongsBySearch} from "@/entities/song";
 import { Header } from "@/widgets/header";
 import { SearchInput } from "@/features/search-input";
 import { SearchContent } from "@/_pages/songs-search";

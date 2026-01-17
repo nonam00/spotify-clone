@@ -1,2 +1,1 @@
-export type { ManagedUser, UserListVm } from "./types.ts";
-
+export type { ManagedUser, UserListVm } from "./types";

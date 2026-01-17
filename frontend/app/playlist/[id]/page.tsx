@@ -1,8 +1,8 @@
 import { redirect, notFound }  from "next/navigation";
 
-import {getUserInfoServer} from "@/entities/user/api";
-import {getPlaylistById} from "@/entities/playlist/api";
-import {getSongsByPlaylistId} from "@/entities/song/api";
+import {getUserInfoServer} from "@/entities/user";
+import {getPlaylistById} from "@/entities/playlist";
+import {getSongsByPlaylistId} from "@/entities/song";
 import { Header } from "@/widgets/header";
 import { PlaylistImage } from "@/widgets/playlist";
 import { PlaylistContent} from "@/_pages/playlist";

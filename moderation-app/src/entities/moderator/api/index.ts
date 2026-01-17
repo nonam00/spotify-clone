@@ -1,5 +1,5 @@
-import { authFetchClient, MODERATORS_API_URL } from "@/shared/config/api.ts";
-import type { ModeratorListVm } from "@/entities/moderator/model";
+import {authFetchClient, CLIENT_API_URL} from "@/shared/config/api";
+import type {ModeratorListVm, ModeratorInfo} from "../model";
 
 export type UpdateModeratorPermissionsPayload = {
   canManageUsers: boolean;
@@ -26,7 +26,7 @@ function getErrorMessage(status: number, defaultMessage: string) {
 }
 
 export async function getModerators(): Promise<ModeratorListVm> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators`, {
     method: "GET",
   });
 
@@ -41,7 +41,7 @@ export async function updateModeratorPermissions(
   moderatorId: string,
   payload: UpdateModeratorPermissionsPayload
 ): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/${moderatorId}/permissions`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/${moderatorId}/permissions`, {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
@@ -53,7 +53,7 @@ export async function updateModeratorPermissions(
 }
 
 export async function updateModeratorStatus(moderatorId: string, isActive: boolean): Promise<void> {
-  const response = await authFetchClient(`${MODERATORS_API_URL}/${moderatorId}/status`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/${moderatorId}/status`, {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ isActive }),
@@ -71,7 +71,7 @@ export async function createModerator(payload: CreateModeratorPayload): Promise<
   formData.append("Password", payload.password);
   formData.append("IsSuper", String(payload.isSuper));
 
-  const response = await authFetchClient(`${MODERATORS_API_URL}/register`, {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/register`, {
     method: "POST",
     body: formData,
   });
@@ -85,3 +85,20 @@ export async function createModerator(payload: CreateModeratorPayload): Promise<
   }
 }
 
+export async function getModeratorInfo(): Promise<ModeratorInfo> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/info`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    if (response.status === 403) {
+      throw new Error("Forbidden");
+    }
+    throw new Error("Failed to fetch moderator info");
+  }
+
+  return response.json();
+}

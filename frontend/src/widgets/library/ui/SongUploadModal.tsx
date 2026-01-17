@@ -14,7 +14,7 @@ import {
   validateImage,
 } from "@/shared/lib/files";
 import { Button, Input, Modal } from "@/shared/ui";
-import { createSongRecord } from "@/entities/song/api";
+import { createSongRecord } from "@/entities/song";
 import { useAuthStore } from "@/features/auth";
 import { useUploadModalStore } from "../model";
 

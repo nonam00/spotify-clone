@@ -1,4 +1,4 @@
-export interface ManagedUser {
+export type ManagedUser = {
   id: string;
   email: string;
   fullName: string;
@@ -7,7 +7,6 @@ export interface ManagedUser {
   uploadedSongsCount: number;
 }
 
-export interface UserListVm {
+export type UserListVm = {
   users: ManagedUser[];
 }
-

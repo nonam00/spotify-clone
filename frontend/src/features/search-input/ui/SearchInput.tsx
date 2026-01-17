@@ -6,7 +6,7 @@ import { twMerge } from "tailwind-merge";
 
 import useDebounce from "@/shared/lib/useDebounce";
 import { Input } from "@/shared/ui";
-import type { SearchType } from "@/entities/song/model";
+import type { SearchType } from "@/entities/song";
 
 const SearchInput = ({
   pageUrl,

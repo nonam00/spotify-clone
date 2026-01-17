@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import { type ManagedUser, getUserSongs } from "@/entities/user";
-import { type Song, unpublishSong } from "@/entities/song";
+import { type ManagedUser } from "@/entities/user";
+import {getUserSongs, type Song, unpublishSong} from "@/entities/song";
 
 type UserSongsModalStore = {
   isOpen: boolean;

@@ -7,7 +7,7 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
 import { MediaItem } from "@/shared/ui";
-import type { Playlist } from "@/entities/playlist/model";
+import type { Playlist } from "@/entities/playlist";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { useCreateModalStore } from "../model";
 

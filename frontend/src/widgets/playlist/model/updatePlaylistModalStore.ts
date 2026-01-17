@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Playlist } from "@/entities/playlist/model";
+import type { Playlist } from "@/entities/playlist";
 
 type UpdatePlaylistModalStore = {
   isOpen: boolean;

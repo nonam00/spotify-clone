@@ -1,4 +1,4 @@
-import { CLIENT_FILES_URL } from "@/shared/config/api.ts";
+import { CLIENT_FILES_URL } from "@/shared/config/api";
 import type { Song } from "../model";
 
 const SongItem = ({

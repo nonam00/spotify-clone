@@ -3,7 +3,7 @@ import Image from "next/image";
 import { IoMdPerson, IoMdMail } from "react-icons/io";
 
 import { CLIENT_FILES_URL } from "@/shared/config/api";
-import {getUserInfoServer} from "@/entities/user/api";
+import {getUserInfoServer} from "@/entities/user";
 import { Header } from "@/widgets/header";
 import {
   ChangeUserInfoForm,

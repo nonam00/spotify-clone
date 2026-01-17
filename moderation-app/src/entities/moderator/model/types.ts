@@ -1,11 +1,19 @@
-export interface ModeratorPermissions {
+export type ModeratorInfo = {
+  id: string;
+  email: string;
+  fullName: string;
+  isActive: boolean;
+  permissions: ModeratorPermissions;
+}
+
+export type ModeratorPermissions = {
   canManageUsers: boolean;
   canManageContent: boolean;
   canViewReports: boolean;
   canManageModerators: boolean;
 }
 
-export interface ModeratorSummary {
+export type ModeratorSummary = {
   id: string;
   email: string;
   fullName: string;
@@ -14,7 +22,6 @@ export interface ModeratorSummary {
   permissions: ModeratorPermissions;
 }
 
-export interface ModeratorListVm {
+export type ModeratorListVm = {
   moderators: ModeratorSummary[];
 }
-
