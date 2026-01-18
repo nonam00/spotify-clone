@@ -5,8 +5,8 @@ namespace Domain.Events;
 
 public class UserRegisteredEvent : DomainEvent
 {
-    public Guid UserId { get; init; }
-    public Email Email { get; init; }
+    public Guid UserId { get; }
+    public Email Email { get; }
 
     public UserRegisteredEvent(Guid userId, Email email)
     {
@@ -15,17 +15,15 @@ public class UserRegisteredEvent : DomainEvent
     }
 }
 
-public class UserProfileUpdatedEvent : DomainEvent
+public class UserAvatarChangedEvent : DomainEvent
 {
-    public Guid UserId { get; init; }
-    public string FullName { get; init; }
-    public FilePath NewAvatarPath { get; init; }
-    public FilePath OldAvatarPath { get; init; }
+    public Guid UserId { get; }
+    public FilePath NewAvatarPath { get; }
+    public FilePath OldAvatarPath { get; }
     
-    public UserProfileUpdatedEvent(Guid userId, string fullName, FilePath newAvatarPath, FilePath oldAvatarPath)
+    public UserAvatarChangedEvent(Guid userId, FilePath newAvatarPath, FilePath oldAvatarPath)
     {
         UserId = userId;
-        FullName = fullName;
         NewAvatarPath = newAvatarPath;
         OldAvatarPath = oldAvatarPath;
     }
