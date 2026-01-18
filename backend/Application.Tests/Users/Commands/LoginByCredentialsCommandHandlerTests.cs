@@ -1,14 +1,14 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Queries.LoginByCredentials;
+using Application.Users.Commands.LoginByCredentials;
 using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 
-namespace Application.Tests.Users.Queries;
+namespace Application.Tests.Users.Commands;
 
-public class LoginByCredentialsQueryHandlerTests : TestBase
+public class LoginByCredentialsCommandHandlerTests : TestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenCredentialsAreValid()
@@ -27,7 +27,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
             .Setup(x => x.Verify("password", "hashed_password"))
             .Returns(true);
         
-        var query = new LoginByCredentialsQuery("test@example.com", "password");
+        var query = new LoginByCredentialsCommand("test@example.com", "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -49,7 +49,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenUserNotFound()
     {
         // Arrange
-        var query = new LoginByCredentialsQuery("nonexistent@example.com", "password");
+        var query = new LoginByCredentialsCommand("nonexistent@example.com", "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -71,7 +71,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        var query = new LoginByCredentialsQuery("test@example.com", "password");
+        var query = new LoginByCredentialsCommand("test@example.com", "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -98,7 +98,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
             .Setup(x => x.Verify("wrongpassword", "hashed_password"))
             .Returns(false);
         
-        var query = new LoginByCredentialsQuery("test@example.com", "wrongpassword");
+        var query = new LoginByCredentialsCommand("test@example.com", "wrongpassword");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -112,7 +112,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenEmailIsEmpty()
     {
         // Arrange
-        var query = new LoginByCredentialsQuery("", "password");
+        var query = new LoginByCredentialsCommand("", "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -127,7 +127,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenEmailIsInvalid()
     {
         // Arrange
-        var query = new LoginByCredentialsQuery("invalid-email", "password");
+        var query = new LoginByCredentialsCommand("invalid-email", "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -143,7 +143,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     {
         // Arrange
         var longEmail = new string('a', 250) + "@example.com";
-        var query = new LoginByCredentialsQuery(longEmail, "password");
+        var query = new LoginByCredentialsCommand(longEmail, "password");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -158,7 +158,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenPasswordIsEmpty()
     {
         // Arrange
-        var query = new LoginByCredentialsQuery("test@example.com", "");
+        var query = new LoginByCredentialsCommand("test@example.com", "");
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -174,7 +174,7 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
     {
         // Arrange
         var longPassword = new string('a', 101);
-        var query = new LoginByCredentialsQuery("test@example.com", longPassword);
+        var query = new LoginByCredentialsCommand("test@example.com", longPassword);
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);

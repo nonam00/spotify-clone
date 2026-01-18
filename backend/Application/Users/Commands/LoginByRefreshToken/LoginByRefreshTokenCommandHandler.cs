@@ -8,20 +8,20 @@ using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
 
-namespace Application.Users.Queries.LoginByRefreshToken;
+namespace Application.Users.Commands.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshTokenQuery, Result<TokenPair>>
+public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTokenCommand, Result<TokenPair>>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<LoginByRefreshTokenQueryHandler> _logger;
+    private readonly ILogger<LoginByRefreshTokenCommandHandler> _logger;
 
-    public LoginByRefreshTokenQueryHandler(
+    public LoginByRefreshTokenCommandHandler(
         IRefreshTokensRepository refreshTokensRepository,
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork,
-        ILogger<LoginByRefreshTokenQueryHandler> logger)
+        ILogger<LoginByRefreshTokenCommandHandler> logger)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _jwtProvider = jwtProvider;
@@ -29,7 +29,7 @@ public class LoginByRefreshTokenQueryHandler : IQueryHandler<LoginByRefreshToken
         _logger = logger;
     }
 
-    public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var refreshToken = await _refreshTokensRepository.GetByValueWithUser(request.RefreshToken, cancellationToken);
         

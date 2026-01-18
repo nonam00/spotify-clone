@@ -1,14 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using FluentAssertions;
+
 using Application.Users.Errors;
-using Application.Users.Queries.LoginByRefreshToken;
+using Application.Users.Commands.LoginByRefreshToken;
 using Domain.Models;
 using Domain.ValueObjects;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 
-namespace Application.Tests.Users.Queries;
+namespace Application.Tests.Users.Commands;
 
-public class LoginByRefreshTokenQueryHandlerTest : TestBase
+public class LoginByRefreshTokenCommandHandlerTest : TestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsValid()
@@ -29,7 +30,7 @@ public class LoginByRefreshTokenQueryHandlerTest : TestBase
         
         Context.ChangeTracker.Clear();
 
-        var query = new LoginByRefreshTokenQuery(refreshTokenValue);
+        var query = new LoginByRefreshTokenCommand(refreshTokenValue);
         
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -68,7 +69,7 @@ public class LoginByRefreshTokenQueryHandlerTest : TestBase
         
         Context.ChangeTracker.Clear();
 
-        var query = new LoginByRefreshTokenQuery("8391831983");
+        var query = new LoginByRefreshTokenCommand("8391831983");
         
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -97,7 +98,7 @@ public class LoginByRefreshTokenQueryHandlerTest : TestBase
         
         Context.ChangeTracker.Clear();
 
-        var query = new LoginByRefreshTokenQuery(refreshTokenValue);
+        var query = new LoginByRefreshTokenCommand(refreshTokenValue);
         
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);

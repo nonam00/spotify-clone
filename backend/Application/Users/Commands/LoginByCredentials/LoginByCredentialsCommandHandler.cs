@@ -1,27 +1,27 @@
-﻿using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 
+using Application.Users.Interfaces;
+using Application.Users.Errors;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
-using Application.Users.Errors;
-using Application.Users.Interfaces;
 
-namespace Application.Users.Queries.LoginByCredentials;
+namespace Application.Users.Commands.LoginByCredentials;
 
-public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, Result<TokenPair>>
+public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentialsCommand, Result<TokenPair>>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<LoginByCredentialsQueryHandler> _logger;
+    private readonly ILogger<LoginByCredentialsCommandHandler> _logger;
     
-    public LoginByCredentialsQueryHandler(IUsersRepository usersRepository,
+    public LoginByCredentialsCommandHandler(IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider,
-        IUnitOfWork unitOfWork, ILogger<LoginByCredentialsQueryHandler> logger)
+        IUnitOfWork unitOfWork, ILogger<LoginByCredentialsCommandHandler> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
@@ -30,7 +30,7 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
         _logger = logger;
     }
 
-    public async Task<Result<TokenPair>> Handle(LoginByCredentialsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TokenPair>> Handle(LoginByCredentialsCommand request, CancellationToken cancellationToken)
     {
         var user = await _usersRepository.GetByEmailWithRefreshTokens(request.Email, cancellationToken);
 

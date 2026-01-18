@@ -8,18 +8,18 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Queries.LoginByCredentials;
 
-public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, Result<string>>
+public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentialsQuery, Result<string>>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtProvider _jwtProvider;
-    private readonly ILogger<LoginByCredentialsQueryHandler> _logger;
+    private readonly ILogger<LoginByCredentialsCommandHandler> _logger;
     
-    public LoginByCredentialsQueryHandler(
+    public LoginByCredentialsCommandHandler(
         IModeratorsRepository moderatorsRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider,
-        ILogger<LoginByCredentialsQueryHandler> logger)
+        ILogger<LoginByCredentialsCommandHandler> logger)
     {
         _moderatorsRepository = moderatorsRepository;
         _passwordHasher = passwordHasher;
