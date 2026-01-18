@@ -23,6 +23,8 @@ public class CreatePlaylistCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
+        Context.ChangeTracker.Clear();
+        
         var command = new CreatePlaylistCommand(user.Id);
 
         // Act
@@ -34,7 +36,7 @@ public class CreatePlaylistCommandHandlerTests : TestBase
         var playlist = await Context.Playlists.SingleOrDefaultAsync(p => p.Id == result.Value);
         
         playlist.Should().NotBeNull();
-        playlist!.Title.Should().Be("Playlist #1");
+        playlist.Title.Should().Be("Playlist #1");
         playlist.UserId.Should().Be(user.Id);
     }
 
@@ -65,6 +67,8 @@ public class CreatePlaylistCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
+        Context.ChangeTracker.Clear();
+        
         var command1 = new CreatePlaylistCommand(user.Id);
         var command2 = new CreatePlaylistCommand(user.Id);
 
@@ -81,5 +85,20 @@ public class CreatePlaylistCommandHandlerTests : TestBase
         
         playlist1!.Title.Should().Be("Playlist #1");
         playlist2!.Title.Should().Be("Playlist #2");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var command = new CreatePlaylistCommand(Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
     }
 }

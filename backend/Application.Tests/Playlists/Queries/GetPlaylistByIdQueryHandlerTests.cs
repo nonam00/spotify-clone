@@ -51,4 +51,55 @@ public class GetPlaylistByIdQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(PlaylistErrors.NotFound);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = Playlist.Create(user.Id, "My Playlist");
+        
+        await Context.Users.AddAsync(user);
+        await Context.Playlists.AddAsync(playlist);
+        await Context.SaveChangesAsync();
+        
+        var query = new GetPlaylistByIdQuery(Guid.Empty, playlist.Id);
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPlaylistIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var query = new GetPlaylistByIdQuery(user.Id, Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("PlaylistId");
+    }
 }

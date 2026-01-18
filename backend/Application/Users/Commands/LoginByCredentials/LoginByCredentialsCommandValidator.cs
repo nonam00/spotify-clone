@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace Application.Users.Queries.LoginByCredentials;
+namespace Application.Users.Commands.LoginByCredentials;
 
-public class LoginByCredentialsQueryValidator : AbstractValidator<LoginByCredentialsQuery>
+public class LoginByCredentialsCommandValidator : AbstractValidator<LoginByCredentialsCommand>
 {
-    public LoginByCredentialsQueryValidator()
+    public LoginByCredentialsCommandValidator()
     {
         RuleFor(query => query.Email)
             .NotEmpty()

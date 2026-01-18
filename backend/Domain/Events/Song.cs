@@ -5,9 +5,9 @@ namespace Domain.Events;
 
 public class SongDeletedEvent : DomainEvent
 {
-    public Guid SongId { get; private set; }
-    public FilePath Image { get; private set; }
-    public FilePath Audio { get; private set; }
+    public Guid SongId { get; }
+    public FilePath Image { get; }
+    public FilePath Audio { get; }
     
     public SongDeletedEvent(Guid id, FilePath image, FilePath audio)
     {

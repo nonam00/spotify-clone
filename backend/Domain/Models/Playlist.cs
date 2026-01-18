@@ -55,13 +55,10 @@ public class Playlist : AggregateRoot<Guid>
         ImagePath = imagePath;
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new PlaylistDetailsUpdatedEvent(
-            Id,
-            UserId,
-            title,
-            description!,
-            imagePath,
-            oldImagePath));
+        if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != imagePath)
+        {
+            AddDomainEvent(new PlaylistImageChangedEvent(Id, imagePath, oldImagePath));
+        }
     }
     
     public bool AddSong(Guid songId)

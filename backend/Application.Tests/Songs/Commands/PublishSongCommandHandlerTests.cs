@@ -37,7 +37,7 @@ public class PublishSongCommandHandlerTests : TestBase
         var publishedSong = await Context.Songs.FirstOrDefaultAsync(s => s.Id == song.Id);
         
         publishedSong.Should().NotBeNull();
-        publishedSong!.IsPublished.Should().BeTrue();
+        publishedSong.IsPublished.Should().BeTrue();
     }
 
     [Fact]
@@ -52,6 +52,21 @@ public class PublishSongCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(SongErrors.NotFound);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenIdIsEmpty()
+    {
+        // Arrange
+        var command = new PublishSongCommand(Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Id");
     }
     
     // TODO: published -> publish

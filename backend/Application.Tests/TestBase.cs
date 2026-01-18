@@ -12,7 +12,6 @@ using Application.Users.Interfaces;
 using Application.Songs.Interfaces;
 using Application.Playlists.Interfaces;
 using Application.Moderators.Interfaces;
-using Infrastructure.Email;
 using Domain.Common;
 
 namespace Application.Tests;
@@ -21,11 +20,7 @@ public abstract class TestBase : IDisposable
 {
     protected IMediator Mediator { get; }
     protected AppDbContext Context { get; }
-    protected IServiceProvider ServiceProvider { get; }
     protected Mock<IPasswordHasher> PasswordHasherMock { get; }
-    protected Mock<IJwtProvider> JwtProviderMock { get; }
-    protected Mock<IFileServiceClient> FileServiceClientMock { get; }
-    protected Mock<ILoggerFactory> LoggerFactoryMock { get; }
 
     protected TestBase()
     {
@@ -41,9 +36,8 @@ public abstract class TestBase : IDisposable
 
         // Configuring mock services 
         PasswordHasherMock = new Mock<IPasswordHasher>();
-        JwtProviderMock = new Mock<IJwtProvider>();
-        FileServiceClientMock = new Mock<IFileServiceClient>();
-        LoggerFactoryMock = new Mock<ILoggerFactory>();
+        var jwtProviderMock = new Mock<IJwtProvider>();
+        var fileServiceClientMock = new Mock<IFileServiceClient>();
         var codesClientMock = new Mock<ICodesClient>();
         
         PasswordHasherMock.Setup(x => x.Generate(It.IsAny<string>()))
@@ -51,14 +45,10 @@ public abstract class TestBase : IDisposable
         PasswordHasherMock.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>()))
             .Returns<string, string>((password, hash) => hash == $"hashed_{password}");
         
-        JwtProviderMock.Setup(x => x.GenerateUserToken(It.IsAny<Domain.Models.User>()))
+        jwtProviderMock.Setup(x => x.GenerateUserToken(It.IsAny<Domain.Models.User>()))
             .Returns("mock_access_token");
-        JwtProviderMock.Setup(x => x.GenerateModeratorToken(It.IsAny<Domain.Models.Moderator>()))
+        jwtProviderMock.Setup(x => x.GenerateModeratorToken(It.IsAny<Domain.Models.Moderator>()))
             .Returns("mock_moderator_token");
-
-        var loggerMock = new Mock<ILogger>();
-        LoggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>()))
-            .Returns(loggerMock.Object);
 
         // Configuring mocks for ICodesClient
         codesClientMock.Setup(x => x.VerifyConfirmationCodeAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -69,11 +59,14 @@ public abstract class TestBase : IDisposable
             .Returns("123456");
         
         services.AddSingleton(PasswordHasherMock.Object);
-        services.AddSingleton(JwtProviderMock.Object);
-        services.AddSingleton(FileServiceClientMock.Object);
-        services.AddSingleton(LoggerFactoryMock.Object);
+        services.AddSingleton(jwtProviderMock.Object);
         services.AddSingleton(codesClientMock.Object);
+        services.AddSingleton(fileServiceClientMock.Object);
+        
+        services.AddScoped(typeof(ILoggerFactory), typeof(LoggerFactory));
         services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
+
+        services.AddApplication();
         
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<ISongsRepository, SongsRepository>();
@@ -81,27 +74,13 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IModeratorsRepository, ModeratorsRepository>();
         services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
         
-        // Mock for Redis codes repository
-        var codesRepositoryMock = new Mock<ICodesRepository>();
-        codesRepositoryMock.Setup(x => x.SetConfirmationCode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()))
-            .Returns(Task.CompletedTask);
-        codesRepositoryMock.Setup(x => x.GetConfirmationCode(It.IsAny<string>()))
-            .ReturnsAsync((string?)null);
-        codesRepositoryMock.Setup(x => x.SetRestoreCode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>()))
-            .Returns(Task.CompletedTask);
-        codesRepositoryMock.Setup(x => x.GetRestoreCode(It.IsAny<string>()))
-            .ReturnsAsync((string?)null);
-        services.AddSingleton(codesRepositoryMock.Object);
-        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDomainEventDispatcher, InMemoryDomainEventDispatcher>();
         
-        services.AddApplication();
+        var serviceProvider = services.BuildServiceProvider();
         
-        ServiceProvider = services.BuildServiceProvider();
-        
-        Mediator = ServiceProvider.GetRequiredService<IMediator>();
-        Context = ServiceProvider.GetRequiredService<AppDbContext>();
+        Mediator = serviceProvider.GetRequiredService<IMediator>();
+        Context = serviceProvider.GetRequiredService<AppDbContext>();
         
         Context.Database.EnsureCreated();
     }
@@ -110,9 +89,5 @@ public abstract class TestBase : IDisposable
     {
         Context.Database.EnsureDeleted();
         Context.Dispose();
-        if (ServiceProvider is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
     }
 }

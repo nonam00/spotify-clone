@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Users.Commands.ActivateUserByConfirmationCode;
 using Application.Users.Commands.CreateUser;
 using Application.Users.Commands.DeleteRefreshToken;
+using Application.Users.Commands.LoginByCredentials;
+using Application.Users.Commands.LoginByRefreshToken;
 using Application.Users.Commands.RestoreUserAccess;
 using Application.Users.Commands.SendRestoreToken;
-using Application.Users.Queries.LoginByCredentials;
-using Application.Users.Queries.LoginByRefreshToken;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -78,7 +78,7 @@ public class AuthController : BaseController
     public async Task<IActionResult> UserLogin(
         [FromForm] LoginCredentialsDto loginCredentialsDto, CancellationToken cancellationToken)
     {
-        var query = new LoginByCredentialsQuery(Email: loginCredentialsDto.Email, Password: loginCredentialsDto.Password);
+        var query = new LoginByCredentialsCommand(Email: loginCredentialsDto.Email, Password: loginCredentialsDto.Password);
         var result = await Mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)
@@ -105,7 +105,7 @@ public class AuthController : BaseController
             return Unauthorized();
         }
 
-        var loginQuery = new LoginByRefreshTokenQuery(refreshToken);
+        var loginQuery = new LoginByRefreshTokenCommand(refreshToken);
         var result = await Mediator.Send(loginQuery, cancellationToken);
 
         if (result.IsFailure)

@@ -49,8 +49,11 @@ public class User : AggregateRoot<Guid>
         FullName = fullName?.Trim();
         var oldAvatarPath = AvatarPath;
         AvatarPath = avatarPath;
-        AddDomainEvent(new UserProfileUpdatedEvent(
-            Id, fullName: FullName ?? "", newAvatarPath: AvatarPath, oldAvatarPath: oldAvatarPath));
+        
+        if (!string.IsNullOrEmpty(oldAvatarPath) && oldAvatarPath != avatarPath)
+        {
+            AddDomainEvent(new UserAvatarChangedEvent(Id, newAvatarPath: AvatarPath, oldAvatarPath: oldAvatarPath));
+        }
     }
 
     public void ChangePassword(PasswordHash newPasswordHash)
@@ -106,11 +109,13 @@ public class User : AggregateRoot<Guid>
     public Playlist? RemovePlaylist(Guid playlistId)
     {
         var playlist = _playlists.FirstOrDefault(p => p.Id == playlistId);
+        
         if (playlist != null)
         {
             _playlists.Remove(playlist);
-            AddDomainEvent(new PlaylistDeletedEvent(playlistId, Id, playlist.ImagePath));
+            AddDomainEvent(new PlaylistDeletedEvent(playlistId, playlist.ImagePath));
         }
+        
         return playlist;
     }
 }

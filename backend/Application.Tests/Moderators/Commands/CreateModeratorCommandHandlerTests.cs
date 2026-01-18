@@ -30,7 +30,7 @@ public class CreateModeratorCommandHandlerTests : TestBase
         var moderator = await Context.Moderators.FirstOrDefaultAsync(m => m.Email == "moderator@example.com");
         
         moderator.Should().NotBeNull();
-        moderator!.IsActive.Should().BeTrue();
+        moderator.IsActive.Should().BeTrue();
         moderator.Permissions.CanManageModerators.Should().BeFalse();
         
         PasswordHasherMock.Verify(x => x.Generate("password123"), Times.Once);
@@ -55,7 +55,7 @@ public class CreateModeratorCommandHandlerTests : TestBase
         var moderator = await Context.Moderators.FirstOrDefaultAsync(m => m.Email == "admin@example.com");
         
         moderator.Should().NotBeNull();
-        moderator!.IsActive.Should().BeTrue();
+        moderator.IsActive.Should().BeTrue();
         moderator.Permissions.CanManageModerators.Should().BeTrue();
     }
 

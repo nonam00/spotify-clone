@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace Application.Users.Queries.LoginByRefreshToken;
+namespace Application.Users.Commands.LoginByRefreshToken;
 
-public class LoginByRefreshTokenQueryValidator : AbstractValidator<LoginByRefreshTokenQuery>
+public class LoginByRefreshTokenCommandValidator : AbstractValidator<LoginByRefreshTokenCommand>
 {
-    public LoginByRefreshTokenQueryValidator()
+    public LoginByRefreshTokenCommandValidator()
     {
         RuleFor(query => query.RefreshToken)
             .NotEmpty()
