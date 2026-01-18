@@ -33,8 +33,8 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
             UserId: user.Id,
             PlaylistId: playlist.Id,
             "New Title",
-            "New Description", 
-            "new_image.jpg");
+            "New Description",
+            "");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -44,9 +44,9 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
         
         var updatedPlaylist = await Context.Playlists.FirstOrDefaultAsync(p => p.Id == playlist.Id);
         updatedPlaylist.Should().NotBeNull();
-        updatedPlaylist!.Title.Should().Be("New Title");
+        updatedPlaylist.Title.Should().Be("New Title");
         updatedPlaylist.Description.Should().Be("New Description");
-        updatedPlaylist.ImagePath.Value.Should().Be("new_image.jpg");
+        updatedPlaylist.ImagePath.Value.Should().Be("");
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
             playlist.Id,
             "New Title",
             "",
-            "new_image.jpg");
+            "");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -149,9 +149,9 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
         
         var updatedPlaylist = await Context.Playlists.FirstOrDefaultAsync(p => p.Id == playlist.Id);
         updatedPlaylist.Should().NotBeNull();
-        updatedPlaylist!.Title.Should().Be("New Title");
+        updatedPlaylist.Title.Should().Be("New Title");
         updatedPlaylist.Description.Should().Be(null);
-        updatedPlaylist.ImagePath.Value.Should().Be("new_image.jpg");
+        updatedPlaylist.ImagePath.Value.Should().Be("");
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
         
         var updatedPlaylist = await Context.Playlists.FirstOrDefaultAsync(p => p.Id == playlist.Id);
         updatedPlaylist.Should().NotBeNull();
-        updatedPlaylist!.Title.Should().Be("New Title");
+        updatedPlaylist.Title.Should().Be("New Title");
         updatedPlaylist.Description.Should().Be(null);
         updatedPlaylist.ImagePath.Value.Should().Be("old_image.jpg");
     }
@@ -235,8 +235,101 @@ public class UpdatePlaylistCommandHandlerTests : TestBase
         
         var updatedPlaylist = await Context.Playlists.FirstOrDefaultAsync(p => p.Id == playlist.Id);
         updatedPlaylist.Should().NotBeNull();
-        updatedPlaylist!.Title.Should().Be("New Title");
+        updatedPlaylist.Title.Should().Be("New Title");
         updatedPlaylist.Description.Should().Be(null);
         updatedPlaylist.ImagePath.Value.Should().Be("old_image.jpg");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = Playlist.Create(user.Id, "Test Playlist");
+        
+        await Context.Users.AddAsync(user);
+        await Context.Playlists.AddAsync(playlist);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdatePlaylistCommand(
+            Guid.Empty,
+            playlist.Id,
+            "New Title",
+            null,
+            null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPlaylistIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdatePlaylistCommand(
+            user.Id,
+            Guid.Empty,
+            "New Title",
+            null,
+            null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("PlaylistId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenTitleIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = Playlist.Create(user.Id, "Test Playlist");
+        
+        await Context.Users.AddAsync(user);
+        await Context.Playlists.AddAsync(playlist);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdatePlaylistCommand(
+            user.Id,
+            playlist.Id,
+            "",
+            null,
+            null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Title");
     }
 }

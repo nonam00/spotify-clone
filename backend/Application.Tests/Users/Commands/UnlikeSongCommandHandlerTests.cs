@@ -104,4 +104,53 @@ public class UnlikeSongCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserLikeErrors.NotLiked);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var song = Song.Create(
+            "Test Song",
+            new FilePath("song.mp3"),
+            new FilePath("image.jpg"),
+            "Test Author");
+        song.Publish();
+        
+        await Context.Songs.AddAsync(song);
+        await Context.SaveChangesAsync();
+        
+        var command = new UnlikeSongCommand(Guid.Empty, song.Id);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenSongIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new UnlikeSongCommand(user.Id, Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("SongId");
+    }
 }

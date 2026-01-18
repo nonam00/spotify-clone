@@ -47,4 +47,19 @@ public class GetUserInfoQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserErrors.NotFound);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var query = new GetUserInfoQuery(Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
 }

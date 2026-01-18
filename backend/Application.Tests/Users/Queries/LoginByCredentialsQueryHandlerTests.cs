@@ -107,4 +107,81 @@ public class LoginByCredentialsQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserErrors.InvalidCredentials);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailIsEmpty()
+    {
+        // Arrange
+        var query = new LoginByCredentialsQuery("", "password");
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailIsInvalid()
+    {
+        // Arrange
+        var query = new LoginByCredentialsQuery("invalid-email", "password");
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailExceedsMaxLength()
+    {
+        // Arrange
+        var longEmail = new string('a', 250) + "@example.com";
+        var query = new LoginByCredentialsQuery(longEmail, "password");
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPasswordIsEmpty()
+    {
+        // Arrange
+        var query = new LoginByCredentialsQuery("test@example.com", "");
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Password");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPasswordExceedsMaxLength()
+    {
+        // Arrange
+        var longPassword = new string('a', 101);
+        var query = new LoginByCredentialsQuery("test@example.com", longPassword);
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Password");
+    }
 }

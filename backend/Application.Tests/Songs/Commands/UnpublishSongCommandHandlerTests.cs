@@ -36,7 +36,7 @@ public class UnpublishSongCommandHandlerTests : TestBase
         
         var unpublishedSong = await Context.Songs.FirstOrDefaultAsync(s => s.Id == song.Id);
         unpublishedSong.Should().NotBeNull();
-        unpublishedSong!.IsPublished.Should().BeFalse();
+        unpublishedSong.IsPublished.Should().BeFalse();
     }
 
     [Fact]
@@ -51,6 +51,21 @@ public class UnpublishSongCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(SongErrors.NotFound);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenIdIsEmpty()
+    {
+        // Arrange
+        var command = new UnpublishSongCommand(Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Id");
     }
     
     // TODO: unpublished -> unpublish 

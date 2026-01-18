@@ -45,7 +45,7 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
         var updatedModerator = await Context.Moderators.FirstOrDefaultAsync(m => m.Id == moderator.Id);
         
         updatedModerator.Should().NotBeNull();
-        updatedModerator!.Permissions.CanManageUsers.Should().BeTrue();
+        updatedModerator.Permissions.CanManageUsers.Should().BeTrue();
         updatedModerator.Permissions.CanManageContent.Should().BeTrue();
         updatedModerator.Permissions.CanViewReports.Should().BeFalse();
         updatedModerator.Permissions.CanManageModerators.Should().BeFalse();

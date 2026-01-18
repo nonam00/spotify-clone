@@ -45,7 +45,7 @@ public class LoginByRefreshTokenQueryHandlerTest : TestBase
             .SingleOrDefaultAsync(u => u.Id == user.Id);
         
         userWithTokens.Should().NotBeNull();
-        userWithTokens!.RefreshTokens.Count.Should().Be(1);
+        userWithTokens.RefreshTokens.Count.Should().Be(1);
         userWithTokens.RefreshTokens.First().Should().NotBe(refreshTokenValue);
     }
 

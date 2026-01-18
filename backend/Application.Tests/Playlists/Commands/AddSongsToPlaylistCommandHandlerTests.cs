@@ -40,6 +40,8 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         await Context.Songs.AddRangeAsync(song1, song2);
         await Context.SaveChangesAsync();
         
+        Context.ChangeTracker.Clear();
+        
         var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, song2.Id]);
 
         // Act

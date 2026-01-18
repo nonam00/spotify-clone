@@ -37,7 +37,7 @@ public class UpdateUserCommandHandlerTests : TestBase
         var updatedUser = await Context.Users.SingleOrDefaultAsync(u => u.Id == user.Id);
         
         updatedUser.Should().NotBeNull();
-        updatedUser!.FullName.Should().Be("New Name");
+        updatedUser.FullName.Should().Be("New Name");
         updatedUser.AvatarPath.Value.Should().Be("new_avatar.jpg");
     }
 
@@ -86,7 +86,72 @@ public class UpdateUserCommandHandlerTests : TestBase
             .SingleOrDefaultAsync(u => u.Id == user.Id);
         
         updatedUser.Should().NotBeNull();
-        updatedUser!.FullName.Should().Be("New Name");
+        updatedUser.FullName.Should().Be("New Name");
         updatedUser.AvatarPath.Value.Should().Be(originalAvatarPath);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var command = new UpdateUserCommand(Guid.Empty, "New Name", "avatar.jpg");
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenFullNameExceedsMaxLength()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var longName = new string('a', 101);
+        var command = new UpdateUserCommand(user.Id, longName, null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("FullName");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenAvatarPathExceedsMaxLength()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var longPath = new string('a', 501);
+        var command = new UpdateUserCommand(user.Id, null, longPath);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("AvatarPath");
     }
 }

@@ -73,4 +73,54 @@ public class DeletePlaylistCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserPlaylistErrors.Ownership);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPlaylistIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new DeletePlaylistCommand(Guid.Empty, user.Id);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("PlaylistId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = user.CreatePlaylist();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new DeletePlaylistCommand(playlist.Id, Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
 }

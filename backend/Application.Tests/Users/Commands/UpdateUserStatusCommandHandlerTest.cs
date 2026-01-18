@@ -38,7 +38,7 @@ public class UpdateUserStatusCommandHandlerTest : TestBase
             .SingleOrDefaultAsync(u => u.Id == user.Id);
         
         updatedUser.Should().NotBeNull();
-        updatedUser!.IsActive.Should().BeTrue();
+        updatedUser.IsActive.Should().BeTrue();
     }
     
     [Fact]
@@ -70,7 +70,7 @@ public class UpdateUserStatusCommandHandlerTest : TestBase
             .SingleOrDefaultAsync(u => u.Id == user.Id);
         
         updatedUser.Should().NotBeNull();
-        updatedUser!.IsActive.Should().BeFalse();
+        updatedUser.IsActive.Should().BeFalse();
     }
     
     [Fact]

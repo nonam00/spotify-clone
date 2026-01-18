@@ -33,6 +33,8 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
+        Context.ChangeTracker.Clear();
+        
         var command = new AddSongToPlaylistCommand(user.Id, playlist.Id, song.Id);
 
         // Act
@@ -151,5 +153,98 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(PlaylistErrors.SongAlreadyInPlaylist);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = Playlist.Create(user.Id, "My Playlist");
+        var song = Song.Create(
+            "Test Song",
+            new FilePath("song.mp3"),
+            new FilePath("image.jpg"),
+            "Test Author");
+        song.Publish();
+        
+        await Context.Users.AddAsync(user);
+        await Context.Playlists.AddAsync(playlist);
+        await Context.Songs.AddAsync(song);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongToPlaylistCommand(Guid.Empty, playlist.Id, song.Id);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("UserId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPlaylistIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var song = Song.Create(
+            "Test Song",
+            new FilePath("song.mp3"),
+            new FilePath("image.jpg"),
+            "Test Author");
+        song.Publish();
+        
+        await Context.Users.AddAsync(user);
+        await Context.Songs.AddAsync(song);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongToPlaylistCommand(user.Id, Guid.Empty, song.Id);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("PlaylistId");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenSongIdIsEmpty()
+    {
+        // Arrange
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        var playlist = Playlist.Create(user.Id, "My Playlist");
+        
+        await Context.Users.AddAsync(user);
+        await Context.Playlists.AddAsync(playlist);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongToPlaylistCommand(user.Id, playlist.Id, Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("SongId");
     }
 }

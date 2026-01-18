@@ -38,6 +38,8 @@ public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
         await Context.Songs.AddRangeAsync(song1, song2, song3);
         await Context.SaveChangesAsync();
         
+        Context.ChangeTracker.Clear();
+        
         // Reorder: song3, song1, song2
         var command = new ReorderSongsInPlaylistCommand(playlist.Id, [song3.Id, song1.Id, song2.Id]);
 

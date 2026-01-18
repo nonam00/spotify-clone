@@ -38,7 +38,7 @@ public class UpdateModeratorStatusCommandHandlerTests : TestBase
         var updatedModerator = await Context.Moderators.FirstOrDefaultAsync(m => m.Id == moderator.Id);
 
         updatedModerator.Should().NotBeNull();
-        updatedModerator!.IsActive.Should().BeTrue();
+        updatedModerator.IsActive.Should().BeTrue();
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class UpdateModeratorStatusCommandHandlerTests : TestBase
         var updatedModerator = await Context.Moderators.FirstOrDefaultAsync(m => m.Id == moderator.Id);
         
         updatedModerator.Should().NotBeNull();
-        updatedModerator!.IsActive.Should().BeFalse();
+        updatedModerator.IsActive.Should().BeFalse();
     }
 
     [Fact]
