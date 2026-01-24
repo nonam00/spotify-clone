@@ -27,7 +27,7 @@ export default async function Home() {
               <PlaylistHomeItem
                 key = {playlist.id}
                 name={playlist.title}
-                href={`/${playlist.id}`}
+                href={`/playlist/${playlist.id}`}
                 image={playlist.imagePath
                   ? `${CLIENT_FILES_URL}/download-url?type=image&file_id=${playlist.imagePath}`
                   : "/images/playlist.webp"}

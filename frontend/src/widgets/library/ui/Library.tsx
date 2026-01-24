@@ -10,19 +10,20 @@ import { MediaItem } from "@/shared/ui";
 import type { Playlist } from "@/entities/playlist";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { useCreateModalStore } from "../model";
+import {useShallow} from "zustand/shallow";
 
 const Library = memo(function Library({
   playlists,
 }: {
   playlists: Playlist[];
 }) {
-  const openAuthModal = useAuthModalStore((s) => s.onOpen);
-  const openCreateModal = useCreateModalStore((s) => s.onOpen);
-  const { isAuthenticated } = useAuthStore();
+  const openAuthModal = useAuthModalStore(useShallow((s) => s.onOpen));
+  const openCreateModal = useCreateModalStore(useShallow((s) => s.onOpen));
+  const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
+
   const router = useRouter();
 
-  const onCreateClick = () =>
-    !isAuthenticated ? openAuthModal() : openCreateModal();
+  const onCreateClick = () => !isAuthenticated ? openAuthModal() : openCreateModal();
 
   const tryRedirect = (url: string) => {
     if (typeof window !== "undefined" && window.location.pathname !== url) {

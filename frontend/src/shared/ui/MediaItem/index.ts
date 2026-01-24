@@ -1,2 +1,1 @@
-export { default as MediaItem } from "./MediaItem";
-
+export { MediaItem } from "./MediaItem";

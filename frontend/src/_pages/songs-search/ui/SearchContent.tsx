@@ -1,7 +1,7 @@
 "use client";
 
 import { type Song, SongListItem } from "@/entities/song";
-import { useOnPlay } from "@/features/player";
+import { useOnPlay } from "@/widgets/player";
 
 const SearchContent = ({ songs }: { songs: Song[] }) => {
   const onPlay = useOnPlay(songs);

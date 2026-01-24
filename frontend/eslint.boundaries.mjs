@@ -44,7 +44,7 @@ export const eslintBoundariesConfig = {
   },
   rules: {
     "boundaries/element-types": [
-      1,
+      2,
       {
         default: "allow",
         rules: [

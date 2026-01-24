@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useMemo } from "react";
+import { useShallow } from "zustand/shallow";
 import { IconType } from "react-icons";
 import { BiSearch } from "react-icons/bi";
 import { HiHome } from "react-icons/hi";
@@ -10,7 +11,7 @@ import { twMerge } from "tailwind-merge";
 
 import { Box } from "@/shared/ui";
 import type { Playlist } from "@/entities/playlist";
-import { usePlayerStore } from "@/features/player";
+import { usePlayerStore } from "@/widgets/player";
 import { Library } from "@/widgets/library";
 
 const Sidebar = ({
@@ -21,7 +22,7 @@ const Sidebar = ({
   playlists: Playlist[];
 }) => {
   const pathName = usePathname();
-  const playerActiveSongId = usePlayerStore((s) => s.activeId);
+  const playerActiveSongId = usePlayerStore(useShallow((s) => s.activeId));
 
   const routes = useMemo(
     () => [

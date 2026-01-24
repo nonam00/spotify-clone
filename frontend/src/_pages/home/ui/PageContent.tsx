@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import {type Song, SongGridItem } from "@/entities/song";
-import { useOnPlay } from "@/features/player";
+import { useOnPlay } from "@/widgets/player";
 
 const PageContent = memo(function PageContent({ songs }: { songs: Song[] }) {
   const onPlay = useOnPlay(songs);

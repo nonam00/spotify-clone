@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Form from "next/form";
-import { useLayoutEffect, useTransition } from "react";
+import {useCallback, useLayoutEffect, useTransition} from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -18,10 +18,16 @@ import { useAuthStore } from "@/features/auth";
 import { useUpdatePlaylistModalStore } from "../model";
 
 const UpdatePlaylistModal = () => {
-  const [playlist, isOpen, onClose, setPlaylist] = useUpdatePlaylistModalStore(
-    useShallow((s) => [s.playlist, s.isOpen, s.onClose, s.setPlaylist])
+  const { playlist, isOpen, onClose, setPlaylist } = useUpdatePlaylistModalStore(
+    useShallow((s) => ({
+      playlist: s.playlist,
+      isOpen: s.isOpen,
+      onClose: s.onClose,
+      setPlaylist: s.setPlaylist,
+    }))
   );
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
+
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -32,16 +38,16 @@ const UpdatePlaylistModal = () => {
     }
   }, [isAuthenticated, router, onClose, playlist, isOpen]);
 
+  const onChange = useCallback((open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  }, [onClose]);
+
   if (!playlist) {
     onClose();
     return null;
   }
-
-  const onChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-    }
-  };
 
   const onSubmit = async (formData: FormData) => {
     startTransition(async () => {

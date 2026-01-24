@@ -8,12 +8,12 @@ type MediaItemProps = {
   selected?: boolean;
 }
 
-const MediaItem = ({
+export function MediaItem ({
   title,
   imagePath,
   author,
   selected,
-}: MediaItemProps) => {
+}: MediaItemProps) {
   return (
     <div
       className={`
@@ -41,7 +41,4 @@ const MediaItem = ({
       </div>
     </div>
   );
-};
-
-export default MediaItem;
-
+}

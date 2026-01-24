@@ -43,6 +43,7 @@ const AddSongsToPlaylistContent = ({
     startTransition(async () => {
       const ok = await addSongsToPlaylist(playlistId, toAddList);
       if (ok) {
+        setToAddList([]);
         router.refresh();
         toast.success("Songs successfully added to the playlist.");
       } else {

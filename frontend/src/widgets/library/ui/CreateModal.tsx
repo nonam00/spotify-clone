@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { memo, useCallback } from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -8,34 +9,38 @@ import { Button, Modal } from "@/shared/ui";
 import { createPlaylist } from "@/entities/playlist";
 import { useCreateModalStore, useUploadModalStore } from "../model";
 
-const CreateModal = () => {
+const CreateModal = memo(function CreateModal() {
   const router = useRouter();
-  const [onClose, isOpen] = useCreateModalStore(
-    useShallow((s) => [s.onClose, s.isOpen])
-  );
-  const openUploadModal = useUploadModalStore((s) => s.onOpen);
 
-  const onChange = (open: boolean) => {
+  const { onClose, isOpen } = useCreateModalStore(
+    useShallow((s) => ({
+      onClose: s.onClose,
+      isOpen: s.isOpen,
+    })),
+  );
+
+  const openUploadModal = useUploadModalStore(useShallow((s) => s.onOpen));
+
+  const onChange = useCallback((open: boolean) => {
     if (!open) {
       onClose();
     }
-  };
+  }, [onClose]);
 
-  const onPlaylistClick = async () => {
+  const onPlaylistClick = useCallback(async () => {
     onClose();
-
     const success = await createPlaylist();
     if (success) {
       router.refresh();
     } else {
       toast.error("Failed on creating playlist");
     }
-  };
+  }, [onClose, router]);
 
-  const onUploadClick = () => {
+  const onUploadClick = useCallback(() => {
     onClose();
     return openUploadModal();
-  };
+  }, [onClose, openUploadModal]);
 
   return (
     <Modal
@@ -60,7 +65,6 @@ const CreateModal = () => {
       </div>
     </Modal>
   );
-};
+});
 
 export default CreateModal;
-

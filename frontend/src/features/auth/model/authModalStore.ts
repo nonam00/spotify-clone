@@ -1,11 +1,13 @@
 import { create } from "zustand";
 
+export type AuthView = "login" | "register" | "forgot-password";
+
 type AuthModalStore = {
   isOpen: boolean;
-  currentView: 'login' | 'register' | 'forgot-password';
+  currentView: AuthView;
   onOpen: () => void;
   onClose: () => void;
-  setView: (view: 'login' | 'register' | 'forgot-password') => void;
+  setView: (view: AuthView) => void;
 }
 
 export const useAuthModalStore = create<AuthModalStore>((set) => ({
@@ -13,5 +15,5 @@ export const useAuthModalStore = create<AuthModalStore>((set) => ({
   currentView: 'login',
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false, currentView: 'login' }),
-  setView: (view) => set({ currentView: view }),
+  setView: (view: AuthView) => set({ currentView: view }),
 }));

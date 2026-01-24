@@ -1,9 +1,6 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { FaPlay } from "react-icons/fa";
-import { useCallback } from "react";
+import Link from "next/link";
 
 const PlaylistHomeItem = ({
   name,
@@ -14,15 +11,10 @@ const PlaylistHomeItem = ({
   href: string;
   image: string;
 }) => {
-  const router = useRouter();
-
-  const onClick = useCallback(() => {
-    router.push(`/playlist${href}`);
-  }, [href, router]);
-
   return (
-    <button
-      onClick={onClick}
+    <Link
+      href={href}
+      prefetch={true}
       className="
         relative group flex items-center pr-4 rounded-md overflow-hidden gap-x-4
         bg-neutral-100/10 hover:bg-neutral-100/20 transition-colors
@@ -45,7 +37,7 @@ const PlaylistHomeItem = ({
       ">
         <FaPlay className="text-black" />
       </div>
-    </button>
+    </Link>
   );
 };
 

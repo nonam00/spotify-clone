@@ -21,7 +21,7 @@ import {
 
 import { SortableSongListItem, type Song } from "@/entities/song";
 import { reorderPlaylistSongs } from "@/entities/playlist";
-import { useOnPlay } from "@/features/player";
+import { useOnPlay } from "@/widgets/player";
 import { PlaylistSongActionsMenu, PlaylistActionsMenu } from "@/widgets/playlist";
 
 const PlaylistContent = ({

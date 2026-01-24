@@ -2,6 +2,7 @@
 
 import Form from "next/form";
 import { useState, useTransition } from "react";
+import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
 import { Button, Input } from "@/shared/ui";
@@ -14,7 +15,15 @@ type RegisterFormProps = {
 
 const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
   const [isPending, startTransition] = useTransition();
-  const { register, isLoading, error } = useAuthStore();
+
+  const { register, isLoading, error } = useAuthStore(
+    useShallow((s) => ({
+      register: s.register,
+      isLoading: s.isLoading,
+      error: s.error,
+    }))
+  );
+
   const [localError, setLocalError] = useState<string | null>(null);
 
   const validatePassword = (password: string) => {

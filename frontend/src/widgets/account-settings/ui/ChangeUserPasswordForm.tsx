@@ -8,9 +8,11 @@ import {changePassword} from "@/entities/user";
 
 const ChangeUserPasswordForm = () => {
   const [isPending, startTransition] = useTransition();
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [errors, setErrors] = useState<{
     currentPassword?: string;
     newPassword?: string;

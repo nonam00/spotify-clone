@@ -1,9 +1,8 @@
-export { default as Box } from "./Box/Box";
-export { default as Button } from "./Button/Button";
-export { default as Input } from "./Input/Input";
-export { default as Modal } from "./Modal/Modal";
-export { default as Slider } from "./Slider/Slider";
+export { Box } from "./Box";
+export { Button } from "./Button";
+export { Input } from "./Input";
+export { Modal } from "./Modal";
+export { Slider } from "./Slider";
 export { MediaItem } from "./MediaItem";
 export { PlayButton } from "./PlayButton";
-export { OptionsMenu } from "./OptionsMenu";
-export type { MenuOption } from "./OptionsMenu";
+export { type MenuOption, OptionsMenu } from "./OptionsMenu";

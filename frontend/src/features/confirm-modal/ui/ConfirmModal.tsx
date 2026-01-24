@@ -1,20 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useCallback, useTransition } from "react";
+import { useShallow } from "zustand/shallow";
+
 import { Button, Modal } from "@/shared/ui";
 import { useConfirmModalStore } from "../model";
 
 const ConfirmModal = () => {
   const router = useRouter();
-  const { onClose, isOpen, action, description } = useConfirmModalStore();
+
+  const { onClose, isOpen, action, description } = useConfirmModalStore(
+    useShallow((s) => ({
+      onClose: s.onClose,
+      isOpen: s.isOpen,
+      action: s.action,
+      description: s.description,
+    }))
+  );
+
   const [isPending, startTransition] = useTransition();
 
-  const onChange = (open: boolean) => {
+  const onChange = useCallback((open: boolean) => {
     if (!open) {
       onClose();
     }
-  };
+  }, [onClose]);
 
   const onConfirmClick = async () => {
     startTransition(async () => {

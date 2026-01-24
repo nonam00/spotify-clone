@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import Form from "next/form";
+import { useState, useTransition } from "react";
+import { useShallow } from "zustand/shallow";
 import { FiCheckCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 
@@ -15,7 +16,15 @@ type ForgotPasswordFormProps = {
 
 const ForgotPasswordForm = ({ onSwitchToLogin }: ForgotPasswordFormProps) => {
   const [isPending, startTransition] = useTransition();
-  const { forgotPassword, isLoading, error } = useAuthStore();
+
+  const { forgotPassword, isLoading, error } = useAuthStore(
+    useShallow((s) => ({
+      forgotPassword: s.forgotPassword,
+      isLoading: s.isLoading,
+      error: s.error,
+    }))
+  );
+
   const [localError, setLocalError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
 

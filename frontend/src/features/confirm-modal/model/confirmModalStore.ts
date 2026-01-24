@@ -15,8 +15,7 @@ export const useConfirmModalStore = create<ConfirmModalStore>((set) => ({
   description: "",
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
-  onClose: () =>
-    set({ isOpen: false, action: async () => {}, description: "" }),
+  onClose: () => set({ isOpen: false, action: async () => {}, description: "" }),
   setAction: (action) => set({ action }),
   setDescription: (description) => set({ description }),
 }));
