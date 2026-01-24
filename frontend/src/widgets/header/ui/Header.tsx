@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import {useShallow} from "zustand/shallow";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
 import { HiHome, HiSearch } from "react-icons/hi";
@@ -11,7 +12,7 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { Button } from "@/shared/ui";
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
-import {usePlayerStore} from "@/features/player";
+import {usePlayerStore} from "@/widgets/player";
 
 const Header = ({
   children,
@@ -21,8 +22,16 @@ const Header = ({
   className?: string;
 }>) => {
   const router = useRouter();
-  const openAuthModal = useAuthModalStore((s) => s.onOpen);
-  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const openAuthModal = useAuthModalStore(useShallow((s) => s.onOpen));
+
+  const { isAuthenticated, user, logout } = useAuthStore(
+    useShallow((s) => ({
+      isAuthenticated: s.isAuthenticated,
+      user: s.user,
+      logout: s.logout,
+    })),
+  );
 
   const handleLogout = async () => {
     try {

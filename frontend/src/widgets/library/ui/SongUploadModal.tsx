@@ -19,12 +19,17 @@ import { useAuthStore } from "@/features/auth";
 import { useUploadModalStore } from "../model";
 
 const SongUploadModal = () => {
-  const [isPending, startTransition] = useTransition();
-  const [onClose, isOpen] = useUploadModalStore(
-    useShallow((s) => [s.onClose, s.isOpen])
-  );
-  const { isAuthenticated } = useAuthStore();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const { onClose, isOpen } = useUploadModalStore(
+    useShallow((s) => ({
+      onClose: s.onClose,
+      isOpen: s.isOpen,
+    }))
+  );
+
+  const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
 
   useLayoutEffect(() => {
     if (isOpen && !isAuthenticated) {

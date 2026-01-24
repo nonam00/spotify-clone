@@ -9,7 +9,7 @@ type ModalProps = {
   children: React.ReactNode;
 };
 
-const Modal = ({ isOpen, onChange, title, description, children }: ModalProps) => {
+export function Modal({isOpen, onChange, title, description, children }: ModalProps) {
   return (
     <Dialog.Root open={isOpen} defaultOpen={isOpen} onOpenChange={onChange}>
       <Dialog.Portal>
@@ -61,7 +61,4 @@ const Modal = ({ isOpen, onChange, title, description, children }: ModalProps) =
       </Dialog.Portal>
     </Dialog.Root>
   );
-};
-
-export default Modal;
-
+}

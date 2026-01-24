@@ -2,8 +2,8 @@
 
 import { memo } from "react";
 import {type Song, SongListItem } from "@/entities/song";
-import { useOnPlay } from "@/features/player";
 import {LikeButton} from "@/features/like-button";
+import { useOnPlay } from "@/widgets/player";
 
 const LikedContent = memo(function LikedContent({ songs }: { songs: Song[] }) {
   const onPlay = useOnPlay(songs);

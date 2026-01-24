@@ -1,4 +1,6 @@
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useShallow } from "zustand/react/shallow";
 import { twMerge } from "tailwind-merge";
 
 import { useAuthStore } from "@/features/auth";
@@ -13,12 +15,18 @@ interface HeaderProps {
 
 const Header = ({ title, description, children, className }: Readonly<HeaderProps>) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
 
-  const handleLogout = async () => {
+  const { user, logout } = useAuthStore(
+    useShallow((s) => ({
+      user: s.user,
+      logout: s.logout,
+    }))
+  );
+
+  const handleLogout = useCallback(async () => {
     await logout();
     navigate("/login");
-  };
+  }, [logout, navigate]);
 
   return (
     <div

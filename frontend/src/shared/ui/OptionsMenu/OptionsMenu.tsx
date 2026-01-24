@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { twMerge } from "tailwind-merge";
 
@@ -39,28 +39,38 @@ const OptionsMenu = ({
     if (!isOpen) return;
 
     const handleOutsideClick = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscapeKey);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscapeKey);
+    }
   }, [isOpen]);
 
-  const toggleMenu = () => {
+  const toggleMenu = useCallback(() => {
     if (disabled) return;
     setIsOpen((prev) => !prev);
-  };
+  }, [disabled]);
 
   const handleSelect = async (option: MenuOption) => {
     if (option.disabled) return;
     await option.onSelect();
     setIsOpen(false);
   };
+
+  if (options.length === 0) return null;
 
   return (
     <div
@@ -124,4 +134,3 @@ const OptionsMenu = ({
 };
 
 export default OptionsMenu;
-

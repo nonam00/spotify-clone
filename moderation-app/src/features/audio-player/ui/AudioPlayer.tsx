@@ -6,6 +6,7 @@ import { CLIENT_FILES_URL } from "@/shared/config/api";
 import type { Song } from "@/entities/song";
 import { useSound } from "../lib";
 import { useAudioStore } from "../model";
+import {useShallow} from "zustand/react/shallow";
 
 // Helper function to format time
 function formatTime(timeInSeconds: number): string {
@@ -30,7 +31,13 @@ function AudioPlayer({ song }: { song: Song}) {
     togglePlay,
     isSeeking,
   } = useSound(songUrl);
-  const { activeSongId, setActiveSongId } = useAudioStore();
+
+  const { activeSongId, setActiveSongId } = useAudioStore(
+    useShallow((s) => ({
+      activeSongId: s.activeSongId,
+      setActiveSongId: s.setActiveSongId,
+    }))
+  );
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragProgress, setDragProgress] = useState(0);

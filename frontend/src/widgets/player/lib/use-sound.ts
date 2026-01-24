@@ -1,7 +1,7 @@
-import {RefObject, useEffect, useLayoutEffect, useRef, useState, useTransition} from "react";
-import {useShallow} from "zustand/shallow";
-import {type Song, getSongById } from "@/entities/song";
-import {usePlayerStore} from "@/features/player";
+"use client";
+
+import { Song}  from "@/entities/song";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 type UseSoundReturnType = {
   audioRef: RefObject<HTMLAudioElement | null>;
@@ -154,6 +154,28 @@ export function useSound(
       }
     };
 
+    const togglePlay = () => {
+      if (isMountedRef.current && isCurrentAudioValid) {
+        if (!audio.paused) {
+          audio.pause();
+        } else {
+          audio.play().catch((error) => {
+            if (isMountedRef.current && isCurrentAudioValid) {
+              console.error("Media API play error:", error);
+              setIsPlaying(false);
+            }
+          });
+        }
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        togglePlay();
+      }
+    }
+
     audio.src = songUrl;
     audio.volume = volume;
 
@@ -173,6 +195,8 @@ export function useSound(
     audio.addEventListener("seeked", handleSeekingEnd);
 
     audio.addEventListener('error', handleError);
+
+    document.addEventListener('keydown', handleKeyDown);
 
     // Configuration of media player widget in user device
     if ("mediaSession" in navigator) {
@@ -218,6 +242,8 @@ export function useSound(
       if (audio) {
         audio.pause();
 
+        document.removeEventListener('keydown', handleKeyDown);
+
         audio.removeEventListener("timeupdate", updateTime);
         audio.removeEventListener("loadedmetadata", updateDuration);
         audio.removeEventListener("ended", handleEnded);
@@ -257,57 +283,4 @@ export function useSound(
   }, [volume]);
 
   return { audioRef, isPlaying, duration, currentTime, isStalled, isSeeking };
-}
-
-// Get song by active id from track list store
-export function useGetCurrentSong(): {
-  currentSong: Song | undefined;
-  isLoading: boolean;
-} {
-  const [activeId, cache, setCachedSong, removeSongId] = usePlayerStore(
-    useShallow((s) => [
-      s.activeId,
-      s.cache,
-      s.setCachedSong,
-      s.removeId,
-    ])
-  );
-
-  const [currentSong, setCurrentSong] = useState<Song | undefined>(
-    activeId ? cache[activeId] : undefined
-  );
-  const [isLoading, startTransition] = useTransition();
-
-  // Fetch song data when activeId changes
-  useLayoutEffect(() => {
-    if (!activeId) {
-      setCurrentSong(undefined);
-      return;
-    }
-
-    // Check cache first
-    if (cache[activeId]) {
-      setCurrentSong(cache[activeId]);
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    startTransition(async () => {
-      const song = await getSongById(activeId, abortController);
-      if (!song) {
-        setCurrentSong(undefined);
-        removeSongId(activeId);
-      } else {
-        setCurrentSong(song);
-        setCachedSong(song);
-      }
-    })
-
-    return () => {
-      abortController.abort();
-    };
-  }, [activeId, cache, removeSongId, setCachedSong]);
-
-  return { currentSong, isLoading }
 }

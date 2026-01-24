@@ -1,2 +1,2 @@
 export { useAuthStore } from "./authStore";
-export { useAuthModalStore } from "./authModalStore";
+export { type AuthView, useAuthModalStore } from "./authModalStore";

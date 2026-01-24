@@ -1,4 +1,4 @@
-export const CLIENT_API_URL = "http://localhost:8080/1";
+export const CLIENT_API_URL = "http://localhost/api/1";
 export const CLIENT_FILES_URL = "http://localhost/files/api/v1";
 
 export const SERVER_API_URL = process.env.SERVER_API_URL;

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
-import useDebounce from "@/shared/lib/useDebounce";
+import useDebounce from "@/shared/lib/use-debounce";
 import { Input } from "@/shared/ui";
 import type { SearchType } from "@/entities/song";
 

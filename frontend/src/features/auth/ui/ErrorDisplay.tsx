@@ -1,5 +1,3 @@
-"use client";
-
 import {MdError} from "react-icons/md";
 
 type ErrorDisplayProps = {

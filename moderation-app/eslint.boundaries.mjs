@@ -12,7 +12,6 @@ export const eslintBoundariesConfig = {
     },
 
     "boundaries/elements": [
-
       {
         type: "app",
         pattern: "./src/app/*",
@@ -41,7 +40,7 @@ export const eslintBoundariesConfig = {
   },
   rules: {
     "boundaries/element-types": [
-      1,
+      2,
       {
         default: "allow",
         rules: [

@@ -1,16 +1,21 @@
+"use client";
+
 import { useCallback } from "react";
+import { useShallow } from "zustand/shallow";
+
 import type { Song } from "@/entities/song";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { usePlayerStore } from "../model";
 
-const useOnPlay = (songs: Song[]) => {
+export function useOnPlay(songs: Song[]) {
   const { setActiveId, setIds } = usePlayerStore();
-  const openAuthModal = useAuthModalStore((s) => s.onOpen);
+  const openAuthModal = useAuthModalStore(useShallow((s) => s.onOpen));
   const { isAuthenticated } = useAuthStore();
 
   return useCallback(
     (id: string) => {
       if (!isAuthenticated) {
+        usePlayerStore.persist.clearStorage();
         return openAuthModal();
       }
 
@@ -19,7 +24,4 @@ const useOnPlay = (songs: Song[]) => {
     },
     [openAuthModal, isAuthenticated, setActiveId, setIds, songs]
   );
-};
-
-export default useOnPlay;
-
+}

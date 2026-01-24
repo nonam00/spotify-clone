@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import React, { useRef, useState, useTransition } from "react";
+import { ChangeEvent, FormEvent, useRef, useState, useTransition } from "react";
+import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 import { IoMdCloudUpload } from "react-icons/io";
 
@@ -20,14 +21,17 @@ const ChangeUserInfoForm = ({
 }: {
   userDetails: UserDetails;
 }) => {
-  const {checkAuth} = useAuthStore();
+  const checkAuth = useAuthStore(useShallow((s) => s.checkAuth));
+
   const [isPending, startTransition] = useTransition();
+
   const [fullName, setFullName] = useState(userDetails?.fullName || "");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<{ file?: string; name?: string }>({});
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newErrors: typeof errors = errors;
     const file = e.target.files?.[0];
 
@@ -47,7 +51,7 @@ const ChangeUserInfoForm = ({
     setPreviewUrl(url);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const file = fileInputRef.current?.files?.[0];

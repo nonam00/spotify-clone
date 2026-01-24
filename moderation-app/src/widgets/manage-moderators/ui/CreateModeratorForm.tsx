@@ -1,10 +1,17 @@
 import { useState, type FormEvent } from "react";
+import {useShallow} from "zustand/react/shallow";
 
 import { Box, Button, Input } from "@/shared/ui";
 import { useModeratorsStore } from "../model";
 
 const CreateModeratorForm = () => {
-  const { createModerator, isLoading } = useModeratorsStore();
+  const { createModerator, isLoading } = useModeratorsStore(
+    useShallow((s) => ({
+      createModerator: s.createModerator,
+      isLoading: s.isLoading,
+    }))
+  );
+
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");

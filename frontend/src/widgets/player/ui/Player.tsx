@@ -10,19 +10,19 @@ import { CLIENT_FILES_URL } from "@/shared/config/api";
 import { Slider } from "@/shared/ui";
 import { SongListItem } from "@/entities/song";
 import { LikeButton } from "@/features/like-button";
-import {usePlayerStore} from "@/features/player";
+import { usePlayerStore } from "../model";
 import { useSound, useGetCurrentSong, formatTime, calculateProgress } from "../lib";
 
 const Player = () => {
-  const [activeId, ids, volume, setNextId, setPreviousId, setVolume] = usePlayerStore(
-    useShallow((s) => [
-      s.activeId,
-      s.ids,
-      s.volume,
-      s.setNextId,
-      s.setPreviousId,
-      s.setVolume,
-    ])
+  const { activeId, ids, volume, setNextId, setPreviousId, setVolume } = usePlayerStore(
+    useShallow((s) => ({
+      activeId: s.activeId,
+      ids: s.ids,
+      volume: s.volume,
+      setNextId: s.setNextId,
+      setPreviousId: s.setPreviousId,
+      setVolume: s.setVolume,
+    }))
   );
 
   const { currentSong, isLoading } = useGetCurrentSong();

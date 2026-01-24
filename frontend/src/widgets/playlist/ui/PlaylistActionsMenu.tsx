@@ -22,8 +22,13 @@ const PlaylistActionsMenu = ({
 }: PlaylistActionsMenuProps) => {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [onOpen, setAction, setDescription] = useConfirmModalStore(
-    useShallow((s) => [s.onOpen, s.setAction, s.setDescription])
+
+  const { onOpen, setAction, setDescription } = useConfirmModalStore(
+    useShallow((s) => ({
+      onOpen: s.onOpen,
+      setAction: s.setAction,
+      setDescription: s.setDescription
+    }))
   );
 
   const handleRouteToAdd = useCallback(() => {

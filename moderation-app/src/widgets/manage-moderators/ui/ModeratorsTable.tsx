@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import {useShallow} from "zustand/react/shallow";
 
 import { Box, Button } from "@/shared/ui";
 import type { ModeratorPermissions } from "@/entities/moderator";
@@ -14,9 +15,18 @@ const permissionLabels: Record<keyof ModeratorPermissions, string> = {
 };
 
 const ModeratorsTable = () => {
-  const { moderators, isLoading, error, fetchModerators, updatePermissions, updateStatus } = useModeratorsStore();
-  const { onOpen } = useConfirmModalStore();
-  const { user } = useAuthStore();
+  const { moderators, isLoading, error, fetchModerators, updatePermissions, updateStatus } = useModeratorsStore(
+    useShallow((s) => ({
+      moderators: s.moderators,
+      isLoading: s.isLoading,
+      error: s.error,
+      fetchModerators: s.fetchModerators,
+      updatePermissions: s.updatePermissions,
+      updateStatus: s.updateStatus,
+    }))
+  );
+  const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
+  const user = useAuthStore(useShallow((s) => s.user));
 
   useEffect(() => {
     fetchModerators().catch(() => undefined);
