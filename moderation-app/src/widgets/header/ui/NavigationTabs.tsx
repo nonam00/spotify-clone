@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "@/features/auth";
+import {useShallow} from "zustand/react/shallow";
 
 const navItems = [
   { to: "/", label: "Songs", permission: "canManageContent" as const },
@@ -8,8 +9,8 @@ const navItems = [
 ];
 
 const NavigationTabs = () => {
-  const { hasPermission } = useAuthStore();
-  const availableItems = navItems.filter((item) => hasPermission(item.permission));
+  const hasPermission = useAuthStore(useShallow((s) => s.hasPermission));
+  const availableItems = navItems.filter((item) =>hasPermission(item.permission));
 
   if (availableItems.length === 0) {
     return null;

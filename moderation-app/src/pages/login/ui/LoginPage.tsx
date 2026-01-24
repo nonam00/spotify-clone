@@ -2,10 +2,21 @@ import { type FormEvent, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Input } from "@/shared/ui";
 import { useAuthStore } from "@/features/auth";
+import {useShallow} from "zustand/react/shallow";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, isAuthenticated, checkAuth } = useAuthStore();
+
+  const { login, isLoading, error, isAuthenticated, checkAuth } = useAuthStore(
+    useShallow((s) => ({
+      login: s.login,
+      isLoading: s.isLoading,
+      error: s.error,
+      isAuthenticated: s.isAuthenticated,
+      checkAuth: s.checkAuth,
+    }))
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 

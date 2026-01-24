@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { AUTH_API_URL } from "@/shared/config/api";
-import {getModeratorInfo, type ModeratorInfo, type ModeratorPermissions} from "@/entities/moderator";
+import { CLIENT_API_URL } from "@/shared/config/api";
+import { getModeratorInfo, type ModeratorInfo, type ModeratorPermissions } from "@/entities/moderator";
 
-interface AuthStore {
+type AuthStore = {
   user: ModeratorInfo | null;
   isLoading: boolean;
   error: string | null;
@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       formData.append("Email", email);
       formData.append("Password", password);
 
-      const response = await fetch(`${AUTH_API_URL}/moderators/login`, {
+      const response = await fetch(`${CLIENT_API_URL}/auth/moderators/login`, {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   logout: async () => {
     try {
-      await fetch(`${AUTH_API_URL}/moderators/logout`, {
+      await fetch(`${CLIENT_API_URL}/auth/moderators/logout`, {
         method: "POST",
         credentials: "include",
       });

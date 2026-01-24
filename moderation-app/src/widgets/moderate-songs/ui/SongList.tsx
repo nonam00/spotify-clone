@@ -4,6 +4,7 @@ import { Box, Button } from "@/shared/ui";
 import { useConfirmModalStore } from "@/features/confirm-modal";
 import { useSongsStore } from "../model";
 import SongModerationItem from "./SongModerationItem";
+import {useShallow} from "zustand/react/shallow";
 
 const SongList = () => {
   const { 
@@ -17,7 +18,8 @@ const SongList = () => {
     selectAll,
     clearSelection 
   } = useSongsStore();
-  const { onOpen } = useConfirmModalStore();
+
+  const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
 
   useEffect(() => {
     fetchSongs().catch(() => undefined);

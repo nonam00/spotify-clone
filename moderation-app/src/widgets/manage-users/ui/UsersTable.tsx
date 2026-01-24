@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import { Box, Button } from "@/shared/ui";
 import type { ManagedUser } from "@/entities/user";
@@ -7,22 +8,32 @@ import { useUserSongsModalStore, useUsersStore } from "../model";
 import UserSongsModal from "./UserSongsModal";
 
 const UsersTable = () => {
-  const { users, isLoading, error, fetchUsers, updateStatus } = useUsersStore();
-  const { onOpen } = useConfirmModalStore();
-  const { open: openSongsModal } = useUserSongsModalStore();
-  const handleViewSongs = (user: ManagedUser) => {
+  const { users, isLoading, error, fetchUsers, updateStatus } = useUsersStore(
+    useShallow((s) => ({
+      users: s.users,
+      isLoading: s.isLoading,
+      error: s.error,
+      fetchUsers: s.fetchUsers,
+      updateStatus: s.updateStatus,
+    }))
+  );
+
+  const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
+  const openSongsModal = useUserSongsModalStore(useShallow((s) => s.open));
+
+  const handleViewSongs = useCallback((user: ManagedUser) => {
     if (user.uploadedSongsCount === 0) {
       return;
     }
     openSongsModal(user);
-  };
+  }, [openSongsModal]);
 
   useEffect(() => {
     fetchUsers().catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleStatusChange = (userId: string, isActive: boolean, email: string) => {
+  const handleStatusChange = useCallback((userId: string, isActive: boolean, email: string) => {
     const title = isActive ? "Activate user?" : "Suspend user?";
     const description = isActive
       ? `Allow ${email} to access their library.`
@@ -31,7 +42,7 @@ const UsersTable = () => {
     onOpen(title, description, async () => {
       await updateStatus(userId, isActive);
     });
-  };
+  }, [onOpen, updateStatus]);
 
   if (isLoading && users.length === 0) {
     return (

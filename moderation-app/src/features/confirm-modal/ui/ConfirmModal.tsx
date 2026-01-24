@@ -1,9 +1,20 @@
 import { useState } from "react";
+import {useShallow} from "zustand/react/shallow";
+
 import { Modal, Button } from "@/shared/ui";
 import { useConfirmModalStore } from "../model";
 
 const ConfirmModal = () => {
-  const { isOpen, title, description, onConfirm, onClose } = useConfirmModalStore();
+  const { isOpen, title, description, onConfirm, onClose } = useConfirmModalStore(
+    useShallow((s) => ({
+      isOpen: s.isOpen,
+      title: s.title,
+      description: s.description,
+      onConfirm: s.onConfirm,
+      onClose: s.onClose,
+    }))
+  );
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {

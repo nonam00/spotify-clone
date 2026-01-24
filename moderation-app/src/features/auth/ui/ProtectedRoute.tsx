@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { Box } from "@/shared/ui";
 import type { ModeratorPermissions } from "@/entities/moderator";
 import { useAuthStore } from "../model";
+import {useShallow} from "zustand/react/shallow";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,7 +18,14 @@ const sections = [
 ];
 
 const ProtectedRoute = ({ children, requiredPermission }: ProtectedRouteProps) => {
-  const { isLoading, isAuthenticated, checkAuth, user } = useAuthStore();
+  const { isLoading, isAuthenticated, checkAuth, user } = useAuthStore(
+    useShallow((s) => ({
+      isLoading: s.isLoading,
+      isAuthenticated: s.isAuthenticated,
+      checkAuth: s.checkAuth,
+      user: s.user,
+    }))
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {

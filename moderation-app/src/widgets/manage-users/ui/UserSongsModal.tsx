@@ -1,3 +1,6 @@
+import { useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
+
 import { Modal, Box, Button } from "@/shared/ui";
 import { SongItem } from "@/entities/song";
 import { useConfirmModalStore } from "@/features/confirm-modal";
@@ -5,16 +8,22 @@ import { AudioPlayer } from "@/features/audio-player";
 import { useUserSongsModalStore } from "../model";
 
 const UserSongsModal = () => {
-  const { isOpen, user, songs, isLoading, error, close, unpublishSong, unpublishingSongId } = useUserSongsModalStore();
-  const { onOpen } = useConfirmModalStore();
+  const { isOpen, user, songs, isLoading, error, close, unpublishSong, unpublishingSongId } = useUserSongsModalStore(
+    useShallow((s) => ({
+      isOpen: s.isOpen,
+      user: s.user,
+      songs: s.songs,
+      isLoading: s.isLoading,
+      error: s.error,
+      close: s.close,
+      unpublishSong: s.unpublishSong,
+      unpublishingSongId: s.unpublishingSongId,
+    }))
+  );
 
-  if (!isOpen || !user) {
-    return null;
-  }
+  const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
 
-  const title = user.fullName ? `${user.fullName}'s uploads` : `${user.email}'s uploads`;
-
-  const handleUnpublish = (songId: string, songTitle: string) => {
+  const handleUnpublish = useCallback((songId: string, songTitle: string) => {
     onOpen(
       "Unpublish this song?",
       `Are you sure you want to unpublish "${songTitle}"? This song will not be available to users`,
@@ -22,7 +31,13 @@ const UserSongsModal = () => {
         await unpublishSong(songId);
       }
     );
-  };
+  }, [onOpen, unpublishSong]);
+
+  if (!isOpen || !user) {
+    return null;
+  }
+
+  const title = user.fullName ? `${user.fullName}'s uploads` : `${user.email}'s uploads`;
 
   return (
     <Modal

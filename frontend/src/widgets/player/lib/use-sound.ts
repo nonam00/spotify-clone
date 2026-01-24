@@ -170,7 +170,7 @@ export function useSound(
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === ' ' || event.key === 'Space') {
+      if (event.code === 'Space') {
         event.preventDefault();
         togglePlay();
       }

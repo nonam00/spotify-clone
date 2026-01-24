@@ -12,7 +12,6 @@ export const eslintBoundariesConfig = {
     },
 
     "boundaries/elements": [
-
       {
         type: "app",
         pattern: "./src/app/*",

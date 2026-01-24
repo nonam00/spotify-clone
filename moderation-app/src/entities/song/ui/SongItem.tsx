@@ -14,7 +14,7 @@ const SongItem = ({
       cursor-pointer transition-all duration-200
       hover:bg-neutral-800/30 ${selected ? "bg-neutral-800/40" : ""}
     `}>
-      <div className="relative rounded-lg h-[56px] w-[56px] flex-shrink-0 overflow-hidden shadow-md ring-2 ring-neutral-700/30">
+      <div className="relative rounded-lg h-[56px] w-[56px] shrink-0 overflow-hidden shadow-md ring-2 ring-neutral-700/30">
         <img
           src={song.imagePath ?
             `${CLIENT_FILES_URL}/download-url?type=image&file_id=${song.imagePath}`

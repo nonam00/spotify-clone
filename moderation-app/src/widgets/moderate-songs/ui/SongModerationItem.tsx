@@ -1,5 +1,8 @@
+import { useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
+
 import { Button } from "@/shared/ui";
-import {type Song, SongItem } from "@/entities/song"
+import { type Song, SongItem } from "@/entities/song"
 import { AudioPlayer}  from "@/features/audio-player";
 import { useConfirmModalStore } from "@/features/confirm-modal";
 import { useSongsStore } from "../model";
@@ -9,11 +12,21 @@ type SongModerationItemProps = {
 }
 
 const SongModerationItem = ({ song }: SongModerationItemProps) => {
-  const { publishSong, deleteSong, selectedSongs, toggleSongSelection, isLoading } = useSongsStore();
-  const { onOpen } = useConfirmModalStore();
+  const { publishSong, deleteSong, selectedSongs, toggleSongSelection, isLoading } = useSongsStore(
+    useShallow((s) => ({
+      publishSong: s.publishSong,
+      deleteSong: s.deleteSong,
+      selectedSongs: s.selectedSongs,
+      toggleSongSelection: s.toggleSongSelection,
+      isLoading: s.isLoading,
+    }))
+  );
+
+  const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
+
   const isSelected = selectedSongs.includes(song.id);
 
-  const handlePublish = () => {
+  const handlePublish = useCallback(() => {
     onOpen(
       "Publish this song?",
       `Are you sure you want to publish song "${song.title}" by ${song.author}? After publish it will be available to all users.`,
@@ -21,9 +34,9 @@ const SongModerationItem = ({ song }: SongModerationItemProps) => {
         await publishSong(song.id);
       }
     );
-  };
+  }, [onOpen, publishSong, song]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     onOpen(
       "Delete this song?",
       `Are you sure you want to delete song "${song.title}" by ${song.author}? This action cannot be undone.`,
@@ -31,7 +44,7 @@ const SongModerationItem = ({ song }: SongModerationItemProps) => {
         await deleteSong(song.id);
       }
     );
-  };
+  }, [deleteSong, onOpen, song]);
 
   return (
     <div className="flex flex-col gap-y-4 w-full p-5 rounded-xl bg-neutral-800/50 border border-neutral-700/30 hover:border-neutral-600/50 hover:shadow-lg transition-all duration-300">
