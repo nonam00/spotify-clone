@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { FaPlay } from "react-icons/fa";
 import Link from "next/link";
+import { FaPlay } from "react-icons/fa";
 
 const PlaylistHomeItem = ({
   name,

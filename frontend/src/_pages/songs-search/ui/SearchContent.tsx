@@ -13,6 +13,7 @@ const SearchContent = ({ songs }: { songs: Song[] }) => {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col gap-y-2 w-full px-6">
       {songs.map((song) => (

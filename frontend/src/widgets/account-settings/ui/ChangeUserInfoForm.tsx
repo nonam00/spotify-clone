@@ -14,7 +14,7 @@ import {
 } from "@/shared/lib/files";
 import { Input, Button } from "@/shared/ui";
 import { type UserDetails, updateUserInfo } from "@/entities/user/";
-import {useAuthStore} from "@/features/auth";
+import { useAuthStore } from "@/features/auth";
 
 const ChangeUserInfoForm = ({
   userDetails,

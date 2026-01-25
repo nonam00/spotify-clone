@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/shared/ui";
@@ -19,15 +19,14 @@ const AddSongsToPlaylistContent = ({
   const [isPending, startTransition] = useTransition();
   const [toAddList, setToAddList] = useState<string[]>([]);
 
-  if (songs.length === 0) {
-    return (
-      <div className="flex flex-col gap-y-2 w-full px-6 text-neutral-400">
-        No songs found.
-      </div>
-    );
-  }
+  const onClearClick = useCallback(() => {
+    if (isPending) return;
+    startTransition(() => {
+      setToAddList([]);
+    });
+  }, [isPending]);
 
-  const onAddClick = (songId: string) => {
+  const onAddClick = useCallback((songId: string) => {
     if (isPending) return;
     startTransition(() => {
       if (toAddList.includes(songId)) {
@@ -36,9 +35,9 @@ const AddSongsToPlaylistContent = ({
         setToAddList([...toAddList, songId]);
       }
     });
-  };
+  }, [isPending, toAddList]);
 
-  const onSaveClick = () => {
+  const onSaveClick = useCallback(() => {
     if (isPending) return;
     startTransition(async () => {
       const ok = await addSongsToPlaylist(playlistId, toAddList);
@@ -50,14 +49,15 @@ const AddSongsToPlaylistContent = ({
         toast.error("Failed to add like-button to the playlist.");
       }
     });
-  };
+  }, [isPending, playlistId, router, toAddList]);
 
-  const onClearClick = () => {
-    if (isPending) return;
-    startTransition(() => {
-      setToAddList([]);
-    });
-  };
+  if (songs.length === 0) {
+    return (
+      <div className="flex flex-col gap-y-2 w-full px-6 text-neutral-400">
+        No songs found.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-y-2 w-full px-6">

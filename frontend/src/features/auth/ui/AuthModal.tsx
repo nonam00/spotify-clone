@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useLayoutEffect } from "react";
+import { memo, useCallback, useLayoutEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 import { Modal } from "@/shared/ui";
@@ -28,7 +28,7 @@ const authViewInfo: Record<AuthView, ViewInfo> = {
   }
 };
 
-const AuthModal = () => {
+const AuthModal = memo(function AuthModal() {
   const router = useRouter();
 
   const { isOpen, onClose, currentView, setView } = useAuthModalStore(
@@ -84,6 +84,6 @@ const AuthModal = () => {
       {currentView === "forgot-password" && <ForgotPasswordForm onSwitchToLogin={() => changeView("login")} />}
     </Modal>
   );
-};
+});
 
 export default AuthModal;

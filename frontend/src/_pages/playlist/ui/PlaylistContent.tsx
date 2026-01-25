@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import {startTransition, useCallback, useState} from "react";
 import { FaPlay } from "react-icons/fa";
 import toast from "react-hot-toast";
 import {
@@ -45,16 +45,16 @@ const PlaylistContent = ({
     })
   );
 
-  const onPlayClick = () => {
+  const onPlayClick = useCallback(() => {
     if (songs.length === 0) return;
     onPlay(songs[0].id);
-  };
+  }, [onPlay, songs]);
 
-  const onRemoveClick = (songId: string) => {
+  const onRemoveClick = useCallback((songId: string) => {
     startTransition(() =>
       setSongs((prevSongs) => prevSongs.filter((song) => song.id !== songId))
     );
-  };
+  }, []);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;

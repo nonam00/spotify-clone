@@ -5,7 +5,11 @@ import {type Song, SongListItem } from "@/entities/song";
 import {LikeButton} from "@/features/like-button";
 import { useOnPlay } from "@/widgets/player";
 
-const LikedContent = memo(function LikedContent({ songs }: { songs: Song[] }) {
+const LikedContent = memo(function LikedContent({
+  songs
+}: {
+  songs: Song[]
+}) {
   const onPlay = useOnPlay(songs);
 
   if (songs.length === 0) {
