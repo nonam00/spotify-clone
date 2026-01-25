@@ -53,14 +53,14 @@ const AddSongsToPlaylistContent = ({
 
   if (songs.length === 0) {
     return (
-      <div className="flex flex-col gap-y-2 w-full px-6 text-neutral-400">
+      <div className="flex flex-col gap-y-2 w-full px-6 text-neutral-400 outline-none">
         No songs found.
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-y-2 w-full px-6">
+    <div className="flex flex-col gap-y-2 w-full px-6 outline-none">
       <div className="flex flex-row gap-x-2">
         <Button
           className="bg-white px-6 py-2 mb-4 w-[25%]"

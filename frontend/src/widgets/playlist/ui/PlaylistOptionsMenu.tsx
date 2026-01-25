@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
@@ -55,29 +55,34 @@ const PlaylistActionsMenu = ({
     });
   }, [deletePlaylistCallback, onOpen, setAction, setDescription]);
 
+  const options = useMemo(() => [
+    {
+      id: "add-song-to-playlist",
+      label: "Add songs to playlist",
+      icon: <AiOutlinePlusCircle />,
+      disabled: disabled || isPending,
+      onSelect: handleRouteToAdd,
+    },
+    {
+      id: "delete-playlist",
+      label: "Delete this playlist",
+      icon: <FaTrash />,
+      isDestructive: true,
+      disabled: disabled || isPending,
+      onSelect: handleDeletePlaylist,
+    },
+  ], [disabled, handleDeletePlaylist, handleRouteToAdd, isPending]);
+
   return (
     <OptionsMenu
       buttonAriaLabel="Actions with playlist"
-      align={"left"}
+      align={"start"}
       iconSize={30}
       disabled={disabled || isPending}
-      options={[
-        {
-          id: "add-song-to-playlist",
-          label: "Add songs to playlist",
-          icon: <AiOutlinePlusCircle />,
-          disabled: disabled || isPending,
-          onSelect: handleRouteToAdd,
-        },
-        {
-          id: "delete-playlist",
-          label: "Delete this playlist",
-          icon: <FaTrash />,
-          isDestructive: true,
-          disabled: disabled || isPending,
-          onSelect: handleDeletePlaylist,
-        },
-      ]}
+      triggerClassName="p-2.5 hover:bg-neutral-800/60 rounded-full"
+      sideOffset={12}
+      alignOffset={-4}
+      options={options}
     />
   );
 };
