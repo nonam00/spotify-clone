@@ -40,6 +40,7 @@ const LikeButton = ({
     startTransition(async () => {
       if (isLiked) {
         const success = await deleteLikedSong(songId);
+
         if (success) {
           setIsLiked(false);
           toast.success("Like deleted");
@@ -48,6 +49,7 @@ const LikeButton = ({
         }
       } else {
         const success = await addLikedSong(songId);
+
         if (success) {
           setIsLiked(true);
           toast.success("Liked");

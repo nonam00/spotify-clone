@@ -156,7 +156,7 @@ const UpdatePlaylistModal = () => {
           />
           <p className="text-xs text-gray-500 mt-1">
             Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB
-            • Supported formats: JPEG, PNG, WebP, GIF
+            • Supported formats: JPEG, PNG, WebP, HEIF, RAW
           </p>
         </div>
         <Button disabled={isPending} type="submit">

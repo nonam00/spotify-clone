@@ -14,7 +14,7 @@ import {
 } from "@/shared/lib/files";
 import { Input, Button } from "@/shared/ui";
 import { type UserDetails, updateUserInfo } from "@/entities/user/";
-import {useAuthStore} from "@/features/auth";
+import { useAuthStore } from "@/features/auth";
 
 const ChangeUserInfoForm = ({
   userDetails,
@@ -146,7 +146,7 @@ const ChangeUserInfoForm = ({
                     <p className="mb-1 text-sm text-neutral-400">
                       <span className="font-semibold">Click to upload</span> or drag and drop
                     </p>
-                    <p className="text-xs text-neutral-400">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-neutral-400">JPEG, PNG, WebP, HEIF, RAW up to 5MB</p>
                   </div>
                 )}
                 <Input

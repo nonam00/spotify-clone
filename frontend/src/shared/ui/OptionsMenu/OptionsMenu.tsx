@@ -1,6 +1,9 @@
 "use client";
 
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Slot } from "@radix-ui/react-slot";
+import { Fragment, ReactNode, useTransition} from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { twMerge } from "tailwind-merge";
 
@@ -11,125 +14,205 @@ export type MenuOption = {
   icon?: ReactNode;
   disabled?: boolean;
   isDestructive?: boolean;
+  submenu?: MenuOption[];
+  imageUrl?: string;
 };
 
 type OptionsMenuProps = {
   options: MenuOption[];
   buttonAriaLabel?: string;
-  align?: "left" | "right";
+  align?: "start" | "center" | "end";
+  side?: "top" | "right" | "bottom" | "left";
   className?: string;
   disabled?: boolean;
   triggerContent?: ReactNode;
   iconSize?: number;
+  sideOffset?: number;
+  alignOffset?: number;
+  avoidCollisions?: boolean;
+  // Allow customizing the trigger button
+  triggerClassName?: string;
+  // For controlled usage
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onOpen?: () => void;
 };
 
 const OptionsMenu = ({
   options,
   buttonAriaLabel = "Open options menu",
-  align = "right",
+  align = "end",
+  side = "bottom",
   className,
   disabled = false,
   triggerContent,
   iconSize = 20,
+  sideOffset = 8,
+  alignOffset = 0,
+  avoidCollisions = true,
+  triggerClassName,
+  open,
+  onOpenChange,
+  onOpen,
 }: OptionsMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("keydown", handleEscapeKey);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleEscapeKey);
+  const handleOpenChange = (open: boolean) => {
+    if (open && onOpen) {
+      onOpen();
     }
-  }, [isOpen]);
+    onOpenChange?.(open);
+  };
 
-  const toggleMenu = useCallback(() => {
-    if (disabled) return;
-    setIsOpen((prev) => !prev);
-  }, [disabled]);
-
-  const handleSelect = async (option: MenuOption) => {
-    if (option.disabled) return;
-    await option.onSelect();
-    setIsOpen(false);
+  const handleSelect = async (
+    option: MenuOption,
+    event: Event,
+    hasSubmenu: boolean
+  ) => {
+    if (option.disabled || hasSubmenu) {
+      event.preventDefault();
+      return;
+    }
+    startTransition(async () => {
+      await option.onSelect();
+    });
   };
 
   if (options.length === 0) return null;
 
-  return (
-    <div
-      className={twMerge("relative inline-block text-left", className)}
-      ref={menuRef}
-    >
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        aria-label={buttonAriaLabel}
-        onClick={toggleMenu}
-        disabled={disabled}
-        className={twMerge(
-          "flex items-center justify-center group p-2 rounded-full hover:bg-neutral-800/60 transition cursor-pointer",
-          disabled ? "opacity-50 cursor-not-allowed" : ""
-        )}
-      >
-        {triggerContent ?? (
-          <HiDotsVertical
-            size={iconSize}
-            className="text-neutral-400 group-focus:text-neutral-200"
-          />
-        )}
-      </button>
+  const renderMenuItems = (items: MenuOption[], level = 0) => {
+    return items.map((option: MenuOption, index) => {
+      const hasSubmenu = Boolean(option.submenu?.length);
+      const hasImage = Boolean(option.imageUrl);
 
-      {isOpen && (
-        <div
-          role="menu"
-          className={twMerge(
-            "absolute z-30 mt-2 w-50 origin-top-right" +
-              "rounded-md bg-neutral-900/95 backdrop-blur ring-1 ring-black/30 shadow-lg focus:outline-none",
-            align === "right" ? "right-0" : "left-0"
-          )}
-        >
-          <div className="py-1">
-            {options.map((option, index) => (
-              <button
-                key={option.id ?? `${option.label}-${index}`}
-                role="menuitem"
-                disabled={option.disabled}
-                onClick={() => handleSelect(option)}
+      return (
+        <Fragment key={option.id ?? `${option.label}-${index}-${level}`}>
+          {hasSubmenu ? (
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger
+                disabled={option.disabled || disabled || isPending}
                 className={twMerge(
-                  "w-full px-2 py-2 text-left text-sm flex items-center gap-2 transition",
-                  option.disabled
-                    ? "text-neutral-500 cursor-not-allowed"
-                    : option.isDestructive
-                      ? "text-red-400 hover:bg-red-500/10"
-                      : "text-neutral-200 hover:bg-neutral-800/70"
+                  "group flex w-full cursor-default select-none items-center gap-2 rounded px-2 py-1.5 text-sm outline-none transition-colors",
+                  "data-disabled:pointer-events-none data-disabled:opacity-50",
+                  'data-highlighted:bg-neutral-800/70 data-highlighted:text-neutral-200',
+                  option.isDestructive
+                    ? "text-red-400 data-highlighted:bg-red-500/10"
+                    : "text-neutral-200"
                 )}
               >
-                {option.icon && <span className="text-base">{option.icon}</span>}
+                {hasImage ? (
+                  <div className="relative w-5 h-5">
+                    <Image
+                      src={option.imageUrl!}
+                      alt=""
+                      className="object-cover"
+                      unoptimized
+                      loading="lazy"
+                      fill
+                    />
+                  </div>
+                ) : option.icon ? (
+                  <span className="text-base">{option.icon}</span>
+                ) : null}
                 {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+              </DropdownMenu.SubTrigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.SubContent
+                  className="z-50 min-w-32 overflow-hidden rounded-md bg-neutral-900/95 backdrop-blur p-1 shadow-lg ring-1 ring-black/30"
+                  sideOffset={2}
+                  alignOffset={-5}
+                  collisionPadding={16}
+                >
+                  {renderMenuItems(option.submenu!, level + 1)}
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Sub>
+          ) : (
+            <DropdownMenu.Item
+              disabled={option.disabled || disabled || isPending}
+              onSelect={(event) => handleSelect(option, event, false)}
+              className={twMerge(
+                "group relative flex cursor-default select-none items-center gap-2 rounded px-2 py-1.5 text-sm outline-none transition-colors",
+                "data-disabled:pointer-events-none data-disabled:opacity-50",
+                "data-highlighted:bg-neutral-800/70 data-highlighted:text-neutral-200",
+                option.isDestructive
+                  ? "text-red-400 data-highlighted:bg-red-500/10"
+                  : "text-neutral-200"
+              )}
+            >
+              {hasImage ? (
+                <div className="relative w-5 h-5">
+                  <Image
+                    src={option.imageUrl!}
+                    alt=""
+                    className="object-cover"
+                    unoptimized
+                    loading="lazy"
+                    fill
+                  />
+                </div>
+              ) : option.icon ? (
+                <span className="text-base">{option.icon}</span>
+              ) : null}
+              {option.label}
+            </DropdownMenu.Item>
+          )}
+        </Fragment>
+      );
+    })
+  }
+
+  return (
+    <DropdownMenu.Root
+      open={open}
+      onOpenChange={handleOpenChange}
+    >
+      <DropdownMenu.Trigger asChild>
+        <button
+          type="button"
+          aria-label={buttonAriaLabel}
+          disabled={disabled || isPending}
+          className={twMerge(
+            "inline-flex items-center justify-center p-2 rounded-full hover:bg-neutral-800/60 transition cursor-pointer outline-none",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            triggerClassName
+          )}
+        >
+          <Slot>
+            {triggerContent ?? (
+              <HiDotsVertical
+                size={iconSize}
+                className="text-neutral-400 group-focus:text-neutral-200"
+              />
+            )}
+          </Slot>
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className={twMerge(
+            "z-50 min-w-40 overflow-hidden rounded-md bg-neutral-900/95 backdrop-blur p-1 shadow-lg ring-1 ring-black/30",
+            "data-[state=open]:animate-in data-[state=closed]:animate-out",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
+            "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+            className
+          )}
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          alignOffset={alignOffset}
+          collisionPadding={16}
+          avoidCollisions={avoidCollisions}
+          loop
+        >
+          {renderMenuItems(options)}
+          <DropdownMenu.Arrow className="fill-neutral-800/95" />
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 };
 

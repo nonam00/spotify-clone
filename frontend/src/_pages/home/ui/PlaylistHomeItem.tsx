@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { FaPlay } from "react-icons/fa";
 import Link from "next/link";
+import { FaPlay } from "react-icons/fa";
 
 const PlaylistHomeItem = ({
   name,
@@ -14,7 +14,7 @@ const PlaylistHomeItem = ({
   return (
     <Link
       href={href}
-      prefetch={true}
+      prefetch={false}
       className="
         relative group flex items-center pr-4 rounded-md overflow-hidden gap-x-4
         bg-neutral-100/10 hover:bg-neutral-100/20 transition-colors

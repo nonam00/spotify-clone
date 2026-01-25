@@ -1,4 +1,5 @@
 import { authFetchClient, CLIENT_API_URL } from "@/shared/config/api";
+import {Playlist} from "@/entities/playlist";
 
 export async function createPlaylist(): Promise<boolean> {
   try {
@@ -45,6 +46,24 @@ export async function deletePlaylist(id: string): Promise<boolean> {
   }
 }
 
+export async function addSongToPlaylist(
+  playlistId: string,
+  songId: string
+): Promise<boolean> {
+  try {
+    const response = await authFetchClient(
+      `${CLIENT_API_URL}/playlists/${playlistId}/songs/${songId}`,
+      {
+        method: "POST",
+      }
+    );
+    return response.ok;
+  } catch (error) {
+    console.error("Error on adding song to playlist", error);
+    return false;
+  }
+}
+
 export async function addSongsToPlaylist(
   playlistId: string,
   songIds: string[]
@@ -60,7 +79,7 @@ export async function addSongsToPlaylist(
     );
     return response.ok;
   } catch (error) {
-    console.error("Error on adding like-button to playlist", error);
+    console.error("Error on adding songs to playlist", error);
     return false;
   }
 }
@@ -100,5 +119,23 @@ export async function reorderPlaylistSongs(
   } catch (error) {
     console.error("Error reordering like-button in playlist", error);
     return false;
+  }
+}
+
+export async function getPlaylistsWithoutSong(songId: string): Promise<Playlist[]> {
+  try {
+    const response = await authFetchClient(`${CLIENT_API_URL}/playlists/without-song/${songId}`);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Error getting playlists", data);
+      return [];
+    }
+
+    return data.playlists as Playlist[];
+  } catch (error) {
+    console.error("Error getting playlists", error);
+    return [];
   }
 }

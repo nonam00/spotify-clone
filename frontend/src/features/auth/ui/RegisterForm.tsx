@@ -1,7 +1,7 @@
 "use client";
 
 import Form from "next/form";
-import { useState, useTransition } from "react";
+import {useCallback, useState, useTransition} from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 
@@ -9,11 +9,11 @@ import { Button, Input } from "@/shared/ui";
 import { useAuthStore } from "../model";
 import { ErrorDisplay } from "../ui";
 
-type RegisterFormProps = {
+const RegisterForm = ({
+  onSwitchToLogin
+}: {
   onSwitchToLogin: () => void;
-}
-
-const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
+}) => {
   const [isPending, startTransition] = useTransition();
 
   const { register, isLoading, error } = useAuthStore(
@@ -26,12 +26,12 @@ const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
 
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const validatePassword = (password: string) => {
+  const validatePassword = useCallback((password: string) => {
     if (password.length < 8) {
       return "Password must be at least 8 characters long";
     }
     return null;
-  };
+  }, []);
 
   const onSubmit = async (form: FormData) => {
     startTransition(async () => {

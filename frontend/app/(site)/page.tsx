@@ -20,7 +20,7 @@ export default async function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
             <PlaylistHomeItem
               name="Liked Songs"
-              href="/liked"
+              href="/playlist/liked"
               image="/images/liked.png"
             />
             {playlists.map((playlist) => (

@@ -12,6 +12,7 @@ using Application.Playlists.Commands.ReorderSongsInPlaylist;
 using Application.Playlists.Errors;
 using Application.Playlists.Queries.GetFullPlaylistList;
 using Application.Playlists.Queries.GetPlaylistListByCount;
+using Application.Playlists.Queries.GetPlaylistListWithoutSong;
 using Application.Songs.Models;
 using Application.Songs.Queries.GetLikedSongListForPlaylist;
 using Application.Songs.Queries.GetLikedSongListForPlaylistBySearch;
@@ -287,15 +288,17 @@ public class PlaylistsController : BaseController
     /// </summary>
     /// <param name="playlistId">ID of the playlist from which the song is removing</param>
     /// <param name="songId">ID of the song which is removing from the playlist</param>
+    /// <param name="cancellationToken"></param>
     /// <response code="204">Success</response>
     /// <response code="401">If the user is unauthorized</response>
     [HttpDelete("{playlistId:guid}/songs/{songId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeleteSongFromPlaylist(Guid playlistId, Guid songId)
+    public async Task<IActionResult> DeleteSongFromPlaylist(
+        Guid playlistId, Guid songId, CancellationToken cancellationToken)
     {
         var command = new RemoveSongFromPlaylistCommand(UserId: UserId, PlaylistId: playlistId, SongId: songId);
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(command, cancellationToken);
         
         if (result.IsSuccess)
         {
@@ -349,6 +352,32 @@ public class PlaylistsController : BaseController
             UserId: UserId, PlaylistId: playlistId, SearchString: searchString);
         var result = await Mediator.Send(query, cancellationToken);
         
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        
+        throw new Exception(result.Error.Description);
+    }
+    
+    /// <summary>
+    /// Gets user playlists that doesn't contain song 
+    /// </summary>
+    /// <param name="songId">ID of the song</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Returns PlaylistListVm></returns>
+    /// <response code="200">Success</response>
+    /// <response code="401">If the user is unauthorized</response>
+    [HttpGet("without-song/{songId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<PlaylistListVm>> GetPlaylistsWithoutSong(
+        Guid songId, CancellationToken cancellationToken)
+    {
+        var query = new GetPlaylistListWithoutSongQuery(UserId, songId);
+
+        var result = await Mediator.Send(query, cancellationToken);
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);

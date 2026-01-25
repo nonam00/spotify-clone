@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Song } from "../model";
@@ -23,11 +24,11 @@ const SortableSongListItem = ({
     isDragging,
   } = useSortable({ id: song.id });
 
-  const style = {
+  const style = useMemo(() => ({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  };
+  }), [isDragging, transform, transition]);
 
   return (
     <div
