@@ -146,7 +146,7 @@ const ChangeUserInfoForm = ({
                     <p className="mb-1 text-sm text-neutral-400">
                       <span className="font-semibold">Click to upload</span> or drag and drop
                     </p>
-                    <p className="text-xs text-neutral-400">PNG, JPG, GIF up to 5MB</p>
+                    <p className="text-xs text-neutral-400">JPEG, PNG, WebP, HEIF, RAW up to 5MB</p>
                   </div>
                 )}
                 <Input

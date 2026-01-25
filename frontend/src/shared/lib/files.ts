@@ -17,7 +17,7 @@ type FileConfigType = Record<string, FileConfigElementType>;
 
 export const FILE_CONFIG: FileConfigType = {
   image: {
-    allowedTypes: [".png", ".jpg", ".jpeg", ".webp", ".svg", ".heif", ".raw"],
+    allowedTypes: [".png", ".jpg", ".jpeg", ".webp", ".heif", ".raw"],
     maxSize: 32 * 1024 * 1024, // 32MB
   },
   audio: {
