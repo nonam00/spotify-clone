@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 using Domain.Models;
 using Application.Playlists.Interfaces;
@@ -54,6 +54,25 @@ public class PlaylistsRepository : IPlaylistsRepository
             .OrderByDescending(p => p.UpdatedAt)
             .Select(p => ToVm(p))
             .Take(count)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return playlists;
+    }
+
+    public async Task<List<PlaylistVm>> GetListWithoutSong(
+        Guid userId, Guid songId, CancellationToken cancellationToken = default)
+    {
+        var playlistWithSong = _dbContext.PlaylistSongs
+            .AsNoTracking()
+            .Where(ps => ps.SongId == songId)
+            .Select(ps => ps.PlaylistId);
+        
+        var playlists = await _dbContext.Playlists
+            .AsNoTracking()
+            .Where(p => p.UserId == userId)
+            .Where(p => !playlistWithSong.Contains(p.Id))
+            .Select(p => ToVm(p))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
