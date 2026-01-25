@@ -16,7 +16,7 @@ type PlaylistActionsMenuProps = {
   disabled?: boolean;
 };
 
-const PlaylistActionsMenu = ({
+const PlaylistOptionsMenu = ({
   playlistId,
   disabled,
 }: PlaylistActionsMenuProps) => {
@@ -87,4 +87,4 @@ const PlaylistActionsMenu = ({
   );
 };
 
-export default PlaylistActionsMenu;
+export default PlaylistOptionsMenu;

@@ -22,7 +22,7 @@ import {
 import { SortableSongListItem, type Song } from "@/entities/song";
 import { reorderPlaylistSongs } from "@/entities/playlist";
 import { useOnPlay } from "@/widgets/player";
-import { PlaylistSongActionsMenu, PlaylistActionsMenu } from "@/widgets/playlist";
+import { PlaylistSongOptionsMenu, PlaylistOptionsMenu } from "@/widgets/playlist";
 
 const PlaylistContent = ({
   id,
@@ -89,7 +89,7 @@ const PlaylistContent = ({
         >
           <FaPlay className="text-black cursor-pointer" size="20" />
         </button>
-        <PlaylistActionsMenu playlistId={id} />
+        <PlaylistOptionsMenu playlistId={id} />
       </div>
       <div className="h-0.5 bg-neutral-800/40 w-full" />
       <DndContext
@@ -113,10 +113,10 @@ const PlaylistContent = ({
                   song={song}
                   onClickCallback={onPlay}
                 >
-                  <PlaylistSongActionsMenu
+                  <PlaylistSongOptionsMenu
                     playlistId={id}
                     songId={song.id}
-                    callback={onRemoveClick}
+                    removeCallback={onRemoveClick}
                   />
                 </SortableSongListItem>
               ))
