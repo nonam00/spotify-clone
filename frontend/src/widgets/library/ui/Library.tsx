@@ -18,7 +18,10 @@ const Library = memo(function Library({
   playlists: Playlist[];
 }) {
   const openAuthModal = useAuthModalStore(useShallow((s) => s.onOpen));
-  const openCreateModal = useCreateModalStore(useShallow((s) => s.onOpen));
+  // To update list of user playlist after creating new playlist
+  // We need to force library component rerender on closing modal window
+  // Because of this we can't use shallow state of create modal window store
+  const openCreateModal = useCreateModalStore(s => s.onOpen);
   const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
 
   const router = useRouter();
