@@ -1,12 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-
-import useDebounce from "@/shared/lib/use-debounce";
 import { Input } from "@/shared/ui";
-import type { SearchType } from "@/entities/song";
+import {useDebouncedSearch} from "../lib";
+
+const MINIMUM_INPUT_LENGTH = 3;
 
 const SearchInput = ({
   pageUrl,
@@ -15,24 +13,12 @@ const SearchInput = ({
   pageUrl: string;
   types?: boolean;
 }) => {
-  const router = useRouter();
-
-  const [value, setValue] = useState<string>("");
-  const debouncedValue = useDebounce<string>(value, 500);
-
-  const [searchType, setSearchType] = useState<SearchType>("any");
-  const debouncedType = useDebounce<SearchType>(searchType, 200);
-
-  useEffect(() => {
-    const query = `?searchString=${debouncedValue}&type=${debouncedType}`;
-    if (
-      debouncedValue !== "" &&
-      typeof window !== "undefined" &&
-      query !== window.location.search
-    ) {
-      router.push(pageUrl + query);
-    }
-  }, [debouncedValue, debouncedType, router, pageUrl]);
+  const {
+    value,
+    setValue,
+    searchType,
+    setSearchType
+  } = useDebouncedSearch(pageUrl, MINIMUM_INPUT_LENGTH);
 
   return (
     <div>

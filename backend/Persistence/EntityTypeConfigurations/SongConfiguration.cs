@@ -15,18 +15,25 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.Title)
             .IsRequired()
             .HasMaxLength(255);
-        
-        builder.HasIndex(s => s.Title)
-            .IsUnique(false)
-            .HasMethod("gin");
 
         builder.Property(s => s.Author)
             .IsRequired()
             .HasMaxLength(255);
         
-        builder.HasIndex(s => s.Author)
-            .IsUnique(false)
-            .HasMethod("gin");
+        builder.Property<string>("TitleLower")
+            .HasComputedColumnSql("lower(f_unaccent(trim(\"title\")))", stored: true);
+            
+        builder.Property<string>("AuthorLower")
+            .HasComputedColumnSql("lower(f_unaccent(trim(\"author\")))", stored: true);
+        
+        // Gin indexes for trigram searching
+        builder.HasIndex("TitleLower")
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops");
+            
+        builder.HasIndex("AuthorLower")
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops");
         
         builder.Property(s => s.SongPath)
             .HasConversion(

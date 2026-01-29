@@ -1,1 +1,2 @@
-export { default as SongOptionsMenu } from "./SongOptionsMenu";
+export { SongOptionsMenu } from "./SongOptionsMenu";
+export { PlaylistSongOptionsMenu } from "./PlaylistSongOptionsMenu";

@@ -1,1 +1,1 @@
-export { SongOptionsMenu } from "./ui";
+export { PlaylistSongOptionsMenu, SongOptionsMenu } from "./ui";
