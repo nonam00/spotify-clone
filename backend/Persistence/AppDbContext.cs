@@ -16,8 +16,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.HasPostgresExtension("pg_trgm");
+        builder.HasPostgresExtension("btree_gin");
+        builder.HasPostgresExtension("unaccent");
+        
         builder.Ignore<DomainEvent>();
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        
         base.OnModelCreating(builder);
     }
 }
