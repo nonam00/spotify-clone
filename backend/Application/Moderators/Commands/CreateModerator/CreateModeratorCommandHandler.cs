@@ -35,7 +35,7 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
     {
         var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
 
-        if (managingModerator == null)
+        if (managingModerator is null)
         {
             _logger.LogInformation(
                 "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
@@ -61,7 +61,7 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
         
         var checkModerator = await _moderatorsRepository.GetByEmail(command.Email, cancellationToken);
         
-        if (checkModerator != null)
+        if (checkModerator is not null)
         {
             if (!checkModerator.IsActive)
             {

@@ -1,22 +1,22 @@
-﻿using Application.Shared.Data;
+﻿using Domain.Common;
+using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Interfaces;
-using Domain.Common;
 
-namespace Application.Users.Commands.CleanupRefreshTokens;
+namespace Application.Users.Commands.CleanupExpiredRefreshTokens;
 
-public class CleanupRefreshTokensCommandHandler : ICommandHandler<CleanupRefreshTokensCommand, Result>
+public class CleanupExpiredRefreshTokensCommandHandler : ICommandHandler<CleanupExpiredRefreshTokensCommand, Result>
 {
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CleanupRefreshTokensCommandHandler(IRefreshTokensRepository refreshTokensRepository, IUnitOfWork unitOfWork)
+    public CleanupExpiredRefreshTokensCommandHandler(IRefreshTokensRepository refreshTokensRepository, IUnitOfWork unitOfWork)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result> Handle(CleanupRefreshTokensCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CleanupExpiredRefreshTokensCommand request, CancellationToken cancellationToken)
     {
         var expired = await _refreshTokensRepository.GetExpiredList(cancellationToken);
         

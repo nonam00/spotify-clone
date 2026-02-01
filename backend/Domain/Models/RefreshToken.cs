@@ -34,7 +34,7 @@ public class RefreshToken : Entity<Guid>
         };
     }
     
-    public void UpdateToken(string newToken, DateTime newExpires)
+    internal void UpdateToken(string newToken, DateTime newExpires)
     {
         Token = newToken;
         Expires = newExpires;

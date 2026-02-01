@@ -15,22 +15,17 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
+        var refreshToken = user.AddRefreshToken();
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         Context.ChangeTracker.Clear();
 
-        var query = new LoginByRefreshTokenCommand(refreshTokenValue);
+        var query = new LoginByRefreshTokenCommand(refreshToken.Token);
         
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
@@ -38,7 +33,7 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().Be("mock_access_token");
-        result.Value.RefreshToken.Should().NotBe(refreshTokenValue);
+        result.Value.RefreshToken.Should().NotBe(refreshToken.Token);
         
         var userWithTokens = await Context.Users
             .AsNoTracking()
@@ -47,22 +42,17 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
         
         userWithTokens.Should().NotBeNull();
         userWithTokens.RefreshTokens.Count.Should().Be(1);
-        userWithTokens.RefreshTokens.First().Should().NotBe(refreshTokenValue);
+        userWithTokens.RefreshTokens.First().Should().NotBe(refreshToken.Token);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsNotValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
+        var refreshToken = user.AddRefreshToken();
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -83,17 +73,14 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsExpired()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(-1));
+        var refreshToken = RefreshToken.Create(user.Id, refreshTokenValue, DateTime.UtcNow.AddDays(-1));
         
         await Context.Users.AddAsync(user);
+        await Context.RefreshTokens.AddAsync(refreshToken);
         await Context.SaveChangesAsync();
         
         Context.ChangeTracker.Clear();

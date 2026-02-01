@@ -13,18 +13,18 @@ namespace Application.Users.Commands.LoginByRefreshToken;
 
 public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTokenCommand, Result<TokenPair>>
 {
-    private readonly IRefreshTokensRepository _refreshTokensRepository;
+    private readonly IUsersRepository _usersRepository;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LoginByRefreshTokenCommandHandler> _logger;
 
     public LoginByRefreshTokenCommandHandler(
-        IRefreshTokensRepository refreshTokensRepository,
+        IUsersRepository usersRepository,
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork,
         ILogger<LoginByRefreshTokenCommandHandler> logger)
     {
-        _refreshTokensRepository = refreshTokensRepository;
+        _usersRepository = usersRepository;
         _jwtProvider = jwtProvider;
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -32,23 +32,19 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
 
     public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var refreshToken = await _refreshTokensRepository.GetByValueWithUser(request.RefreshToken, cancellationToken);
+        var user = await _usersRepository.GetByRefreshTokenValue(request.RefreshToken, cancellationToken);
         
-        if (refreshToken is null || refreshToken.Expires < DateTime.UtcNow)
+        if (user is null)
         {
             _logger.LogInformation("Anonymous user tried to login with non-relevant refresh token"); 
             return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
         }
         
-        var accessToken = _jwtProvider.GenerateUserToken(refreshToken.User);
+        var accessToken = _jwtProvider.GenerateUserToken(user);
+        var refreshToken = user.UpdateRefreshToken(request.RefreshToken);
         
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        
-        refreshToken.UpdateToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
-        
-        _refreshTokensRepository.Update(refreshToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken!.Token));
     }
 }

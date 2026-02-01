@@ -1,5 +1,5 @@
 ﻿using Application.Shared.Messaging;
-using Application.Users.Commands.CleanupRefreshTokens;
+using Application.Users.Commands.CleanupExpiredRefreshTokens;
 
 namespace WebAPI.Services;
 
@@ -32,7 +32,7 @@ public class RefreshTokensCleanupService : BackgroundService
         _logger.LogInformation("Starting refresh tokens cleanup");
         using var scope = _scopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.Send(new CleanupRefreshTokensCommand());
+        await mediator.Send(new CleanupExpiredRefreshTokensCommand());
         _logger.LogInformation("Finished refresh tokens cleanup");
     }
 }

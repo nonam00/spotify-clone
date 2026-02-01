@@ -1,13 +1,13 @@
-using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Common;
-using Domain.ValueObjects;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Users.Commands.RestoreUserAccess;
 
@@ -62,16 +62,15 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
 
         var hash = _passwordHasher.Generate("12345678");
         var passwordHash = new PasswordHash(hash);
+        
         user.ChangePassword(passwordHash);
         _usersRepository.Update(user);
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
-
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
+        var refreshToken = user.AddRefreshToken();
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken.Token));
     }
 }

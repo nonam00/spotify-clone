@@ -1,4 +1,6 @@
-﻿using Domain.Common;
+﻿using System.Security.Cryptography;
+
+using Domain.Common;
 using Domain.Events;
 using Domain.ValueObjects;
 
@@ -71,10 +73,29 @@ public class User : AggregateRoot<Guid>
         IsActive = false;
     }
 
-    public RefreshToken AddRefreshToken(string token, DateTime expires)
+    public RefreshToken AddRefreshToken()
     {
-        var refreshToken = RefreshToken.Create(Id, token, expires);
+        var refreshTokenValue = GenerateRefreshTokenValue();
+        var refreshToken = RefreshToken.Create(Id, refreshTokenValue, DateTime.UtcNow.AddDays(14));
         _refreshTokens.Add(refreshToken);
+        return refreshToken;
+    }
+
+    public RefreshToken? UpdateRefreshToken(string refreshTokenValue)
+    {
+        var refreshToken = _refreshTokens.FirstOrDefault(rf => rf.Token == refreshTokenValue);
+        
+        if (refreshToken == null || !_refreshTokens.Remove(refreshToken))
+        {
+            return null;
+        }
+        
+        var newRefreshTokenValue = GenerateRefreshTokenValue();
+        
+        refreshToken.UpdateToken(newRefreshTokenValue,DateTime.UtcNow.AddDays(14));
+        
+        _refreshTokens.Add(refreshToken);
+        
         return refreshToken;
     }
 
@@ -139,4 +160,9 @@ public class User : AggregateRoot<Guid>
         
         return playlist;
     }
+    
+    public void CleanRefreshTokens() => _refreshTokens.Clear();
+    
+    private static string GenerateRefreshTokenValue() => 
+        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 }

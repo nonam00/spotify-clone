@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Logging;
+
+using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Common;
 
 namespace Application.Users.Commands.SendRestoreToken;
 

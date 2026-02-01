@@ -64,7 +64,7 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
             _logger.LogWarning(
                 "Tried to deactivate moderator {ModeratorToActivateId} but it does not exist.",
                 command.ModeratorToDeactivateId);
-            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+            return Result.Failure(ModeratorErrors.NotFound);
         }
         
         var deactivationResult = managingModerator.DeactivateModerator(moderatorToDeactivate);

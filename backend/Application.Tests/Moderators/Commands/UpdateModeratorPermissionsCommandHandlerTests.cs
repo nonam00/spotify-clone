@@ -121,11 +121,77 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenModeratorNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorNotFound()
     {
         // Arrange
         var command = new UpdateModeratorPermissionsCommand(
             Guid.NewGuid(),
+            Guid.NewGuid(),
+            CanManageUsers: true,
+            CanManageContent: true,
+            CanViewReports: false,
+            CanManageModerators: false);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorErrors.NotFound);
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorIsNotActive()
+    {
+        // Arrange
+        var admin = Moderator.Create(
+            new Email("admin@example.com"),
+            new PasswordHash("admin_hash"),
+            "Admin",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        admin.DeactivateModerator(managingModerator);
+        
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdateModeratorPermissionsCommand(
+            managingModerator.Id,
+            Guid.NewGuid(),
+            CanManageUsers: true,
+            CanManageContent: true,
+            CanViewReports: false,
+            CanManageModerators: false);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.NotActive);
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenModeratorToUpdateNotFound()
+    {
+        // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdateModeratorPermissionsCommand(
+            managingModerator.Id,
             Guid.NewGuid(),
             CanManageUsers: true,
             CanManageContent: true,

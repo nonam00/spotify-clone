@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
+using Domain.Common;
 using Application.Users.Interfaces;
 using Application.Users.Errors;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
-using Domain.Common;
 
 namespace Application.Users.Commands.LoginByCredentials;
 
@@ -42,25 +42,23 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
 
         if (!user.IsActive)
         {
-            _logger.LogInformation("Non active user {userId} with tried to login.", user.Id);
+            _logger.LogInformation("Non active user {UserId} with tried to login.", user.Id);
             return Result<TokenPair>.Failure(UserErrors.AlreadyExistButNotActive);
         }
         
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            _logger.LogInformation("Invalid login attempt by user {userId}.", user.Id);
+            _logger.LogInformation("Invalid login attempt by user {UserId}.", user.Id);
             return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
         }
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
-
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
+        var refreshToken = user.AddRefreshToken();
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Generated token pair for user {userId}", user.Id);
 
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken.Token));
     }
 }

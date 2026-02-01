@@ -25,6 +25,16 @@ public class UsersRepository : IUsersRepository
         var user = await _dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithRefreshTokens(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.RefreshTokens)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+
         return user;
     }
 
@@ -71,6 +81,18 @@ public class UsersRepository : IUsersRepository
             .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
         
         return user;   
+    }
+
+    public async Task<User?> GetByRefreshTokenValue(string refreshTokenValue, CancellationToken cancellationToken = default)
+    {
+        var refreshToken = _dbContext.RefreshTokens
+            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.Expires >= DateTime.UtcNow);
+        
+        var user = await _dbContext.Users
+            .Include(u => u.RefreshTokens)
+            .SingleOrDefaultAsync(u => u.RefreshTokens.Contains(refreshToken), cancellationToken);
+
+        return user;
     }
 
     public async Task<bool> CheckIfSongLiked(Guid userId, Guid songId, CancellationToken cancellationToken = default)

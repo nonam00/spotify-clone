@@ -106,42 +106,6 @@ public class CreateModeratorCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorDomainErrors.CannotManageModerators);
     }
-    
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorIsNotActive()
-    {
-        // Arrange
-        var admin = Moderator.Create(
-            new Email("admin@example.com"),
-            new PasswordHash("hashed_password_admin"),
-            "Admin",
-            ModeratorPermissions.CreateSuperAdmin());
-        
-        var managingModerator = Moderator.Create(
-            new Email("managing@example.com"),
-            new PasswordHash("hashed_password1"),
-            "Managing Moderator",
-            ModeratorPermissions.CreateSuperAdmin());
-
-        admin.DeactivateModerator(managingModerator);
-        
-        await Context.Moderators.AddAsync(managingModerator);
-        await Context.SaveChangesAsync();
-        
-        var command = new CreateModeratorCommand(
-            managingModerator.Id,
-            "admin@example.com",
-            "Admin Name",
-            "password123",
-            true);
-        
-        // Act
-        var result = await Mediator.Send(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ModeratorDomainErrors.NotActive);
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenEmailAlreadyExistsAndActive()
@@ -212,5 +176,61 @@ public class CreateModeratorCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorErrors.AlreadyExistButNotActive);
+    }
+    
+        
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorIsNotActive()
+    {
+        // Arrange
+        var admin = Moderator.Create(
+            new Email("admin@example.com"),
+            new PasswordHash("hashed_password_admin"),
+            "Admin",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+
+        admin.DeactivateModerator(managingModerator);
+        
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
+        var command = new CreateModeratorCommand(
+            managingModerator.Id,
+            "admin@example.com",
+            "Admin Name",
+            "password123",
+            true);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.NotActive);
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorNotFound()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(), 
+            "admin@example.com",
+            "Admin Name",
+            "password123",
+            true);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorErrors.NotFound);
     }
 }

@@ -1,6 +1,6 @@
+using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
-using Domain.Common;
 
 namespace Application.Users.Commands.RestoreUserAccess;
 

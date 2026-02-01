@@ -29,7 +29,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
     {
         var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
 
-        if (managingModerator == null)
+        if (managingModerator is null)
         {
             _logger.LogInformation(
                 "Tried to activate moderator {ModeratorToActivateId}" +
@@ -58,12 +58,12 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
 
         var moderatorToActivate = await _moderatorsRepository.GetById(command.ModeratorToActivateId, cancellationToken);
         
-        if (moderatorToActivate == null)
+        if (moderatorToActivate is null)
         {
             _logger.LogWarning(
                 "Tried to activate moderator {ModeratorToActivateId} but it does not exist.",
                 command.ModeratorToActivateId);
-            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+            return Result.Failure(ModeratorErrors.NotFound);
         }
         
         var activationResult = managingModerator.ActivateModerator(moderatorToActivate);
