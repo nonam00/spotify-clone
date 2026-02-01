@@ -15,14 +15,23 @@ const permissionLabels: Record<keyof ModeratorPermissions, string> = {
 };
 
 const ModeratorsTable = () => {
-  const { moderators, isLoading, error, fetchModerators, updatePermissions, updateStatus } = useModeratorsStore(
+  const {
+    moderators,
+    isLoading,
+    error,
+    fetchModerators,
+    updatePermissions,
+    activateModerator,
+    deactivateModerator
+  } = useModeratorsStore(
     useShallow((s) => ({
       moderators: s.moderators,
       isLoading: s.isLoading,
       error: s.error,
       fetchModerators: s.fetchModerators,
       updatePermissions: s.updatePermissions,
-      updateStatus: s.updateStatus,
+      activateModerator: s.activateModerator,
+      deactivateModerator: s.deactivateModerator,
     }))
   );
   const onOpen = useConfirmModalStore(useShallow((s) => s.onOpen));
@@ -51,14 +60,19 @@ const ModeratorsTable = () => {
   };
 
   const handleStatusChange = (moderatorId: string, isActive: boolean, fullName: string) => {
-    const title = isActive ? "Activate moderator?" : "Deactivate moderator?";
+    const title = isActive
+      ? "Activate moderator?"
+      : "Deactivate moderator?";
+
     const description = isActive
       ? `Allow ${fullName || "moderator"} to access the platform.`
       : `This moderator will lose access immediately.`;
 
-    onOpen(title, description, async () => {
-      await updateStatus(moderatorId, isActive);
-    });
+    const action = isActive
+      ? async() => await activateModerator(moderatorId)
+      : async() => await deactivateModerator(moderatorId);
+
+    onOpen(title, description, action);
   };
 
   if (isLoading && moderators.length === 0) {

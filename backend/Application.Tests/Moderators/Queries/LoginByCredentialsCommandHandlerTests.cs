@@ -53,11 +53,18 @@ public class LoginByCredentialsCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenModeratorNotActive()
     {
         // Arrange
+        var admin = Moderator.Create(
+            new Email("admin@example.com"),
+            new PasswordHash("hashed_password_admin"),
+            "Admin",
+            ModeratorPermissions.CreateSuperAdmin());
+        
         var moderator = Moderator.Create(
             new Email("test@example.com"),
             new PasswordHash("hashed_password"),
             "Test User");
-        moderator.Deactivate();
+        
+        admin.DeactivateModerator(moderator);
         
         await Context.Moderators.AddAsync(moderator);
         await Context.SaveChangesAsync();
@@ -80,7 +87,6 @@ public class LoginByCredentialsCommandHandlerTests : TestBase
             new Email("test@example.com"),
             new PasswordHash("hashed_password"),
             "Test User");
-        moderator.Activate();
         
         await Context.Moderators.AddAsync(moderator);
         await Context.SaveChangesAsync();

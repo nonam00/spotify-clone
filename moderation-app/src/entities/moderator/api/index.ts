@@ -52,6 +52,26 @@ export async function updateModeratorPermissions(
   }
 }
 
+export async function activateModerator(moderatorId: string): Promise<void> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/${moderatorId}/activate`, {
+    method: "PUT"
+  });
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(response.status, "Failed to activate moderator"));
+  }
+}
+
+export async function deactivateModerator(moderatorId: string): Promise<void> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/${moderatorId}/deactivate`, {
+    method: "PUT"
+  });
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(response.status, "Failed to deactivate moderator"));
+  }
+}
+
 export async function updateModeratorStatus(moderatorId: string, isActive: boolean): Promise<void> {
   const response = await authFetchClient(`${CLIENT_API_URL}/moderators/${moderatorId}/status`, {
     method: "PUT",

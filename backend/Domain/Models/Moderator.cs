@@ -32,31 +32,14 @@ public class Moderator : AggregateRoot<Guid>
         return moderator;
     }
 
-    public void ChangePassword(PasswordHash newPasswordHash) => PasswordHash = newPasswordHash;
-
-    public Result Deactivate()
-    {
-        if (!IsActive)
-        {
-            return Result.Failure(ModeratorDomainErrors.AlreadyDeactivated);
-        }
-        IsActive = false;
-        return Result.Success();
-    }
-
-    public Result Activate()
-    {
-        if (IsActive)
-        {
-            return Result.Failure(ModeratorDomainErrors.AlreadyActive);
-        }
-        IsActive = true;
-        return Result.Success();
-    }
-
     public Result<Moderator> CreateModerator(
         Email email, PasswordHash passwordHash, string? fullName = null, bool isSuper = false)
     {
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
         if (!Permissions.CanManageModerators)
         {
             return Result<Moderator>.Failure(ModeratorDomainErrors.CannotManageModerators);
@@ -73,11 +56,82 @@ public class Moderator : AggregateRoot<Guid>
 
     public Result UpdateModeratorPermissions(Moderator moderatorToUpdate, ModeratorPermissions permissions)
     {
+        if (moderatorToUpdate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
         if (!Permissions.CanManageModerators)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
         moderatorToUpdate.Permissions =  permissions;
+        return Result.Success();
+    }
+
+    public Result ActivateModerator(Moderator moderatorToActivate)
+    {
+        if (moderatorToActivate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        var activationResult = moderatorToActivate.Activate();
+        return activationResult;
+    }
+
+    public Result DeactivateModerator(Moderator moderatorToDeactivate)
+    {
+        if (moderatorToDeactivate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
+        var activationResult = moderatorToDeactivate.Deactivate();
+        return activationResult;
+    }
+    
+    internal Result Deactivate()
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyDeactivated);
+        }
+        IsActive = false;
+        return Result.Success();
+    }
+
+    internal Result Activate()
+    {
+        if (IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyActive);
+        }
+        IsActive = true;
         return Result.Success();
     }
 }
@@ -95,4 +149,7 @@ public static class ModeratorDomainErrors
     
     public static readonly Error CannotManageModerators =
         new(nameof(CannotManageModerators), "Moderator cannot manage moderators");
+    
+    public static readonly Error CannotManageHimself =
+        new(nameof(CannotManageHimself), "Moderator cannot manage himself");
 }

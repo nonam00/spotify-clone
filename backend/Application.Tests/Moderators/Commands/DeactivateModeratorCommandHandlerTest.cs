@@ -1,16 +1,17 @@
-using FluentAssertions;
+using Application.Moderators.Commands.DeactivateModerator;
 using Microsoft.EntityFrameworkCore;
-using Application.Moderators.Commands.UpdateModeratorPermissions;
+using FluentAssertions;
+
 using Application.Moderators.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
+public class DeactivateModeratorCommandHandlerTest : TestBase
 {
     [Fact] 
-    public async Task Handle_ShouldUpdatePermissions_WhenValid()
+    public async Task Handle_ShouldActivateModerator_WhenValid()
     {
         // Arrange
         var managingModerator = Moderator.Create(
@@ -19,25 +20,21 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
             "Managing Moderator",
             ModeratorPermissions.CreateSuperAdmin());
         
-        var moderatorToUpdate = Moderator.Create(
+        var moderatorToDeactivate = Moderator.Create(
             new Email("toupdate@example.com"),
             new PasswordHash("hashed_password2"),
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToUpdate);
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
         await Context.SaveChangesAsync();
         
         // Clear tracking to avoid conflicts
         Context.ChangeTracker.Clear();
 
-        var command = new UpdateModeratorPermissionsCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToUpdateId: moderatorToUpdate.Id,
-            CanManageUsers: true,
-            CanManageContent: true,
-            CanViewReports: false,
-            CanManageModerators: false);
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -45,15 +42,12 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
 
-        var updatedModerator = await Context.Moderators
+        var deactivatedModerator = await Context.Moderators
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == moderatorToUpdate.Id);
+            .FirstOrDefaultAsync(m => m.Id == moderatorToDeactivate.Id);
         
-        updatedModerator.Should().NotBeNull();
-        updatedModerator.Permissions.CanManageUsers.Should().BeTrue();
-        updatedModerator.Permissions.CanManageContent.Should().BeTrue();
-        updatedModerator.Permissions.CanViewReports.Should().BeFalse();
-        updatedModerator.Permissions.CanManageModerators.Should().BeFalse();
+        deactivatedModerator.Should().NotBeNull();
+        deactivatedModerator.IsActive.Should().BeFalse();
     }
     
     [Fact]
@@ -66,22 +60,18 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
             "Managing Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var moderatorToUpdate = Moderator.Create(
+        var moderatorToDeactivate = Moderator.Create(
             new Email("toupdate@example.com"),
             new PasswordHash("hashed_password2"),
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToUpdate);
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
         await Context.SaveChangesAsync();
         
-        var command = new UpdateModeratorPermissionsCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToUpdateId: moderatorToUpdate.Id,
-            CanManageUsers: true,
-            CanManageContent: true,
-            CanViewReports: false,
-            CanManageModerators: false);
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -92,7 +82,7 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenModeratorTryingToUpdateSelfPermissions()
+    public async Task Handle_ShouldReturnFailure_WhenModeratorTryingToActivateThemself()
     {
         // Arrange
         var moderator = Moderator.Create(
@@ -104,13 +94,9 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
         await Context.Moderators.AddRangeAsync(moderator);
         await Context.SaveChangesAsync();
 
-        var command = new UpdateModeratorPermissionsCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: moderator.Id,
-            ModeratorToUpdateId: moderator.Id,
-            CanManageUsers: true,
-            CanManageContent: true,
-            CanViewReports: false,
-            CanManageModerators: true);
+            ModeratorToDeactivateId: moderator.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -121,16 +107,46 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenModeratorIsAlreadyDeactivated()
+    {
+        
+        // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        var moderatorToDeactivate = Moderator.Create(
+            new Email("toupdate@example.com"),
+            new PasswordHash("hashed_password2"),
+            "Moderator",
+            ModeratorPermissions.CreateDefault());
+        
+        managingModerator.DeactivateModerator(moderatorToDeactivate);
+        
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
+        await Context.SaveChangesAsync();
+
+        var command = new DeactivateModeratorCommand(
+            ManagingModeratorId: managingModerator.Id,
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.AlreadyDeactivated);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenModeratorNotFound()
     {
         // Arrange
-        var command = new UpdateModeratorPermissionsCommand(
+        var command = new DeactivateModeratorCommand(
             Guid.NewGuid(),
-            Guid.NewGuid(),
-            CanManageUsers: true,
-            CanManageContent: true,
-            CanViewReports: false,
-            CanManageModerators: false);
+            Guid.NewGuid());
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);

@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Application.Moderators.Commands.CreateModerator;
+using Application.Moderators.Commands.ActivateModerator;
+using Application.Moderators.Commands.DeactivateModerator;
 using Application.Moderators.Models;
 using Application.Moderators.Queries.GetModeratorInfo;
 using Application.Moderators.Queries.GetModeratorList;
 using Application.Moderators.Commands.UpdateModeratorPermissions;
-using Application.Moderators.Commands.UpdateModeratorStatus;
 using Application.Songs.Commands.DeleteSong;
 using Application.Songs.Commands.DeleteSongs;
 using Application.Songs.Commands.PublishSong;
@@ -84,7 +85,8 @@ public class ModeratorsController : BaseController
         return BadRequest(new { Detail = result.Error.Description });
     }
     
-    [HttpPut("{moderatorToUpdateId:guid}/permissions"), Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
+    [HttpPut("{moderatorToUpdateId:guid}/permissions")]
+    [Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -111,16 +113,42 @@ public class ModeratorsController : BaseController
         return BadRequest(new { Detail = result.Error.Description });
     }
     
-    [HttpPut("{moderatorId:guid}/status"), Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
+    [HttpPut("{moderatorToActivateId:guid}/activate")]
+    [Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateModeratorStatus(
-        Guid moderatorId,
-        UpdateModeratorStatusDto updateModeratorStatusDto,
+    public async Task<IActionResult> ActivateModerator(
+        Guid moderatorToActivateId,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateModeratorStatusCommand(moderatorId, updateModeratorStatusDto.IsActive);
+        var command = new ActivateModeratorCommand(
+            ManagingModeratorId: ModeratorId,
+            ModeratorToActivateId: moderatorToActivateId);
+        
+        var result = await Mediator.Send(command, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+    
+    [HttpPut("{moderatorToDeactivateId:guid}/deactivate")]
+    [Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeactivateModerator(
+        Guid moderatorToDeactivateId,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeactivateModeratorCommand(
+            ManagingModeratorId: ModeratorId,
+            ModeratorToDeactivateId: moderatorToDeactivateId);
+        
         var result = await Mediator.Send(command, cancellationToken);
         
         if (result.IsSuccess)
@@ -205,7 +233,9 @@ public class ModeratorsController : BaseController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> PublishSongs(PublishSongsDto publishSongsDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> PublishSongs(
+        PublishSongsDto publishSongsDto,
+        CancellationToken cancellationToken)
     {
         var command = new PublishSongsCommand(publishSongsDto.SongIds);
         var result = await Mediator.Send(command, cancellationToken);

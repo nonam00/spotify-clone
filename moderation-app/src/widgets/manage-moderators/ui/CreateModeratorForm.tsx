@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import {useShallow} from "zustand/react/shallow";
 
 import { Box, Button, Input } from "@/shared/ui";
@@ -19,7 +19,7 @@ const CreateModeratorForm = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     setMessage(null);
     setError(null);

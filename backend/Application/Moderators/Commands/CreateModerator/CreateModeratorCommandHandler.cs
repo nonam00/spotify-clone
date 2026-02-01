@@ -1,13 +1,14 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Models;
+using Domain.ValueObjects;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
-using Domain.Common;
-using Domain.Models;
-using Domain.ValueObjects;
+
 
 namespace Application.Moderators.Commands.CreateModerator;
 
@@ -36,7 +37,9 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
         if (managingModerator == null)
         {
-            _logger.LogInformation("Tried to create moderator but managing moderator does not exist.");
+            _logger.LogInformation(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
+                command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
 

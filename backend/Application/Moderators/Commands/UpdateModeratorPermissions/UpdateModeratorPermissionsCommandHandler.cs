@@ -78,7 +78,6 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
         }
         
         _moderatorsRepository.Update(moderatorToUpdate);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(

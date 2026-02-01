@@ -1,0 +1,81 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Models;
+using Application.Moderators.Errors;
+using Application.Moderators.Interfaces;
+using Application.Shared.Data;
+using Application.Shared.Messaging;
+
+namespace Application.Moderators.Commands.ActivateModerator;
+
+public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModeratorCommand, Result>
+{
+    private readonly IModeratorsRepository _moderatorsRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<ActivateModeratorCommandHandler> _logger;
+
+    public ActivateModeratorCommandHandler(
+        IModeratorsRepository moderatorsRepository,
+        IUnitOfWork unitOfWork,
+        ILogger<ActivateModeratorCommandHandler> logger)
+    {
+        _logger = logger;
+        _unitOfWork = unitOfWork;
+        _moderatorsRepository = moderatorsRepository;
+    }
+
+    public async Task<Result> Handle(ActivateModeratorCommand command, CancellationToken cancellationToken)
+    {
+        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+
+        if (managingModerator == null)
+        {
+            _logger.LogInformation(
+                "Tried to activate moderator {ModeratorToActivateId}" +
+                " but managing moderator {ManagingModeratorId} does not exist.",
+                command.ModeratorToActivateId, command.ManagingModeratorId);
+            return Result.Failure(ModeratorErrors.NotFound);
+        }
+
+        if (!managingModerator.IsActive)
+        {
+            _logger.LogInformation(
+                "Tried to activate moderator {ModeratorToActivateId}" +
+                " but managing moderator {ManagingModeratorId} does not exist.",
+                command.ModeratorToActivateId, command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!managingModerator.Permissions.CanManageModerators)
+        {
+            _logger.LogWarning(
+                "Tried to activate moderator {ModeratorToActivateId}" +
+                " but managing moderator {ManagingModeratorId} cannot manage moderators",
+                command.ModeratorToActivateId, command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+
+        var moderatorToActivate = await _moderatorsRepository.GetById(command.ModeratorToActivateId, cancellationToken);
+        
+        if (moderatorToActivate == null)
+        {
+            _logger.LogWarning(
+                "Tried to activate moderator {ModeratorToActivateId} but it does not exist.",
+                command.ModeratorToActivateId);
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
+        var activationResult = managingModerator.ActivateModerator(moderatorToActivate);
+
+        if (activationResult.IsFailure)
+        {
+            return activationResult;
+        }
+        
+        _moderatorsRepository.Update(moderatorToActivate);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        return Result.Success();
+    }
+}

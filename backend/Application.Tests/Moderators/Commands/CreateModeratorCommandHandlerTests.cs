@@ -111,12 +111,19 @@ public class CreateModeratorCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenManagingModeratorIsNotActive()
     {
         // Arrange
+        var admin = Moderator.Create(
+            new Email("admin@example.com"),
+            new PasswordHash("hashed_password_admin"),
+            "Admin",
+            ModeratorPermissions.CreateSuperAdmin());
+        
         var managingModerator = Moderator.Create(
             new Email("managing@example.com"),
             new PasswordHash("hashed_password1"),
             "Managing Moderator",
             ModeratorPermissions.CreateSuperAdmin());
-        managingModerator.Deactivate();
+
+        admin.DeactivateModerator(managingModerator);
         
         await Context.Moderators.AddAsync(managingModerator);
         await Context.SaveChangesAsync();
@@ -186,7 +193,8 @@ public class CreateModeratorCommandHandlerTests : TestBase
             new PasswordHash("hashed_password"),
             "Existing Moderator",
             ModeratorPermissions.CreateDefault());
-        existingModerator.Deactivate(); // Deactivate the moderator
+            
+        managingModerator.DeactivateModerator(existingModerator); // Deactivate the moderator
         
         await Context.Moderators.AddRangeAsync(managingModerator, existingModerator);
         await Context.SaveChangesAsync();
