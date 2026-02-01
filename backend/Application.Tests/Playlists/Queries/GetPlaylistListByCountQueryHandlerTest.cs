@@ -19,8 +19,8 @@ public class GetPlaylistListByCountQueryHandlerTest : TestBase
         user.Activate();
 
         user.CreatePlaylist();
-        var playlist2 = user.CreatePlaylist(); 
-        var playlist3 = user.CreatePlaylist();
+        var playlist2 = user.CreatePlaylist().Value; 
+        var playlist3 = user.CreatePlaylist().Value;
 
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();

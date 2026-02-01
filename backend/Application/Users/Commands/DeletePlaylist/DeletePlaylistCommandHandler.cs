@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Common;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Users.Commands.DeletePlaylist;
 

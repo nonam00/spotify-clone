@@ -272,7 +272,7 @@ public class PlaylistsController : BaseController
     public async Task<IActionResult> ReorderSongsInPlaylist(
         Guid playlistId, ReorderSongsDto reorderSongsDto, CancellationToken cancellationToken)
     {
-        var command = new ReorderSongsInPlaylistCommand(playlistId, reorderSongsDto.SongIds);
+        var command = new ReorderSongsInPlaylistCommand(UserId, playlistId, reorderSongsDto.SongIds);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)

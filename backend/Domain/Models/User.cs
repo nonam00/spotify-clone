@@ -112,12 +112,19 @@ public class User : AggregateRoot<Guid>
 
     private bool HasLikedSong(Guid songId) => _userLikedSongs.Any(s => s.SongId == songId);
 
-    public Playlist CreatePlaylist()
+    public Result<Playlist> CreatePlaylist()
     {
         var title = $"Playlist #{_playlists.Count + 1}";
-        var playlist = Playlist.Create(userId: Id, title: title);
-        _playlists.Add(playlist);
-        return playlist;
+        var createPlaylistResult = Playlist.Create(userId: Id, title: title);
+        
+        if (createPlaylistResult.IsFailure)
+        {
+            return createPlaylistResult;
+        }
+        
+        _playlists.Add(createPlaylistResult.Value);
+        
+        return createPlaylistResult;
     }
     
     public Playlist? RemovePlaylist(Guid playlistId)

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
-using Domain.Common;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
@@ -32,7 +32,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         if (playlist == null)
         {
             _logger.LogError(
-                "User {userId} tried update details of playlist {playlistId} but playlist does not exist",
+                "User {UserId} tried update details of playlist {PlaylistId} but playlist does not exist",
                 request.UserId, request.PlaylistId);
             return Result.Failure(PlaylistErrors.NotFound);
         }
@@ -40,7 +40,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         if (playlist.UserId != request.UserId)
         {
             _logger.LogWarning(
-                "User {userId} tried to update details of playlist {playlist} but playlist belongs to user {ownerId}",
+                "User {UserId} tried to update details of playlist {PlaylistId} but playlist belongs to user {OwnerId}",
                 request.UserId, request.PlaylistId, playlist.UserId);
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
@@ -52,10 +52,20 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
                 ? request.ImagePath
                 : playlist.ImagePath.Value);
 
-        playlist.UpdateDetails(title, description, newImagePath);
+        var updateResult = playlist.UpdateDetails(title, description, newImagePath);
+        if (updateResult.IsFailure)
+        {
+            _logger.LogInformation(
+                "User {UserId} tried to update details of playlist {PlaylistId}" +
+                " but domain occurred: {DomainErrorDescription}",
+                request.UserId, request.PlaylistId, updateResult.Error.Description);
+            return updateResult;
+        }
+        
         _playlistsRepository.Update(playlist);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return Result.Success();
     }
 }

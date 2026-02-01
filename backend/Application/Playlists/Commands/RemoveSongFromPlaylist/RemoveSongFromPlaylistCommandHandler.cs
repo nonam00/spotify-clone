@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
-using Domain.Common;
+using Domain.Models;
 
 namespace Application.Playlists.Commands.RemoveSongFromPlaylist;
 
@@ -31,7 +32,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
         if (playlist == null)
         {
             _logger.LogError(
-                "User {userId} tried to remove song {songId} from playlist {playlistId} but playlist does not exist",
+                "User {UserId} tried to remove song {SongId} from playlist {PlaylistId} but playlist does not exist",
                 request.UserId, request.SongId, request.PlaylistId);
             return Result.Failure(PlaylistErrors.NotFound);
         }
@@ -39,20 +40,32 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
         if (playlist.UserId != request.UserId)
         {
             _logger.LogWarning(
-                "User {userId} tried to add remove {songId} from playlist {playlist} that belongs to user {ownerId}",
+                "User {UserId} tried to remove {SongId} from playlist {PlaylistId} that belongs to user {OwnerId}",
                 request.UserId, request.SongId, request.PlaylistId, playlist.UserId);
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
 
-        if (!playlist.RemoveSong(request.SongId))
+        var removeSongsResult = playlist.RemoveSong(request.SongId);
+        if (removeSongsResult.IsFailure)
         {
-            _logger.LogError(
-                "User {userId} tried to remove song {songId} but it's not in playlist {playlistId}",
-                request.UserId, request.SongId, playlist.Id);        
-            return Result.Failure(PlaylistErrors.SongNotInPlaylist);
+            if (removeSongsResult.Error.Code == nameof(PlaylistDomainErrors.DoesntContainSong))
+            {
+                _logger.LogError(
+                    "User {UserId} tried to remove song {SongId} but it's not in playlist {PlaylistId}",
+                    request.UserId, request.SongId, playlist.Id);        
+            }
+            else
+            {
+                _logger.LogError(
+                    "User {UserId} tried to remove song {SongId} from playlist {PlaylistId}" +
+                    " but domain error occurred: {DomainErrorDescription}",
+                    request.UserId, request.SongId, playlist.Id, removeSongsResult.Error.Description);
+            }
+            return removeSongsResult;
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return Result.Success();
     }
 }

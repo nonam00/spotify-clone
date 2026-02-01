@@ -20,7 +20,7 @@ public class DeletePlaylistCommandHandlerTests : TestBase
             "Test User");
         user.Activate();
         
-        var playlist = user.CreatePlaylist();
+        var playlist = user.CreatePlaylist().Value;
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -108,7 +108,7 @@ public class DeletePlaylistCommandHandlerTests : TestBase
             "Test User");
         user.Activate();
         
-        var playlist = user.CreatePlaylist();
+        var playlist = user.CreatePlaylist().Value;
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();

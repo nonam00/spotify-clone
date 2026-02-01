@@ -14,26 +14,19 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldRemoveSongFromPlaylist_WhenValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
+
+        var playlist = user.CreatePlaylist().Value;
         
-        var playlist = Playlist.Create(user.Id, "My Playlist");
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
-        playlist.AddSong(song.Id);
+        playlist.AddSong(song);
         
-        await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
         await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
-        
-        Context.ChangeTracker.Clear();
         
         var command = new RemoveSongFromPlaylistCommand(user.Id, playlist.Id, song.Id);
 
@@ -53,19 +46,14 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenPlaylistNotFound()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
-        await Context.Users.AddAsync(user);
         await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new RemoveSongFromPlaylistCommand(user.Id, Guid.NewGuid(), song.Id);
@@ -82,21 +70,16 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenSongNotInPlaylist()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
+
+        var playlist = user.CreatePlaylist().Value;
         
-        var playlist = Playlist.Create(user.Id, "My Playlist");
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
-        await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
         await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new RemoveSongFromPlaylistCommand(user.Id, playlist.Id, song.Id);
@@ -106,17 +89,14 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(PlaylistErrors.SongNotInPlaylist);
+        result.Error.Should().Be(PlaylistDomainErrors.DoesntContainSong);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserNotOwner()
     {
         // Arrange
-        var owner = User.Create(
-            new Email("owner@example.com"),
-            new PasswordHash("hashed_password"),
-            "Owner");
+        var owner = User.Create(new Email("owner@example.com"), new PasswordHash("hashed_password"), "Owner");
         owner.Activate();
         
         var otherUser = User.Create(
@@ -124,19 +104,16 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
             new PasswordHash("hashed_password"),
             "Other User");
         otherUser.Activate();
+
+        var playlist = owner.CreatePlaylist().Value;
         
-        var playlist = Playlist.Create(owner.Id, "My Playlist");
-        
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
-        playlist.AddSong(song.Id);
+        playlist.AddSong(song);
         
-        await Context.Users.AddRangeAsync(owner, otherUser);
-        await Context.Playlists.AddAsync(playlist);
         await Context.Songs.AddAsync(song);
+        await Context.Users.AddRangeAsync(owner, otherUser);
         await Context.SaveChangesAsync();
         
         var command = new RemoveSongFromPlaylistCommand(otherUser.Id, playlist.Id, song.Id);
@@ -153,24 +130,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        var playlist = Playlist.Create(user.Id, "My Playlist");
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
-        
-        await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
-        await Context.Songs.AddAsync(song);
-        await Context.SaveChangesAsync();
-        
-        var command = new RemoveSongFromPlaylistCommand(Guid.Empty, playlist.Id, song.Id);
+        var command = new RemoveSongFromPlaylistCommand(Guid.Empty, Guid.NewGuid(), Guid.NewGuid());
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -185,22 +145,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenPlaylistIdIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
-        
-        await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
-        await Context.SaveChangesAsync();
-        
-        var command = new RemoveSongFromPlaylistCommand(user.Id, Guid.Empty, song.Id);
+        var command = new RemoveSongFromPlaylistCommand(Guid.NewGuid(), Guid.Empty, Guid.NewGuid());
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -215,19 +160,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenSongIdIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        var playlist = Playlist.Create(user.Id, "My Playlist");
-        
-        await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
-        await Context.SaveChangesAsync();
-        
-        var command = new RemoveSongFromPlaylistCommand(user.Id, playlist.Id, Guid.Empty);
+        var command = new RemoveSongFromPlaylistCommand(Guid.NewGuid(), Guid.NewGuid(), Guid.Empty);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
