@@ -69,6 +69,7 @@ public class ModeratorsController : BaseController
         [FromForm] CreateModeratorDto createModeratorDto, CancellationToken cancellationToken)
     {
         var command = new CreateModeratorCommand(
+            ModeratorId,
             Email: createModeratorDto.Email, 
             FullName: createModeratorDto.FullName,
             Password: createModeratorDto.Password,

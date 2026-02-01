@@ -12,10 +12,20 @@ namespace Application.Tests.Moderators.Commands;
 public class CreateModeratorCommandHandlerTests : TestBase
 {
     [Fact]
-    public async Task Handle_ShouldCreateModerator_WhenEmailIsUnique()
+    public async Task Handle_ShouldCreateModerator_WhenValid()
     {
         // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
         var command = new CreateModeratorCommand(
+            managingModerator.Id,
             "moderator@example.com",
             "Moderator Name", 
             "password123",
@@ -40,7 +50,17 @@ public class CreateModeratorCommandHandlerTests : TestBase
     public async Task Handle_ShouldCreateSuperAdmin_WhenIsSuperIsTrue()
     {
         // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+                
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
         var command = new CreateModeratorCommand(
+            managingModerator.Id,
             "admin@example.com",
             "Admin Name",
             "password123",
@@ -60,9 +80,72 @@ public class CreateModeratorCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorDoesNotHavePermissions()
+    {
+        // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateDefault());
+                
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
+        var command = new CreateModeratorCommand(
+            managingModerator.Id,
+            "admin@example.com",
+            "Admin Name",
+            "password123",
+            true);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.CannotManageModerators);
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenManagingModeratorIsNotActive()
+    {
+        // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        managingModerator.Deactivate();
+        
+        await Context.Moderators.AddAsync(managingModerator);
+        await Context.SaveChangesAsync();
+        
+        var command = new CreateModeratorCommand(
+            managingModerator.Id,
+            "admin@example.com",
+            "Admin Name",
+            "password123",
+            true);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.NotActive);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenEmailAlreadyExistsAndActive()
     {
         // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
         var existingModerator = Moderator.Create(
             new Email("moderator@example.com"),
             new PasswordHash("hashed_password"),
@@ -70,10 +153,11 @@ public class CreateModeratorCommandHandlerTests : TestBase
             ModeratorPermissions.CreateDefault());
         // Already active after creation
         
-        await Context.Moderators.AddAsync(existingModerator);
+        await Context.Moderators.AddRangeAsync(managingModerator, existingModerator);
         await Context.SaveChangesAsync();
         
         var command = new CreateModeratorCommand(
+            managingModerator.Id,
             "moderator@example.com",
             "New Moderator",
             "password123",
@@ -91,6 +175,12 @@ public class CreateModeratorCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenEmailAlreadyExistsButNotActive()
     {
         // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
         var existingModerator = Moderator.Create(
             new Email("moderator@example.com"),
             new PasswordHash("hashed_password"),
@@ -98,10 +188,11 @@ public class CreateModeratorCommandHandlerTests : TestBase
             ModeratorPermissions.CreateDefault());
         existingModerator.Deactivate(); // Deactivate the moderator
         
-        await Context.Moderators.AddAsync(existingModerator);
+        await Context.Moderators.AddRangeAsync(managingModerator, existingModerator);
         await Context.SaveChangesAsync();
         
         var command = new CreateModeratorCommand(
+            managingModerator.Id,
             "moderator@example.com", 
             "New Moderator",
             "password123",

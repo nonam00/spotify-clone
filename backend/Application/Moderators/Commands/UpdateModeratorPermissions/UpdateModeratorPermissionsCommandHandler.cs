@@ -37,6 +37,14 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
                 command.ManagingModeratorId, command.ModeratorToUpdateId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
+        
+        if (!managingModerator.IsActive)
+        {
+            _logger.LogInformation(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
 
         if (!managingModerator.Permissions.CanManageModerators)
         {

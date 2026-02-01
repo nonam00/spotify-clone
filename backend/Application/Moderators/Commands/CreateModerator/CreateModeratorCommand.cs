@@ -3,4 +3,9 @@ using Domain.Common;
 
 namespace Application.Moderators.Commands.CreateModerator;
 
-public record CreateModeratorCommand(string Email, string FullName, string Password, bool IsSuper) : ICommand<Result>;
+public record CreateModeratorCommand(
+    Guid ManagingModeratorId,
+    string Email,
+    string FullName,
+    string Password,
+    bool IsSuper) : ICommand<Result>;

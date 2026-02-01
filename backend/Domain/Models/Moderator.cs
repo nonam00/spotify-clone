@@ -54,6 +54,23 @@ public class Moderator : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result<Moderator> CreateModerator(
+        Email email, PasswordHash passwordHash, string? fullName = null, bool isSuper = false)
+    {
+        if (!Permissions.CanManageModerators)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+
+        var permissions = isSuper
+            ? ModeratorPermissions.CreateSuperAdmin()
+            : ModeratorPermissions.CreateDefault();
+        
+        var newModerator = Create(email, passwordHash, fullName, permissions);
+
+        return Result<Moderator>.Success(newModerator);
+    }
+
     public Result UpdateModeratorPermissions(Moderator moderatorToUpdate, ModeratorPermissions permissions)
     {
         if (!Permissions.CanManageModerators)
@@ -67,12 +84,15 @@ public class Moderator : AggregateRoot<Guid>
 
 public static class ModeratorDomainErrors
 {
+    public static readonly Error NotActive =
+        new(nameof(NotActive), "The moderator has not been activated and cannot perform actions");
+    
     public static readonly Error AlreadyActive =
-        new Error(nameof(AlreadyActive), "Moderator is already active");
+        new(nameof(AlreadyActive), "Moderator is already active");
     
     public static readonly Error AlreadyDeactivated =
-        new Error(nameof(AlreadyDeactivated), "Moderator is already deactivated");
+        new(nameof(AlreadyDeactivated), "Moderator is already deactivated");
     
     public static readonly Error CannotManageModerators =
-        new Error(nameof(CannotManageModerators), "Moderator cannot manage moderators");
+        new(nameof(CannotManageModerators), "Moderator cannot manage moderators");
 }

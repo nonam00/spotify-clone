@@ -32,6 +32,30 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
     public async Task<Result> Handle(CreateModeratorCommand command, CancellationToken cancellationToken)
     {
+        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+
+        if (managingModerator == null)
+        {
+            _logger.LogInformation("Tried to create moderator but managing moderator does not exist.");
+            return Result.Failure(ModeratorErrors.NotFound);
+        }
+
+        if (!managingModerator.IsActive)
+        {
+            _logger.LogInformation(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!managingModerator.Permissions.CanManageModerators)
+        {
+            _logger.LogWarning(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} cannot manage moderators",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
         var checkModerator = await _moderatorsRepository.GetByEmail(command.Email, cancellationToken);
         
         if (checkModerator != null)
@@ -39,26 +63,30 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
             if (!checkModerator.IsActive)
             {
                 _logger.LogInformation(               
-                    "Tried to create user with email {email} which is already exists but not active.",
+                    "Tried to create moderator with email {email} which is already exists but not active.",
                     command.Email);
                 return Result.Failure(ModeratorErrors.AlreadyExistButNotActive);
             }
+            
             _logger.LogInformation(
                 "Tried to create user with email {email} which is already active.",
                 command.Email);
+            
             return Result.Failure(ModeratorErrors.AlreadyExist);
         }
-        
-        var permissions = command.IsSuper
-            ? ModeratorPermissions.CreateSuperAdmin()
-            : ModeratorPermissions.CreateDefault();
 
         var email = new Email(command.Email);
         var passwordHash = new PasswordHash(_passwordHasher.Generate(command.Password));
         
-        var moderator = Moderator.Create(email, passwordHash, command.FullName, permissions);
+        var createModeratorResult = managingModerator.CreateModerator(
+            email, passwordHash, command.FullName, command.IsSuper);
+
+        if (createModeratorResult.IsFailure)
+        {
+            return createModeratorResult;
+        }
         
-        await _moderatorsRepository.Add(moderator, cancellationToken);
+        await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         return Result.Success();
