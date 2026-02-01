@@ -5,6 +5,7 @@ using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Common;
 using Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 

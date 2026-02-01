@@ -1,4 +1,4 @@
-using Application.Shared.Data;
+using Domain.Common;
 using FluentValidation.Results;
 
 namespace Application.Shared.Errors;

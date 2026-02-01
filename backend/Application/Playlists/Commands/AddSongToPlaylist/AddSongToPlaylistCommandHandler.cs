@@ -4,6 +4,7 @@ using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Domain.Common;
 
 namespace Application.Playlists.Commands.AddSongToPlaylist;
 

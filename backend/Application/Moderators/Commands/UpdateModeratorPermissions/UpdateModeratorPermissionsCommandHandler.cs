@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Models;
 using Domain.ValueObjects;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
@@ -26,11 +28,31 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
 
     public async Task<Result> Handle(UpdateModeratorPermissionsCommand command, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(command.ModeratorId, cancellationToken);
+        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
 
-        if (moderator is null)
+        if (managingModerator is null)
         {
-            _logger.LogWarning("Moderator {ModeratorId} not found while updating permissions", command.ModeratorId);
+            _logger.LogWarning(
+                "Managing moderator {ManagingModeratorId} not found while updating permissions for moderator {ModeratorToUpdateId}",
+                command.ManagingModeratorId, command.ModeratorToUpdateId);
+            return Result.Failure(ModeratorErrors.NotFound);
+        }
+
+        if (!managingModerator.Permissions.CanManageModerators)
+        {
+            _logger.LogWarning(
+                "Managing moderator {ManagingModeratorId} cannot manage moderators, so cannot update permissions for moderator {ModeratorToUpdateId}",
+                command.ManagingModeratorId, command.ModeratorToUpdateId);
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
+        var moderatorToUpdate = await _moderatorsRepository.GetById(command.ModeratorToUpdateId, cancellationToken);
+        
+        if (moderatorToUpdate is null)
+        {
+            _logger.LogWarning(
+                "Moderator to update {ModeratorToUpdateId} not found while updating permissions",
+                command.ModeratorToUpdateId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
 
@@ -40,12 +62,20 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
             command.CanViewReports,
             command.CanManageModerators);
 
-        moderator.UpdatePermissions(permissions);
-        _moderatorsRepository.Update(moderator);
+        var updateResult = managingModerator.UpdateModeratorPermissions(moderatorToUpdate, permissions);
+
+        if (updateResult.IsFailure)
+        {
+            return Result.Failure(updateResult.Error);
+        }
+        
+        _moderatorsRepository.Update(moderatorToUpdate);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Moderator {ModeratorId} permissions were updated", command.ModeratorId);
+        _logger.LogInformation(
+            "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}",
+            command.ModeratorToUpdateId, command.ManagingModeratorId);
 
         return Result.Success();
     }

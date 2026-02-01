@@ -1,8 +1,8 @@
 import Image from "next/image"
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
 
-import {getUserInfoServer} from "@/entities/user";
-import {getLikedSongs} from "@/entities/song";
+import { getUserInfoServer } from "@/entities/user";
+import { getLikedSongs } from "@/entities/song";
 import { Header } from "@/widgets/header";
 import { LikedContent } from "@/_pages/liked";
 

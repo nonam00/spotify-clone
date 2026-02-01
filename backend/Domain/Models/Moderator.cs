@@ -34,9 +34,45 @@ public class Moderator : AggregateRoot<Guid>
 
     public void ChangePassword(PasswordHash newPasswordHash) => PasswordHash = newPasswordHash;
 
-    public void Deactivate() => IsActive = false;
-    
-    public void Activate() => IsActive = true;
+    public Result Deactivate()
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyDeactivated);
+        }
+        IsActive = false;
+        return Result.Success();
+    }
 
-    public void UpdatePermissions(ModeratorPermissions permissions) => Permissions = permissions;
+    public Result Activate()
+    {
+        if (IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyActive);
+        }
+        IsActive = true;
+        return Result.Success();
+    }
+
+    public Result UpdateModeratorPermissions(Moderator moderatorToUpdate, ModeratorPermissions permissions)
+    {
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        moderatorToUpdate.Permissions =  permissions;
+        return Result.Success();
+    }
+}
+
+public static class ModeratorDomainErrors
+{
+    public static readonly Error AlreadyActive =
+        new Error(nameof(AlreadyActive), "Moderator is already active");
+    
+    public static readonly Error AlreadyDeactivated =
+        new Error(nameof(AlreadyDeactivated), "Moderator is already deactivated");
+    
+    public static readonly Error CannotManageModerators =
+        new Error(nameof(CannotManageModerators), "Moderator cannot manage moderators");
 }

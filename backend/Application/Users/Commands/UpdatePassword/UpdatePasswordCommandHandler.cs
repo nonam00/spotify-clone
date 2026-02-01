@@ -6,6 +6,7 @@ using Application.Shared.Interfaces;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
+using Domain.Common;
 
 namespace Application.Users.Commands.UpdatePassword;
 

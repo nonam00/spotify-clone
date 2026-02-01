@@ -7,6 +7,7 @@ using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Common;
 
 namespace Application.Users.Commands.CreateUser;
 

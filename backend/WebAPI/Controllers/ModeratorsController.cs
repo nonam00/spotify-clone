@@ -83,17 +83,18 @@ public class ModeratorsController : BaseController
         return BadRequest(new { Detail = result.Error.Description });
     }
     
-    [HttpPut("{moderatorId:guid}/permissions"), Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
+    [HttpPut("{moderatorToUpdateId:guid}/permissions"), Authorize(Policy = AuthorizationPolicies.CanManageModerators)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateModeratorPermissions(
-        Guid moderatorId,
+        Guid moderatorToUpdateId,
         UpdateModeratorPermissionsDto updateModeratorPermissionsDto,
         CancellationToken cancellationToken)
     {
         var command = new UpdateModeratorPermissionsCommand(
-            moderatorId,
+            ModeratorId,
+            moderatorToUpdateId,
             updateModeratorPermissionsDto.CanManageUsers,
             updateModeratorPermissionsDto.CanManageContent,
             updateModeratorPermissionsDto.CanViewReports,

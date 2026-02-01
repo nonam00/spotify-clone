@@ -1,4 +1,4 @@
-using Application.Shared.Data;
+using Domain.Common;
 
 namespace Application.Songs.Errors;
 

@@ -2,6 +2,7 @@ using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
+using Domain.Common;
 
 namespace Application.Songs.Commands.PublishSongs;
 

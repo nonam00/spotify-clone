@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
-
-using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Application.Users.Models;
+using Domain.Common;
 
 namespace Application.Users.Queries.GetUserInfo;
 

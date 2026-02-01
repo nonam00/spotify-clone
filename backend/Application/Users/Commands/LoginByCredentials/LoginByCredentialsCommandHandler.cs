@@ -7,6 +7,7 @@ using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
+using Domain.Common;
 
 namespace Application.Users.Commands.LoginByCredentials;
 

@@ -1,4 +1,4 @@
-namespace Application.Shared.Data;
+namespace Domain.Common;
 
 public class Result
 {

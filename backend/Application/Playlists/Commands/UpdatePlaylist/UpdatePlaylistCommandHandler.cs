@@ -5,6 +5,7 @@ using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
+using Domain.Common;
 
 namespace Application.Playlists.Commands.UpdatePlaylist;
 
