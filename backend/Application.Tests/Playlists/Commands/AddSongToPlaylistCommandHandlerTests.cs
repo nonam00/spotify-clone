@@ -23,9 +23,7 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -61,9 +59,7 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -98,10 +94,8 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         
         var playlist = Playlist.Create(owner.Id, "My Playlist");
         var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Song", 
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(owner);
@@ -133,9 +127,7 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         playlist.AddSong(song.Id);
@@ -168,9 +160,7 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -201,9 +191,7 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);

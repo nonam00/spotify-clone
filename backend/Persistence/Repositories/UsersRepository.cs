@@ -28,7 +28,16 @@ public class UsersRepository : IUsersRepository
         return user;
     }
 
-    public async Task<User?> GetByIdWithSongs(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdWithUploadedSongs(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.UploadedSongs)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithLikedSongs(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .Include(u => u.UserLikedSongs)
@@ -96,7 +105,7 @@ public class UsersRepository : IUsersRepository
                 u.FullName ?? "",
                 u.IsActive,
                 u.CreatedAt,
-                u.PublishedSongs.Count
+                u.UploadedSongs.Count
             ))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

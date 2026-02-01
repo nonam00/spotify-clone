@@ -1,17 +1,17 @@
-﻿using FluentValidation;
+using FluentValidation;
 
-namespace Application.Songs.Commands.CreateSong;
+namespace Application.Users.Commands.UploadSong;
 
-public class CreateSongCommandValidator : AbstractValidator<CreateSongCommand>
+public class UploadSongCommandValidator : AbstractValidator<UploadSongCommand>
 {
-    public CreateSongCommandValidator()
+    public UploadSongCommandValidator()
     {
         RuleFor(command => command.UserId)
             .NotEqual(Guid.Empty)
             .WithMessage("User ID is required")
             .WithErrorCode("400");
 
-        RuleFor(command => command.Title)
+        RuleFor(command => command.Title.Trim())
             .NotEmpty()
             .WithMessage("Title is required")
             .WithErrorCode("400")
@@ -19,7 +19,7 @@ public class CreateSongCommandValidator : AbstractValidator<CreateSongCommand>
             .WithMessage("Title cannot exceed 200 characters")
             .WithErrorCode("400");
 
-        RuleFor(command => command.Author)
+        RuleFor(command => command.Author.Trim())
             .NotEmpty()
             .WithMessage("Author is required")
             .WithErrorCode("400")

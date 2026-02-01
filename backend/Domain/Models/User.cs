@@ -17,12 +17,12 @@ public class User : AggregateRoot<Guid>
     private readonly List<LikedSong> _userLikedSongs = [];
     private readonly List<Playlist> _playlists = [];
     private readonly List<RefreshToken> _refreshTokens = [];
-    private readonly List<Song> _publishedSongs = [];
+    private readonly List<Song> _uploadedSongs = [];
     
     public IReadOnlyCollection<Playlist> Playlists => _playlists.AsReadOnly();
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
     public IReadOnlyCollection<LikedSong> UserLikedSongs => _userLikedSongs.AsReadOnly();
-    public IReadOnlyCollection<Song> PublishedSongs => _publishedSongs.AsReadOnly();
+    public IReadOnlyCollection<Song> UploadedSongs => _uploadedSongs.AsReadOnly();
     
 
     private User() { } // For EF Core
@@ -78,6 +78,20 @@ public class User : AggregateRoot<Guid>
         return refreshToken;
     }
 
+    public Song UploadSong(string title, string author, FilePath audioPath, FilePath imagePath)
+    {
+        var song = Song.Create(
+            title: title,
+            author: author,
+            songPath: audioPath,
+            imagePath: imagePath,
+            uploaderId: Id);
+        
+        _uploadedSongs.Add(song);
+        
+        return song;
+    }
+    
     public bool LikeSong(Guid songId)
     {
         if (HasLikedSong(songId))

@@ -45,7 +45,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(u => u.CreatedAt).IsRequired();
 
-        builder.HasMany(u => u.PublishedSongs)
+        builder.HasMany(u => u.UploadedSongs)
             .WithOne(s => s.Uploader)
             .HasForeignKey(u => u.UploaderId)
             .OnDelete(DeleteBehavior.Cascade);

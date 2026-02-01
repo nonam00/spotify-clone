@@ -16,9 +16,7 @@ public class PublishSongCommandHandlerTests : TestBase
         // Arrange
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         
         await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();

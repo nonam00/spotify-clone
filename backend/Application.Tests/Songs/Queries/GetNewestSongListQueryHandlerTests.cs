@@ -12,9 +12,9 @@ public class GetNewestSongListQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnNewestPublishedSongs()
     {
         // Arrange
-        var song1 = Song.Create("Song 1", new FilePath("song1.mp3"), new FilePath("img1.jpg"), "Author");
-        var song2 = Song.Create("Song 2", new FilePath("song2.mp3"), new FilePath("img2.jpg"), "Author");
-        var song3 = Song.Create("Song 3", new FilePath("song3.mp3"), new FilePath("img3.jpg"), "Author");
+        var song1 = Song.Create("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg"));
+        var song2 = Song.Create("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg"));
+        var song3 = Song.Create("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg"));
 
         song1.Publish();
         song2.Publish();

@@ -16,11 +16,12 @@ public class Song : AggregateRoot<Guid>
     public DateTime CreatedAt { get; private set; }
 
     // Navigation properties for EF Core (not part of domain logic)
-    public virtual User? Uploader { get; private init; }
+    public virtual User? Uploader { get; private set; }
 
     private Song() { } // For EF Core
     
-    public static Song Create(string title, FilePath songPath, FilePath imagePath, string author, Guid? uploaderId = null)
+    public static Song Create(string title, string author, FilePath songPath, FilePath imagePath,
+        Guid? uploaderId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {

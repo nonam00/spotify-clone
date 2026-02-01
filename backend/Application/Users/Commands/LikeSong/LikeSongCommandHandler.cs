@@ -25,7 +25,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
 
     public async Task<Result> Handle(LikeSongCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithSongs(request.UserId, cancellationToken);
+        var user = await _usersRepository.GetByIdWithLikedSongs(request.UserId, cancellationToken);
 
         if (user == null)
         {

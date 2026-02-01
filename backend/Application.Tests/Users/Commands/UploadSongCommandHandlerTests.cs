@@ -1,13 +1,12 @@
+using Application.Users.Commands.UploadSong;
+using Domain.Models;
+using Domain.ValueObjects;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Songs.Commands.CreateSong;
-using Domain.Models;
-using Domain.ValueObjects;
+namespace Application.Tests.Users.Commands;
 
-namespace Application.Tests.Songs.Commands;
-
-public class CreateSongCommandHandlerTests : TestBase
+public class UploadSongCommandHandlerTests : TestBase
 {
     [Fact]
     public async Task Handle_ShouldCreateSong_WhenValidData()
@@ -24,7 +23,7 @@ public class CreateSongCommandHandlerTests : TestBase
         
         Context.ChangeTracker.Clear();
         
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "Test Author",
@@ -36,9 +35,12 @@ public class CreateSongCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeEmpty();
-        
-        var song = await Context.Songs.FirstOrDefaultAsync(s => s.Id == result.Value);
+
+        var song = await Context.Users
+            .Where(u => u.Id == user.Id)
+            .Include(u => u.UploadedSongs)
+            .SelectMany(u => u.UploadedSongs)
+            .FirstOrDefaultAsync();
         
         song.Should().NotBeNull();
     }
@@ -47,8 +49,19 @@ public class CreateSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldCreateUnpublishedSong_ByDefault()
     {
         // Arrange
-        var command = new CreateSongCommand(
-            Guid.NewGuid(),
+        var user = User.Create(
+            new Email("test@example.com"),
+            new PasswordHash("hashed_password"),
+            "Test User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        Context.ChangeTracker.Clear();
+        
+        var command = new UploadSongCommand(
+            user.Id,
             "Test Song",
             "Test Author",
             "song.mp3",
@@ -60,7 +73,11 @@ public class CreateSongCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         
-        var song = await Context.Songs.FirstOrDefaultAsync(s => s.Id == result.Value);
+        var song = await Context.Users
+            .Where(u => u.Id == user.Id)
+            .Include(u => u.UploadedSongs)
+            .SelectMany(u => u.UploadedSongs)
+            .FirstOrDefaultAsync();
         
         song.Should().NotBeNull();
         song.IsPublished.Should().BeFalse();
@@ -70,7 +87,7 @@ public class CreateSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
     {
         // Arrange
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             Guid.Empty,
             "Test Song",
             "Test Author",
@@ -99,7 +116,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "",
             "Test Author",
@@ -129,7 +146,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.SaveChangesAsync();
         
         var longTitle = new string('a', 201);
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             longTitle,
             "Test Author",
@@ -158,7 +175,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "",
@@ -188,7 +205,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.SaveChangesAsync();
         
         var longAuthor = new string('a', 201);
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             longAuthor,
@@ -217,7 +234,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "Test Author",
@@ -247,7 +264,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.SaveChangesAsync();
         
         var longPath = new string('a', 501);
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "Test Author",
@@ -276,7 +293,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "Test Author",
@@ -306,7 +323,7 @@ public class CreateSongCommandHandlerTests : TestBase
         await Context.SaveChangesAsync();
         
         var longPath = new string('a', 501);
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             user.Id,
             "Test Song",
             "Test Author",

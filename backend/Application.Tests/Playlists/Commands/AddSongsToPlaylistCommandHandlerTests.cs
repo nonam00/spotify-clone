@@ -23,14 +23,10 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song1 = Song.Create(
             "Test Song 1",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         var song2 = Song.Create(
             "Test Song 2",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         
         song1.Publish();
         song2.Publish();
@@ -71,14 +67,10 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var song1 = Song.Create(
             "Test Song 1",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         var song2 = Song.Create(
             "Test Song 2",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         
         song1.Publish();
         song2.Publish();
@@ -112,9 +104,7 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -151,9 +141,7 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         
         song.Publish();
         

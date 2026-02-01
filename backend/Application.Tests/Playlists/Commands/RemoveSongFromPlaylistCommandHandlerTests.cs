@@ -23,9 +23,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         playlist.AddSong(song.Id);
@@ -63,9 +61,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -95,9 +91,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -135,9 +129,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         playlist.AddSong(song.Id);
@@ -170,9 +162,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         var playlist = Playlist.Create(user.Id, "My Playlist");
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -203,9 +193,7 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Users.AddAsync(user);

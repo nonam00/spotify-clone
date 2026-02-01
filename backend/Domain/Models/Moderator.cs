@@ -15,7 +15,8 @@ public class Moderator : AggregateRoot<Guid>
 
     private Moderator() { }
 
-    public static Moderator Create(Email email, PasswordHash passwordHash, string? fullName = null, ModeratorPermissions? permissions = null)
+    public static Moderator Create(
+        Email email, PasswordHash passwordHash, string? fullName = null, ModeratorPermissions? permissions = null)
     {
         var moderator = new Moderator
         {

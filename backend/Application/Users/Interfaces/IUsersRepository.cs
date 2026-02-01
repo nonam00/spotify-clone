@@ -7,7 +7,8 @@ public interface IUsersRepository
 {
     Task Add(User user, CancellationToken cancellationToken = default);
     Task<User?> GetById(Guid id, CancellationToken cancellationToken = default);
-    Task<User?> GetByIdWithSongs(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdWithUploadedSongs(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdWithLikedSongs(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByIdWithPlaylists(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByEmail(string email, CancellationToken cancellationToken = default);
     Task<User?> GetByEmailWithRefreshTokens(string email, CancellationToken cancellationToken = default);

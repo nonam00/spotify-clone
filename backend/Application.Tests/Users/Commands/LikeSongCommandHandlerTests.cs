@@ -22,10 +22,9 @@ public class LikeSongCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
             "Test Author",
-            user.Id);
+            new FilePath("song.mp3"), new FilePath("image.jpg"), user.Id);
+        
         song.Publish();
         
         await Context.Users.AddAsync(user);
@@ -53,9 +52,7 @@ public class LikeSongCommandHandlerTests : TestBase
         // Arrange
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Songs.AddAsync(song);
@@ -83,10 +80,8 @@ public class LikeSongCommandHandlerTests : TestBase
         
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
             "Test Author",
-            user.Id);
+            new FilePath("song.mp3"), new FilePath("image.jpg"), user.Id);
         song.Publish();
         
         user.LikeSong(song.Id);
@@ -111,9 +106,7 @@ public class LikeSongCommandHandlerTests : TestBase
         // Arrange
         var song = Song.Create(
             "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
         song.Publish();
         
         await Context.Songs.AddAsync(song);
