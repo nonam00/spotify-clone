@@ -11,6 +11,11 @@ namespace Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:btree_gin", ",,")
+                .Annotation("Npgsql:PostgresExtension:pg_trgm", ",,")
+                .Annotation("Npgsql:PostgresExtension:unaccent", ",,");
+
             migrationBuilder.CreateTable(
                 name: "moderators",
                 columns: table => new
@@ -103,7 +108,10 @@ namespace Persistence.Migrations
                     image_path = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     uploader_id = table.Column<Guid>(type: "uuid", nullable: true),
                     is_published = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    marked_for_deletion = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    author_lower = table.Column<string>(type: "text", nullable: true, computedColumnSql: "lower(f_unaccent(trim(\"author\")))", stored: true),
+                    title_lower = table.Column<string>(type: "text", nullable: true, computedColumnSql: "lower(f_unaccent(trim(\"title\")))", stored: true)
                 },
                 constraints: table =>
                 {
@@ -168,6 +176,11 @@ namespace Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "moderators",
+                columns: new[] { "id", "created_at", "email", "full_name", "is_active", "password_hash", "can_manage_content", "can_manage_moderators", "can_manage_users", "can_view_reports" },
+                values: new object[] { new Guid("12dbc10a-a7a9-47a3-9a1b-513aae383f1f"), new DateTime(2023, 4, 14, 21, 0, 0, 0, DateTimeKind.Utc), "admin@admin.com", "Admin", true, "$2a$11$1Aw9/S0I8DnN7VDPmP4EuOl3qREfsNBFwfc8JOIqhldNYDYMBARLC", true, true, true, true });
+
             migrationBuilder.CreateIndex(
                 name: "ix_liked_songs_song_id",
                 table: "liked_songs",
@@ -206,16 +219,18 @@ namespace Persistence.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_songs_author",
+                name: "ix_songs_author_lower",
                 table: "songs",
-                column: "author")
-                .Annotation("Npgsql:IndexMethod", "gin");
+                column: "author_lower")
+                .Annotation("Npgsql:IndexMethod", "gin")
+                .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_songs_title",
+                name: "ix_songs_title_lower",
                 table: "songs",
-                column: "title")
-                .Annotation("Npgsql:IndexMethod", "gin");
+                column: "title_lower")
+                .Annotation("Npgsql:IndexMethod", "gin")
+                .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_songs_uploader_id",
