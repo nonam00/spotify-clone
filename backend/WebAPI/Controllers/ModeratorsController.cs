@@ -5,15 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Moderators.Commands.CreateModerator;
 using Application.Moderators.Commands.ActivateModerator;
 using Application.Moderators.Commands.DeactivateModerator;
+using Application.Moderators.Commands.DeleteSong;
+using Application.Moderators.Commands.DeleteSongs;
+using Application.Moderators.Commands.PublishSong;
+using Application.Moderators.Commands.PublishSongs;
+using Application.Moderators.Commands.UnpublishSong;
 using Application.Moderators.Models;
 using Application.Moderators.Queries.GetModeratorInfo;
 using Application.Moderators.Queries.GetModeratorList;
 using Application.Moderators.Commands.UpdateModeratorPermissions;
-using Application.Songs.Commands.DeleteSong;
-using Application.Songs.Commands.DeleteSongs;
-using Application.Songs.Commands.PublishSong;
-using Application.Songs.Commands.PublishSongs;
-using Application.Songs.Commands.UnpublishSong;
 using Application.Songs.Models;
 using Application.Songs.Queries.GetUnpublishedSongList;
 using Application.Songs.Queries.GetUploadedSongsByUserId;
@@ -165,7 +165,7 @@ public class ModeratorsController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteSong(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new DeleteSongCommand(songId);
+        var command = new DeleteSongCommand(ModeratorId, songId);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
@@ -182,7 +182,7 @@ public class ModeratorsController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteSongs(DeleteSongsDto deleteSongsDto, CancellationToken cancellationToken)
     {
-        var command = new DeleteSongsCommand(deleteSongsDto.SongIds);
+        var command = new DeleteSongsCommand(ModeratorId, deleteSongsDto.SongIds);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
@@ -217,7 +217,7 @@ public class ModeratorsController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> PublishSong(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new PublishSongCommand(songId);
+        var command = new PublishSongCommand(ModeratorId, songId);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
@@ -237,7 +237,7 @@ public class ModeratorsController : BaseController
         PublishSongsDto publishSongsDto,
         CancellationToken cancellationToken)
     {
-        var command = new PublishSongsCommand(publishSongsDto.SongIds);
+        var command = new PublishSongsCommand(ModeratorId, publishSongsDto.SongIds);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
@@ -254,7 +254,7 @@ public class ModeratorsController : BaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UnpublishSong(Guid songId, CancellationToken cancellationToken)
     {
-        var command = new UnpublishSongCommand(songId);
+        var command = new UnpublishSongCommand(ModeratorId, songId);
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)

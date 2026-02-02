@@ -9,7 +9,6 @@ using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
-
 namespace Application.Moderators.Commands.CreateModerator;
 
 public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorCommand, Result>
@@ -37,7 +36,7 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
         if (managingModerator is null)
         {
-            _logger.LogInformation(
+            _logger.LogError(
                 "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
                 command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
@@ -45,7 +44,7 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
         if (!managingModerator.IsActive)
         {
-            _logger.LogInformation(
+            _logger.LogError(
                 "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
                 command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
@@ -66,14 +65,16 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
             if (!checkModerator.IsActive)
             {
                 _logger.LogInformation(               
-                    "Tried to create moderator with email {email} which is already exists but not active.",
-                    command.Email);
+                    "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
+                    " but moderator {ExistingModeratorWithEmailId} with this email already exists but not active.",
+                    command.ManagingModeratorId, command.Email, checkModerator.Id);
                 return Result.Failure(ModeratorErrors.AlreadyExistButNotActive);
             }
             
             _logger.LogInformation(
-                "Tried to create user with email {email} which is already active.",
-                command.Email);
+                "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
+                " but moderator {ExistingModeratorWithEmailId} with this email already exists.",
+                command.ManagingModeratorId, command.Email, checkModerator.Id);
             
             return Result.Failure(ModeratorErrors.AlreadyExist);
         }
@@ -86,6 +87,10 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
         if (createModeratorResult.IsFailure)
         {
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to create moderator" +
+                " but domain error occurred: {DomainErrorDescription}.",
+                command.ManagingModeratorId, createModeratorResult.Error.Description);
             return createModeratorResult;
         }
         

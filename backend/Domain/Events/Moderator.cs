@@ -3,13 +3,13 @@ using Domain.ValueObjects;
 
 namespace Domain.Events;
 
-public class SongDeletedEvent : DomainEvent
+public class ModeratorDeletedSongEvent : DomainEvent
 {
     public Guid SongId { get; }
     public FilePath Image { get; }
     public FilePath Audio { get; }
     
-    public SongDeletedEvent(Guid id, FilePath image, FilePath audio)
+    public ModeratorDeletedSongEvent(Guid id, FilePath image, FilePath audio)
     {
         SongId = id;
         Image = image;

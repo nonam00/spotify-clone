@@ -8,6 +8,7 @@ public interface ISongsRepository
 {
     Task<Song?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<List<Song>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken = default);
+    Task<List<Song>> GetMarkedForDeletion(CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetList(CancellationToken cancellationToken = default);
     Task<List<SongVm>> TakeNewestList(int count = 100, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default);
@@ -22,6 +23,5 @@ public interface ISongsRepository
     Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default);
     void Update(Song song);
     void UpdateRange(IEnumerable<Song> songs);
-    void Delete(Song song);
     void DeleteRange(IEnumerable<Song> songs);
 }

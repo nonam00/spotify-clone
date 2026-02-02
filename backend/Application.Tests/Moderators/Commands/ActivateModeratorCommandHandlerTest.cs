@@ -56,32 +56,18 @@ public class ActivateModeratorCommandHandlerTest : TestBase
     public async Task Handle_ShouldReturnFailure_WhenManagingModeratorDoesNotHavePermissions()
     {
         // Arrange
-        var admin = Moderator.Create(
-            new Email("admin@example.com"),
-            new PasswordHash("hashed_password_admin"),
-            "Admin",
-            ModeratorPermissions.CreateSuperAdmin());
-        
         var managingModerator = Moderator.Create(
             new Email("managing@example.com"),
             new PasswordHash("hashed_password1"),
             "Managing Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var moderatorToActivate = Moderator.Create(
-            new Email("toupdate@example.com"),
-            new PasswordHash("hashed_password2"),
-            "Moderator",
-            ModeratorPermissions.CreateDefault());
-        
-        admin.DeactivateModerator(moderatorToActivate);
-        
-        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToActivate);
+        await Context.Moderators.AddAsync(managingModerator);
         await Context.SaveChangesAsync();
         
         var command = new ActivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToActivateId: moderatorToActivate.Id);
+            ModeratorToActivateId: Guid.NewGuid());
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);

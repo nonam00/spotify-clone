@@ -30,9 +30,12 @@ public class RefreshTokensCleanupService : BackgroundService
     private async Task DoWork()
     {
         _logger.LogInformation("Starting refresh tokens cleanup");
+        
         using var scope = _scopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
         await mediator.Send(new CleanupExpiredRefreshTokensCommand());
+        
         _logger.LogInformation("Finished refresh tokens cleanup");
     }
 }

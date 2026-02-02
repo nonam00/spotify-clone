@@ -31,7 +31,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
 
         if (managingModerator is null)
         {
-            _logger.LogInformation(
+            _logger.LogError(
                 "Tried to activate moderator {ModeratorToActivateId}" +
                 " but managing moderator {ManagingModeratorId} does not exist.",
                 command.ModeratorToActivateId, command.ManagingModeratorId);
@@ -40,7 +40,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
 
         if (!managingModerator.IsActive)
         {
-            _logger.LogInformation(
+            _logger.LogError(
                 "Tried to activate moderator {ModeratorToActivateId}" +
                 " but managing moderator {ManagingModeratorId} does not exist.",
                 command.ModeratorToActivateId, command.ManagingModeratorId);
@@ -51,7 +51,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
         {
             _logger.LogWarning(
                 "Tried to activate moderator {ModeratorToActivateId}" +
-                " but managing moderator {ManagingModeratorId} cannot manage moderators",
+                " but managing moderator {ManagingModeratorId} cannot manage moderators.",
                 command.ModeratorToActivateId, command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
@@ -60,9 +60,10 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
         
         if (moderatorToActivate is null)
         {
-            _logger.LogWarning(
-                "Tried to activate moderator {ModeratorToActivateId} but it does not exist.",
-                command.ModeratorToActivateId);
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to activate moderator {ModeratorToActivateId}" +
+                " but it does not exist.",
+                command.ManagingModeratorId, command.ModeratorToActivateId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
         
@@ -70,11 +71,19 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
 
         if (activationResult.IsFailure)
         {
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to activate moderator {ModeratorToActivateId}" +
+                " but domain error occurred: {DomainErrorDescription}.",
+                command.ManagingModeratorId, command.ModeratorToActivateId, activationResult.Error.Description);
             return activationResult;
         }
         
         _moderatorsRepository.Update(moderatorToActivate);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.",
+            command.ModeratorToActivateId, command.ManagingModeratorId);
         
         return Result.Success();
     }

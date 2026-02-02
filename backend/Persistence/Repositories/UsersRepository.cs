@@ -86,7 +86,7 @@ public class UsersRepository : IUsersRepository
     public async Task<User?> GetByRefreshTokenValue(string refreshTokenValue, CancellationToken cancellationToken = default)
     {
         var refreshToken = _dbContext.RefreshTokens
-            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.Expires >= DateTime.UtcNow);
+            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.IsActive);
         
         var user = await _dbContext.Users
             .Include(u => u.RefreshTokens)
@@ -109,7 +109,7 @@ public class UsersRepository : IUsersRepository
     {
         var nonActiveUsers = await _dbContext.Users
             .AsNoTracking()
-            .Where(u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
+            .Where(u => !u.IsActive && u.CreatedAt.AddHours(48) < DateTime.UtcNow)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
             
@@ -137,6 +137,5 @@ public class UsersRepository : IUsersRepository
 
     public void Update(User user) => _dbContext.Update(user);
     
-    public void DeleteRange(IEnumerable<User> users) =>
-        _dbContext.Users.RemoveRange(users);
+    public void DeleteRange(IEnumerable<User> users) => _dbContext.Users.RemoveRange(users);
 }

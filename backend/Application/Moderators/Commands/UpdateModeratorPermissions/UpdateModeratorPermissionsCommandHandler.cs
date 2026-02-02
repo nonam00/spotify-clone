@@ -32,35 +32,41 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
 
         if (managingModerator is null)
         {
-            _logger.LogWarning(
-                "Managing moderator {ManagingModeratorId} not found while updating permissions for moderator {ModeratorToUpdateId}",
-                command.ManagingModeratorId, command.ModeratorToUpdateId);
+            _logger.LogError(
+                "Tried to update permission for moderator {ModeratorToUpdatePermissionsId}" +
+                " but managing moderator {ManagingModeratorId} doesnt exist",
+                command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
         
         if (!managingModerator.IsActive)
         {
-            _logger.LogInformation(
-                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
-                command.ManagingModeratorId);
+            _logger.LogError(
+                "Tried to update permissions for moderator {ModeratorToUpdatePermissionsId}" +
+                " but managing moderator {ManagingModeratorId} is not active.",
+                command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
 
         if (!managingModerator.Permissions.CanManageModerators)
         {
             _logger.LogWarning(
-                "Managing moderator {ManagingModeratorId} cannot manage moderators, so cannot update permissions for moderator {ModeratorToUpdateId}",
-                command.ManagingModeratorId, command.ModeratorToUpdateId);
+                "Managing moderator {ManagingModeratorId} tried" +
+                " to update permissions for moderator {ModeratorToUpdatePermissionsId}" +
+                " but doesnt have permission to manage moderators.",
+                command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId);
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
         
-        var moderatorToUpdate = await _moderatorsRepository.GetById(command.ModeratorToUpdateId, cancellationToken);
+        var moderatorToUpdate = await _moderatorsRepository.GetById(command.ModeratorToUpdatePermissionsId, cancellationToken);
         
         if (moderatorToUpdate is null)
         {
-            _logger.LogWarning(
-                "Moderator to update {ModeratorToUpdateId} not found while updating permissions",
-                command.ModeratorToUpdateId);
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried" +
+                " to update permissions for moderator {ModeratorToUpdatePermissionsId}" +
+                " but it doesnt exist.",
+                command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
 
@@ -74,6 +80,11 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
 
         if (updateResult.IsFailure)
         {
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried" +
+                " to update permissions for moderator {ModeratorToUpdatePermissionsId}" +
+                " but domain error occurred: {DomainErrorDescription}.",
+                command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId, updateResult.Error.Description);
             return Result.Failure(updateResult.Error);
         }
         
@@ -82,9 +93,8 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
 
         _logger.LogInformation(
             "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}",
-            command.ModeratorToUpdateId, command.ManagingModeratorId);
+            command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
 
         return Result.Success();
     }
 }
-

@@ -10,11 +10,11 @@ public class UpdateModeratorPermissionsCommandValidator : AbstractValidator<Upda
             .NotEqual(Guid.Empty)
             .WithMessage("Managing moderator ID is required")
             .WithErrorCode("400")
-            .NotEqual(c => c.ModeratorToUpdateId)
+            .NotEqual(c => c.ModeratorToUpdatePermissionsId)
             .WithMessage("Moderator cannot manage himself")
             .WithErrorCode("400");
         
-        RuleFor(command => command.ModeratorToUpdateId)
+        RuleFor(command => command.ModeratorToUpdatePermissionsId)
             .NotEqual(Guid.Empty)
             .WithMessage("Moderator to update ID is required")
             .WithErrorCode("400")

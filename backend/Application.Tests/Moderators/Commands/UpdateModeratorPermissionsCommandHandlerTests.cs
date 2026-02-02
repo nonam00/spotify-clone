@@ -33,7 +33,7 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
 
         var command = new UpdateModeratorPermissionsCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToUpdateId: moderatorToUpdate.Id,
+            ModeratorToUpdatePermissionsId: moderatorToUpdate.Id,
             CanManageUsers: true,
             CanManageContent: true,
             CanViewReports: false,
@@ -77,7 +77,7 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
         
         var command = new UpdateModeratorPermissionsCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToUpdateId: moderatorToUpdate.Id,
+            ModeratorToUpdatePermissionsId: moderatorToUpdate.Id,
             CanManageUsers: true,
             CanManageContent: true,
             CanViewReports: false,
@@ -106,7 +106,7 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
 
         var command = new UpdateModeratorPermissionsCommand(
             ManagingModeratorId: moderator.Id,
-            ModeratorToUpdateId: moderator.Id,
+            ModeratorToUpdatePermissionsId: moderator.Id,
             CanManageUsers: true,
             CanManageContent: true,
             CanViewReports: false,

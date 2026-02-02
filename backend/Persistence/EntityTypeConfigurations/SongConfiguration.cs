@@ -54,10 +54,12 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.IsPublished)
             .IsRequired()
             .HasDefaultValue(false);
-
-        builder.Property(s => s.IsPublished);
         
-        builder.Property(song => song.CreatedAt);
+        builder.Property(s => s.MarkedForDeletion)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
+        builder.Property(s => s.CreatedAt).IsRequired();
             
         builder.HasOne(song => song.Uploader)
             .WithMany(u => u.UploadedSongs)

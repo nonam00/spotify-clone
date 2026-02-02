@@ -7,7 +7,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Songs.Events.SongDeleted;
 
-public class SongDeletedEventHandler : IDomainEventHandler<SongDeletedEvent>
+public class SongDeletedEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
 {
     private readonly IFileServiceClient _fileServiceClient;
     private readonly ILogger<PlaylistDeletedEventHandler> _logger;
@@ -18,7 +18,7 @@ public class SongDeletedEventHandler : IDomainEventHandler<SongDeletedEvent>
         _logger = logger;
     }
 
-    public async Task HandleAsync(SongDeletedEvent @event, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(ModeratorDeletedSongEvent @event, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Handling song {songId} deleted event", @event.SongId);
         

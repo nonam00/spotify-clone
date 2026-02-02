@@ -1,11 +1,16 @@
 using FluentValidation;
 
-namespace Application.Songs.Commands.DeleteSongs;
+namespace Application.Moderators.Commands.DeleteSongs;
 
 public class DeleteSongsCommandValidator : AbstractValidator<DeleteSongsCommand>
 {
     public DeleteSongsCommandValidator()
     {
+        RuleFor(x => x.ModeratorId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Moderator ID is required")
+            .WithErrorCode("400");
+        
         RuleFor(c => c.SongIds)
             .NotEmpty()
                 .WithMessage("Song ids list cannot be empty")

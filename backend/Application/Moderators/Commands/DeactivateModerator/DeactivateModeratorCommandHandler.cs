@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Domain.Common;
 
+using Domain.Common;
 using Domain.Models;
 using Application.Moderators.Commands.ActivateModerator;
 using Application.Moderators.Errors;
@@ -32,8 +32,8 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
 
         if (managingModerator == null)
         {
-            _logger.LogInformation(
-                "Tried to deactivate moderator {ModeratorToActivateId}" +
+            _logger.LogError(
+                "Tried to deactivate moderator {ModeratorToDeactivateId}" +
                 " but managing moderator {ManagingModeratorId} does not exist.",
                 command.ModeratorToDeactivateId, command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
@@ -41,8 +41,8 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
 
         if (!managingModerator.IsActive)
         {
-            _logger.LogInformation(
-                "Tried to deactivate moderator {ModeratorToActivateId}" +
+            _logger.LogError(
+                "Tried to deactivate moderator {ModeratorToDeactivateId}" +
                 " but managing moderator {ManagingModeratorId} does not exist.",
                 command.ModeratorToDeactivateId, command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
@@ -51,8 +51,8 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
         if (!managingModerator.Permissions.CanManageModerators)
         {
             _logger.LogWarning(
-                "Tried to deactivate moderator {ModeratorToActivateId}" +
-                " but managing moderator {ManagingModeratorId} cannot manage moderators",
+                "Tried to deactivate moderator {ModeratorToDeactivateId}" +
+                " but managing moderator {ManagingModeratorId} cannot manage moderators.",
                 command.ModeratorToDeactivateId, command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
@@ -61,9 +61,10 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
         
         if (moderatorToDeactivate == null)
         {
-            _logger.LogWarning(
-                "Tried to deactivate moderator {ModeratorToActivateId} but it does not exist.",
-                command.ModeratorToDeactivateId);
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to deactivate moderator {ModeratorToDeactivateId}" +
+                " but it does not exist.",
+                command.ManagingModeratorId, command.ModeratorToDeactivateId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
         
@@ -71,11 +72,19 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
 
         if (deactivationResult.IsFailure)
         {
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to deactivate moderator {ModeratorToDeactivateId}" +
+                " but domain error occurred: {DomainErrorDescription}.",
+                command.ManagingModeratorId, command.ModeratorToDeactivateId, deactivationResult.Error);
             return deactivationResult;
         }
         
         _moderatorsRepository.Update(moderatorToDeactivate);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "Moderator {ModeratorToDeactivateId} was successfully deactivated by managing moderator {ManagingModeratorId}.",
+            command.ModeratorToDeactivateId, command.ManagingModeratorId);
         
         return Result.Success();
     }
