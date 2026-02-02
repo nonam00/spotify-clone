@@ -77,9 +77,14 @@ public class Playlist : AggregateRoot<Guid>
             return Result.Failure(PlaylistDomainErrors.AlreadyContainsSong);
         }
 
-        var playlistSong = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
+        var createPlaylistSongResult = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
+
+        if (createPlaylistSongResult.IsFailure)
+        {
+            return Result.Failure(createPlaylistSongResult.Error);
+        }
         
-        _playlistSongs.Add(playlistSong);
+        _playlistSongs.Add(createPlaylistSongResult.Value);
         
         UpdatedAt = DateTime.UtcNow;
         
@@ -100,8 +105,14 @@ public class Playlist : AggregateRoot<Guid>
 
         foreach (var song in songs)
         {
-            var playlistSong = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
-            _playlistSongs.Add(playlistSong);   
+            var createPlaylistSongResult = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
+
+            if (createPlaylistSongResult.IsFailure)
+            {
+                return Result.Failure(createPlaylistSongResult.Error);
+            }
+        
+            _playlistSongs.Add(createPlaylistSongResult.Value);
         }
         
         UpdatedAt = DateTime.UtcNow;
@@ -139,7 +150,11 @@ public class Playlist : AggregateRoot<Guid>
 
             if (playlistSong.Order != i + 1)
             {
-                playlistSong.ChangeOrder(i + 1);
+                var changeOrderResult = playlistSong.ChangeOrder(i + 1);
+                if (changeOrderResult.IsFailure)
+                {
+                    return changeOrderResult;
+                }
             }
         }
         

@@ -86,7 +86,7 @@ public class UsersRepository : IUsersRepository
     public async Task<User?> GetByRefreshTokenValue(string refreshTokenValue, CancellationToken cancellationToken = default)
     {
         var refreshToken = _dbContext.RefreshTokens
-            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.IsActive);
+            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.Expires >= DateTime.UtcNow);
         
         var user = await _dbContext.Users
             .Include(u => u.RefreshTokens)
