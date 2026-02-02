@@ -18,14 +18,13 @@ public class CheckLikeQueryHandlerTests : TestBase
             "Test User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
         user.LikeSong(song.Id);
         
-        await Context.Songs.AddAsync(song);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -49,13 +48,12 @@ public class CheckLikeQueryHandlerTests : TestBase
             "Test User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
         var query = new CheckLikeQuery(user.Id, song.Id);

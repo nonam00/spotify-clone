@@ -21,17 +21,17 @@ public class Song : AggregateRoot<Guid>
     private Song() { } // For EF Core
     
     // Cannot make internal because of the tests
-    public static Song Create(string title, string author, FilePath songPath, FilePath imagePath,
-        Guid? uploaderId = null)
+    internal static Result<Song> Create(
+        string title, string author, FilePath songPath, FilePath imagePath, Guid? uploaderId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            return Result<Song>.Failure(SongDomainErrors.TitleCannotBeEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(author))
         {
-            throw new ArgumentException("Author cannot be empty", nameof(author));
+            return Result<Song>.Failure(SongDomainErrors.AuthorCannotBeEmpty);
         }
 
         var song = new Song
@@ -47,11 +47,10 @@ public class Song : AggregateRoot<Guid>
             CreatedAt = DateTime.UtcNow,
         };
 
-        return song;
+        return Result<Song>.Success(song);
     }
     
-    // TODO: make internal after rewriting tests
-    public Result Publish()
+    internal Result Publish()
     {
         if (MarkedForDeletion)
         {
@@ -96,6 +95,12 @@ public class Song : AggregateRoot<Guid>
 
 public static class SongDomainErrors
 {
+    public static readonly Error TitleCannotBeEmpty =
+        new(nameof(TitleCannotBeEmpty), "Title cannot be empty.");
+    
+    public static readonly Error AuthorCannotBeEmpty =
+        new(nameof(AuthorCannotBeEmpty), "Author cannot be empty.");
+    
     public static readonly Error AlreadyPublished =
         new(nameof(AlreadyPublished), "The song is already published.");
     

@@ -10,6 +10,7 @@ public class ModeratorConfiguration : IEntityTypeConfiguration<Moderator>
     public void Configure(EntityTypeBuilder<Moderator> builder)
     {
         builder.HasKey(m => m.Id);
+        builder.Property(m => m.Id).ValueGeneratedNever();
         
         // Initial moderator
         builder.HasData(new

@@ -1,4 +1,5 @@
 using Application.Users.Commands.UploadSong;
+using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 using FluentAssertions;
@@ -9,13 +10,10 @@ namespace Application.Tests.Users.Commands;
 public class UploadSongCommandHandlerTests : TestBase
 {
     [Fact]
-    public async Task Handle_ShouldCreateSong_WhenValidData()
+    public async Task Handle_ShouldCreateSong_WhenValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -72,15 +70,32 @@ public class UploadSongCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        
-        var song = await Context.Users
-            .Where(u => u.Id == user.Id)
-            .Include(u => u.UploadedSongs)
-            .SelectMany(u => u.UploadedSongs)
-            .FirstOrDefaultAsync();
+
+        var song = await Context.Songs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.UploaderId == user.Id);
         
         song.Should().NotBeNull();
         song.IsPublished.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserDoesNotExist()
+    {
+        // Arrange
+        var command = new UploadSongCommand(
+            Guid.NewGuid(),
+            "Test Song",
+            "Test Author",
+            "song.mp3",
+            "image.jpg");
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserErrors.NotFound);
     }
 
     [Fact]
@@ -107,17 +122,8 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenTitleIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "",
             "Test Author",
             "song.mp3",
@@ -136,18 +142,9 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenTitleExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longTitle = new string('a', 201);
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             longTitle,
             "Test Author",
             "song.mp3",
@@ -166,17 +163,8 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenAuthorIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             "",
             "song.mp3",
@@ -195,18 +183,9 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenAuthorExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longAuthor = new string('a', 201);
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             longAuthor,
             "song.mp3",
@@ -225,17 +204,8 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenSongPathIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             "Test Author",
             "",
@@ -254,18 +224,9 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenSongPathExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longPath = new string('a', 501);
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             "Test Author",
             longPath,
@@ -284,17 +245,8 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenImagePathIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             "Test Author",
             "song.mp3",
@@ -313,18 +265,9 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenImagePathExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longPath = new string('a', 501);
         var command = new UploadSongCommand(
-            user.Id,
+            Guid.NewGuid(),
             "Test Song",
             "Test Author",
             "song.mp3",

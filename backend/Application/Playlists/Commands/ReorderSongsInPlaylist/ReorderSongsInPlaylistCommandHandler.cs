@@ -28,7 +28,7 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
     {
         var playlist = await _playlistsRepository.GetByIdWithSongs(command.PlaylistId, cancellationToken);
 
-        if (playlist == null)
+        if (playlist is null)
         {
             _logger.LogError(
                 "User {UserId} tried to reorder songs in playlist {PlaylistId} but playlist does not exist",

@@ -99,18 +99,23 @@ public class User : AggregateRoot<Guid>
         return refreshToken;
     }
 
-    public Song UploadSong(string title, string author, FilePath audioPath, FilePath imagePath)
+    public Result<Song> UploadSong(string title, string author, FilePath audioPath, FilePath imagePath)
     {
-        var song = Song.Create(
+        var createSongResult = Song.Create(
             title: title,
             author: author,
             songPath: audioPath,
             imagePath: imagePath,
             uploaderId: Id);
+
+        if (createSongResult.IsFailure)
+        {
+            return Result<Song>.Failure(createSongResult.Error);
+        }
         
-        _uploadedSongs.Add(song);
+        _uploadedSongs.Add(createSongResult.Value);
         
-        return song;
+        return Result<Song>.Success(createSongResult.Value);
     }
     
     public bool LikeSong(Guid songId)

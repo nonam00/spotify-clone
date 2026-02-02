@@ -71,7 +71,8 @@ public class Moderator : AggregateRoot<Guid>
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
-        moderatorToUpdate.Permissions =  permissions;
+        
+        moderatorToUpdate.Permissions = permissions;
         return Result.Success();
     }
 
@@ -91,6 +92,7 @@ public class Moderator : AggregateRoot<Guid>
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
+        
         var activationResult = moderatorToActivate.Activate();
         return activationResult;
     }

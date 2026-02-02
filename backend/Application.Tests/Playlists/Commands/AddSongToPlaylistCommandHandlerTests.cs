@@ -1,10 +1,11 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Playlists.Commands.AddSongToPlaylist;
-using Application.Playlists.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Playlists.Commands.AddSongToPlaylist;
+using Application.Playlists.Errors;
+using Application.Songs.Errors;
 
 namespace Application.Tests.Playlists.Commands;
 
@@ -19,11 +20,11 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        song.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
         
-        await Context.Songs.AddAsync(song);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -48,10 +49,11 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        await Context.Songs.AddAsync(song);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+        
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -80,10 +82,11 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         
         var playlist = owner.CreatePlaylist().Value;
         
-        var song = Song.Create("TSong", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = otherUser.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        await Context.Songs.AddAsync(song);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+        
         await Context.Users.AddRangeAsync(owner, otherUser);
         await Context.SaveChangesAsync();
         
@@ -98,6 +101,28 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenSongNotFound()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        user.Activate();
+
+        var playlist = user.CreatePlaylist().Value;
+        
+        await  Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongToPlaylistCommand(user.Id, playlist.Id, Guid.NewGuid());
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(SongErrors.NotFound);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenSongAlreadyInPlaylist()
     {
         // Arrange
@@ -106,12 +131,13 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
         
         var playlist = user.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
         
         playlist.AddSong(song);
         
-        await Context.Songs.AddAsync(song);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -134,13 +160,8 @@ public class AddSongToPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song = Song.Create(
-            "Test Song",
-            "Test Author",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"));
-
-        await Context.Songs.AddAsync(song);
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         

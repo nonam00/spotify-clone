@@ -22,13 +22,12 @@ public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg"));
-        var song2 = Song.Create("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg"));
-        var song3 = Song.Create("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg"));
+        var song1 = user.UploadSong("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg")).Value;
+        var song3 = user.UploadSong("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg")).Value;
         
-        song1.Publish();
-        song2.Publish();
-        song3.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2, song3]);
 
         playlist.AddSongs([song1, song2, song3]);
         
@@ -115,13 +114,12 @@ public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
         
         var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg"));
-        var song2 = Song.Create("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg"));
-        var song3 = Song.Create("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg"));
+        var song1 = user.UploadSong("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg")).Value;
+        var song3 = user.UploadSong("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg")).Value;
         
-        song1.Publish();
-        song2.Publish();
-        song3.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2, song3]);
 
         playlist.AddSongs([song1, song2]);
         

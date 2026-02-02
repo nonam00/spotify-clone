@@ -29,7 +29,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
     {
         var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
         
-        if (playlist == null)
+        if (playlist is null)
         {
             _logger.LogError(
                 "User {UserId} tried to remove song {SongId} from playlist {PlaylistId} but playlist does not exist",

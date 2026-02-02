@@ -1,18 +1,19 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Events;
-using Application.Playlists.Events.PlaylistDeleted;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
-namespace Application.Songs.Events.SongDeleted;
+namespace Application.Moderators.Events.ModeratorDeletedSong;
 
-public class SongDeletedEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
+public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
 {
     private readonly IFileServiceClient _fileServiceClient;
-    private readonly ILogger<PlaylistDeletedEventHandler> _logger;
+    private readonly ILogger<ModeratorDeletedSongEventHandler> _logger;
 
-    public SongDeletedEventHandler(IFileServiceClient fileServiceClient, ILogger<PlaylistDeletedEventHandler> logger)
+    public ModeratorDeletedSongEventHandler(
+        IFileServiceClient fileServiceClient,
+        ILogger<ModeratorDeletedSongEventHandler> logger)
     {
         _fileServiceClient = fileServiceClient;
         _logger = logger;

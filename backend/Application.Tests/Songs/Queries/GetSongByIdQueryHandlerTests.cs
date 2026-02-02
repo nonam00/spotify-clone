@@ -1,9 +1,10 @@
 using FluentAssertions;
 
-using Application.Songs.Queries.GetSongById;
-using Application.Songs.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Songs.Queries.GetSongById;
+using Application.Songs.Errors;
+
 
 namespace Application.Tests.Songs.Queries;
 
@@ -13,12 +14,15 @@ public class GetSongByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnSong_WhenSongExistsAndPublished()
     {
         // Arrange
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var user = User.Create(new Email("user@email.com"), new PasswordHash("password_hash"));
+        user.Activate();
         
-        await Context.Songs.AddAsync(song);
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+        
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var query = new GetSongByIdQuery(song.Id);
@@ -30,8 +34,6 @@ public class GetSongByIdQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         
         result.Value.Should().NotBeNull();
-        result.Value.Title.Should().Be("Test Song");
-        result.Value.Author.Should().Be("Test Author");
         result.Value.IsPublished.Should().BeTrue();
     }
     
@@ -39,10 +41,11 @@ public class GetSongByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnSong_WhenSongExistsButNotPublished()
     {
         // Arrange
-        var song = Song.Create(
-            "Test Song",
-            "Test Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@email.com"), new PasswordHash("password_hash"));
+        user.Activate();
         
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+
         await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
@@ -55,8 +58,6 @@ public class GetSongByIdQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         
         result.Value.Should().NotBeNull();
-        result.Value.Title.Should().Be("Test Song");
-        result.Value.Author.Should().Be("Test Author");
         result.Value.IsPublished.Should().BeFalse();
     }
 

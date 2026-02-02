@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Models;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
-using Domain.Models;
 
 namespace Application.Playlists.Commands.AddSongsToPlaylist;
 
@@ -34,7 +34,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
     {
         var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
 
-        if (playlist == null)
+        if (playlist is null)
         {
             _logger.LogError(
                 "User {UserId} tried to add songs to playlist {PlaylistId} but playlist does not exist",

@@ -56,14 +56,9 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
 
         var songs = await _songsRepository.GetListByIds(command.SongIds, cancellationToken);
 
-        if (!songs.Any())
-        {
-            return Result.Failure(SongErrors.SongsNotFound);
-        }
-
         if (songs.Count != command.SongIds.Count)
         {
-            return Result.Failure(SongErrors.SomeSongsNotFound);
+            return Result.Failure(SongErrors.SongsNotFound);
         }
 
         var publishResult = moderator.PublishSongs(songs);
@@ -78,7 +73,6 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
         _songsRepository.UpdateRange(songs);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-                
         _logger.LogInformation(
             "{SongCount} songs were successfully published by moderator {ModeratorId}.",
             command.SongIds.Count, command.ModeratorId);

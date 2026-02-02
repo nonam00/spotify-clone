@@ -19,12 +19,13 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
         
         playlist.AddSong(song);
         
-        await Context.Songs.AddAsync(song);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -49,10 +50,11 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        await Context.Songs.AddAsync(song);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+        
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -75,10 +77,11 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        await Context.Songs.AddAsync(song);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+        
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -107,12 +110,13 @@ public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
 
         var playlist = owner.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = otherUser.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
         
         playlist.AddSong(song);
         
-        await Context.Songs.AddAsync(song);
         await Context.Users.AddRangeAsync(owner, otherUser);
         await Context.SaveChangesAsync();
         

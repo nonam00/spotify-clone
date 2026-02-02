@@ -34,7 +34,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongToPlaylist
     {
         var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
 
-        if (playlist == null)
+        if (playlist is null)
         {
             _logger.LogError(
                 "User {UserId} tried to add song {SongId} to playlist {PlaylistId} but playlist does not exist",
@@ -52,7 +52,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongToPlaylist
         
         var song = await _songsRepository.GetById(request.SongId, cancellationToken);
         
-        if (song == null)
+        if (song is null)
         {
             _logger.LogError(
                 "User {UserId} tried to add song {SongId} to playlist {PlaylistId} but song does not exist",

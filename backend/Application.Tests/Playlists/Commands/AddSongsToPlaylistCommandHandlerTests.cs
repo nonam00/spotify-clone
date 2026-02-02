@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Application.Playlists.Commands.AddSongsToPlaylist;
 using Application.Playlists.Errors;
+using Application.Songs.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 
@@ -19,13 +20,12 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        song1.Publish();
-        song2.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2]);
         
-        await Context.Songs.AddRangeAsync(song1, song2);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -53,15 +53,14 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        
-        song1.Publish();
-        song2.Publish();
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2]);
         
         playlist.AddSong(song1);
         
-        await Context.Songs.AddRangeAsync(song1, song2);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -82,14 +81,10 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
-        
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
-        var command = new AddSongsToPlaylistCommand(user.Id, Guid.NewGuid(), [song.Id]);
+        var command = new AddSongsToPlaylistCommand(user.Id, Guid.NewGuid(), [Guid.NewGuid()]);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -114,10 +109,11 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         var playlist = owner.CreatePlaylist().Value;
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        song.Publish();
+        var song = otherUser.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        await Context.Songs.AddAsync(song);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
+        
         await Context.Users.AddRangeAsync(owner, otherUser);
         await Context.SaveChangesAsync();
         
@@ -140,12 +136,12 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
 
         var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        song1.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song1); // Song 2 remains unpublished
         
-        await Context.Songs.AddRangeAsync(song1, song2);
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -157,5 +153,36 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(PlaylistDomainErrors.UnpublishedSong);
+    }
+    
+    [Fact] 
+    public async Task Handle_ShouldReturnFailure_WhenSomeSongsNotFound()
+    {
+        var moderator = Moderator.Create(
+            new Email("moderator@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Moderator",
+            ModeratorPermissions.CreateDefault());
+
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var playlist = user.CreatePlaylist().Value;
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        moderator.PublishSong(song1);
+        
+        await Context.Moderators.AddAsync(moderator);
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, Guid.NewGuid()]);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(SongErrors.SongsNotFound);
     }
 }

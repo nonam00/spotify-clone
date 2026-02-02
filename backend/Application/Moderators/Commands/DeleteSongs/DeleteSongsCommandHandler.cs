@@ -55,14 +55,9 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
 
         var songs = await _songsRepository.GetListByIds(command.SongIds, cancellationToken);
 
-        if (!songs.Any())
-        {
-            return Result.Failure(SongErrors.SongsNotFound);
-        }
-
         if (songs.Count != command.SongIds.Count)
         {
-            return Result.Failure(SongErrors.SomeSongsNotFound);
+            return Result.Failure(SongErrors.SongsNotFound);
         }
 
         var publishResult = moderator.DeleteSongs(songs);

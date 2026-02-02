@@ -21,11 +21,14 @@ public class DeleteSongsCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddRangeAsync(song1, song2);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         // Clear tracking to avoid conflicts
@@ -120,27 +123,6 @@ public class DeleteSongsCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorDomainErrors.CannotManageContent);
     }
-
-    [Fact] public async Task Handle_ShouldReturnFailure_WhenAllSongsNotFound()
-    {
-        var moderator = Moderator.Create(
-            new Email("moderator@example.com"),
-            new PasswordHash("hashed_password1"),
-            "Moderator",
-            ModeratorPermissions.CreateDefault());
-        
-        await Context.Moderators.AddAsync(moderator);
-        await Context.SaveChangesAsync();
-        
-        var command = new DeleteSongsCommand(moderator.Id, [Guid.NewGuid()]);
-
-        // Act
-        var result = await Mediator.Send(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(SongErrors.SongsNotFound);
-    }
     
     [Fact] 
     public async Task Handle_ShouldReturnFailure_WhenSomeSongsNotFound()
@@ -151,10 +133,13 @@ public class DeleteSongsCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
 
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-   
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddAsync(song1);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new DeleteSongsCommand(moderator.Id, [song1.Id, Guid.NewGuid()]);
@@ -164,7 +149,7 @@ public class DeleteSongsCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(SongErrors.SomeSongsNotFound);
+        result.Error.Should().Be(SongErrors.SongsNotFound);
     }
     
     [Fact]
@@ -177,13 +162,16 @@ public class DeleteSongsCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
 
         moderator.PublishSong(song1);
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddRangeAsync(song1, song2);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new DeleteSongsCommand(moderator.Id, [song1.Id, song2.Id]);
@@ -206,13 +194,16 @@ public class DeleteSongsCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song1 = Song.Create("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg"));
-        var song2 = Song.Create("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg"));
-
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
         moderator.DeleteSong(song1);
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddRangeAsync(song1, song2);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new DeleteSongsCommand(moderator.Id, [song1.Id, song2.Id]);

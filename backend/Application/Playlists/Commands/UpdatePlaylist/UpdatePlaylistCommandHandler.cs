@@ -29,7 +29,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
     {
         var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken);
         
-        if (playlist == null)
+        if (playlist is null)
         {
             _logger.LogError(
                 "User {UserId} tried update details of playlist {PlaylistId} but playlist does not exist",

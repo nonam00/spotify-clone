@@ -21,10 +21,13 @@ public class DeleteSongCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         // Clear tracking to avoid conflicts
@@ -150,12 +153,15 @@ public class DeleteSongCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;        
         
         moderator.PublishSong(song);
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new DeleteSongCommand(moderator.Id, song.Id);
@@ -178,12 +184,15 @@ public class DeleteSongCommandHandlerTests : TestBase
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        var song = Song.Create("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg"));
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var song = user.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;        
         
         moderator.DeleteSong(song);
         
         await Context.Moderators.AddAsync(moderator);
-        await Context.Songs.AddAsync(song);
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var command = new DeleteSongCommand(moderator.Id, song.Id);
