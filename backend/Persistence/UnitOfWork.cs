@@ -17,6 +17,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
         _domainEventDispatcher = domainEventDispatcher;
         _logger = logger;
     }
+    
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var domainEvents = CollectAndCleanDomainEvents();

@@ -102,6 +102,7 @@ public static class DependencyInjection
 
         public IServiceCollection AddBackgroundServices()
         {
+            services.AddHostedService<MarkedForDeletionSongsCleanupService>();
             services.AddHostedService<RefreshTokensCleanupService>();
             services.AddHostedService<NonActiveUsersCleanupService>();
             return services;

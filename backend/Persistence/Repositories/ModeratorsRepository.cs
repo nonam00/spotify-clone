@@ -22,9 +22,7 @@ public class ModeratorsRepository : IModeratorsRepository
 
     public async Task<Moderator?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var moderator = await _dbContext.Moderators
-            .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+        var moderator = await _dbContext.Moderators.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
         
         return moderator;
     }

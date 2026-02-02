@@ -247,6 +247,7 @@ public class Moderator : AggregateRoot<Guid>
             {
                 return markingForDeletionResult;
             }
+            AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
         }
         
         return Result.Success();
