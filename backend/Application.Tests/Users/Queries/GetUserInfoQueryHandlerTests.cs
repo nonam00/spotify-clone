@@ -1,9 +1,9 @@
 using FluentAssertions;
 
-using Application.Users.Queries.GetUserInfo;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Queries.GetUserInfo;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Queries;
 
@@ -13,10 +13,7 @@ public class GetUserInfoQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnUserInfo_WhenUserExists()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -31,7 +28,7 @@ public class GetUserInfoQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Email.Should().Be("test@example.com");
-        result.Value.FullName.Should().Be("Test User");
+        result.Value.FullName.Should().Be("User");
     }
 
     [Fact]

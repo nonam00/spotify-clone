@@ -70,7 +70,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongToPlaylist
                         "User {UserId} tried to add song {SongId} that is already in playlist {PlaylistId}",
                         request.UserId, request.SongId, playlist.Id);
                     break;
-                case nameof(PlaylistDomainErrors.UnpublishedSong):
+                case nameof(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong):
                     _logger.LogError(
                         "User {UserId} tried to add unpublished song {SongId} to playlist {PlaylistId}",
                         request.UserId, request.SongId, playlist.Id);

@@ -1,5 +1,5 @@
-﻿using Application.Shared.Messaging;
-using Domain.Common;
+﻿using Domain.Common;
+using Application.Shared.Messaging;
 
 namespace Application.Users.Commands.UpdateUser;
 

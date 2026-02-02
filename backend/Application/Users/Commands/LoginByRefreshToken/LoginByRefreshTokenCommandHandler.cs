@@ -1,13 +1,13 @@
-﻿using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Common;
+using Domain.Models;
 
 namespace Application.Users.Commands.LoginByRefreshToken;
 
@@ -36,15 +36,34 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
         
         if (user is null)
         {
-            _logger.LogInformation("Anonymous user tried to login with non-relevant refresh token"); 
+            _logger.LogInformation(
+                "Anonymous user tried to login with non-relevant refresh token {RefreshToken}",
+                request.RefreshToken); 
             return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
         }
         
+        if (!user.IsActive)
+        {
+            _logger.LogError(
+                "Non-active user {UserId} tried to login with non-relevant refresh token {RefreshToken}.",
+                user.Id, request.RefreshToken);
+            return Result<TokenPair>.Failure(UserDomainErrors.NotActive);
+        }
+
+        var updateRefreshTokenResult = user.UpdateRefreshToken(request.RefreshToken);
+        if (updateRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "Anonymous user tried to login with refresh token {RefreshToken}" +
+                " but domain error occurred: {DomainErrorDescription}",
+                request.RefreshToken, updateRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(updateRefreshTokenResult.Error);
+        }
+        
         var accessToken = _jwtProvider.GenerateUserToken(user);
-        var refreshToken = user.UpdateRefreshToken(request.RefreshToken);
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken!.Token));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, updateRefreshTokenResult.Value.Token));
     }
 }

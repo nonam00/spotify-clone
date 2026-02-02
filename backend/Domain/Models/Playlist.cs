@@ -69,7 +69,7 @@ public class Playlist : AggregateRoot<Guid>
     {
         if (!song.IsPublished)
         {
-            return Result.Failure(PlaylistDomainErrors.UnpublishedSong);
+            return Result.Failure(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
         }
         
         if (ContainsSong(song.Id))
@@ -100,7 +100,7 @@ public class Playlist : AggregateRoot<Guid>
 
         if (songs.Any(song => !song.IsPublished))
         {
-            return Result.Failure(PlaylistDomainErrors.UnpublishedSong);
+            return Result.Failure(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
         }
 
         foreach (var song in songs)
@@ -176,6 +176,7 @@ public static class PlaylistDomainErrors
     public static readonly Error DoesntContainSong =
         new(nameof(DoesntContainSong), "Playlist does not contain song.");
     
-    public static readonly Error UnpublishedSong =
-        new(nameof(UnpublishedSong), "Trying to do action with unpublished song.");
+    public static readonly Error CannotPerformActionsWithUnpublishedSong = new(
+        nameof(CannotPerformActionsWithUnpublishedSong),
+        "Trying to do action with unpublished song.");
 }

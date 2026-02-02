@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Commands.CreatePlaylist;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.CreatePlaylist;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -14,10 +14,7 @@ public class CreatePlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldCreatePlaylist_WhenUserExists()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -55,13 +52,31 @@ public class CreatePlaylistCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        Context.ChangeTracker.Clear();
+        
+        var command = new CreatePlaylistCommand(user.Id);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
+    }
+
+    [Fact]
     public async Task Handle_ShouldCreateMultiplePlaylists_WithCorrectTitles()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);

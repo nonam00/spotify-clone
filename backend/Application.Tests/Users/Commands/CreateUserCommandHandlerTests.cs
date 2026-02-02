@@ -2,10 +2,10 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
-using Application.Users.Commands.CreateUser;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.CreateUser;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 

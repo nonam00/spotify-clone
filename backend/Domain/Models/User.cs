@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-using Domain.Common;
+﻿using Domain.Common;
 using Domain.Events;
 using Domain.ValueObjects;
 
@@ -46,8 +44,13 @@ public class User : AggregateRoot<Guid>
         return user;
     }
 
-    public void UpdateProfile(string? fullName, FilePath avatarPath)
+    public Result UpdateProfile(string? fullName, FilePath avatarPath)
     {
+        if (!IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
         FullName = fullName?.Trim();
         var oldAvatarPath = AvatarPath;
         AvatarPath = avatarPath;
@@ -56,51 +59,83 @@ public class User : AggregateRoot<Guid>
         {
             AddDomainEvent(new UserAvatarChangedEvent(Id, newAvatarPath: AvatarPath, oldAvatarPath: oldAvatarPath));
         }
+
+        return Result.Success();
     }
 
-    public void ChangePassword(PasswordHash newPasswordHash)
+    public Result ChangePassword(PasswordHash newPasswordHash)
     {
+        if (!IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
         PasswordHash = newPasswordHash;
+        
+        return Result.Success();
     }
 
-    public void Activate()
+    public Result Activate()
     {
+        if (IsActive)
+        {
+            return Result.Failure(UserDomainErrors.UserAlreadyActive);
+        }
         IsActive = true;
+        return Result.Success();
     }
     
-    public void Deactivate()
+    public Result Deactivate()
     {
+        if (!IsActive)
+        {
+            return Result.Failure(UserDomainErrors.UserAlreadyDeactivated);
+        }
         IsActive = false;
+        return Result.Success();
     }
 
-    public RefreshToken AddRefreshToken()
+    public Result<RefreshToken> AddRefreshToken()
     {
-        var refreshTokenValue = GenerateRefreshTokenValue();
-        var refreshToken = RefreshToken.Create(Id, refreshTokenValue, DateTime.UtcNow.AddDays(14));
+        if (!IsActive)
+        {
+            return Result<RefreshToken>.Failure(UserDomainErrors.NotActive);
+        }
+        
+        var refreshToken = RefreshToken.Create(Id);
         _refreshTokens.Add(refreshToken);
-        return refreshToken;
+        
+        return Result<RefreshToken>.Success(refreshToken);
     }
 
-    public RefreshToken? UpdateRefreshToken(string refreshTokenValue)
+    public Result<RefreshToken> UpdateRefreshToken(string refreshTokenValue)
     {
+        if (!IsActive)
+        {
+            return Result<RefreshToken>.Failure(UserDomainErrors.NotActive);
+        }
+        
         var refreshToken = _refreshTokens.FirstOrDefault(rf => rf.Token == refreshTokenValue);
         
         if (refreshToken == null || !_refreshTokens.Remove(refreshToken))
         {
-            return null;
+            return Result<RefreshToken>.Failure(UserDomainErrors.RefreshTokenNotFound);
         }
         
-        var newRefreshTokenValue = GenerateRefreshTokenValue();
-        
-        refreshToken.UpdateToken(newRefreshTokenValue,DateTime.UtcNow.AddDays(14));
+        refreshToken.UpdateToken();
         
         _refreshTokens.Add(refreshToken);
         
-        return refreshToken;
+        return Result<RefreshToken>.Success(refreshToken);
     }
 
     public Result<Song> UploadSong(string title, string author, FilePath audioPath, FilePath imagePath)
     {
+        if (!IsActive)
+        {
+            return Result<Song>.Failure(UserDomainErrors.NotActive);
+        }
+        
         var createSongResult = Song.Create(
             title: title,
             author: author,
@@ -118,28 +153,52 @@ public class User : AggregateRoot<Guid>
         return Result<Song>.Success(createSongResult.Value);
     }
     
-    public bool LikeSong(Guid songId)
+    public Result LikeSong(Song song)
     {
-        if (HasLikedSong(songId))
+        if (!IsActive)
         {
-            return false;
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
+        if (!song.IsPublished)
+        {
+            return Result.Failure(UserDomainErrors.CannotLikedUnpublishedSong);
+        }
+        
+        if (HasLikedSong(song.Id))
+        {
+            return Result.Failure(UserDomainErrors.SongAlreadyLiked);
         }
 
-        var likedSong = LikedSong.Create(Id, songId);
+        var likedSong = LikedSong.Create(Id, song.Id);
         _userLikedSongs.Add(likedSong);
-        return true;
+        return Result.Success();
     }
 
-    public bool UnlikeSong(Guid songId)
+    public Result UnlikeSong(Guid songId)
     {
+        if (!IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
         var likedSong = _userLikedSongs.FirstOrDefault(ls => ls.SongId == songId);
-        return likedSong != null && _userLikedSongs.Remove(likedSong);
+        if (likedSong is null || !_userLikedSongs.Remove(likedSong))
+        {
+            return  Result.Failure(UserDomainErrors.SongNotLiked);
+        } 
+        return Result.Success();
     }
 
     private bool HasLikedSong(Guid songId) => _userLikedSongs.Any(s => s.SongId == songId);
 
     public Result<Playlist> CreatePlaylist()
     {
+        if (!IsActive)
+        {
+            return Result<Playlist>.Failure(UserDomainErrors.NotActive);
+        }
+        
         var title = $"Playlist #{_playlists.Count + 1}";
         var createPlaylistResult = Playlist.Create(userId: Id, title: title);
         
@@ -153,21 +212,60 @@ public class User : AggregateRoot<Guid>
         return createPlaylistResult;
     }
     
-    public Playlist? RemovePlaylist(Guid playlistId)
+    public Result RemovePlaylist(Guid playlistId)
     {
-        var playlist = _playlists.FirstOrDefault(p => p.Id == playlistId);
-        
-        if (playlist != null)
+        if (!IsActive)
         {
-            _playlists.Remove(playlist);
-            AddDomainEvent(new PlaylistDeletedEvent(playlistId, playlist.ImagePath));
+            return Result.Failure(UserDomainErrors.NotActive);
         }
         
-        return playlist;
+        var playlist = _playlists.FirstOrDefault(p => p.Id == playlistId);
+
+        if (playlist is null || !_playlists.Remove(playlist))
+        {
+            return Result.Failure(UserDomainErrors.UserDoesNotHavePlaylist);
+        }
+
+        AddDomainEvent(new PlaylistDeletedEvent(playlistId, playlist.ImagePath));
+        
+        return Result.Success();
     }
+
+    public Result CleanRefreshTokens()
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
+        _refreshTokens.Clear();
+        return Result.Success();
+    }
+}
+
+public static class UserDomainErrors
+{
+    public static readonly Error NotActive =
+        new(nameof(NotActive), "User is not active and cannot perform actions.");
     
-    public void CleanRefreshTokens() => _refreshTokens.Clear();
+    public static readonly Error UserAlreadyActive =
+        new(nameof(UserAlreadyActive), "User is already active.");
     
-    private static string GenerateRefreshTokenValue() => 
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    public static readonly Error UserAlreadyDeactivated =
+        new(nameof(UserAlreadyDeactivated), "User is already deactivated.");
+    
+    public static readonly Error RefreshTokenNotFound =
+        new (nameof(RefreshTokenNotFound), "Refresh token not found.");
+    
+    public static readonly Error CannotLikedUnpublishedSong =
+        new(nameof(CannotLikedUnpublishedSong), "User cannot like unpublished song.");
+    
+    public static readonly Error SongAlreadyLiked =
+        new(nameof(SongAlreadyLiked), "Song already liked.");
+    
+    public static readonly Error SongNotLiked =
+        new(nameof(SongNotLiked), "Song not liked.");
+
+    public static readonly Error UserDoesNotHavePlaylist =
+        new(nameof(UserDoesNotHavePlaylist), "User doesnt have this playlist.");
 }

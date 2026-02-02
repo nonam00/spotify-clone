@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Models;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
@@ -21,12 +22,21 @@ public class CleanUserRefreshTokensCommandHandler : ICommandHandler<CleanUserRef
     {
         var user = await _usersRepository.GetByIdWithRefreshTokens(request.UserId, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
             return Result.Failure(UserErrors.NotFound);
         }
+
+        if (!user.IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
         
-        user.CleanRefreshTokens();
+        var cleanRefreshTokensResult = user.CleanRefreshTokens();
+        if (cleanRefreshTokensResult.IsFailure)
+        {
+            return cleanRefreshTokensResult;
+        }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         

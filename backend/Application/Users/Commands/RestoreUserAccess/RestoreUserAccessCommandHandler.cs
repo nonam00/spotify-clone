@@ -8,6 +8,7 @@ using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Models;
 
 namespace Application.Users.Commands.RestoreUserAccess;
 
@@ -45,7 +46,7 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         if (!codeVerificationStatus)
         {
             _logger.LogInformation(
-                "Someone tried to restore access to user account with email {email} using invalid code {restoreCode}",
+                "Someone tried to restore access to user account with email {Email} using invalid code {RestoreCode}",
                 request.Email, request.RestoreCode);
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
@@ -55,22 +56,43 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         if (user == null)
         {
             _logger.LogError(
-                "Someone tried to restore access to non-existing user account with email {email} and code {restoreCode}", 
+                "Someone tried to restore access to non-existing user account with email {Email} and code {RestoreCode}", 
                 request.Email, request.RestoreCode);
             return Result<TokenPair>.Failure(UserErrors.NotFoundWithEmail);
+        }
+                
+        if (!user.IsActive)
+        {
+            _logger.LogError(
+                "Non-active user {UserId} tried to restore access to account with code {RestoreCode}.",
+                user.Id, request.RestoreCode);
+            return Result<TokenPair>.Failure(UserDomainErrors.NotActive);
+        }
+        
+        var addRefreshTokenResult = user.AddRefreshToken();
+        if (addRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to restore access to account with code {RestoreCode}" +
+                " but domain error occurred when creating refresh token: {DomainErrorResult}",
+                user.Id, request.RestoreCode, addRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
         }
 
         var hash = _passwordHasher.Generate("12345678");
         var passwordHash = new PasswordHash(hash);
-        
+
         user.ChangePassword(passwordHash);
         _usersRepository.Update(user);
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
-        var refreshToken = user.AddRefreshToken();
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken.Token));
+        _logger.LogInformation(
+            "User {UserId} successfully restored access to account using restore code {RestoreCode}",
+            user.Id, request.RestoreCode);
+        
+        return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }
 }

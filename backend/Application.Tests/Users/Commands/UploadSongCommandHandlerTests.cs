@@ -1,9 +1,10 @@
-using Application.Users.Commands.UploadSong;
-using Application.Users.Errors;
+using FluentAssertions;
+
 using Domain.Models;
 using Domain.ValueObjects;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Application.Users.Commands.UploadSong;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -47,10 +48,7 @@ public class UploadSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldCreateUnpublishedSong_ByDefault()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -96,6 +94,30 @@ public class UploadSongCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserErrors.NotFound);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhemUserIsNotActive()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new UploadSongCommand(
+            user.Id,
+            "Test Song",
+            "Test Author",
+            "song.mp3",
+            "image.jpg");
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
     }
 
     [Fact]

@@ -4,6 +4,7 @@ using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Models;
 
 namespace Application.Users.Commands.SendRestoreToken;
 
@@ -29,9 +30,14 @@ public class SendRestoreTokenCommandHandler : ICommandHandler<SendRestoreTokenCo
             .GetByEmail(request.Email, cancellationToken)
             .ConfigureAwait(false);
 
-        if (user == null)
+        if (user is null)
         {
             return Result.Failure(UserErrors.NotFound);
+        }
+
+        if (!user.IsActive)
+        {
+            return Result.Failure(UserDomainErrors.NotActive);
         }
         
         var verificationCode = _codesClient.GenerateCode();

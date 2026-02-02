@@ -5,6 +5,7 @@ using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Models;
 
 namespace Application.Users.Commands.CreatePlaylist;
 
@@ -31,6 +32,12 @@ public class CreatePlaylistCommandHandler : ICommandHandler<CreatePlaylistComman
                 "Tried to create a playlist but that user {UserId} doesn't exist",
                 request.UserId);
             return Result<Guid>.Failure(UserErrors.NotFound);
+        }
+
+        if (!user.IsActive)
+        {
+            _logger.LogError("User {UserId} tried to  create a playlist but that user is not active", request.UserId);
+            return Result<Guid>.Failure(UserDomainErrors.NotActive);
         }
         
         var createPlaylistResult = user.CreatePlaylist();

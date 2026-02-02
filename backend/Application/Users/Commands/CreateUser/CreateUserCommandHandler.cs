@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Shared.Data;
@@ -7,7 +8,6 @@ using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Common;
 
 namespace Application.Users.Commands.CreateUser;
 
@@ -21,7 +21,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
     public CreateUserCommandHandler(
         IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork, ILogger<CreateUserCommandHandler> logger)
+        IUnitOfWork unitOfWork,
+        ILogger<CreateUserCommandHandler> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;

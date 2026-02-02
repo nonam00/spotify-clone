@@ -152,7 +152,7 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(PlaylistDomainErrors.UnpublishedSong);
+        result.Error.Should().Be(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
     }
     
     [Fact] 

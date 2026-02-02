@@ -50,7 +50,7 @@ public class ActivateUserByConfirmationCodeCommandHandler
 
         var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError(
                 "Someone tried to activate non-existing user account with email {Email} and code {ConfirmationCode}", 
@@ -61,11 +61,19 @@ public class ActivateUserByConfirmationCodeCommandHandler
         user.Activate();
         _usersRepository.Update(user);
 
+        var addRefreshTokenResult = user.AddRefreshToken();
+        if (addRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "Tried to activate user {UserId} by confirmation code" +
+                " but domain error occurred on creating refresh token {DomainErrorDescription}",
+                user.Id, addRefreshTokenResult.Error.Description);
+        }
+
         var accessToken = _jwtProvider.GenerateUserToken(user);
-        var refreshToken = user.AddRefreshToken();       
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshToken.Token));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }
 }

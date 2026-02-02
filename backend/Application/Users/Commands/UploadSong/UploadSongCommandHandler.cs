@@ -6,6 +6,7 @@ using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
+using Domain.Models;
 
 namespace Application.Users.Commands.UploadSong;
 
@@ -33,6 +34,12 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
         {
             _logger.LogError("Tried to upload song but user {UserId} doesnt exist", request.UserId);
             return Result.Failure(UserErrors.NotFound);
+        }
+
+        if (!user.IsActive)
+        {
+            _logger.LogError("User {UserId} tried to upload song but user is not active", request.UserId);
+            return Result.Failure(UserDomainErrors.NotActive);
         }
         
         var audioPath = new FilePath(request.SongPath);

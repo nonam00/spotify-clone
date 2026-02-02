@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Commands.UnlikeSong;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.UnlikeSong;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -14,10 +14,7 @@ public class UnlikeSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldUnlikeSong_WhenSongIsLiked()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
@@ -25,7 +22,7 @@ public class UnlikeSongCommandHandlerTests : TestBase
         var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
         moderator.PublishSong(song);        
         
-        user.LikeSong(song.Id);
+        user.LikeSong(song);
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -58,15 +55,39 @@ public class UnlikeSongCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserErrors.NotFound);
     }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
+    {
+        // Arrange
+        var user = User.Create(new Email("user@mail.com"), new PasswordHash("hashed_password"), "USer");
+        user.Activate();
+        
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);
+
+        user.Deactivate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new UnlikeSongCommand(user.Id, song.Id);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
+    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenSongNotLiked()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
@@ -84,7 +105,7 @@ public class UnlikeSongCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(UserLikeErrors.NotLiked);
+        result.Error.Should().Be(UserDomainErrors.SongNotLiked);
     }
 
     [Fact]
@@ -106,16 +127,7 @@ public class UnlikeSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenSongIdIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UnlikeSongCommand(user.Id, Guid.Empty);
+        var command = new UnlikeSongCommand(Guid.NewGuid(), Guid.Empty);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);

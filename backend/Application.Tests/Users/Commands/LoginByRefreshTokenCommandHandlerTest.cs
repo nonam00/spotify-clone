@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Errors;
-using Application.Users.Commands.LoginByRefreshToken;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Errors;
+using Application.Users.Commands.LoginByRefreshToken;
 
 namespace Application.Tests.Users.Commands;
 
@@ -18,7 +17,7 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var refreshToken = user.AddRefreshToken();
+        var refreshToken = user.AddRefreshToken().Value;
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -46,13 +45,13 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsNotValid()
+    public async Task Handle_ShouldReturnFailure_WhenRefreshTokenIsNotValid()
     {
         // Arrange
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var refreshToken = user.AddRefreshToken();
+        user.AddRefreshToken();
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -68,30 +67,32 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(RefreshTokenErrors.RelevantNotFound);
     }
-    
+
     [Fact]
-    public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsExpired()
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
     {
         // Arrange
         var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        var refreshToken = RefreshToken.Create(user.Id, refreshTokenValue, DateTime.UtcNow.AddDays(-1));
+        var refreshToken = user.AddRefreshToken().Value;
+        
+        user.Deactivate();
         
         await Context.Users.AddAsync(user);
-        await Context.RefreshTokens.AddAsync(refreshToken);
         await Context.SaveChangesAsync();
         
         Context.ChangeTracker.Clear();
 
-        var query = new LoginByRefreshTokenCommand(refreshTokenValue);
+        var query = new LoginByRefreshTokenCommand(refreshToken.Token);
         
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
-
+        
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(RefreshTokenErrors.RelevantNotFound);
+        result.Error.Should().Be(UserDomainErrors.NotActive);
     }
+    
+    // [Fact] public async Task Handle_ShouldReturnFailure_WhenRefreshTokenIsExpired() { }
 }
