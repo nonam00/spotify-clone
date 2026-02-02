@@ -67,8 +67,8 @@ const AddSongsToPlaylistContent = ({
         <Button
           className="bg-white px-6 py-2 mb-4 w-[25%]"
           type="button"
-          onClick={onSaveClick || toAddList.length === 0}
-          disabled={isDisabled}
+          onClick={onSaveClick}
+          disabled={isDisabled || toAddList.length === 0}
         >
           Save
         </Button>
