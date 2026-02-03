@@ -6,7 +6,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Queries;
 
-public class GetPlaylistListByCountQueryHandlerTest : TestBase
+public class GetPlaylistListByCountQueryHandlerTests : TestBase
 {
     [Fact]
     public async Task Handle_Should_ReturnPlaylists_WhenValid()

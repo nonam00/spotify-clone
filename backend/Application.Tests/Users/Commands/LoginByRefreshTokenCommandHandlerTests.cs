@@ -8,7 +8,7 @@ using Application.Users.Commands.LoginByRefreshToken;
 
 namespace Application.Tests.Users.Commands;
 
-public class LoginByRefreshTokenCommandHandlerTest : TestBase
+public class LoginByRefreshTokenCommandHandlerTests : TestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsValid()
@@ -76,8 +76,9 @@ public class LoginByRefreshTokenCommandHandlerTest : TestBase
         user.Activate();
         
         var refreshToken = user.AddRefreshToken().Value;
-        
-        user.Deactivate();
+
+        var moderator = Moderator.Create(new Email("mod@mail.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.DeactivateUser(user);
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();

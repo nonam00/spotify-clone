@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 using Application.Moderators.Commands.CreateModerator;
 using Application.Moderators.Commands.ActivateModerator;
+using Application.Moderators.Commands.ActivateUser;
 using Application.Moderators.Commands.DeactivateModerator;
+using Application.Moderators.Commands.DeactivateUser;
 using Application.Moderators.Commands.DeleteSong;
 using Application.Moderators.Commands.DeleteSongs;
 using Application.Moderators.Commands.PublishSong;
@@ -17,7 +19,6 @@ using Application.Moderators.Commands.UpdateModeratorPermissions;
 using Application.Songs.Models;
 using Application.Songs.Queries.GetUnpublishedSongList;
 using Application.Songs.Queries.GetUploadedSongsByUserId;
-using Application.Users.Commands.UpdateUserStatus;
 using Application.Users.Models;
 using Application.Users.Queries.GetUserList;
 using WebAPI.Models;
@@ -297,16 +298,30 @@ public class ModeratorsController : BaseController
         return BadRequest(new { Detail = result.Error.Description });
     }
     
-    [HttpPut("users/{userId:guid}/status"), Authorize(Policy = AuthorizationPolicies.CanManageUsers)]
+    [HttpPut("users/{userId:guid}/activate"), Authorize(Policy = AuthorizationPolicies.CanManageUsers)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateUserStatus(
-        Guid userId,
-        UpdateUserStatusDto updateUserStatusDto,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ActivateUser(Guid userId, CancellationToken cancellationToken)
     {
-        var command = new UpdateUserStatusCommand(userId, updateUserStatusDto.IsActive);
+        var command = new ActivateUserCommand(ModeratorId, userId);
+        var result = await Mediator.Send(command, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
+    }
+    
+    [HttpPut("users/{userId:guid}/deactivate"), Authorize(Policy = AuthorizationPolicies.CanManageUsers)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeactivateUser(Guid userId, CancellationToken cancellationToken)
+    {
+        var command = new DeactivateUserCommand(ModeratorId, userId);
         var result = await Mediator.Send(command, cancellationToken);
         
         if (result.IsSuccess)

@@ -57,7 +57,7 @@ public class User : AggregateRoot<Guid>
         
         if (!string.IsNullOrEmpty(oldAvatarPath) && oldAvatarPath != avatarPath)
         {
-            AddDomainEvent(new UserAvatarChangedEvent(Id, newAvatarPath: AvatarPath, oldAvatarPath: oldAvatarPath));
+            AddDomainEvent(new UserAvatarChangedEvent(Id, oldAvatarPath: oldAvatarPath));
         }
 
         return Result.Success();
@@ -81,17 +81,22 @@ public class User : AggregateRoot<Guid>
         {
             return Result.Failure(UserDomainErrors.UserAlreadyActive);
         }
+        
         IsActive = true;
+        
         return Result.Success();
     }
     
-    public Result Deactivate()
+    internal Result Deactivate()
     {
         if (!IsActive)
         {
             return Result.Failure(UserDomainErrors.UserAlreadyDeactivated);
         }
+        
         IsActive = false;
+        AvatarPath = new FilePath("");
+        
         return Result.Success();
     }
 

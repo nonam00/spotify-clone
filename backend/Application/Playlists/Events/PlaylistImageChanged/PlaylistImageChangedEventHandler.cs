@@ -21,13 +21,17 @@ public class PlaylistImageChangedEventHandler : IDomainEventHandler<PlaylistImag
 
     public async Task HandleAsync(PlaylistImageChangedEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling playlist {playlistId} details updated event",  @event.PlaylistId);
-        
-        _logger.LogDebug("Deleting playlist {playlistId} old cover image {imagePath}",
-                @event.PlaylistId, @event.OldImagePath.Value);
+        _logger.LogDebug("Handling playlist {PlaylistId} details updated event",  @event.PlaylistId);
+
+        if (!string.IsNullOrWhiteSpace(@event.OldImagePath))
+        {
+            _logger.LogDebug(
+                "Deleting playlist {PlaylistId} old cover image {ImagePath}",
+                @event.PlaylistId, @event.OldImagePath);
             
-        await _fileServiceClient
-            .DeleteAsync(@event.OldImagePath, "image", cancellationToken)
-            .ConfigureAwait(false);
+            await _fileServiceClient
+                .DeleteAsync(@event.OldImagePath, "image", cancellationToken)
+                .ConfigureAwait(false);
+        }
     }
 }

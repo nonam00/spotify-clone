@@ -64,12 +64,17 @@ public class Moderator : AggregateRoot<Guid>
         
         if (!IsActive)
         {
-            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+            return Result.Failure(ModeratorDomainErrors.NotActive);
         }
         
         if (!Permissions.CanManageModerators)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+
+        if (!moderatorToUpdate.IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
         }
         
         moderatorToUpdate.Permissions = permissions;
@@ -252,6 +257,50 @@ public class Moderator : AggregateRoot<Guid>
         
         return Result.Success();
     }
+
+    public Result ActivateUser(User user)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageUsers)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
+        }
+        
+        var activateResult = user.Activate();
+        return activateResult;
+    }
+
+    public Result DeactivateUser(User user)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageUsers)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
+        }
+        
+        var oldAvatarPath = user.AvatarPath;
+        
+        var deactivateResult = user.Deactivate();
+        if (deactivateResult.IsFailure)
+        {
+            return deactivateResult;
+        }
+
+        if (!string.IsNullOrWhiteSpace(oldAvatarPath))
+        {
+            AddDomainEvent(new ModeratorDeactivatedUserEvent(user.Id, oldAvatarPath));
+        }
+        
+        return Result.Success();
+    }
 }
 
 public static class ModeratorDomainErrors
@@ -276,4 +325,7 @@ public static class ModeratorDomainErrors
     
     public static readonly Error CannotManageEmptySongList =
         new(nameof(CannotManageEmptySongList), "Moderator cannot manage empty song list.");
+    
+    public static readonly Error CannotManageUsers =
+        new(nameof(CannotManageUsers), "Moderator cannot manage users.");
 }

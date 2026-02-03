@@ -23,14 +23,22 @@ export async function getUsersForModeration(): Promise<UserListVm> {
   return response.json();
 }
 
-export async function updateUserStatus(userId: string, isActive: boolean): Promise<void> {
-  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users/${userId}/status`, {
+export async function activateUser(userId: string): Promise<void> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users/${userId}/activate`, {
     method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ isActive }),
   });
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(response.status, "Failed to update user status"));
+    throw new Error(getErrorMessage(response.status, "Failed to activate user"));
+  }
+}
+
+export async function deactivateUser(userId: string): Promise<void> {
+  const response = await authFetchClient(`${CLIENT_API_URL}/moderators/users/${userId}/deactivate`, {
+    method: "PUT",
+  });
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(response.status, "Failed to deactivate user"));
   }
 }

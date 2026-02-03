@@ -67,8 +67,7 @@ public class UnlikeSongCommandHandlerTests : TestBase
         
         var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
         moderator.PublishSong(song);
-
-        user.Deactivate();
+        moderator.DeactivateUser(user);
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();

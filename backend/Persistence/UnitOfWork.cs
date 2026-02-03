@@ -7,13 +7,13 @@ namespace Persistence;
 
 public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
     private readonly IDomainEventDispatcher _domainEventDispatcher;
     private readonly ILogger<UnitOfWork> _logger;
 
-    public UnitOfWork(AppDbContext context, IDomainEventDispatcher domainEventDispatcher, ILogger<UnitOfWork> logger)
+    public UnitOfWork(AppDbContext dbContext, IDomainEventDispatcher domainEventDispatcher, ILogger<UnitOfWork> logger)
     {
-        _context = context;
+        _dbContext = dbContext;
         _domainEventDispatcher = domainEventDispatcher;
         _logger = logger;
     }
@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     {
         var domainEvents = CollectAndCleanDomainEvents();
         
-        var result = await _context.SaveChangesAsync(cancellationToken);
+        var result = await _dbContext.SaveChangesAsync(cancellationToken);
         
         // Dispatch domain events after successful save
         await DispatchDomainEventsAsync(domainEvents, cancellationToken).ConfigureAwait(false);
@@ -32,7 +32,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
 
     private List<DomainEvent> CollectAndCleanDomainEvents()
     {
-        var domainEntities = _context.ChangeTracker
+        var domainEntities = _dbContext.ChangeTracker
             .Entries<AggregateRoot<Guid>>()
             .Where(x => x.Entity.DomainEvents.Count != 0)
             .ToList();
@@ -64,13 +64,13 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
-        _context.Dispose();
+        _dbContext.Dispose();
         GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _context.DisposeAsync();
+        await _dbContext.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 }

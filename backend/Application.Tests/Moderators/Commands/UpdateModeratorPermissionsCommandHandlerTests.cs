@@ -205,4 +205,44 @@ public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorErrors.NotFound);
     }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenModeratorToUpdateIsNotActive()
+    {
+        // Arrange
+        var managingModerator = Moderator.Create(
+            new Email("managing@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Managing Moderator",
+            ModeratorPermissions.CreateSuperAdmin());
+        
+        var moderatorToUpdate = Moderator.Create(
+            new Email("toupdate@example.com"),
+            new PasswordHash("hashed_password2"),
+            "Moderator",
+            ModeratorPermissions.CreateDefault());
+        
+        managingModerator.DeactivateModerator(moderatorToUpdate);
+        
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToUpdate);
+        await Context.SaveChangesAsync();
+        
+        // Clear tracking to avoid conflicts
+        Context.ChangeTracker.Clear();
+
+        var command = new UpdateModeratorPermissionsCommand(
+            ManagingModeratorId: managingModerator.Id,
+            ModeratorToUpdatePermissionsId: moderatorToUpdate.Id,
+            CanManageUsers: true,
+            CanManageContent: true,
+            CanViewReports: false,
+            CanManageModerators: false);
+        
+        // Act 
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ModeratorDomainErrors.NotActive);
+    }
 }

@@ -59,7 +59,7 @@ public class Playlist : AggregateRoot<Guid>
 
         if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != imagePath)
         {
-            AddDomainEvent(new PlaylistImageChangedEvent(Id, imagePath, oldImagePath));
+            AddDomainEvent(new PlaylistImageChangedEvent(Id, oldImagePath));
         }
         
         return Result.Success();

@@ -8,13 +8,14 @@ import { useUserSongsModalStore, useUsersStore } from "../model";
 import UserSongsModal from "./UserSongsModal";
 
 const UsersTable = () => {
-  const { users, isLoading, error, fetchUsers, updateStatus } = useUsersStore(
+  const { users, isLoading, error, fetchUsers, activateUser, deactivateUser, } = useUsersStore(
     useShallow((s) => ({
       users: s.users,
       isLoading: s.isLoading,
       error: s.error,
       fetchUsers: s.fetchUsers,
-      updateStatus: s.updateStatus,
+      activateUser: s.activateUser,
+      deactivateUser: s.deactivateUser,
     }))
   );
 
@@ -34,15 +35,20 @@ const UsersTable = () => {
   }, []);
 
   const handleStatusChange = useCallback((userId: string, isActive: boolean, email: string) => {
-    const title = isActive ? "Activate user?" : "Suspend user?";
+    const title = isActive
+      ? "Activate user?"
+      : "Suspend user?";
+
     const description = isActive
       ? `Allow ${email} to access their library.`
       : `User ${email} will be logged out and blocked.`;
 
-    onOpen(title, description, async () => {
-      await updateStatus(userId, isActive);
-    });
-  }, [onOpen, updateStatus]);
+    const action = isActive
+      ? async () => await activateUser(userId)
+      : async () => await deactivateUser(userId);
+
+    onOpen(title, description, action);
+  }, [activateUser, deactivateUser, onOpen]);
 
   if (isLoading && users.length === 0) {
     return (
