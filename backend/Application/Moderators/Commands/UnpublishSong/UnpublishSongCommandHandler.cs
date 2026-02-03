@@ -1,12 +1,13 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
-using Domain.Common;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
-using Domain.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Moderators.Commands.UnpublishSong;
 
@@ -36,7 +37,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         if (moderator is null)
         {
             _logger.LogError(
-                "Tried to unpublish song {SongId} but moderator {ModeratorId} doesnt exist",
+                "Tried to unpublish song {SongId} but moderator {ModeratorId} doesnt exist.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -44,7 +45,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         if (!moderator.IsActive)
         {
             _logger.LogError(
-                "Tried to unpublish song {SongId} but moderator {ModeratorId} is not active",
+                "Tried to unpublish song {SongId} but moderator {ModeratorId} is not active.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
@@ -52,7 +53,8 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         if (!moderator.Permissions.CanManageContent)
         {
             _logger.LogWarning(
-                "Moderator {ModeratorId} tried to unpublish song {SongId} but doesnt have permission to manage content",
+                "Moderator {ModeratorId} tried to unpublish song {SongId}" +
+                " but doesnt have permission to manage content.",
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
@@ -72,7 +74,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         {  
             _logger.LogError(
                 "Moderator {ModeratorId} tried to unpublish song {SongId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, publishSongResult.Error.Description);
             return publishSongResult;
         }
@@ -81,7 +83,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Song {SongId} was successfully unpublished by moderator {ModeratorId}.",
+            "Moderator {ModeratorId} successfully unpublished song {SongId}.",
             command.SongId, command.ModeratorId);
         
         return Result.Success();

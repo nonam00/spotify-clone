@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Application.Moderators.Commands.UpdateModeratorPermissions;
 using Application.Moderators.Errors;
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 

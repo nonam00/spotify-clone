@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Models;
 
 namespace Application.Users.Commands.LoginByRefreshToken;
 
@@ -37,9 +37,9 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
         if (user is null)
         {
             _logger.LogInformation(
-                "Anonymous user tried to login with non-relevant refresh token {RefreshToken}",
+                "Anonymous user tried to login with non-relevant refresh token {RefreshToken}.",
                 request.RefreshToken); 
-            return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
+            return Result<TokenPair>.Failure(UserErrors.RelevantRefreshTokenNotFound);
         }
         
         if (!user.IsActive)
@@ -55,7 +55,7 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
         {
             _logger.LogError(
                 "Anonymous user tried to login with refresh token {RefreshToken}" +
-                " but domain error occurred: {DomainErrorDescription}",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 request.RefreshToken, updateRefreshTokenResult.Error.Description);
             return Result<TokenPair>.Failure(updateRefreshTokenResult.Error);
         }
@@ -63,6 +63,8 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation("User {UserId} successfully used refresh token to generate token pair.", user.Id);
         
         return Result<TokenPair>.Success(new TokenPair(accessToken, updateRefreshTokenResult.Value.Token));
     }

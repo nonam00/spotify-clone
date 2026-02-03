@@ -6,6 +6,7 @@ using Domain.ValueObjects;
 using Application.Users.Commands.LikeSong;
 using Application.Users.Errors;
 using Application.Songs.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 

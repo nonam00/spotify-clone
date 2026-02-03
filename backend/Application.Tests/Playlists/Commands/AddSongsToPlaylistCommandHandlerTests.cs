@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Application.Playlists.Commands.AddSongsToPlaylist;
 using Application.Playlists.Errors;
 using Application.Songs.Errors;
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 

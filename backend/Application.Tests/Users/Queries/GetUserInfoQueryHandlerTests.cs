@@ -1,5 +1,6 @@
 using FluentAssertions;
 
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Users.Queries.GetUserInfo;

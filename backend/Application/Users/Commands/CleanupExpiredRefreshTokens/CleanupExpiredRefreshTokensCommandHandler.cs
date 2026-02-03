@@ -10,7 +10,9 @@ public class CleanupExpiredRefreshTokensCommandHandler : ICommandHandler<Cleanup
     private readonly IRefreshTokensRepository _refreshTokensRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CleanupExpiredRefreshTokensCommandHandler(IRefreshTokensRepository refreshTokensRepository, IUnitOfWork unitOfWork)
+    public CleanupExpiredRefreshTokensCommandHandler(
+        IRefreshTokensRepository refreshTokensRepository,
+        IUnitOfWork unitOfWork)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _unitOfWork = unitOfWork;

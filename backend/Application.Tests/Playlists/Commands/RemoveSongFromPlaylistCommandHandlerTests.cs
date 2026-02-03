@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Application.Playlists.Commands.RemoveSongFromPlaylist;
 using Application.Playlists.Errors;
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 

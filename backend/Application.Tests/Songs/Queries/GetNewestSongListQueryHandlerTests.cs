@@ -1,8 +1,8 @@
 using FluentAssertions;
 
-using Application.Songs.Queries.GetNewestSongList;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Songs.Queries.GetNewestSongList;
 
 namespace Application.Tests.Songs.Queries;
 

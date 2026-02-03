@@ -43,8 +43,8 @@ public class ActivateUserByConfirmationCodeCommandHandler
         if (!codeVerificationStatus)
         {
             _logger.LogInformation(
-                "Someone tried to activate user account with email {Email} using invalid code {ConfirmationCode}",
-                request.Email, request.ConfirmationCode);
+                "Someone tried to activate user account with email {Email} using invalid confirmation code.",
+                request.Email);
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
 
@@ -52,9 +52,7 @@ public class ActivateUserByConfirmationCodeCommandHandler
 
         if (user is null)
         {
-            _logger.LogError(
-                "Someone tried to activate non-existing user account with email {Email} and code {ConfirmationCode}", 
-                request.Email, request.ConfirmationCode);
+            _logger.LogError("Someone tried to activate non-existing user account with email {Email}.", request.Email);
             return Result<TokenPair>.Failure(UserErrors.NotFoundWithEmail);
         }
         
@@ -65,14 +63,17 @@ public class ActivateUserByConfirmationCodeCommandHandler
         if (addRefreshTokenResult.IsFailure)
         {
             _logger.LogError(
-                "Tried to activate user {UserId} by confirmation code" +
-                " but domain error occurred on creating refresh token {DomainErrorDescription}",
+                "User {UserId} tried to activate their account by confirmation code" +
+                " but domain error occurred on creating refresh token:\n{DomainErrorDescription}",
                 user.Id, addRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
         }
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation("User {UserId} successfully activated their account with confirmation code.", user.Id);
         
         return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }

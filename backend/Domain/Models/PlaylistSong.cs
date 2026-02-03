@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Errors;
 
 namespace Domain.Models;
 
@@ -20,7 +21,7 @@ public class PlaylistSong : Entity
     {
         if (order <= 0)
         {
-            return Result<PlaylistSong>.Failure(PlaylistSongDomainErrors.OrderCannotBeLessOrEqualToZero);
+            return Result<PlaylistSong>.Failure(PlaylistDomainErrors.SongOrderCannotBeLessOrEqualToZero);
         }
         
         var now = DateTime.UtcNow;
@@ -39,12 +40,12 @@ public class PlaylistSong : Entity
     {
         if (newOrder <= 0)
         {
-            return Result.Failure(PlaylistSongDomainErrors.OrderCannotBeLessOrEqualToZero);
+            return Result.Failure(PlaylistDomainErrors.SongOrderCannotBeLessOrEqualToZero);
         }
 
         if (Order == newOrder)
         {
-            return Result.Failure(PlaylistSongDomainErrors.NewOrderCannotBeEqualToOld);
+            return Result.Failure(PlaylistDomainErrors.NewSongOrderCannotBeEqualToOld);
         }
         
         Order = newOrder;
@@ -52,15 +53,4 @@ public class PlaylistSong : Entity
 
         return Result.Success();
     }
-}
-
-public static class PlaylistSongDomainErrors
-{
-    public static readonly Error OrderCannotBeLessOrEqualToZero = new(
-        nameof(OrderCannotBeLessOrEqualToZero), 
-            "Song order in playlist cannot be less than zero or equal to zero");
-    
-    public static readonly Error NewOrderCannotBeEqualToOld = new(
-        nameof(NewOrderCannotBeEqualToOld),
-            "New song order in playlist cannot be equal to old order");
 }

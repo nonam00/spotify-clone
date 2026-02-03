@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
@@ -37,7 +37,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
         if (user is null)
         {
             _logger.LogError(
-                "Tried to like song {SongId} but user {UserId} doesn't exist",
+                "Tried to like song {SongId} but user {UserId} doesn't exist.",
                 request.SongId, request.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
@@ -55,7 +55,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
         if (song is null)
         {
             _logger.LogError(
-                "User {UserId} tried to like song {SongId} but it doesn't exist",
+                "User {UserId} tried to like song {SongId} but it doesn't exist.",
                 request.UserId, request.SongId);
             return Result.Failure(SongErrors.NotFound);
         }
@@ -66,14 +66,14 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
             if (likeSongResult.Error == UserDomainErrors.SongAlreadyLiked)
             {
                 _logger.LogError(
-                    "User with id {userId} tried to like song {songId} but he already liked this song",
+                    "User with id {UserId} tried to like song {SongId} but he already liked this song.",
                     request.UserId, request.SongId);
             }
             else
             {
                 _logger.LogError(
-                    "User with id {userId} tried to like song {songId}" +
-                    " but domain error occurred: {DomainErrorDescription}",
+                    "User with id {UserId} tried to like song {SongId}" +
+                    " but domain error occurred:\n{DomainErrorDescription}",
                     request.UserId, request.SongId,  likeSongResult.Error.Description);   
             }
             
@@ -82,7 +82,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        _logger.LogInformation("User {UserId} successfully liked song {SongId}", request.UserId, request.SongId);
+        _logger.LogInformation("User {UserId} successfully liked song {SongId}.", request.UserId, request.SongId);
         
         return Result.Success();
     }

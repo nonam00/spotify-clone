@@ -7,6 +7,7 @@ using Domain.ValueObjects;
 using Application.Songs.Errors;
 using Application.Moderators.Commands.UnpublishSong;
 using Application.Moderators.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 

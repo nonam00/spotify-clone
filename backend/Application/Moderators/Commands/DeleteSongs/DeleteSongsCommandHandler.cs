@@ -1,12 +1,13 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
-using Domain.Common;
-using Domain.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Moderators.Commands.DeleteSongs;
 
@@ -35,20 +36,20 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
 
         if (moderator is null)
         {
-            _logger.LogError("Tried to delete songs but moderator {ModeratorId} doesnt exist", command.ModeratorId);
+            _logger.LogError("Tried to delete songs but moderator {ModeratorId} doesnt exist.", command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
 
         if (!moderator.IsActive)
         {
-            _logger.LogError("Tried to delete songs but moderator {ModeratorId} is not active", command.ModeratorId);
+            _logger.LogError("Tried to delete songs but moderator {ModeratorId} is not active.", command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
 
         if (!moderator.Permissions.CanManageContent)
         {
             _logger.LogWarning(
-                "Moderator {ModeratorId} tried to delete songs but doesnt have permission to manage content",
+                "Moderator {ModeratorId} tried to delete songs but doesnt have permission to manage content.",
                 command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
@@ -64,7 +65,7 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
         if (publishResult.IsFailure)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to delete songs but domain error occurred: {DomainErrorDescription}.",
+                "Moderator {ModeratorId} tried to delete songs but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, publishResult.Error.Description);
             return publishResult;
         }

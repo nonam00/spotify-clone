@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Commands.ActivateModerator;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
@@ -74,7 +74,7 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
         {
             _logger.LogError(
                 "Managing moderator {ManagingModeratorId} tried to deactivate moderator {ModeratorToDeactivateId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ManagingModeratorId, command.ModeratorToDeactivateId, deactivationResult.Error);
             return deactivationResult;
         }
@@ -83,8 +83,8 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Moderator {ModeratorToDeactivateId} was successfully deactivated by managing moderator {ManagingModeratorId}.",
-            command.ModeratorToDeactivateId, command.ManagingModeratorId);
+            "Managing moderator {ManagingModeratorId} successfully deactivated moderator {ModeratorToDeactivateId}.",
+            command.ManagingModeratorId, command.ModeratorToDeactivateId);
         
         return Result.Success();
     }

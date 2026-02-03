@@ -5,6 +5,7 @@ using Domain.Models;
 using Domain.ValueObjects;
 using Application.Users.Errors;
 using Application.Users.Commands.LoginByRefreshToken;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -65,7 +66,7 @@ public class LoginByRefreshTokenCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(RefreshTokenErrors.RelevantNotFound);
+        result.Error.Should().Be(UserErrors.RelevantRefreshTokenNotFound);
     }
 
     [Fact]

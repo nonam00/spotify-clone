@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
@@ -36,20 +36,20 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
 
         if (moderator is null)
         {
-            _logger.LogError("Tried to publish songs but moderator {ModeratorId} doesnt exist", command.ModeratorId);
+            _logger.LogError("Tried to publish songs but moderator {ModeratorId} doesnt exist.", command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
 
         if (!moderator.IsActive)
         {
-            _logger.LogError("Tried to publish songs but moderator {ModeratorId} is not active", command.ModeratorId);
+            _logger.LogError("Tried to publish songs but moderator {ModeratorId} is not active.", command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
 
         if (!moderator.Permissions.CanManageContent)
         {
             _logger.LogWarning(
-                "Moderator {ModeratorId} tried to publish songs but doesnt have permission to manage content",
+                "Moderator {ModeratorId} tried to publish songs but doesnt have permission to manage content.",
                 command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
@@ -65,7 +65,7 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
         if (publishResult.IsFailure)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to publish songs but domain error occurred: {DomainErrorDescription}.",
+                "Moderator {ModeratorId} tried to publish songs but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, publishResult.Error.Description);
             return publishResult;
         }

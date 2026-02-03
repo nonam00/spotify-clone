@@ -21,12 +21,12 @@ public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDel
 
     public async Task HandleAsync(ModeratorDeletedSongEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling song {SongId} deleted event", @event.SongId);
+        _logger.LogDebug("Handling song {SongId} deleted event.", @event.SongId);
         
-        _logger.LogDebug("Deleting song {SongId} image {ImagePath}", @event.SongId, @event.Image.Value);
+        _logger.LogDebug("Deleting song {SongId} image {ImagePath}.", @event.SongId, @event.Image.Value);
         var deleteImageTask = _fileServiceClient.DeleteAsync(@event.Image, "image", cancellationToken);
         
-        _logger.LogDebug("Deleting song {SongId} audio {AudioPath}", @event.SongId, @event.Audio.Value);
+        _logger.LogDebug("Deleting song {SongId} audio {AudioPath}.", @event.SongId, @event.Audio.Value);
         var deleteAudioTask = _fileServiceClient.DeleteAsync(@event.Audio, "audio", cancellationToken);
         
         await Task.WhenAll(deleteImageTask, deleteAudioTask).ConfigureAwait(false);

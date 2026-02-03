@@ -18,7 +18,7 @@ public class RefreshToken : Entity<Guid>
 
     private RefreshToken() { } // For EF Core
 
-    public static RefreshToken Create(Guid userId)
+    internal static RefreshToken Create(Guid userId)
     {
         return new RefreshToken
         {

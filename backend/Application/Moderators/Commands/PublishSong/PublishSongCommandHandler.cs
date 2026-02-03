@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
@@ -37,7 +37,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         if (moderator is null)
         {
             _logger.LogError(
-                "Tried to publish song {SongId} but moderator {ModeratorId} doesnt exist",
+                "Tried to publish song {SongId} but moderator {ModeratorId} doesnt exist.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -45,7 +45,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         if (!moderator.IsActive)
         {
             _logger.LogError(
-                "Tried to publish song {SongId} but moderator {ModeratorId} is not active",
+                "Tried to publish song {SongId} but moderator {ModeratorId} is not active.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
@@ -53,7 +53,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         if (!moderator.Permissions.CanManageContent)
         {
             _logger.LogWarning(
-                "Moderator {ModeratorId} tried to publish song {SongId} but doesnt have permission to manage content",
+                "Moderator {ModeratorId} tried to publish song {SongId} but doesnt have permission to manage content.",
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
@@ -73,7 +73,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         {  
             _logger.LogError(
                 "Moderator {ModeratorId} tried to publish song {SongId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, publishSongResult.Error.Description);
             return publishSongResult;
         }
@@ -82,7 +82,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Song {SongId} was successfully published by moderator {ModeratorId}.",
+            "Moderator {ModeratorId} successfully published song {SongId}.",
             command.SongId, command.ModeratorId);
         
         return Result.Success();

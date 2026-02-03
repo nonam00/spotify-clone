@@ -24,4 +24,7 @@ public static class UserErrors
     
     public static readonly Error InvalidVerificationCode =
         new(nameof(InvalidVerificationCode), "Invalid verification code.");
+
+    public static readonly Error RelevantRefreshTokenNotFound =
+        new(nameof(RelevantRefreshTokenNotFound), "Refresh token does not exist or expired");
 }

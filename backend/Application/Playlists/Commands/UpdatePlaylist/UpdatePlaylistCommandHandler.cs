@@ -32,7 +32,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         if (playlist is null)
         {
             _logger.LogError(
-                "User {UserId} tried update details of playlist {PlaylistId} but playlist does not exist",
+                "User {UserId} tried update details of playlist {PlaylistId} but playlist does not exist.",
                 request.UserId, request.PlaylistId);
             return Result.Failure(PlaylistErrors.NotFound);
         }
@@ -40,7 +40,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         if (playlist.UserId != request.UserId)
         {
             _logger.LogWarning(
-                "User {UserId} tried to update details of playlist {PlaylistId} but playlist belongs to user {OwnerId}",
+                "User {UserId} tried to update playlist {PlaylistId} details but playlist belongs to user {OwnerId}.",
                 request.UserId, request.PlaylistId, playlist.UserId);
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
@@ -57,7 +57,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         {
             _logger.LogInformation(
                 "User {UserId} tried to update details of playlist {PlaylistId}" +
-                " but domain occurred: {DomainErrorDescription}",
+                " but domain occurred:\n{DomainErrorDescription}",
                 request.UserId, request.PlaylistId, updateResult.Error.Description);
             return updateResult;
         }
@@ -65,6 +65,10 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         _playlistsRepository.Update(playlist);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "User {UserId} successfully updated playlist {PlaylistId} details.",
+            request.UserId, playlist.Id);
         
         return Result.Success();
     }

@@ -31,7 +31,7 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
         if (playlist is null)
         {
             _logger.LogError(
-                "User {UserId} tried to reorder songs in playlist {PlaylistId} but playlist does not exist",
+                "User {UserId} tried to reorder songs in playlist {PlaylistId} but playlist does not exist.",
                 command.UserId, command.PlaylistId);
             return Result.Failure(PlaylistErrors.NotFound);
         }
@@ -39,7 +39,7 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
         if (playlist.UserId != command.UserId)
         {
             _logger.LogWarning(
-                "User {UserId} tried to reorder songs in playlist {PlaylistId} that belongs to user {OwnerId}",
+                "User {UserId} tried to reorder songs in playlist {PlaylistId} that belongs to user {OwnerId}.",
                 command.UserId, command.PlaylistId, playlist.UserId);
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
@@ -49,12 +49,16 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
         {
             _logger.LogError(
                 "User {UserId} tried to reorder songs in playlist {PlaylistId}" +
-                " but domain error occurred: {DomainErrorDescription}",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.UserId, command.PlaylistId, reorderSongsResult.Error);
             return reorderSongsResult;
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "User {UserId} successfully reordered songs in playlist {PlaylistId}.",
+            command.UserId, playlist.Id);
         
         return Result.Success();
     }

@@ -5,6 +5,7 @@ using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Application.Users.Commands.UploadSong;
 using Application.Users.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 

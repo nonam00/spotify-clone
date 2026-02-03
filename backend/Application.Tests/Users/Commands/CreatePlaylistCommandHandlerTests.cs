@@ -5,6 +5,7 @@ using Domain.Models;
 using Domain.ValueObjects;
 using Application.Users.Commands.CreatePlaylist;
 using Application.Users.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 

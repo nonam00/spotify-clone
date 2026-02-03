@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
@@ -89,13 +89,17 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
         {
             _logger.LogError(
                 "Managing moderator {ManagingModeratorId} tried to create moderator" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ManagingModeratorId, createModeratorResult.Error.Description);
             return createModeratorResult;
         }
         
         await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "Managing moderator {ManagingModeratorId} successfully created new moderator {CreatedModeratorId}.",
+            command.ManagingModeratorId, createModeratorResult.Value.Id);
         
         return Result.Success();
     }

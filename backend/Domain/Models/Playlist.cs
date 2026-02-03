@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Errors;
 using Domain.Events;
 using Domain.ValueObjects;
 
@@ -163,20 +164,4 @@ public class Playlist : AggregateRoot<Guid>
 
     private bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
     private bool ContainsSongs(IEnumerable<Guid> songIds) => _playlistSongs.Any(ps => songIds.Contains(ps.SongId));
-}
-
-public static class PlaylistDomainErrors
-{
-    public static readonly Error EmptyTitle =
-        new(nameof(EmptyTitle), "Playlist title cannot be empty.");
-    
-    public static readonly Error AlreadyContainsSong =
-        new(nameof(AlreadyContainsSong), "Playlist already contains song.");
-    
-    public static readonly Error DoesntContainSong =
-        new(nameof(DoesntContainSong), "Playlist does not contain song.");
-    
-    public static readonly Error CannotPerformActionsWithUnpublishedSong = new(
-        nameof(CannotPerformActionsWithUnpublishedSong),
-        "Trying to do action with unpublished song.");
 }

@@ -1,7 +1,7 @@
+using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Users.Interfaces;
 using Application.Users.Models;
-using Domain.Common;
 
 namespace Application.Users.Queries.GetUserList;
 
@@ -20,4 +20,3 @@ public class GetUserListQueryHandler : IQueryHandler<GetUserListQuery, Result<Us
         return Result<UserListVm>.Success(new UserListVm(users));
     }
 }
-

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using Domain.Models;
+using Domain.Errors;
 using Application.Users.Models;
 using Application.Users.Queries.GetUserInfo;
 using Application.Users.Commands.UpdatePassword;

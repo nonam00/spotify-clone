@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
@@ -37,7 +37,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
         if (moderator is null)
         {
             _logger.LogError(
-                "Tried to delete song {SongId} but moderator {ModeratorId} doesnt exist",
+                "Tried to delete song {SongId} but moderator {ModeratorId} doesnt exist.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -45,7 +45,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
         if (!moderator.IsActive)
         {
             _logger.LogError(
-                "Tried to delete song {SongId} but moderator {ModeratorId} is not active",
+                "Tried to delete song {SongId} but moderator {ModeratorId} is not active.",
                 command.SongId, command.ModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
@@ -53,7 +53,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
         if (!moderator.Permissions.CanManageContent)
         {
             _logger.LogWarning(
-                "Moderator {ModeratorId} tried to delete song {SongId} but doesnt have permission to manage content",
+                "Moderator {ModeratorId} tried to delete song {SongId} but doesnt have permission to manage content.",
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
@@ -73,7 +73,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
         {  
             _logger.LogError(
                 "Moderator {ModeratorId} tried to delete song {SongId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, deletionResult.Error.Description);
             return deletionResult;
         }
@@ -82,7 +82,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Song {SongId} was successfully marked for deletion by moderator {ModeratorId}.",
+            "Moderator {ModeratorId} successfully marked song {SongId} for deletion.",
             command.SongId, command.ModeratorId);
         
         return Result.Success();

@@ -21,12 +21,12 @@ public class ModeratorDeactivatedUserEventHandler : IDomainEventHandler<Moderato
 
     public async Task HandleAsync(ModeratorDeactivatedUserEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling user {UserId} deactivated event", @event.UserId);
+        _logger.LogDebug("Handling user {UserId} deactivated event.", @event.UserId);
 
         if (!string.IsNullOrWhiteSpace(@event.AvatarPath.Value))
         {
             _logger.LogDebug(
-                "Deleting user {UserId} avatar image {AvatarImagePath}",
+                "Deleting user {UserId} avatar image {AvatarImagePath}.",
                 @event.UserId, @event.AvatarPath.Value);
             
             await _fileServiceClient

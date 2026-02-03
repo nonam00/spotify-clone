@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Models;
 
 namespace Application.Users.Commands.UploadSong;
 
@@ -32,13 +32,13 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
         
         if (user is null)
         {
-            _logger.LogError("Tried to upload song but user {UserId} doesnt exist", request.UserId);
+            _logger.LogError("Tried to upload song but user {UserId} doesnt exist.", request.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
 
         if (!user.IsActive)
         {
-            _logger.LogError("User {UserId} tried to upload song but user is not active", request.UserId);
+            _logger.LogError("User {UserId} tried to upload song but user is not active.", request.UserId);
             return Result.Failure(UserDomainErrors.NotActive);
         }
         
@@ -49,7 +49,7 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
         if (uploadSongResult.IsFailure)
         {
             _logger.LogError(
-                "User {UserId} tried to upload song but domain error occurred: {DomainErrorDescription}",
+                "User {UserId} tried to upload song but domain error occurred:\n{DomainErrorDescription}",
                 request.UserId, uploadSongResult.Error);
             return uploadSongResult;
         }
@@ -57,7 +57,7 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "User {UserId} successfully uploaded song {SongId}",
+            "User {UserId} successfully uploaded song {SongId}.",
             request.UserId, uploadSongResult.Value.Id);
         
         return Result.Success();

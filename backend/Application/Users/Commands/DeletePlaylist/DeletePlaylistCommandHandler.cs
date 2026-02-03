@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.Models;
 
 namespace Application.Users.Commands.DeletePlaylist;
 
@@ -32,7 +32,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
         if (user is null)
         {
             _logger.LogError(
-                "Tried to delete playlist {PlaylistId} but user {UserId} doesn't exist", 
+                "Tried to delete playlist {PlaylistId} but user {UserId} doesn't exist.", 
                 request.PlaylistId, request.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
@@ -50,7 +50,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
         {
             _logger.LogError(
                 "User {UserId} tried to delete playlist {PlaylistId}" +
-                " but domain error occurred: {DomainErrorDescription}",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 request.PlaylistId, request.UserId, removePlaylistResult.Error.Description);
             return removePlaylistResult;
         }
@@ -58,7 +58,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "User {UserId} successfully deleted playlist {PlaylistId}", 
+            "User {UserId} successfully deleted playlist {PlaylistId}.", 
             request.UserId, request.PlaylistId);
         
         return Result.Success();

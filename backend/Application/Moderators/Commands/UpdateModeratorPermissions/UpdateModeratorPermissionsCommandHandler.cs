@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
@@ -34,7 +34,7 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
         {
             _logger.LogError(
                 "Tried to update permission for moderator {ModeratorToUpdatePermissionsId}" +
-                " but managing moderator {ManagingModeratorId} doesnt exist",
+                " but managing moderator {ManagingModeratorId} doesnt exist.",
                 command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -83,7 +83,7 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
             _logger.LogError(
                 "Managing moderator {ManagingModeratorId} tried" +
                 " to update permissions for moderator {ModeratorToUpdatePermissionsId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId, updateResult.Error.Description);
             return Result.Failure(updateResult.Error);
         }
@@ -92,7 +92,7 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}",
+            "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}.",
             command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
 
         return Result.Success();

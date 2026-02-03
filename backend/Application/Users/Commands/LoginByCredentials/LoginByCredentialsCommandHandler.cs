@@ -57,7 +57,7 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
         {
             _logger.LogError(
                 "User {UserId} tried to login" +
-                " but domain error occurred on creating refresh token: {DomainErrorDescription}.",
+                " but domain error occurred on creating refresh token:\n{DomainErrorDescription}",
                 user.Id, addRefreshTokenResult.Error.Description);   
             return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
         }
@@ -66,7 +66,7 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Generated token pair for user {userId}", user.Id);
+        _logger.LogInformation("Successfully generated token pair for user {userId}.", user.Id);
 
         return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }

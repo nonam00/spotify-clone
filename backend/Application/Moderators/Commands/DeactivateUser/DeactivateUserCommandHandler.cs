@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Commands.ActivateUser;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
@@ -38,7 +38,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         if (moderator is null)
         {
             _logger.LogError(
-                "Tried to deactivate user {UserId} but moderator {ModeratorId} doesnt exist",
+                "Tried to deactivate user {UserId} but moderator {ModeratorId} doesnt exist.",
                 command.UserId, command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -46,7 +46,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         if (!moderator.IsActive)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to deactivate user {UserId} but moderator is not active",
+                "Moderator {ModeratorId} tried to deactivate user {UserId} but moderator is not active.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
@@ -55,7 +55,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to deactivate user {UserId}" +
-                " but moderator doesnt have permission to manage users",
+                " but moderator doesnt have permission to manage users.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
         }
@@ -65,7 +65,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         if (user is null)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to deactivate user {UserId} but user doesnt exist",
+                "Moderator {ModeratorId} tried to deactivate user {UserId} but user doesnt exist.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
@@ -75,7 +75,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to deactivate user {UserId}" +
-                " but domain error occurred: {DomainErrorDescription}",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.UserId, activateUserResult.Error.Description);
             return activateUserResult;
         }
@@ -84,7 +84,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Moderator {ModeratorId} successfully deactivated User {UserId}",
+            "Moderator {ModeratorId} successfully deactivated User {UserId}.",
             command.ModeratorId, command.UserId);
 
         return Result.Success();

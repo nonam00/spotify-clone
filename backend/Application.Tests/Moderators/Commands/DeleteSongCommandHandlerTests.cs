@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Moderators.Commands.DeleteSong;

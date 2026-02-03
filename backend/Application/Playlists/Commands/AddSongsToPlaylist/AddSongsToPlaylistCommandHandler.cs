@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
@@ -37,7 +37,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
         if (playlist is null)
         {
             _logger.LogError(
-                "User {UserId} tried to add songs to playlist {PlaylistId} but playlist does not exist",
+                "User {UserId} tried to add songs to playlist {PlaylistId} but playlist does not exist.",
                 request.UserId, request.PlaylistId);
             return Result.Failure(PlaylistErrors.NotFound);
         }
@@ -45,7 +45,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
         if (playlist.UserId != request.UserId)
         {
             _logger.LogWarning(
-                "User {UserId} tried to add songs to playlist {PlaylistId} that belongs to user {OwnerId}",
+                "User {UserId} tried to add songs to playlist {PlaylistId} that belongs to user {OwnerId}.",
                 request.UserId, request.PlaylistId, playlist.UserId);
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
@@ -55,7 +55,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
         if (songs.Count != request.SongIds.Count)
         {
             _logger.LogError(
-                "User {UserId} tried to add songs to playlist {PlaylistId} but some songs does not exist",
+                "User {UserId} tried to add songs to playlist {PlaylistId} but some songs does not exist.",
                 request.UserId, request.PlaylistId);
             return Result.Failure(SongErrors.SongsNotFound);
         }
@@ -67,18 +67,18 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
             {
                 case nameof(PlaylistDomainErrors.AlreadyContainsSong):
                     _logger.LogError(
-                        "User {UserId} tried to add songs that is already in playlist {PlaylistId}",
+                        "User {UserId} tried to add songs that is already in playlist {PlaylistId}.",
                         request.UserId, playlist.Id);
                     break;
                 case nameof(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong):
                     _logger.LogError(
-                        "User {UserId} tried to add unpublished songs to playlist {PlaylistId}",
+                        "User {UserId} tried to add unpublished songs to playlist {PlaylistId}.",
                         request.UserId, playlist.Id);
                     break;
                 default:
                     _logger.LogError(
                         "User {UserId} tried to add songs to playlist {PlaylistId}" +
-                        " but domain error occurred: {DomainErrorDescription}",
+                        " but domain error occurred:\n{DomainErrorDescription}",
                         request.UserId, playlist.Id, addSongsResult.Error.Description);
                     break;
             }
@@ -87,6 +87,10 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "User {UserId} successfully added {SongsCount} songs to playlist {PlaylistId}.",
+            request.UserId, request.SongIds.Count, playlist.Id);
         
         return Result.Success();
     }

@@ -1,10 +1,11 @@
-using Application.Moderators.Commands.DeactivateModerator;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 
-using Application.Moderators.Errors;
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Moderators.Errors;
+using Application.Moderators.Commands.DeactivateModerator;
 
 namespace Application.Tests.Moderators.Commands;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
@@ -26,13 +26,13 @@ public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, Result<Us
 
         if (user is null)
         {
-            _logger.LogWarning("Tried to get info for non-existing user {UserId}", request.UserId);
+            _logger.LogWarning("Tried to get info for non-existing user {UserId}.", request.UserId);
             return Result<UserInfo>.Failure(UserErrors.NotFound);
         }
 
         if (!user.IsActive)
         {
-            _logger.LogInformation("User {UserId} tried to get their info but user is not active", request.UserId);
+            _logger.LogInformation("User {UserId} tried to get their info but user is not active.", request.UserId);
             return Result<UserInfo>.Failure(UserDomainErrors.NotActive);
         }
         

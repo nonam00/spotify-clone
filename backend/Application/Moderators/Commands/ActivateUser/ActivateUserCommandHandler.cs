@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
@@ -37,7 +37,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         if (moderator is null)
         {
             _logger.LogError(
-                "Tried to activate user {UserId} but moderator {ModeratorId} doesnt exist",
+                "Tried to activate user {UserId} but moderator {ModeratorId} doesnt exist.",
                 command.UserId, command.ModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
@@ -45,7 +45,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         if (!moderator.IsActive)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to activate user {UserId} but moderator is not active",
+                "Moderator {ModeratorId} tried to activate user {UserId} but moderator is not active.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
@@ -54,7 +54,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to activate user {UserId}" +
-                " but moderator doesnt have permission to manage users",
+                " but moderator doesnt have permission to manage users.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
         }
@@ -64,7 +64,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         if (user is null)
         {
             _logger.LogError(
-                "Moderator {ModeratorId} tried to activate user {UserId} but user doesnt exist",
+                "Moderator {ModeratorId} tried to activate user {UserId} but user doesnt exist.",
                 command.ModeratorId, command.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
@@ -74,7 +74,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to activate user {UserId}" +
-                " but domain error occurred: {DomainErrorDescription}",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.UserId, activateUserResult.Error.Description);
             return activateUserResult;
         }
@@ -83,7 +83,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
         _logger.LogInformation(
-            "Moderator {ModeratorId} successfully activated User {UserId}",
+            "Moderator {ModeratorId} successfully activated user {UserId}.",
             command.ModeratorId, command.UserId);
 
         return Result.Success();

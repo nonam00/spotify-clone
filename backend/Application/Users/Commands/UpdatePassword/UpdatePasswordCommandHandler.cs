@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
-using Domain.Models;
 
 namespace Application.Users.Commands.UpdatePassword;
 
@@ -62,7 +62,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         if (changePasswordResult.IsFailure)
         {
             _logger.LogError(
-                "User {UserId} tried to change password but domain error occurred: {DomainErrorDescription}",
+                "User {UserId} tried to change password but domain error occurred:\n{DomainErrorDescription}",
                 request.UserId, changePasswordResult.Error.Description);
             return changePasswordResult;
         }
@@ -70,7 +70,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        _logger.LogInformation("User {UserId} successfully changed password", request.UserId);
+        _logger.LogInformation("User {UserId} successfully changed password.", request.UserId);
         
         return Result.Success();
     }

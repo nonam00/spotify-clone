@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
+using Domain.Errors;
 
 namespace Application.Users.Commands.UpdateUser;
 

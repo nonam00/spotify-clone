@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-using Domain.Models;
+using Domain.Errors;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
@@ -73,7 +73,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
         {
             _logger.LogError(
                 "Managing moderator {ManagingModeratorId} tried to activate moderator {ModeratorToActivateId}" +
-                " but domain error occurred: {DomainErrorDescription}.",
+                " but domain error occurred:\n{DomainErrorDescription}",
                 command.ManagingModeratorId, command.ModeratorToActivateId, activationResult.Error.Description);
             return activationResult;
         }

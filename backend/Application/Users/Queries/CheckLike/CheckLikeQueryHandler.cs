@@ -1,6 +1,6 @@
-﻿using Application.Shared.Messaging;
+﻿using Domain.Common;
+using Application.Shared.Messaging;
 using Application.Users.Interfaces;
-using Domain.Common;
 
 namespace Application.Users.Queries.CheckLike;
 
