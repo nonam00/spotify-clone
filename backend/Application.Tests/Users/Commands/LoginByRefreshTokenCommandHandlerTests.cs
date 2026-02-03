@@ -5,7 +5,6 @@ using Domain.Models;
 using Domain.ValueObjects;
 using Application.Users.Errors;
 using Application.Users.Commands.LoginByRefreshToken;
-using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -84,8 +83,6 @@ public class LoginByRefreshTokenCommandHandlerTests : TestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
-        Context.ChangeTracker.Clear();
-
         var query = new LoginByRefreshTokenCommand(refreshToken.Token);
         
         // Act
@@ -93,7 +90,7 @@ public class LoginByRefreshTokenCommandHandlerTests : TestBase
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(UserDomainErrors.NotActive);
+        result.Error.Should().Be(UserErrors.RelevantRefreshTokenNotFound);
     }
     
     // [Fact] public async Task Handle_ShouldReturnFailure_WhenRefreshTokenIsExpired() { }

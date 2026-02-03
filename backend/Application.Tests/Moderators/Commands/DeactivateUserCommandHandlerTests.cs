@@ -42,6 +42,43 @@ public class DeactivateUserCommandHandlerTests : TestBase
         deactivatedUser.Should().NotBeNull();
         deactivatedUser.IsActive.Should().BeFalse();
     }
+
+    [Fact]
+    public async Task Handle_ShouldCleanUserRefreshTokensOnDeactivating_WhenValid()
+    {
+        // Arrange
+        var moderator = Moderator.Create(new Email("mod@mail.com"), new PasswordHash("hashed_password"), "Mod");
+        var user = User.Create(new Email("user@example.com"), new PasswordHash("hashed_password"), "User");
+        
+        moderator.ActivateUser(user);
+
+        user.AddRefreshToken();
+        user.AddRefreshToken();
+        
+        await Context.Moderators.AddAsync(moderator);
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        // Clear tracking to avoid conflicts
+        Context.ChangeTracker.Clear();
+
+        var command = new DeactivateUserCommand(moderator.Id, user.Id);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+
+        var deactivatedUser = await Context.Users
+            .AsNoTracking()
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.Id == user.Id);
+        
+        deactivatedUser.Should().NotBeNull();
+        deactivatedUser.IsActive.Should().BeFalse();
+        deactivatedUser.RefreshTokens.Count.Should().Be(0);
+    }
     
     [Fact] 
     public async Task Handle_ShouldDeleteAvatarImage_WhenValid()

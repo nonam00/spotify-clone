@@ -95,6 +95,12 @@ public class User : AggregateRoot<Guid>
             return Result.Failure(UserDomainErrors.UserAlreadyDeactivated);
         }
         
+        var cleanRefreshTokensResult = CleanRefreshTokens();
+        if (cleanRefreshTokensResult.IsFailure)
+        {
+            return cleanRefreshTokensResult;
+        }
+        
         IsActive = false;
         AvatarPath = new FilePath("");
         

@@ -60,7 +60,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
             return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
         }
         
-        var user = await _usersRepository.GetById(command.UserId, cancellationToken);
+        var user = await _usersRepository.GetByIdWithRefreshTokens(command.UserId, cancellationToken);
         
         if (user is null)
         {
