@@ -46,6 +46,25 @@ public class GetUserInfoQueryHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var query = new GetUserInfoQuery(user.Id);
+
+        // Act
+        var result = await Mediator.Send(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
     {
         // Arrange

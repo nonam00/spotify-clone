@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Models;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
 using Application.Users.Models;
-using Domain.Common;
 
 namespace Application.Users.Queries.GetUserInfo;
 
@@ -22,12 +24,18 @@ public class GetUserInfoQueryHandler : IQueryHandler<GetUserInfoQuery, Result<Us
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken).ConfigureAwait(false);
 
-        if (user != null)
+        if (user is null)
         {
-            return Result<UserInfo>.Success(new UserInfo(user.Email, user.FullName, user.AvatarPath));
+            _logger.LogWarning("Tried to get info for non-existing user {UserId}", request.UserId);
+            return Result<UserInfo>.Failure(UserErrors.NotFound);
+        }
+
+        if (!user.IsActive)
+        {
+            _logger.LogInformation("User {UserId} tried to get their info but user is not active", request.UserId);
+            return Result<UserInfo>.Failure(UserDomainErrors.NotActive);
         }
         
-        _logger.LogWarning("Tried to get info for non-existing user {userId}", request.UserId);
-        return Result<UserInfo>.Failure(UserErrors.NotFound);
+        return Result<UserInfo>.Success(new UserInfo(user.Email, user.FullName, user.AvatarPath));
     }
 }
