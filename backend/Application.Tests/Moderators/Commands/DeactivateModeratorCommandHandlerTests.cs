@@ -1,14 +1,14 @@
+using Application.Moderators.Commands.DeactivateModerator;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 
-using Application.Moderators.Commands.ActivateModerator;
 using Application.Moderators.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class ActivateModeratorCommandHandlerTest : TestBase
+public class DeactivateModeratorCommandHandlerTests : TestBase
 {
     [Fact] 
     public async Task Handle_ShouldActivateModerator_WhenValid()
@@ -20,23 +20,21 @@ public class ActivateModeratorCommandHandlerTest : TestBase
             "Managing Moderator",
             ModeratorPermissions.CreateSuperAdmin());
         
-        var moderatorToActivate = Moderator.Create(
+        var moderatorToDeactivate = Moderator.Create(
             new Email("toupdate@example.com"),
             new PasswordHash("hashed_password2"),
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        managingModerator.DeactivateModerator(moderatorToActivate);
-        
-        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToActivate);
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
         await Context.SaveChangesAsync();
         
         // Clear tracking to avoid conflicts
         Context.ChangeTracker.Clear();
 
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToActivateId: moderatorToActivate.Id);
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -44,12 +42,12 @@ public class ActivateModeratorCommandHandlerTest : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
 
-        var activatedModerator = await Context.Moderators
+        var deactivatedModerator = await Context.Moderators
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => m.Id == moderatorToActivate.Id);
+            .FirstOrDefaultAsync(m => m.Id == moderatorToDeactivate.Id);
         
-        activatedModerator.Should().NotBeNull();
-        activatedModerator.IsActive.Should().BeTrue();
+        deactivatedModerator.Should().NotBeNull();
+        deactivatedModerator.IsActive.Should().BeFalse();
     }
     
     [Fact]
@@ -62,12 +60,18 @@ public class ActivateModeratorCommandHandlerTest : TestBase
             "Managing Moderator",
             ModeratorPermissions.CreateDefault());
         
-        await Context.Moderators.AddAsync(managingModerator);
+        var moderatorToDeactivate = Moderator.Create(
+            new Email("toupdate@example.com"),
+            new PasswordHash("hashed_password2"),
+            "Moderator",
+            ModeratorPermissions.CreateDefault());
+        
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
         await Context.SaveChangesAsync();
         
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToActivateId: Guid.NewGuid());
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -90,9 +94,9 @@ public class ActivateModeratorCommandHandlerTest : TestBase
         await Context.Moderators.AddRangeAsync(moderator);
         await Context.SaveChangesAsync();
 
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: moderator.Id,
-            ModeratorToActivateId: moderator.Id);
+            ModeratorToDeactivateId: moderator.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -103,8 +107,9 @@ public class ActivateModeratorCommandHandlerTest : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenModeratorIsAlreadyActive()
+    public async Task Handle_ShouldReturnFailure_WhenModeratorIsAlreadyDeactivated()
     {
+        
         // Arrange
         var managingModerator = Moderator.Create(
             new Email("managing@example.com"),
@@ -112,32 +117,34 @@ public class ActivateModeratorCommandHandlerTest : TestBase
             "Managing Moderator",
             ModeratorPermissions.CreateSuperAdmin());
         
-        var moderatorToActivate = Moderator.Create(
+        var moderatorToDeactivate = Moderator.Create(
             new Email("toupdate@example.com"),
             new PasswordHash("hashed_password2"),
             "Moderator",
             ModeratorPermissions.CreateDefault());
         
-        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToActivate);
+        managingModerator.DeactivateModerator(moderatorToDeactivate);
+        
+        await Context.Moderators.AddRangeAsync(managingModerator, moderatorToDeactivate);
         await Context.SaveChangesAsync();
 
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             ManagingModeratorId: managingModerator.Id,
-            ModeratorToActivateId: moderatorToActivate.Id);
+            ModeratorToDeactivateId: moderatorToDeactivate.Id);
         
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ModeratorDomainErrors.AlreadyActive);
+        result.Error.Should().Be(ModeratorDomainErrors.AlreadyDeactivated);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenManagingModeratorNotFound()
     {
         // Arrange
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             Guid.NewGuid(),
             Guid.NewGuid());
         
@@ -170,7 +177,7 @@ public class ActivateModeratorCommandHandlerTest : TestBase
         await Context.Moderators.AddAsync(managingModerator);
         await Context.SaveChangesAsync();
         
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             managingModerator.Id,
             Guid.NewGuid());
         
@@ -183,7 +190,7 @@ public class ActivateModeratorCommandHandlerTest : TestBase
     }
     
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenModeratorToActivateNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenModeratorToDeactivateNotFound()
     {
         // Arrange
         var managingModerator = Moderator.Create(
@@ -195,7 +202,7 @@ public class ActivateModeratorCommandHandlerTest : TestBase
         await Context.Moderators.AddAsync(managingModerator);
         await Context.SaveChangesAsync();
         
-        var command = new ActivateModeratorCommand(
+        var command = new DeactivateModeratorCommand(
             managingModerator.Id,
             Guid.NewGuid());
         
@@ -205,5 +212,35 @@ public class ActivateModeratorCommandHandlerTest : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorErrors.NotFound);
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenManagingModeratorIdIsEmpty()
+    {
+        // Arrange
+        var command = new DeactivateModeratorCommand(Guid.Empty, Guid.NewGuid());
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("ManagingModeratorId");
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenModeratorToDeactivateIdIsEmpty()
+    {
+        // Arrange
+        var command = new DeactivateModeratorCommand(Guid.NewGuid(), Guid.Empty);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("ModeratorToDeactivateId");
     }
 }

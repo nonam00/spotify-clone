@@ -233,4 +233,160 @@ public class CreateModeratorCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ModeratorErrors.NotFound);
     }
+    
+        [Fact]
+    public async Task Handle_ShouldReturnValidationFailure_WhenFullNameIsEmpty()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(),
+            "test@example.com",
+            "",
+            "password123",
+            false);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("FullName");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailIsEmpty()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(),
+            "",
+            "Moderator",
+            "password123",
+            false);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailIsInvalid()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(),
+            "invalid-email",
+            "Moderator",
+            "password123",
+            false);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenEmailExceedsMaxLength()
+    {
+        // Arrange
+        var longEmail = new string('a', 250) + "@example.com";
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(),
+            longEmail,
+            "Moderator",
+            "password123",
+            false);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Email");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPasswordIsEmpty()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(), 
+            "admin@example.com",
+            "Admin Name",
+            "",
+            false);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Password");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPasswordIsTooShort()
+    {
+        // Arrange
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(), 
+            "admin@example.com",
+            "Admin Name",
+            "pass",
+            true);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Password");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenPasswordExceedsMaxLength()
+    {
+        // Arrange
+        var longPassword = new string('a', 101);
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(), 
+            "admin@example.com",
+            "Admin Name",
+            longPassword,
+            true);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Password");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenFullNameExceedsMaxLength()
+    {
+        // Arrange
+        var longName = new string('a', 101);
+        var command = new CreateModeratorCommand(
+            Guid.NewGuid(), 
+            "admin@example.com",
+            longName,
+            "password123",
+            true);
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("FullName");
+    }
 }

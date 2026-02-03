@@ -1,25 +1,25 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
-using Domain.Common;
 
 namespace Application.Moderators.Queries.LoginByCredentials;
 
-public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentialsQuery, Result<string>>
+public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQuery, Result<string>>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtProvider _jwtProvider;
-    private readonly ILogger<LoginByCredentialsCommandHandler> _logger;
+    private readonly ILogger<LoginByCredentialsQueryHandler> _logger;
     
-    public LoginByCredentialsCommandHandler(
+    public LoginByCredentialsQueryHandler(
         IModeratorsRepository moderatorsRepository,
         IPasswordHasher passwordHasher,
         IJwtProvider jwtProvider,
-        ILogger<LoginByCredentialsCommandHandler> logger)
+        ILogger<LoginByCredentialsQueryHandler> logger)
     {
         _moderatorsRepository = moderatorsRepository;
         _passwordHasher = passwordHasher;
