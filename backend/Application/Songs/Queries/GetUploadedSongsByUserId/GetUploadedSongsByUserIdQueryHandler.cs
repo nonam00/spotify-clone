@@ -1,7 +1,7 @@
+using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
-using Domain.Common;
 
 namespace Application.Songs.Queries.GetUploadedSongsByUserId;
 

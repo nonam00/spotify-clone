@@ -1,38 +1,43 @@
+
+using Moq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 using Domain.Common;
 
-using Application.Shared.Interfaces;
-using Application.Shared.Data;
-using Application.Shared.Messaging;
-using Application.Users.Interfaces;
-using Application.Songs.Interfaces;
-using Application.Playlists.Interfaces;
 using Application.Moderators.Interfaces;
+using Application.Playlists.Interfaces;
+using Application.Shared.Data;
+using Application.Shared.Interfaces;
+using Application.Shared.Messaging;
+using Application.Songs.Interfaces;
+using Application.Users.Interfaces;
+
 using Persistence;
 using Persistence.Repositories;
 
 namespace Application.Tests;
 
-public abstract class TestBase : IDisposable
+public class TestBaseWithPostgresFixture : IClassFixture<PostgreSqlFixture>, IAsyncLifetime
 {
     protected IMediator Mediator { get; }
     protected AppDbContext Context { get; }
     protected Mock<IPasswordHasher> PasswordHasherMock { get; }
 
-    protected TestBase()
+    protected TestBaseWithPostgresFixture(PostgreSqlFixture fixture)
     {
         var services = new ServiceCollection();
         
-        // In-memory db configuration
+        // Test container postgres configuration
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());
-            options.ConfigureWarnings(w =>
-                w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning));
+            options.UseNpgsql(fixture.ConnectionString)
+                .UseSnakeCaseNamingConvention()
+                .EnableSensitiveDataLogging();
+            options.ConfigureWarnings(c =>
+                c.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         // Configuring mock services 
@@ -82,13 +87,17 @@ public abstract class TestBase : IDisposable
         
         Mediator = serviceProvider.GetRequiredService<IMediator>();
         Context = serviceProvider.GetRequiredService<AppDbContext>();
-        
+
         Context.Database.EnsureCreated();
     }
 
-    public void Dispose()
+    public async Task InitializeAsync()
     {
-        Context.Database.EnsureDeleted();
-        Context.Dispose();
+        await Context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE moderators, users, songs CASCADE;");
     }
-}
+
+    public async Task DisposeAsync()
+    {
+        await Context.DisposeAsync();
+    }
+}   

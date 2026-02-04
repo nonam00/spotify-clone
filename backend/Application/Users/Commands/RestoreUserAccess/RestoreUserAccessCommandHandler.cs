@@ -46,8 +46,8 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         if (!codeVerificationStatus)
         {
             _logger.LogInformation(
-                "Someone tried to restore access to user account with email {Email} using invalid restore code.}",
-                request.Email, request.RestoreCode);
+                "Someone tried to restore access to user account with email {Email} using invalid restore code.", 
+                request.Email);
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
 
