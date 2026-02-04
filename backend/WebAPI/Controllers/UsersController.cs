@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Domain.Errors;
 using Application.Users.Models;
 using Application.Users.Queries.GetUserInfo;
 using Application.Users.Commands.UpdatePassword;
@@ -37,6 +38,12 @@ public class UsersController : BaseController
         if (result.IsSuccess)
         {
             return Ok(result.Value);
+        }
+        
+        if (result.IsFailure && result.Error == UserDomainErrors.NotActive)
+        {
+            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("refresh_token");
         }
         
         return BadRequest(new { Detail = result.Error.Description });

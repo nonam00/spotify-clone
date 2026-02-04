@@ -25,10 +25,29 @@ public class UsersRepository : IUsersRepository
         var user = await _dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
         return user;
     }
 
-    public async Task<User?> GetByIdWithSongs(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdWithRefreshTokens(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.RefreshTokens)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithUploadedSongs(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.UploadedSongs)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithLikedSongs(Guid id, CancellationToken cancellationToken = default)
     {
         var user = await _dbContext.Users
             .Include(u => u.UserLikedSongs)
@@ -64,6 +83,18 @@ public class UsersRepository : IUsersRepository
         return user;   
     }
 
+    public async Task<User?> GetByRefreshTokenValue(string refreshTokenValue, CancellationToken cancellationToken = default)
+    {
+        var refreshToken = _dbContext.RefreshTokens
+            .FirstOrDefault(rf => rf.Token == refreshTokenValue && rf.Expires >= DateTime.UtcNow);
+        
+        var user = await _dbContext.Users
+            .Include(u => u.RefreshTokens)
+            .SingleOrDefaultAsync(u => u.RefreshTokens.Contains(refreshToken), cancellationToken);
+
+        return user;
+    }
+
     public async Task<bool> CheckIfSongLiked(Guid userId, Guid songId, CancellationToken cancellationToken = default)
     {
         var isLiked = await _dbContext.LikedSongs
@@ -78,7 +109,7 @@ public class UsersRepository : IUsersRepository
     {
         var nonActiveUsers = await _dbContext.Users
             .AsNoTracking()
-            .Where(u => !u.IsActive && u.CreatedAt.AddHours(1) < DateTime.UtcNow)
+            .Where(u => !u.IsActive && u.CreatedAt.AddHours(48) < DateTime.UtcNow)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
             
@@ -96,7 +127,7 @@ public class UsersRepository : IUsersRepository
                 u.FullName ?? "",
                 u.IsActive,
                 u.CreatedAt,
-                u.PublishedSongs.Count
+                u.UploadedSongs.Count
             ))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -106,6 +137,5 @@ public class UsersRepository : IUsersRepository
 
     public void Update(User user) => _dbContext.Update(user);
     
-    public void DeleteRange(IEnumerable<User> users) =>
-        _dbContext.Users.RemoveRange(users);
+    public void DeleteRange(IEnumerable<User> users) => _dbContext.Users.RemoveRange(users);
 }

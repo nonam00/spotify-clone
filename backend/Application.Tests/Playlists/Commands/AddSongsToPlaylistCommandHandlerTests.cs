@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 using Application.Playlists.Commands.AddSongsToPlaylist;
 using Application.Playlists.Errors;
+using Application.Songs.Errors;
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
 
@@ -14,33 +16,19 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldAddSongToPlaylist_WhenValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var playlist = Playlist.Create(user.Id, "My Playlist");
-        var song1 = Song.Create(
-            "Test Song 1",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        var song2 = Song.Create(
-            "Test Song 2",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+        var playlist = user.CreatePlaylist().Value;
         
-        song1.Publish();
-        song2.Publish();
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2]);
         
         await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
-        await Context.Songs.AddRangeAsync(song1, song2);
         await Context.SaveChangesAsync();
-        
-        Context.ChangeTracker.Clear();
         
         var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, song2.Id]);
 
@@ -61,33 +49,20 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenSongAlreadyInPlaylist()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var playlist = Playlist.Create(user.Id, "My Playlist");
+        var playlist = user.CreatePlaylist().Value;
         
-        var song1 = Song.Create(
-            "Test Song 1",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        var song2 = Song.Create(
-            "Test Song 2",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2]);
         
-        song1.Publish();
-        song2.Publish();
-        
-        playlist.AddSong(song1.Id);
+        playlist.AddSong(song1);
         
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddRangeAsync(song1, song2);
-        await Context.Playlists.AddAsync(playlist);
         await Context.SaveChangesAsync();
         
         var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, song2.Id]);
@@ -97,31 +72,20 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(PlaylistErrors.SongAlreadyInPlaylist);
+        result.Error.Should().Be(PlaylistDomainErrors.AlreadyContainsSong);
     }
     
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenPlaylistNotFound()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        song.Publish();
-        
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
-        var command = new AddSongsToPlaylistCommand(user.Id, Guid.NewGuid(), [song.Id]);
+        var command = new AddSongsToPlaylistCommand(user.Id, Guid.NewGuid(), [Guid.NewGuid()]);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -135,10 +99,7 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenUserNotOwner()
     {
         // Arrange
-        var owner = User.Create(
-            new Email("owner@example.com"),
-            new PasswordHash("hashed_password"),
-            "Owner");
+        var owner = User.Create(new Email("owner@example.com"), new PasswordHash("hashed_password"), "Owner");
         owner.Activate();
         
         var otherUser = User.Create(
@@ -147,20 +108,14 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
             "Other User");
         otherUser.Activate();
         
-        var playlist = Playlist.Create(owner.Id, "My Playlist");
+        var playlist = owner.CreatePlaylist().Value;
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
+        var song = otherUser.UploadSong("Song", "Author", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
         
-        song.Publish();
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
-        await Context.Users.AddAsync(owner);
-        await Context.Users.AddAsync(otherUser);
-        await Context.Playlists.AddAsync(playlist);
-        await Context.Songs.AddAsync(song);
+        await Context.Users.AddRangeAsync(owner, otherUser);
         await Context.SaveChangesAsync();
         
         var command = new AddSongsToPlaylistCommand(otherUser.Id, playlist.Id, [song.Id]);
@@ -171,5 +126,64 @@ public class AddSongsToPlaylistCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(PlaylistErrors.OwnershipError);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenAddingUnpublishedSong()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        user.Activate();
+
+        var playlist = user.CreatePlaylist().Value;
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author 2", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song1); // Song 2 remains unpublished
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, song2.Id]);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
+    }
+    
+    [Fact] 
+    public async Task Handle_ShouldReturnFailure_WhenSomeSongsNotFound()
+    {
+        var moderator = Moderator.Create(
+            new Email("moderator@example.com"),
+            new PasswordHash("hashed_password1"),
+            "Moderator",
+            ModeratorPermissions.CreateDefault());
+
+        var user = User.Create(new Email("user@emal.com"), new PasswordHash("hashed_password"));
+        user.Activate();
+        
+        var playlist = user.CreatePlaylist().Value;
+        
+        var song1 = user.UploadSong("Song 1", "Author 1", new FilePath("song.mp3"), new FilePath("image.jpg")).Value;
+        moderator.PublishSong(song1);
+        
+        await Context.Moderators.AddAsync(moderator);
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new AddSongsToPlaylistCommand(user.Id, playlist.Id, [song1.Id, Guid.NewGuid()]);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(SongErrors.SongsNotFound);
     }
 }

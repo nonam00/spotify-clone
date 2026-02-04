@@ -3,28 +3,14 @@ using Domain.ValueObjects;
 
 namespace Domain.Events;
 
-public class UserRegisteredEvent : DomainEvent
+public class UserRegisteredEvent(Guid userId, Email email) : DomainEvent
 {
-    public Guid UserId { get; }
-    public Email Email { get; }
-
-    public UserRegisteredEvent(Guid userId, Email email)
-    {
-        UserId = userId;
-        Email = email;
-    }
+    public Guid UserId { get; } = userId;
+    public Email Email { get; } = email;
 }
 
-public class UserAvatarChangedEvent : DomainEvent
+public class UserAvatarChangedEvent(Guid userId, FilePath oldAvatarPath) : DomainEvent
 {
-    public Guid UserId { get; }
-    public FilePath NewAvatarPath { get; }
-    public FilePath OldAvatarPath { get; }
-    
-    public UserAvatarChangedEvent(Guid userId, FilePath newAvatarPath, FilePath oldAvatarPath)
-    {
-        UserId = userId;
-        NewAvatarPath = newAvatarPath;
-        OldAvatarPath = oldAvatarPath;
-    }
+    public Guid UserId { get; } = userId;
+    public FilePath OldAvatarPath { get; } = oldAvatarPath;
 }

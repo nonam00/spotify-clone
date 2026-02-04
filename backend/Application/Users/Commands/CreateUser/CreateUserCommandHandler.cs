@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Shared.Data;
@@ -20,7 +21,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
     public CreateUserCommandHandler(
         IUsersRepository usersRepository,
         IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork, ILogger<CreateUserCommandHandler> logger)
+        IUnitOfWork unitOfWork,
+        ILogger<CreateUserCommandHandler> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
@@ -37,13 +39,12 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
             if (!checkUser.IsActive)
             {
                 _logger.LogInformation(               
-                    "Tried to create user with email {email} which is already exists but not active.",
+                    "Tried to create user with email {Email} which is already exists but not active.",
                     request.Email);
                 return Result.Failure(UserErrors.AlreadyExistButNotActive);
             }
-            _logger.LogInformation(
-                "Tried to create user with email {email} which is already active.",
-                request.Email);
+            
+            _logger.LogInformation("Tried to create user with email {Email} which is already active.", request.Email);
             return Result.Failure(UserErrors.AlreadyExist);
         }
 
@@ -56,6 +57,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
         
         await _usersRepository.Add(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation("Successfully created new user {UserId}.", user.Id);
         
         return Result.Success();
     }

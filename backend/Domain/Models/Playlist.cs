@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Errors;
 using Domain.Events;
 using Domain.ValueObjects;
 
@@ -20,16 +21,18 @@ public class Playlist : AggregateRoot<Guid>
     // Private collection for tracking many-to-many relationship with metadata
     private readonly List<PlaylistSong> _playlistSongs = [];
     public IReadOnlyCollection<PlaylistSong> PlaylistSongs => _playlistSongs.AsReadOnly();   
+    
     private Playlist() { } // For EF Core
     
-    public static Playlist Create(Guid userId, string title, string? description = null, FilePath? imagePath = null)
+    public static Result<Playlist> Create(
+        Guid userId, string title, string? description = null, FilePath? imagePath = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            return Result<Playlist>.Failure(PlaylistDomainErrors.EmptyTitle);
         }
 
-        return new Playlist
+        return Result<Playlist>.Success(new Playlist
         {
             Id = Guid.NewGuid(),
             UserId = userId,
@@ -38,14 +41,14 @@ public class Playlist : AggregateRoot<Guid>
             ImagePath = imagePath ?? new FilePath(null),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
-        };
+        });
     }
 
-    public void UpdateDetails(string title, string? description, FilePath imagePath)
+    public Result UpdateDetails(string title, string? description, FilePath imagePath)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            return Result.Failure(PlaylistDomainErrors.EmptyTitle);
         }
 
         var oldImagePath = ImagePath;
@@ -57,49 +60,108 @@ public class Playlist : AggregateRoot<Guid>
 
         if (!string.IsNullOrEmpty(oldImagePath) && oldImagePath != imagePath)
         {
-            AddDomainEvent(new PlaylistImageChangedEvent(Id, imagePath, oldImagePath));
+            AddDomainEvent(new PlaylistImageChangedEvent(Id, oldImagePath));
         }
+        
+        return Result.Success();
     }
     
-    public bool AddSong(Guid songId)
+    public Result AddSong(Song song)
     {
-        if (ContainsSong(songId))
+        if (!song.IsPublished)
         {
-            return false;
+            return Result.Failure(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
+        }
+        
+        if (ContainsSong(song.Id))
+        {
+            return Result.Failure(PlaylistDomainErrors.AlreadyContainsSong);
         }
 
-        var playlistSong = PlaylistSong.Create(Id, songId, _playlistSongs.Count + 1);
+        var createPlaylistSongResult = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
+
+        if (createPlaylistSongResult.IsFailure)
+        {
+            return Result.Failure(createPlaylistSongResult.Error);
+        }
         
-        _playlistSongs.Add(playlistSong);
+        _playlistSongs.Add(createPlaylistSongResult.Value);
         
         UpdatedAt = DateTime.UtcNow;
         
-        return true;
+        return Result.Success();
     }
 
-    public bool RemoveSong(Guid songId)
+    public Result AddSongs(List<Song> songs)
+    {
+        if (ContainsSongs(songs.Select(s => s.Id)))
+        {
+            return Result.Failure(PlaylistDomainErrors.AlreadyContainsSong);
+        }
+
+        if (songs.Any(song => !song.IsPublished))
+        {
+            return Result.Failure(PlaylistDomainErrors.CannotPerformActionsWithUnpublishedSong);
+        }
+
+        foreach (var song in songs)
+        {
+            var createPlaylistSongResult = PlaylistSong.Create(Id, song.Id, _playlistSongs.Count + 1);
+
+            if (createPlaylistSongResult.IsFailure)
+            {
+                return Result.Failure(createPlaylistSongResult.Error);
+            }
+        
+            _playlistSongs.Add(createPlaylistSongResult.Value);
+        }
+        
+        UpdatedAt = DateTime.UtcNow;
+        
+        return Result.Success();
+    }
+
+    public Result RemoveSong(Guid songId)
     {
         var playlistSong = _playlistSongs.FirstOrDefault(ps => ps.SongId == songId);
+
+        if (playlistSong == null || !_playlistSongs.Remove(playlistSong))
+        {
+            return Result.Failure(PlaylistDomainErrors.DoesntContainSong);
+        }
+        
         UpdatedAt = DateTime.UtcNow;
-        return playlistSong != null && _playlistSongs.Remove(playlistSong);
+        
+        return Result.Success();
     }
-
-    private bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
-
+    
     // Song id index in list dictates what order it will get
-    public void ReorderSongs(List<Guid> songsToReorder)
+    public Result ReorderSongs(List<Guid> songsToReorder)
     {
         for (var i = 0; i < _playlistSongs.Count; i++)
         {
             var songId = songsToReorder[i];
             
-            var playlistSong = _playlistSongs.FirstOrDefault(ps => ps.SongId == songId)
-                ?? throw new ArgumentException("Songs not in playlist", nameof(songsToReorder));
+            var playlistSong = _playlistSongs.FirstOrDefault(ps => ps.SongId == songId);
+
+            if (playlistSong == null)
+            {
+                return Result.Failure(PlaylistDomainErrors.DoesntContainSong);
+            }
 
             if (playlistSong.Order != i + 1)
             {
-                playlistSong.ChangeOrder(i + 1);
+                var changeOrderResult = playlistSong.ChangeOrder(i + 1);
+                if (changeOrderResult.IsFailure)
+                {
+                    return changeOrderResult;
+                }
             }
         }
+        
+        return Result.Success();
     }
+
+    private bool ContainsSong(Guid songId) => _playlistSongs.Any(ps => ps.SongId == songId);
+    private bool ContainsSongs(IEnumerable<Guid> songIds) => _playlistSongs.Any(ps => songIds.Contains(ps.SongId));
 }

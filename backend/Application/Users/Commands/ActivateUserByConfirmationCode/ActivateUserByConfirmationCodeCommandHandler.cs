@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
@@ -43,31 +43,38 @@ public class ActivateUserByConfirmationCodeCommandHandler
         if (!codeVerificationStatus)
         {
             _logger.LogInformation(
-                "Someone tried to activate user account with email {email} using invalid code {confirmationCode}",
-                request.Email, request.ConfirmationCode);
+                "Someone tried to activate user account with email {Email} using invalid confirmation code.",
+                request.Email);
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
 
         var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
-            _logger.LogError(
-                "Someone tried to activate non-existing user account with email {email} and code {confirmationCode}", 
-                request.Email, request.ConfirmationCode);
+            _logger.LogError("Someone tried to activate non-existing user account with email {Email}.", request.Email);
             return Result<TokenPair>.Failure(UserErrors.NotFoundWithEmail);
         }
         
         user.Activate();
         _usersRepository.Update(user);
 
-        var accessToken = _jwtProvider.GenerateUserToken(user);
+        var addRefreshTokenResult = user.AddRefreshToken();
+        if (addRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to activate their account by confirmation code" +
+                " but domain error occurred on creating refresh token:\n{DomainErrorDescription}",
+                user.Id, addRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
+        }
 
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));       
+        var accessToken = _jwtProvider.GenerateUserToken(user);
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        _logger.LogInformation("User {UserId} successfully activated their account with confirmation code.", user.Id);
+        
+        return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }
 }

@@ -1,4 +1,6 @@
 using Domain.Common;
+using Domain.Errors;
+using Domain.Events;
 using Domain.ValueObjects;
 
 namespace Domain.Models;
@@ -15,7 +17,8 @@ public class Moderator : AggregateRoot<Guid>
 
     private Moderator() { }
 
-    public static Moderator Create(Email email, PasswordHash passwordHash, string? fullName = null, ModeratorPermissions? permissions = null)
+    public static Moderator Create(
+        Email email, PasswordHash passwordHash, string? fullName = null, ModeratorPermissions? permissions = null)
     {
         var moderator = new Moderator
         {
@@ -31,11 +34,272 @@ public class Moderator : AggregateRoot<Guid>
         return moderator;
     }
 
-    public void ChangePassword(PasswordHash newPasswordHash) => PasswordHash = newPasswordHash;
+    public Result<Moderator> CreateModerator(
+        Email email, PasswordHash passwordHash, string? fullName = null, bool isSuper = false)
+    {
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
 
-    public void Deactivate() => IsActive = false;
+        var permissions = isSuper
+            ? ModeratorPermissions.CreateSuperAdmin()
+            : ModeratorPermissions.CreateDefault();
+        
+        var newModerator = Create(email, passwordHash, fullName, permissions);
+
+        return Result<Moderator>.Success(newModerator);
+    }
+
+    public Result UpdateModeratorPermissions(Moderator moderatorToUpdate, ModeratorPermissions permissions)
+    {
+        if (moderatorToUpdate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+
+        if (!moderatorToUpdate.IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        moderatorToUpdate.Permissions = permissions;
+        return Result.Success();
+    }
+
+    public Result ActivateModerator(Moderator moderatorToActivate)
+    {
+        if (moderatorToActivate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
+        var activationResult = moderatorToActivate.Activate();
+        return activationResult;
+    }
+
+    public Result DeactivateModerator(Moderator moderatorToDeactivate)
+    {
+        if (moderatorToDeactivate.Id == Id)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageHimself);
+        }
+        
+        if (!IsActive)
+        {
+            return Result<Moderator>.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!Permissions.CanManageModerators)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
+        var activationResult = moderatorToDeactivate.Deactivate();
+        return activationResult;
+    }
+
+    private Result Deactivate()
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyDeactivated);
+        }
+        IsActive = false;
+        return Result.Success();
+    }
+
+    private Result Activate()
+    {
+        if (IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.AlreadyActive);
+        }
+        IsActive = true;
+        return Result.Success();
+    }
+
+    public Result PublishSong(Song song)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageContent)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageContent);
+        }
+        
+        var publishResult = song.Publish();
+        return publishResult;
+    }
+
+    public Result PublishSongs(List<Song> songs)
+    {
+        if (!songs.Any())
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);    
+        }
+        
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageContent)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageContent);
+        }
+
+        foreach (var song in songs)
+        {
+            var publishResult = song.Publish();
+            if (publishResult.IsFailure)
+            {
+                return publishResult;
+            }
+        }
+
+        return Result.Success();
+    }
     
-    public void Activate() => IsActive = true;
+    public Result UnpublishSong(Song song)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
 
-    public void UpdatePermissions(ModeratorPermissions permissions) => Permissions = permissions;
+        if (!Permissions.CanManageContent)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageContent);
+        }
+        
+        var unpublishResult = song.Unpublish();
+        return unpublishResult;
+    }
+    
+    public Result DeleteSong(Song song)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageContent)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageContent);
+        }
+        
+        var deleteResult = song.MarkForDeletion();
+
+        if (deleteResult.IsFailure)
+        {
+            return deleteResult;
+        }
+        
+        AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
+        
+        return Result.Success();
+    }
+
+    public Result DeleteSongs(List<Song> songs)
+    {
+        if (!songs.Any())
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);
+        }
+        
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageContent)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageContent);
+        }
+
+        foreach (var song in songs)
+        {
+            var markingForDeletionResult = song.MarkForDeletion();
+            if (markingForDeletionResult.IsFailure)
+            {
+                return markingForDeletionResult;
+            }
+            AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
+        }
+        
+        return Result.Success();
+    }
+
+    public Result ActivateUser(User user)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageUsers)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
+        }
+        
+        var activateResult = user.Activate();
+        return activateResult;
+    }
+
+    public Result DeactivateUser(User user)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+
+        if (!Permissions.CanManageUsers)
+        {
+            return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
+        }
+        
+        var oldAvatarPath = user.AvatarPath;
+        
+        var deactivateResult = user.Deactivate();
+        if (deactivateResult.IsFailure)
+        {
+            return deactivateResult;
+        }
+
+        if (!string.IsNullOrWhiteSpace(oldAvatarPath))
+        {
+            AddDomainEvent(new ModeratorDeactivatedUserEvent(user.Id, oldAvatarPath));
+        }
+        
+        return Result.Success();
+    }
 }

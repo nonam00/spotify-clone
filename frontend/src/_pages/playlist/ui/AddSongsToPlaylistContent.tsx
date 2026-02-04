@@ -59,6 +59,8 @@ const AddSongsToPlaylistContent = ({
     );
   }
 
+  const isDisabled = isPending || songs.length === 0;
+
   return (
     <div className="flex flex-col gap-y-2 w-full px-6 outline-none">
       <div className="flex flex-row gap-x-2">
@@ -66,7 +68,7 @@ const AddSongsToPlaylistContent = ({
           className="bg-white px-6 py-2 mb-4 w-[25%]"
           type="button"
           onClick={onSaveClick}
-          disabled={isPending}
+          disabled={isDisabled || toAddList.length === 0}
         >
           Save
         </Button>
@@ -74,7 +76,7 @@ const AddSongsToPlaylistContent = ({
           className="bg-white px-6 py-2 mb-4 w-[25%]"
           type="button"
           onClick={onClearClick}
-          disabled={isPending}
+          disabled={isDisabled || toAddList.length === 0}
         >
           Clear
         </Button>

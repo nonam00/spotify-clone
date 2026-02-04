@@ -6,6 +6,11 @@ public class CreateModeratorCommandValidator : AbstractValidator<CreateModerator
 {
     public CreateModeratorCommandValidator()
     {
+        RuleFor(command => command.ManagingModeratorId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Managing moderator ID is required")
+            .WithErrorCode("400");
+        
         RuleFor(command => command.Email)
             .NotEmpty()
             .WithMessage("Email is required")
@@ -31,6 +36,9 @@ public class CreateModeratorCommandValidator : AbstractValidator<CreateModerator
         RuleFor(command => command.FullName)
             .NotEmpty()
             .WithMessage("Full name is required")
+            .WithErrorCode("400")
+            .MaximumLength(100)
+            .WithMessage("Full name cannot exceed 100 characters")
             .WithErrorCode("400");
     }
 }

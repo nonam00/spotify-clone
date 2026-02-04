@@ -2,7 +2,8 @@ import { create } from "zustand";
 import {
   type ManagedUser,
   getUsersForModeration,
-  updateUserStatus as updateUserStatusApi
+  activateUser as activateUserApi,
+  deactivateUser as deactivateUserApi,
 } from "@/entities/user";
 
 type UsersStore = {
@@ -10,7 +11,8 @@ type UsersStore = {
   isLoading: boolean;
   error: string | null;
   fetchUsers: () => Promise<void>;
-  updateStatus: (userId: string, isActive: boolean) => Promise<void>;
+  activateUser: (userId: string) => Promise<void>;
+  deactivateUser: (userId: string) => Promise<void>;
 };
 
 function extractError(error: unknown, fallback: string) {
@@ -33,10 +35,10 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
     }
   },
 
-  updateStatus: async (userId, isActive) => {
-    set({ isLoading: true, error: null });
+  activateUser: async (userId: string) => {
+    set({ isLoading: true, error: null })
     try {
-      await updateUserStatusApi(userId, isActive);
+      await activateUserApi(userId);
       const users = get().users;
       const index = users.findIndex(user => user.id === userId);
       const user = users[index];
@@ -46,13 +48,37 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
           ...users.slice(0, index),
           {
             ...user,
-            isActive,
+            isActive: true,
           },
           ...users.slice(index + 1),
-        ]
+        ],
       });
     } catch (error) {
-      set({ error: extractError(error, "Failed to update user status"), isLoading: false });
+      set({ error: extractError(error, "Failed to activate user"), isLoading: false });
+      throw error;
+    }
+  },
+
+  deactivateUser: async (userId: string) => {
+    set({ isLoading: true, error: null })
+    try {
+      await deactivateUserApi(userId);
+      const users = get().users;
+      const index = users.findIndex(user => user.id === userId);
+      const user = users[index];
+      set({
+        isLoading: false,
+        users: [
+          ...users.slice(0, index),
+          {
+            ...user,
+            isActive: false,
+          },
+          ...users.slice(index + 1),
+        ],
+      });
+    } catch (error) {
+      set({ error: extractError(error, "Failed to deactivate user"), isLoading: false });
       throw error;
     }
   },

@@ -1,8 +1,8 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Application.Users.Commands.ActivateUserByConfirmationCode;
+using Application.Users.Commands.CleanUserRefreshTokens;
 using Application.Users.Commands.CreateUser;
-using Application.Users.Commands.DeleteRefreshToken;
 using Application.Users.Commands.LoginByCredentials;
 using Application.Users.Commands.LoginByRefreshToken;
 using Application.Users.Commands.RestoreUserAccess;
@@ -128,14 +128,13 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UserLogout(CancellationToken cancellationToken)
     {
-        Response.Cookies.Delete("access_token");
+        var userId = GetGuidClaim("userId");
         
-        if (HttpContext.Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
-        {
-            Response.Cookies.Delete("refresh_token");
-            var deleteTokenCommand = new DeleteRefreshTokenCommand(refreshToken);
-            await Mediator.Send(deleteTokenCommand, cancellationToken);
-        }
+        var cleanUserRefreshTokensCommand = new CleanUserRefreshTokensCommand(userId);
+        await Mediator.Send(cleanUserRefreshTokensCommand, cancellationToken);
+
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
         
         return StatusCode(205);
     }

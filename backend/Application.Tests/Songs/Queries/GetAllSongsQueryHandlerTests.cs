@@ -12,15 +12,17 @@ public class GetAllSongsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnPublishedSongs()
     {
         // Arrange
-        var song1 = Song.Create("Song 1", new FilePath("song1.mp3"), new FilePath("img1.jpg"), "Author");
-        var song2 = Song.Create("Song 2", new FilePath("song2.mp3"), new FilePath("img2.jpg"), "Author");
-        var song3 = Song.Create("Song 3", new FilePath("song3.mp3"), new FilePath("img3.jpg"), "Author");
+        var user = User.Create(new Email("user@email.com"), new PasswordHash("password_hash"));
+        user.Activate();
         
-        song1.Publish();
-        song2.Publish();
-        // song3 is not published
+        var song1 = user.UploadSong("Song 1", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        var song2 = user.UploadSong("Song 2", "Author", new FilePath("song2.mp3"), new FilePath("img2.jpg")).Value;
+        user.UploadSong("Song 3", "Author", new FilePath("song3.mp3"), new FilePath("img3.jpg"));
         
-        await Context.Songs.AddRangeAsync(song1, song2, song3);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSongs([song1, song2]); // song3 is not published
+        
+        await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
         var query = new GetAllSongsQuery();

@@ -1,10 +1,10 @@
-﻿using Application.Shared.Data;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
+using Domain.Common;
 
 namespace Application.Songs.Queries.GetSongById;
 

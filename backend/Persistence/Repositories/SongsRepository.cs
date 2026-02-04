@@ -38,6 +38,17 @@ public class SongsRepository : ISongsRepository
         return songs;
     }
 
+    public async Task<List<Song>> GetMarkedForDeletion(CancellationToken cancellationToken = default)
+    {
+        var songs = await _dbContext.Songs
+            .AsNoTracking()
+            .Where(s => s.MarkedForDeletion)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        
+        return songs;
+    }
+
     public async Task<List<SongVm>> GetList(CancellationToken cancellationToken = default)
     {
         var songs = await _dbContext.Songs
@@ -262,7 +273,7 @@ public class SongsRepository : ISongsRepository
     {
         var songs = await _dbContext.Songs
             .AsNoTracking()
-            .Where(s => !s.IsPublished)
+            .Where(s => !s.IsPublished && !s.MarkedForDeletion)
             .Select(s => ToVm(s))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

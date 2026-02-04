@@ -1,12 +1,8 @@
-using Application.Shared.Data;
+using Domain.Common;
 using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.UpdateModeratorPermissions;
 
 public record UpdateModeratorPermissionsCommand(
-    Guid ModeratorId,
-    bool CanManageUsers,
-    bool CanManageContent,
-    bool CanViewReports,
-    bool CanManageModerators) : ICommand<Result>;
-
+    Guid ManagingModeratorId, Guid ModeratorToUpdatePermissionsId,
+    bool CanManageUsers, bool CanManageContent, bool CanViewReports, bool CanManageModerators) : ICommand<Result>;

@@ -13,8 +13,8 @@ public class GetSongListBySearchQueryValidator : AbstractValidator<GetSongListBy
             .MinimumLength(3)
             .WithMessage("Search string must be at least 3 characters long")
             .WithErrorCode("400")
-            .MaximumLength(200)
-            .WithMessage("Search string length must be less than 200 characters")
+            .MaximumLength(100)
+            .WithMessage("Search string length must be less than 100 characters")
             .WithErrorCode("400");
         
         RuleFor(query => query.SearchCriteria)

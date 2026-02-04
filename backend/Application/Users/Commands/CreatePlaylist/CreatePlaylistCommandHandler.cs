@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
@@ -24,15 +26,35 @@ public class CreatePlaylistCommandHandler : ICommandHandler<CreatePlaylistComman
     {
         var user = await _usersRepository.GetByIdWithPlaylists(request.UserId, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
-            _logger.LogError("Tried to create a playlist but that user {userId} doesn't exist", request.UserId);
+            _logger.LogError(
+                "Tried to create a playlist but that user {UserId} doesn't exist.",
+                request.UserId);
             return Result<Guid>.Failure(UserErrors.NotFound);
         }
+
+        if (!user.IsActive)
+        {
+            _logger.LogError("User {UserId} tried to  create a playlist but that user is not active.", request.UserId);
+            return Result<Guid>.Failure(UserDomainErrors.NotActive);
+        }
         
-        var playlist = user.CreatePlaylist();
+        var createPlaylistResult = user.CreatePlaylist();
+        if (createPlaylistResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to create playlist but domain error occurred:\n{DomainErrorDescription}.",
+                request.UserId, createPlaylistResult.Error);
+            return Result<Guid>.Failure(createPlaylistResult.Error);
+        }
+        
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<Guid>.Success(playlist.Id);
+        _logger.LogInformation(
+            "User {UserId} successfully created playlist {PlaylistId}.",
+            request.UserId, createPlaylistResult.Value.Id);
+        
+        return Result<Guid>.Success(createPlaylistResult.Value.Id);
     }
 }

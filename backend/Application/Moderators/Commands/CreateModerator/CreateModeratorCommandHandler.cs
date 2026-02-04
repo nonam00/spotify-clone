@@ -1,12 +1,13 @@
 using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Errors;
+using Domain.ValueObjects;
 using Application.Moderators.Errors;
 using Application.Moderators.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
-using Domain.Models;
-using Domain.ValueObjects;
 
 namespace Application.Moderators.Commands.CreateModerator;
 
@@ -31,34 +32,74 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
     public async Task<Result> Handle(CreateModeratorCommand command, CancellationToken cancellationToken)
     {
+        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+
+        if (managingModerator is null)
+        {
+            _logger.LogError(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorErrors.NotFound);
+        }
+
+        if (!managingModerator.IsActive)
+        {
+            _logger.LogError(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} does not exist.",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.NotActive);
+        }
+        
+        if (!managingModerator.Permissions.CanManageModerators)
+        {
+            _logger.LogWarning(
+                "Tried to create moderator but managing moderator {ManagingModeratorId} cannot manage moderators",
+                command.ManagingModeratorId);
+            return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
+        }
+        
         var checkModerator = await _moderatorsRepository.GetByEmail(command.Email, cancellationToken);
         
-        if (checkModerator != null)
+        if (checkModerator is not null)
         {
             if (!checkModerator.IsActive)
             {
                 _logger.LogInformation(               
-                    "Tried to create user with email {email} which is already exists but not active.",
-                    command.Email);
+                    "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
+                    " but moderator {ExistingModeratorWithEmailId} with this email already exists but not active.",
+                    command.ManagingModeratorId, command.Email, checkModerator.Id);
                 return Result.Failure(ModeratorErrors.AlreadyExistButNotActive);
             }
+            
             _logger.LogInformation(
-                "Tried to create user with email {email} which is already active.",
-                command.Email);
+                "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
+                " but moderator {ExistingModeratorWithEmailId} with this email already exists.",
+                command.ManagingModeratorId, command.Email, checkModerator.Id);
+            
             return Result.Failure(ModeratorErrors.AlreadyExist);
         }
-        
-        var permissions = command.IsSuper
-            ? ModeratorPermissions.CreateSuperAdmin()
-            : ModeratorPermissions.CreateDefault();
 
         var email = new Email(command.Email);
         var passwordHash = new PasswordHash(_passwordHasher.Generate(command.Password));
         
-        var moderator = Moderator.Create(email, passwordHash, command.FullName, permissions);
+        var createModeratorResult = managingModerator.CreateModerator(
+            email, passwordHash, command.FullName, command.IsSuper);
+
+        if (createModeratorResult.IsFailure)
+        {
+            _logger.LogError(
+                "Managing moderator {ManagingModeratorId} tried to create moderator" +
+                " but domain error occurred:\n{DomainErrorDescription}",
+                command.ManagingModeratorId, createModeratorResult.Error.Description);
+            return createModeratorResult;
+        }
         
-        await _moderatorsRepository.Add(moderator, cancellationToken);
+        await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "Managing moderator {ManagingModeratorId} successfully created new moderator {CreatedModeratorId}.",
+            command.ManagingModeratorId, createModeratorResult.Value.Id);
         
         return Result.Success();
     }

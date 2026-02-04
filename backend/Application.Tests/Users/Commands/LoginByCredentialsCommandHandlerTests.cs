@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Commands.LoginByCredentials;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.LoginByCredentials;
+using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -14,10 +14,7 @@ public class LoginByCredentialsCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnTokenPair_WhenCredentialsAreValid()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -63,10 +60,7 @@ public class LoginByCredentialsCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenUserNotActive()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
@@ -85,10 +79,7 @@ public class LoginByCredentialsCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenPasswordIsIncorrect()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);

@@ -18,7 +18,7 @@ export default async function AccountPage() {
   }
 
   return (
-    <div className="h-full w-full bg-neutral-900 rounded-lg overflow-y-auto">
+    <div className="h-full w-full bg-neutral-900 rounded-lg overflow-y-auto outline-none">
       <Header>
         <div className="mb-2 flex flex-col gap-y-6">
           <h1 className="text-white text-3xl font-bold">Account Settings</h1>

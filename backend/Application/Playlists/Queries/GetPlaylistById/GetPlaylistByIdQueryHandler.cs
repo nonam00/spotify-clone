@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 
 using Application.Shared.Messaging;
-using Application.Shared.Data;
 using Application.Playlists.Errors;
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
+using Domain.Common;
 
 namespace Application.Playlists.Queries.GetPlaylistById;
 

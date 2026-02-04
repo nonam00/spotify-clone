@@ -11,7 +11,7 @@ export default async function Home() {
   const playlists = await getUserPlaylistsByQuantity(7);
 
   return (
-    <div className="h-full w-full overflow-hidden overflow-y-auto bg-neutral-900 rounded-lg">
+    <div className="h-full w-full overflow-hidden overflow-y-auto bg-neutral-900 rounded-lg outline-none">
       <Header>
         <div className="mb-2">
           <h1 className="text-white text-3xl font-semibold">

@@ -13,16 +13,12 @@ public class GetPlaylistByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnPlaylist_WhenPlaylistExists()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
-        
-        var playlist = Playlist.Create(user.Id, "My Playlist", "Description");
+
+        var playlist = user.CreatePlaylist().Value;
         
         await Context.Users.AddAsync(user);
-        await Context.Playlists.AddAsync(playlist);
         await Context.SaveChangesAsync();
         
         var query = new GetPlaylistByIdQuery(user.Id, playlist.Id);
@@ -33,8 +29,8 @@ public class GetPlaylistByIdQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value.Title.Should().Be("My Playlist");
-        result.Value.Description.Should().Be("Description");
+        result.Value.Title.Should().Be("Playlist #1");
+        result.Value.Description.Should().BeNull();
         result.Value.ImagePath.Should().NotBeNull();
     }
 
@@ -61,8 +57,8 @@ public class GetPlaylistByIdQueryHandlerTests : TestBase
             new PasswordHash("hashed_password"),
             "Test User");
         user.Activate();
-        
-        var playlist = Playlist.Create(user.Id, "My Playlist");
+
+        var playlist = user.CreatePlaylist().Value;
         
         await Context.Users.AddAsync(user);
         await Context.Playlists.AddAsync(playlist);

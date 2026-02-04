@@ -1,8 +1,8 @@
 using FluentAssertions;
 
-using Application.Users.Queries.CheckLike;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Queries.CheckLike;
 
 namespace Application.Tests.Users.Queries;
 
@@ -12,22 +12,16 @@ public class CheckLikeQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnTrue_WhenSongIsLiked()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
         
-        user.LikeSong(song.Id);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
-        await Context.Songs.AddAsync(song);
+        user.LikeSong(song);
+        
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
         
@@ -45,21 +39,15 @@ public class CheckLikeQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnFalse_WhenSongIsNotLiked()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
         var query = new CheckLikeQuery(user.Id, song.Id);

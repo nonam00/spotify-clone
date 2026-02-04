@@ -1,12 +1,14 @@
-using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Errors;
+using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Domain.ValueObjects;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Users.Commands.RestoreUserAccess;
 
@@ -44,33 +46,51 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         if (!codeVerificationStatus)
         {
             _logger.LogInformation(
-                "Someone tried to restore access to user account with email {email} using invalid code {restoreCode}",
-                request.Email, request.RestoreCode);
+                "Someone tried to restore access to user account with email {Email} using invalid restore code.", 
+                request.Email);
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
 
         var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError(
-                "Someone tried to restore access to non-existing user account with email {email} and code {restoreCode}", 
-                request.Email, request.RestoreCode);
+                "Someone tried to restore access to non-existing user account with email {Email} using restore code.", 
+                request.Email);
             return Result<TokenPair>.Failure(UserErrors.NotFoundWithEmail);
+        }
+                
+        if (!user.IsActive)
+        {
+            _logger.LogError(
+                "Non-active user {UserId} tried to restore access to account using restore code.",
+                user.Id);
+            return Result<TokenPair>.Failure(UserDomainErrors.NotActive);
+        }
+        
+        var addRefreshTokenResult = user.AddRefreshToken();
+        if (addRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to restore access to account using restore code" +
+                " but domain error occurred when creating refresh token:\n{DomainErrorResult}",
+                user.Id, addRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
         }
 
         var hash = _passwordHasher.Generate("12345678");
         var passwordHash = new PasswordHash(hash);
+
         user.ChangePassword(passwordHash);
         _usersRepository.Update(user);
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
-
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        _logger.LogInformation("User {UserId} successfully restored access to account using restore code.", user.Id);
+        
+        return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }
 }

@@ -60,7 +60,9 @@ export function Sidebar({
           <Library playlists={playlists} />
         </Box>
       </div>
-      <main className="h-full flex-1 overflow-auto py-2">{children}</main>
+      <main className="h-full flex-1 overflow-auto py-2 outline-none">
+        {children}
+      </main>
     </div>
   );
 }

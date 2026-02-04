@@ -1,6 +1,6 @@
 ﻿using Application.Moderators.Models;
-using Application.Shared.Data;
 using Application.Shared.Messaging;
+using Domain.Common;
 
 namespace Application.Moderators.Queries.GetModeratorInfo;
 

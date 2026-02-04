@@ -1,6 +1,6 @@
 using Application.Shared.Messaging;
 using Application.Playlists.Models;
-using Application.Shared.Data;
+using Domain.Common;
 
 namespace Application.Playlists.Queries.GetPlaylistById;
 

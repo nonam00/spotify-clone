@@ -3,8 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-using Persistence;
-using Persistence.Repositories;
+using Domain.Common;
+
 using Application.Shared.Interfaces;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
@@ -12,7 +12,8 @@ using Application.Users.Interfaces;
 using Application.Songs.Interfaces;
 using Application.Playlists.Interfaces;
 using Application.Moderators.Interfaces;
-using Domain.Common;
+using Persistence;
+using Persistence.Repositories;
 
 namespace Application.Tests;
 

@@ -1,4 +1,5 @@
-﻿using Domain.Common;
+﻿using System.Security.Cryptography;
+using Domain.Common;
 
 namespace Domain.Models;
 
@@ -17,26 +18,24 @@ public class RefreshToken : Entity<Guid>
 
     private RefreshToken() { } // For EF Core
 
-    public static RefreshToken Create(Guid userId, string token, DateTime expires)
+    internal static RefreshToken Create(Guid userId)
     {
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            throw new ArgumentException("Token cannot be empty", nameof(token));
-        }
-
         return new RefreshToken
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            Token = token,
-            Expires = expires,
+            Token = GenerateRefreshTokenValue(),
+            Expires = DateTime.UtcNow.AddDays(14),
             CreatedAt = DateTime.UtcNow
         };
     }
     
-    public void UpdateToken(string newToken, DateTime newExpires)
+    internal void UpdateToken()
     {
-        Token = newToken;
-        Expires = newExpires;
+        Token = GenerateRefreshTokenValue();
+        Expires = DateTime.UtcNow.AddDays(14);
     }
+    
+    private static string GenerateRefreshTokenValue() =>
+        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 }

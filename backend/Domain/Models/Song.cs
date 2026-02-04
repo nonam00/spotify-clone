@@ -1,5 +1,5 @@
 ﻿using Domain.Common;
-using Domain.Events;
+using Domain.Errors;
 using Domain.ValueObjects;
 
 namespace Domain.Models;
@@ -14,42 +14,82 @@ public class Song : AggregateRoot<Guid>
     public Guid? UploaderId { get; private set; }
     public bool IsPublished { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public bool MarkedForDeletion { get; private set; }
 
     // Navigation properties for EF Core (not part of domain logic)
-    public virtual User? Uploader { get; private init; }
+    public virtual User? Uploader { get; private set; }
 
     private Song() { } // For EF Core
     
-    public static Song Create(string title, FilePath songPath, FilePath imagePath, string author, Guid? uploaderId = null)
+    // Cannot make internal because of the tests
+    internal static Result<Song> Create(
+        string title, string author, FilePath songPath, FilePath imagePath, Guid? uploaderId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            return Result<Song>.Failure(SongDomainErrors.TitleCannotBeEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(author))
         {
-            throw new ArgumentException("Author cannot be empty", nameof(author));
+            return Result<Song>.Failure(SongDomainErrors.AuthorCannotBeEmpty);
         }
 
         var song = new Song
         {
             Id = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
             Title = title.Trim(),
+            Author = author.Trim(),
             SongPath = songPath,
             ImagePath = imagePath,
-            Author = author.Trim(),
             UploaderId = uploaderId,
-            IsPublished = false
+            IsPublished = false,
+            MarkedForDeletion = false,
+            CreatedAt = DateTime.UtcNow,
         };
 
-        return song;
+        return Result<Song>.Success(song);
+    }
+    
+    internal Result Publish()
+    {
+        if (MarkedForDeletion)
+        {
+            return Result.Failure(SongDomainErrors.CannotPublishMarkedForDeletion);
+        }
+        
+        if (IsPublished)
+        {
+            return Result.Failure(SongDomainErrors.AlreadyPublished);
+        }
+        
+        IsPublished = true;
+        return Result.Success();
     }
 
-    public void Publish() => IsPublished = true;
+    internal Result Unpublish()
+    {
+        if (!IsPublished)
+        {
+            return Result.Failure(SongDomainErrors.AlreadyUnpublished);
+        }
+        IsPublished = false;
+        return Result.Success();
+    }
 
-    public void Unpublish() => IsPublished = false;
-    
-    public void Delete() => AddDomainEvent(new SongDeletedEvent(Id, ImagePath, SongPath));
+    internal Result MarkForDeletion()
+    {
+        if (IsPublished)
+        {
+            return Result.Failure(SongDomainErrors.CannotDeletePublished);
+        }
+
+        if (MarkedForDeletion)
+        {
+            return Result.Failure(SongDomainErrors.AlreadyMarkedForDeletion);
+        }
+        
+        MarkedForDeletion = true;
+        return Result.Success();
+    } 
 }

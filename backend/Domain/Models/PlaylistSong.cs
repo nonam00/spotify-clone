@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Errors;
 
 namespace Domain.Models;
 
@@ -16,36 +17,40 @@ public class PlaylistSong : Entity
 
     private PlaylistSong() { }
 
-    public static PlaylistSong Create(Guid playlistId, Guid songId, int order)
+    internal static Result<PlaylistSong> Create(Guid playlistId, Guid songId, int order)
     {
         if (order <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(order), order, "Order should be greater than 0");
+            return Result<PlaylistSong>.Failure(PlaylistDomainErrors.SongOrderCannotBeLessOrEqualToZero);
         }
+        
         var now = DateTime.UtcNow;
-        return new PlaylistSong
+        
+        return Result<PlaylistSong>.Success(new PlaylistSong
         {
             PlaylistId = playlistId,
             SongId = songId,
             CreatedAt = now,
             UpdatedAt = now,
             Order = order
-        };
+        });
     }
 
-    public void ChangeOrder(int newOrder)
+    internal Result ChangeOrder(int newOrder)
     {
         if (newOrder <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(newOrder), newOrder, "Order should be greater than 0");
+            return Result.Failure(PlaylistDomainErrors.SongOrderCannotBeLessOrEqualToZero);
         }
 
         if (Order == newOrder)
         {
-            throw new InvalidOperationException("Tried to pass current order");
+            return Result.Failure(PlaylistDomainErrors.NewSongOrderCannotBeEqualToOld);
         }
         
         Order = newOrder;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

@@ -1,10 +1,11 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Commands.UpdatePassword;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.UpdatePassword;
+using Application.Users.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -14,10 +15,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldUpdatePassword_WhenCurrentPasswordIsCorrect()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_oldpassword"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_oldpassword"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -59,15 +57,31 @@ public class UpdatePasswordCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(UserErrors.NotFound);
     }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_oldpassword"), "User");
+
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new UpdatePasswordCommand(user.Id, "oldpassword", "newpassword");
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
+    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenCurrentPasswordIsIncorrect()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_oldpassword"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_oldpassword"), "User");
         user.Activate();
         
         await Context.Users.AddAsync(user);
@@ -92,16 +106,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenCurrentPasswordIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UpdatePasswordCommand(user.Id, "", "newpassword123");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "", "newpassword123");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -116,16 +121,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenCurrentPasswordIsTooShort()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UpdatePasswordCommand(user.Id, "short", "newpassword123");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "short", "newpassword123");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -140,17 +136,8 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenCurrentPasswordExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longPassword = new string('a', 101);
-        var command = new UpdatePasswordCommand(user.Id, longPassword, "newpassword123");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), longPassword, "newpassword123");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -165,16 +152,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenNewPasswordIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UpdatePasswordCommand(user.Id, "oldpassword123", "");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "oldpassword123", "");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -189,16 +167,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenNewPasswordIsTooShort()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UpdatePasswordCommand(user.Id, "oldpassword123", "short");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "oldpassword123", "short");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -213,17 +182,8 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenNewPasswordExceedsMaxLength()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
         var longPassword = new string('a', 101);
-        var command = new UpdatePasswordCommand(user.Id, "oldpassword123", longPassword);
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "oldpassword123", longPassword);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -238,16 +198,7 @@ public class UpdatePasswordCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenNewPasswordEqualsCurrentPassword()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new UpdatePasswordCommand(user.Id, "password123", "password123");
+        var command = new UpdatePasswordCommand(Guid.NewGuid(), "password123", "password123");
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);

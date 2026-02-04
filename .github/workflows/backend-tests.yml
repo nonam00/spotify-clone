@@ -50,6 +50,8 @@ jobs:
         if: steps.backend-changes.outputs.backend == 'true'
         working-directory: ./backend
         run: dotnet test --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
       
       - name: Upload test results
         if: steps.backend-changes.outputs.backend == 'true' && !cancelled()

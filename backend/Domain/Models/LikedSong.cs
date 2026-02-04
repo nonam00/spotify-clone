@@ -14,7 +14,7 @@ public class LikedSong : Entity
     
     private LikedSong() { }
 
-    public static LikedSong Create(Guid userId, Guid songId)
+    internal static LikedSong Create(Guid userId, Guid songId)
     {
         return new LikedSong
         {

@@ -11,6 +11,8 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
     public void Configure(EntityTypeBuilder<Song> builder)
     {
         builder.HasKey(s => s.Id);
+        // To avoid problems when working with child collections 
+        builder.Property(p => p.Id).ValueGeneratedNever();
         
         builder.Property(s => s.Title)
             .IsRequired()
@@ -52,13 +54,15 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.IsPublished)
             .IsRequired()
             .HasDefaultValue(false);
-
-        builder.Property(s => s.IsPublished);
         
-        builder.Property(song => song.CreatedAt);
+        builder.Property(s => s.MarkedForDeletion)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
+        builder.Property(s => s.CreatedAt).IsRequired();
             
         builder.HasOne(song => song.Uploader)
-            .WithMany(u => u.PublishedSongs)
+            .WithMany(u => u.UploadedSongs)
             .HasForeignKey(song => song.UploaderId)
             .OnDelete(DeleteBehavior.SetNull);
     }

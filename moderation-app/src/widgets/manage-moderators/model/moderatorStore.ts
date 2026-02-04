@@ -4,7 +4,8 @@ import {
   createModerator as createModeratorApi,
   getModerators,
   updateModeratorPermissions as updateModeratorPermissionsApi,
-  updateModeratorStatus as updateModeratorStatusApi,
+  activateModerator as activateModeratorApi,
+  deactivateModerator as deactivateModeratorApi,
   type CreateModeratorPayload,
   type UpdateModeratorPermissionsPayload,
 } from "@/entities/moderator";
@@ -15,7 +16,8 @@ type ModeratorsStore = {
   error: string | null;
   fetchModerators: () => Promise<void>;
   updatePermissions: (moderatorId: string, payload: UpdateModeratorPermissionsPayload) => Promise<void>;
-  updateStatus: (moderatorId: string, isActive: boolean) => Promise<void>;
+  activateModerator: (moderatorId: string) => Promise<void>;
+  deactivateModerator: (moderatorId: string) => Promise<void>;
   createModerator: (payload: CreateModeratorPayload) => Promise<void>;
 };
 
@@ -65,10 +67,10 @@ export const useModeratorsStore = create<ModeratorsStore>((set, get) => ({
     }
   },
 
-  updateStatus: async (moderatorId, isActive) => {
-    set({ isLoading: true, error: null });
+  activateModerator: async (moderatorId: string) => {
+    set({isLoading: true, error: null});
     try {
-      await updateModeratorStatusApi(moderatorId, isActive);
+      await activateModeratorApi(moderatorId);
       const moderators = get().moderators;
       const index = moderators.findIndex(moderator => moderator.id === moderatorId);
       const moderator = moderators[index];
@@ -78,13 +80,37 @@ export const useModeratorsStore = create<ModeratorsStore>((set, get) => ({
           ...moderators.slice(0, index),
           {
             ...moderator,
-            isActive
+            isActive: true,
           },
           ...moderators.slice(index + 1),
         ]
       });
     } catch (error) {
-      set({ error: extractError(error, "Failed to update moderator status"), isLoading: false });
+      set({error: extractError(error, "Failed to activate moderator"), isLoading: false});
+      throw error;
+    }
+  },
+
+  deactivateModerator: async (moderatorId: string) => {
+    set({isLoading: true, error: null});
+    try {
+      await deactivateModeratorApi(moderatorId);
+      const moderators = get().moderators;
+      const index = moderators.findIndex(moderator => moderator.id === moderatorId);
+      const moderator = moderators[index];
+      set({
+        isLoading: false,
+        moderators: [
+          ...moderators.slice(0, index),
+          {
+            ...moderator,
+            isActive: false
+          },
+          ...moderators.slice(index + 1),
+        ]
+      });
+    } catch (error) {
+      set({error: extractError(error, "Failed to deactivate moderator"), isLoading: false});
       throw error;
     }
   },

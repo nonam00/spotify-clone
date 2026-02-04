@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
@@ -32,26 +34,43 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
     {
         var user = await _usersRepository.GetById(request.UserId, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
-            _logger.LogError("Tried to change password but user with id {userId} doesn't exist", request.UserId);
+            _logger.LogError("Tried to change password but user with id {UserId} doesn't exist.", request.UserId);
             return Result.Failure(UserErrors.NotFound);
+        }
+
+        if (!user.IsActive)
+        {
+            _logger.LogError("User {UserId} tried to changed password but user is not active.", request.UserId);
+            return Result.Failure(UserDomainErrors.NotActive);
         }
 
         if (!_passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
         {
             _logger.LogInformation(
-                "User {userId} tried to change password but password {requestCurrentPassword} doesn't match with the actual password",
-                request.UserId, request.CurrentPassword);
+                "User {UserId} tried to change password" +
+                " but provided password doesn't match with the actual password.",
+                request.UserId);
             return Result.Failure(UserErrors.PasswordsMissMatch);
         }
 
         var newPasswordHash = _passwordHasher.Generate(request.NewPassword);
         var passwordHash = new PasswordHash(newPasswordHash);
-        user.ChangePassword(passwordHash);
+        
+        var changePasswordResult = user.ChangePassword(passwordHash);
+        if (changePasswordResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to change password but domain error occurred:\n{DomainErrorDescription}",
+                request.UserId, changePasswordResult.Error.Description);
+            return changePasswordResult;
+        }
         
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation("User {UserId} successfully changed password.", request.UserId);
         
         return Result.Success();
     }

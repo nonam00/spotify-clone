@@ -218,7 +218,6 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Models.Song", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -249,6 +248,12 @@ namespace Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_published");
+
+                    b.Property<bool>("MarkedForDeletion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("marked_for_deletion");
 
                     b.Property<string>("SongPath")
                         .IsRequired()
@@ -458,7 +463,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Models.Song", b =>
                 {
                     b.HasOne("Domain.Models.User", "Uploader")
-                        .WithMany("PublishedSongs")
+                        .WithMany("UploadedSongs")
                         .HasForeignKey("UploaderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_songs_users_uploader_id");
@@ -475,9 +480,9 @@ namespace Persistence.Migrations
                 {
                     b.Navigation("Playlists");
 
-                    b.Navigation("PublishedSongs");
-
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("UploadedSongs");
 
                     b.Navigation("UserLikedSongs");
                 });

@@ -1,10 +1,12 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-using Application.Users.Commands.LikeSong;
-using Application.Users.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
+using Application.Users.Commands.LikeSong;
+using Application.Users.Errors;
+using Application.Songs.Errors;
+using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -14,22 +16,15 @@ public class LikeSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldLikeSong_WhenUserAndSongExist()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author",
-            user.Id);
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
         
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
         var command = new LikeSongCommand(user.Id, song.Id);
@@ -51,17 +46,7 @@ public class LikeSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenUserNotFound()
     {
         // Arrange
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        song.Publish();
-        
-        await Context.Songs.AddAsync(song);
-        await Context.SaveChangesAsync();
-        
-        var command = new LikeSongCommand(Guid.NewGuid(), song.Id);
+        var command = new LikeSongCommand(Guid.NewGuid(),Guid.NewGuid());
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -72,27 +57,67 @@ public class LikeSongCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotActive()
+    {
+        // Arrange
+        var activeUser = User.Create(new Email("act@mail.com"), new PasswordHash("hashed_password"), "Active");
+        activeUser.Activate();
+        
+        var song = activeUser.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
+        
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);      
+        
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        
+        await Context.Users.AddRangeAsync(activeUser, user);
+        await Context.SaveChangesAsync();
+        
+        var command = new LikeSongCommand(user.Id, song.Id);
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(UserDomainErrors.NotActive);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenSongNotFound()
+    {
+        // Arrange
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
+        user.Activate();
+        
+        await Context.Users.AddAsync(user);
+        await Context.SaveChangesAsync();
+        
+        var command = new LikeSongCommand(user.Id, Guid.NewGuid());
+        
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+        
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(SongErrors.NotFound);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenSongAlreadyLiked()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
+        var user = User.Create(new Email("test@example.com"), new PasswordHash("hashed_password"), "User");
         user.Activate();
         
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author",
-            user.Id);
-        song.Publish();
+        var song = user.UploadSong("Song", "Author", new FilePath("song1.mp3"), new FilePath("img1.jpg")).Value;
         
-        user.LikeSong(song.Id);
+        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
+        moderator.PublishSong(song);        
+        
+        user.LikeSong(song);
         
         await Context.Users.AddAsync(user);
-        await Context.Songs.AddAsync(song);
         await Context.SaveChangesAsync();
         
         var command = new LikeSongCommand(user.Id, song.Id);
@@ -102,24 +127,14 @@ public class LikeSongCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(UserLikeErrors.AlreadyLiked);
+        result.Error.Should().Be(UserDomainErrors.SongAlreadyLiked);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
     {
         // Arrange
-        var song = Song.Create(
-            "Test Song",
-            new FilePath("song.mp3"),
-            new FilePath("image.jpg"),
-            "Test Author");
-        song.Publish();
-        
-        await Context.Songs.AddAsync(song);
-        await Context.SaveChangesAsync();
-        
-        var command = new LikeSongCommand(Guid.Empty, song.Id);
+        var command = new LikeSongCommand(Guid.Empty,Guid.NewGuid());
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);
@@ -134,16 +149,7 @@ public class LikeSongCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnValidationError_WhenSongIdIsEmpty()
     {
         // Arrange
-        var user = User.Create(
-            new Email("test@example.com"),
-            new PasswordHash("hashed_password"),
-            "Test User");
-        user.Activate();
-        
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-        
-        var command = new LikeSongCommand(user.Id, Guid.Empty);
+        var command = new LikeSongCommand(Guid.NewGuid(), Guid.Empty);
 
         // Act
         var result = await Mediator.Send(command, CancellationToken.None);

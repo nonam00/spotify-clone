@@ -1,8 +1,8 @@
 "use client";
 
 import { type Song, SongListItem } from "@/entities/song";
+import { SongOptionsMenu } from "@/features/song-options-menu";
 import { useOnPlay } from "@/widgets/player";
-import {SongOptionsMenu} from "@/features/song-options-menu";
 
 const SearchContent = ({ songs }: { songs: Song[] }) => {
   const onPlay = useOnPlay(songs);

@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
-using Application.Songs.Commands.CreateSong;
 using Application.Songs.Models;
 using Application.Songs.Queries.GetAllSongs;
 using Application.Songs.Queries.GetNewestSongList;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries.GetSongListBySearch;
+using Application.Users.Commands.UploadSong;
+
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -107,7 +108,7 @@ public class SongsController : BaseController
     /// <summary>
     /// Creates new song 
     /// </summary>
-    /// <param name="createSongDto">createSongDto object</param>
+    /// <param name="uploadSongDto">uploadSongDto object</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Returns created song ID</returns>
     /// <response code="201">Success</response>
@@ -115,20 +116,20 @@ public class SongsController : BaseController
     [HttpPost, Authorize(Policy = AuthorizationPolicies.UserOnly)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Guid>> UploadSong(CreateSongDto createSongDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<Guid>> UploadSong(UploadSongDto uploadSongDto, CancellationToken cancellationToken)
     {
-        var command = new CreateSongCommand(
+        var command = new UploadSongCommand(
             UserId: UserId,
-            Title: createSongDto.Title,
-            Author: createSongDto.Author,
-            SongPath: createSongDto.AudioId.ToString(),
-            ImagePath: createSongDto.ImageId.ToString()
+            Title: uploadSongDto.Title,
+            Author: uploadSongDto.Author,
+            SongPath: uploadSongDto.AudioId.ToString(),
+            ImagePath: uploadSongDto.ImageId.ToString()
         );
         var result = await Mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
         {
-            return result.Value;
+            return Ok();
         }
         
         throw new Exception(result.Error.Description);

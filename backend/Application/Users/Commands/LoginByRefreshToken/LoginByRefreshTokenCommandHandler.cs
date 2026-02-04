@@ -1,6 +1,7 @@
-﻿using System.Security.Cryptography;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
+using Domain.Common;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
@@ -12,18 +13,18 @@ namespace Application.Users.Commands.LoginByRefreshToken;
 
 public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTokenCommand, Result<TokenPair>>
 {
-    private readonly IRefreshTokensRepository _refreshTokensRepository;
+    private readonly IUsersRepository _usersRepository;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LoginByRefreshTokenCommandHandler> _logger;
 
     public LoginByRefreshTokenCommandHandler(
-        IRefreshTokensRepository refreshTokensRepository,
+        IUsersRepository usersRepository,
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork,
         ILogger<LoginByRefreshTokenCommandHandler> logger)
     {
-        _refreshTokensRepository = refreshTokensRepository;
+        _usersRepository = usersRepository;
         _jwtProvider = jwtProvider;
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -31,23 +32,40 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
 
     public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var refreshToken = await _refreshTokensRepository.GetByValueWithUser(request.RefreshToken, cancellationToken);
+        var user = await _usersRepository.GetByRefreshTokenValue(request.RefreshToken, cancellationToken);
         
-        if (refreshToken is null || refreshToken.Expires < DateTime.UtcNow)
+        if (user is null)
         {
-            _logger.LogInformation("Anonymous user tried to login with non-relevant refresh token"); 
-            return Result<TokenPair>.Failure(RefreshTokenErrors.RelevantNotFound);
+            _logger.LogInformation(
+                "Anonymous user tried to login with non-relevant refresh token {RefreshToken}.",
+                request.RefreshToken); 
+            return Result<TokenPair>.Failure(UserErrors.RelevantRefreshTokenNotFound);
         }
         
-        var accessToken = _jwtProvider.GenerateUserToken(refreshToken.User);
+        if (!user.IsActive)
+        {
+            _logger.LogError(
+                "Non-active user {UserId} tried to login with non-relevant refresh token {RefreshToken}.",
+                user.Id, request.RefreshToken);
+            return Result<TokenPair>.Failure(UserDomainErrors.NotActive);
+        }
+
+        var updateRefreshTokenResult = user.UpdateRefreshToken(request.RefreshToken);
+        if (updateRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "Anonymous user tried to login with refresh token {RefreshToken}" +
+                " but domain error occurred:\n{DomainErrorDescription}",
+                request.RefreshToken, updateRefreshTokenResult.Error.Description);
+            return Result<TokenPair>.Failure(updateRefreshTokenResult.Error);
+        }
         
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var accessToken = _jwtProvider.GenerateUserToken(user);
         
-        refreshToken.UpdateToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
-        
-        _refreshTokensRepository.Update(refreshToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        _logger.LogInformation("User {UserId} successfully used refresh token to generate token pair.", user.Id);
+        
+        return Result<TokenPair>.Success(new TokenPair(accessToken, updateRefreshTokenResult.Value.Token));
     }
 }

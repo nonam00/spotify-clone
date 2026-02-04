@@ -1,8 +1,11 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
+using Domain.Errors;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
 using Application.Users.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Users.Commands.DeletePlaylist;
 
@@ -11,6 +14,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeletePlaylistCommandHandler> _logger;
+    
     public DeletePlaylistCommandHandler(
         IUsersRepository usersRepository,
         IUnitOfWork unitOfWork,
@@ -25,24 +29,37 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
     {
         var user = await _usersRepository.GetByIdWithPlaylists(request.UserId, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
-            _logger.LogError("Tried to delete playlist {playlistId} but user {userId} doesn't exist", 
+            _logger.LogError(
+                "Tried to delete playlist {PlaylistId} but user {UserId} doesn't exist.", 
                 request.PlaylistId, request.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
-        
-        var playlist = user.RemovePlaylist(request.PlaylistId);
-        
-        if (playlist == null)
+
+        if (!user.IsActive)
         {
             _logger.LogError(
-                "Tried to delete playlist {playlistId} but user {userId} does not have this playlist",
-                request.PlaylistId, request.UserId);
-            return Result.Failure(UserPlaylistErrors.Ownership);
+                "User {UserId} tried to delete playlist {PlaylistId} but user is not active.",
+                request.UserId, request.PlaylistId);
+            return Result.Failure(UserDomainErrors.NotActive);
+        }
+        
+        var removePlaylistResult = user.RemovePlaylist(request.PlaylistId);
+        if (removePlaylistResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to delete playlist {PlaylistId}" +
+                " but domain error occurred:\n{DomainErrorDescription}",
+                request.PlaylistId, request.UserId, removePlaylistResult.Error.Description);
+            return removePlaylistResult;
         }
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        _logger.LogInformation(
+            "User {UserId} successfully deleted playlist {PlaylistId}.", 
+            request.UserId, request.PlaylistId);
         
         return Result.Success();
     }

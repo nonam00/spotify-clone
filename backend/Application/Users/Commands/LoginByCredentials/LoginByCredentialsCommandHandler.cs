@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Security.Cryptography;
 
+using Domain.Common;
 using Application.Users.Interfaces;
 using Application.Users.Errors;
 using Application.Shared.Data;
@@ -34,32 +34,40 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
     {
         var user = await _usersRepository.GetByEmailWithRefreshTokens(request.Email, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
+            _logger.LogInformation("Tried to login but user with email {Email} doesnt exist.", request.Email);
             return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
         }
 
         if (!user.IsActive)
         {
-            _logger.LogInformation("Non active user {userId} with tried to login.", user.Id);
+            _logger.LogInformation("Non-active user {UserId} tried to login.", user.Id);
             return Result<TokenPair>.Failure(UserErrors.AlreadyExistButNotActive);
         }
         
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            _logger.LogInformation("Invalid login attempt by user {userId}.", user.Id);
+            _logger.LogInformation("Invalid login attempt by user {UserId}.", user.Id);
             return Result<TokenPair>.Failure(UserErrors.InvalidCredentials);
         }
 
+        var addRefreshTokenResult = user.AddRefreshToken();
+        if (addRefreshTokenResult.IsFailure)
+        {
+            _logger.LogError(
+                "User {UserId} tried to login" +
+                " but domain error occurred on creating refresh token:\n{DomainErrorDescription}",
+                user.Id, addRefreshTokenResult.Error.Description);   
+            return Result<TokenPair>.Failure(addRefreshTokenResult.Error);
+        }
+        
         var accessToken = _jwtProvider.GenerateUserToken(user);
-
-        var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.AddRefreshToken(refreshTokenValue, DateTime.UtcNow.AddDays(14));
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Generated token pair for user {userId}", user.Id);
+        _logger.LogInformation("Successfully generated token pair for user {userId}.", user.Id);
 
-        return Result<TokenPair>.Success(new TokenPair(accessToken, refreshTokenValue));
+        return Result<TokenPair>.Success(new TokenPair(accessToken, addRefreshTokenResult.Value.Token));
     }
 }

@@ -1,4 +1,4 @@
-using Application.Shared.Data;
+using Domain.Common;
 using Application.Shared.Messaging;
 using Application.Shared.Models;
 

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import {useShallow} from "zustand/shallow";
 import { twMerge } from "tailwind-merge";
 import toast from "react-hot-toast";
@@ -12,7 +13,7 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { Button } from "@/shared/ui";
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
-import {usePlayerStore} from "@/widgets/player";
+import { usePlayerStore } from "@/widgets/player";
 
 const Header = ({
   children,
@@ -23,7 +24,12 @@ const Header = ({
 }>) => {
   const router = useRouter();
 
-  const openAuthModal = useAuthModalStore(useShallow((s) => s.onOpen));
+  const { openAuthModal, setAuthView } = useAuthModalStore(
+    useShallow((s) => ({
+      openAuthModal: s.onOpen,
+      setAuthView: s.setView,
+    }))
+  );
 
   const { isAuthenticated, user, logout } = useAuthStore(
     useShallow((s) => ({
@@ -32,6 +38,16 @@ const Header = ({
       logout: s.logout,
     })),
   );
+
+  const openLoginModal = useCallback(() => {
+    setAuthView("login");
+    openAuthModal();
+  }, [openAuthModal, setAuthView]);
+
+  const openRegisterModal = useCallback(() => {
+    setAuthView("register");
+    openAuthModal();
+  }, [openAuthModal, setAuthView]);
 
   const handleLogout = async () => {
     try {
@@ -102,13 +118,13 @@ const Header = ({
         ) : (
           <div className="flex items-center gap-x-4 h-11">
             <Button
-              onClick={openAuthModal}
+              onClick={openRegisterModal}
               className="bg-transparent text-neutral-300 font-medium whitespace-nowrap px-6 py-2"
             >
               Sign Up
             </Button>
             <Button
-              onClick={openAuthModal}
+              onClick={openLoginModal}
               className="bg-white whitespace-nowrap px-6 py-2"
             >
               Log In
