@@ -9,7 +9,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
+public class ReorderSongsInPlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReorderSongs_WhenValid()

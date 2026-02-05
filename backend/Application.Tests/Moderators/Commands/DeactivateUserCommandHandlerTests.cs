@@ -10,7 +10,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class DeactivateUserCommandHandlerTests : TestBase
+public class DeactivateUserCommandHandlerTests : InMemoryTestBase
 {
     [Fact] 
     public async Task Handle_ShouldDeactivateUser_WhenValid()

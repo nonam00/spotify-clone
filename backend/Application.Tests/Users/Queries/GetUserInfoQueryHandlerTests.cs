@@ -8,7 +8,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Users.Queries;
 
-public class GetUserInfoQueryHandlerTests : TestBase
+public class GetUserInfoQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnUserInfo_WhenUserExists()

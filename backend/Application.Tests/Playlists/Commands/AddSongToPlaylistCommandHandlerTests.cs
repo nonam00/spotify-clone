@@ -10,7 +10,7 @@ using Application.Songs.Errors;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class AddSongToPlaylistCommandHandlerTests : TestBase
+public class AddSongToPlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldAddSongToPlaylist_WhenValid()

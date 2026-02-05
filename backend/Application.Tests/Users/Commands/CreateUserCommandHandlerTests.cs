@@ -9,7 +9,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class CreateUserCommandHandlerTests : TestBase
+public class CreateUserCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldCreateUser_WhenEmailIsUnique()

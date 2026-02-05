@@ -9,7 +9,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class CreatePlaylistCommandHandlerTests : TestBase
+public class CreatePlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldCreatePlaylist_WhenUserExists()

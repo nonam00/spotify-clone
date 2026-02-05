@@ -10,7 +10,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class DeleteSongsCommandHandlerTests : TestBase
+public class DeleteSongsCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldDeleteSongs_WhenValid()

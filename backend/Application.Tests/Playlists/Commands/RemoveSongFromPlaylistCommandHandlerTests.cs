@@ -9,7 +9,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class RemoveSongFromPlaylistCommandHandlerTests : TestBase
+public class RemoveSongFromPlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldRemoveSongFromPlaylist_WhenValid()

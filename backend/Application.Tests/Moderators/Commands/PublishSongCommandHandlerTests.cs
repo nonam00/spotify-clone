@@ -10,7 +10,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class PublishSongCommandHandlerTests : TestBase
+public class PublishSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldPublishSong_WhenValid()

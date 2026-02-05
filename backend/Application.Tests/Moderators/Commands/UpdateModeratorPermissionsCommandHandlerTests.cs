@@ -8,7 +8,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class UpdateModeratorPermissionsCommandHandlerTests : TestBase
+public class UpdateModeratorPermissionsCommandHandlerTests : InMemoryTestBase
 {
     [Fact] 
     public async Task Handle_ShouldUpdatePermissions_WhenValid()

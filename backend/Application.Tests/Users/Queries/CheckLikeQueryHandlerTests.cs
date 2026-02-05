@@ -6,7 +6,7 @@ using Application.Users.Queries.CheckLike;
 
 namespace Application.Tests.Users.Queries;
 
-public class CheckLikeQueryHandlerTests : TestBase
+public class CheckLikeQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTrue_WhenSongIsLiked()

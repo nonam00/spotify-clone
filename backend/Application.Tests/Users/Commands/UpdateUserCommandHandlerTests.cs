@@ -9,7 +9,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class UpdateUserCommandHandlerTests : TestBase
+public class UpdateUserCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldUpdateUser_WhenUserExists()
@@ -107,7 +107,9 @@ public class UpdateUserCommandHandlerTests : TestBase
         updatedUser.AvatarPath.Value.Should().Be(originalAvatarPath);
     }
 
-    // Not checking domain event but improves coverage 
+    /// <summary>
+    /// This test doesn't check if domain event was created and handled but improves test coverage 
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldTriggerDomainEvent_WhenAvatarIsChanged()
     {
@@ -140,6 +142,7 @@ public class UpdateUserCommandHandlerTests : TestBase
         updatedUser.AvatarPath.Value.Should().Be("new_avatar.jpg");
     }
     
+    // Validation tests
     [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenUserIdIsEmpty()
     {

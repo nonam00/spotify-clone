@@ -10,7 +10,7 @@ using Application.Songs.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class DeleteSongCommandHandlerTests : TestBase
+public class DeleteSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldDeleteSong_WhenValid()

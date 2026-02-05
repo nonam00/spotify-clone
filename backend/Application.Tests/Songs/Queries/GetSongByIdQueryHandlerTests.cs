@@ -5,10 +5,9 @@ using Domain.ValueObjects;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Errors;
 
-
 namespace Application.Tests.Songs.Queries;
 
-public class GetSongByIdQueryHandlerTests : TestBase
+public class GetSongByIdQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnSong_WhenSongExistsAndPublished()

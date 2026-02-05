@@ -9,7 +9,7 @@ using Application.Moderators.Commands.DeactivateModerator;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class DeactivateModeratorCommandHandlerTests : TestBase
+public class DeactivateModeratorCommandHandlerTests : InMemoryTestBase
 {
     [Fact] 
     public async Task Handle_ShouldActivateModerator_WhenValid()

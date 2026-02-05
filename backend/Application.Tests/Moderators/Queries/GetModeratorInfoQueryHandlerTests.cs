@@ -7,7 +7,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Moderators.Queries;
 
-public class GetModeratorInfoQueryHandlerTests : TestBase
+public class GetModeratorInfoQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnModeratorInfo_WhenModeratorExists()

@@ -10,7 +10,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class LikeSongCommandHandlerTests : TestBase
+public class LikeSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldLikeSong_WhenUserAndSongExist()

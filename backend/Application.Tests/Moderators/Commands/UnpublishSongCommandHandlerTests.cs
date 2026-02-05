@@ -11,7 +11,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class UnpublishSongCommandHandlerTests : TestBase
+public class UnpublishSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldUnpublishSong_WhenValid()

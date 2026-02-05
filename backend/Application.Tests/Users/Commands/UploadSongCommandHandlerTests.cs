@@ -9,7 +9,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class UploadSongCommandHandlerTests : TestBase
+public class UploadSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldCreateSong_WhenValid()

@@ -6,7 +6,7 @@ using Application.Songs.Queries.GetNewestSongList;
 
 namespace Application.Tests.Songs.Queries;
 
-public class GetNewestSongListQueryHandlerTests : TestBase
+public class GetNewestSongListQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnNewestPublishedSongs()

@@ -8,7 +8,7 @@ using Application.Users.Commands.LoginByRefreshToken;
 
 namespace Application.Tests.Users.Commands;
 
-public class LoginByRefreshTokenCommandHandlerTests : TestBase
+public class LoginByRefreshTokenCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenRefreshTokenIsValid()

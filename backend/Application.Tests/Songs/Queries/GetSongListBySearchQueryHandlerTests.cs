@@ -4,10 +4,11 @@ using Domain.Models;
 using Domain.ValueObjects;
 using Application.Songs.Queries.GetSongListBySearch;
 using Application.Songs.Enums;
+using Application.Tests.Fixtures;
 
 namespace Application.Tests.Songs.Queries;
 
-public class GetSongListBySearchQueryHandlerTests : TestBaseWithPostgresFixture
+public class GetSongListBySearchQueryHandlerTests : PostgresTestBase
 {
     public GetSongListBySearchQueryHandlerTests(PostgreSqlFixture fixture) : base(fixture) { }
 
