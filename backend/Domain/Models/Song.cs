@@ -91,5 +91,16 @@ public class Song : AggregateRoot<Guid>
         
         MarkedForDeletion = true;
         return Result.Success();
-    } 
+    }
+
+    internal Result CancelMarkForDeletion()
+    {
+        if (!MarkedForDeletion)
+        {
+            return Result.Failure(SongDomainErrors.NotMarkedForDeletion);
+        }
+        
+        MarkedForDeletion = false;
+        return Result.Success();
+    }
 }

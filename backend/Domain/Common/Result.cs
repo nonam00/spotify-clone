@@ -4,9 +4,8 @@ public class Result
 {
     public bool IsSuccess { get; }
     public Error Error { get; }
-
+    
     public bool IsFailure => !IsSuccess;
-
 
     protected Result(bool isSuccess, Error error)
     {
@@ -27,13 +26,13 @@ public class Result
 
 public class Result<T> : Result
 {
-    private readonly T _value;
-    
-    public T Value => IsSuccess ? _value : throw new InvalidOperationException("Cannot access Value of failed result");
+    public T Value => IsSuccess 
+        ? field 
+        : throw new InvalidOperationException("Cannot access Value of failed result");
 
     private Result(T value, bool isSuccess, Error error) : base(isSuccess, error)
     {
-        _value = value;
+        Value = value;
     }
     
     public static Result<T> Success(T value) => new(value, true, Error.None);

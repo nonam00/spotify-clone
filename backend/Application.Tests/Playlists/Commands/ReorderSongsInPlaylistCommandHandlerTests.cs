@@ -9,7 +9,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
+public class ReorderSongsInPlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReorderSongs_WhenValid()
@@ -136,7 +136,7 @@ public class ReorderSongsInPlaylistCommandHandlerTests : TestBase
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(PlaylistDomainErrors.DoesntContainSong);
+        result.Error.Should().Be(PlaylistDomainErrors.InvalidReorderList);
     }
 
     [Fact]

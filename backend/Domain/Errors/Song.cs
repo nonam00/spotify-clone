@@ -25,4 +25,7 @@ public static class SongDomainErrors
     
     public static readonly Error AlreadyMarkedForDeletion =
         new(nameof(AlreadyMarkedForDeletion), "The song is already marked for deletion.");
+    
+    public static readonly Error NotMarkedForDeletion =
+        new(nameof(NotMarkedForDeletion), "The song is not marked for deletion.");
 }

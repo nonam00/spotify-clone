@@ -10,7 +10,7 @@ using Application.Moderators.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class CreateModeratorCommandHandlerTests : TestBase
+public class CreateModeratorCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldCreateModerator_WhenValid()

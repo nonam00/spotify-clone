@@ -9,7 +9,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class CleanUserRefreshTokensCommandHandlerTests : TestBase
+public class CleanUserRefreshTokensCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldCleanUserRefreshTokens_WhenValid()

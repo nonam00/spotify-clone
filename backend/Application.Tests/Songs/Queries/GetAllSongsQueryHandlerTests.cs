@@ -6,7 +6,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Songs.Queries;
 
-public class GetAllSongsQueryHandlerTests : TestBase
+public class GetAllSongsQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnPublishedSongs()

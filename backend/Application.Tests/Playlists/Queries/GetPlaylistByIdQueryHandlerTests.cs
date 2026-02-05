@@ -7,7 +7,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Queries;
 
-public class GetPlaylistByIdQueryHandlerTests : TestBase
+public class GetPlaylistByIdQueryHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnPlaylist_WhenPlaylistExists()

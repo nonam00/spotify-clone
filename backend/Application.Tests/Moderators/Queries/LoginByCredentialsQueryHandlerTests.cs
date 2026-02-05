@@ -7,7 +7,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Moderators.Queries;
 
-public class LoginByCredentialsQueryHandlerTests : TestBase
+public class LoginByCredentialsQueryHandlerTests : InMemoryTestBase
 {
         [Fact]
     public async Task Handle_ShouldReturnAccessToken_WhenCredentialsAreValid()

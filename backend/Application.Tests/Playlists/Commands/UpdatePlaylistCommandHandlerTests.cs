@@ -8,7 +8,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class UpdatePlaylistCommandHandlerTests : TestBase
+public class UpdatePlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldUpdatePlaylist_WhenValid()

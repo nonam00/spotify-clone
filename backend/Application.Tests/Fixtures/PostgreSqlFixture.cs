@@ -2,11 +2,11 @@ using Testcontainers.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
-namespace Application.Tests;
+namespace Application.Tests.Fixtures;
 
 /// <summary>
 /// Fixture for test that need a real PostgreSQL because of specific methods and extensions
-/// Runs container once per test class and applies migrations
+/// Runs container once per test class
 /// </summary>
 public class PostgreSqlFixture : IAsyncLifetime
 {
@@ -34,6 +34,7 @@ public class PostgreSqlFixture : IAsyncLifetime
 
         await using var dbContext = new AppDbContext(options);
         
+        // Executing init sql script
         await dbContext.Database.ExecuteSqlRawAsync(
             """
             CREATE EXTENSION IF NOT EXISTS pg_trgm;

@@ -9,7 +9,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class DeletePlaylistCommandHandlerTests : TestBase
+public class DeletePlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldDeletePlaylist_WhenUserOwnsPlaylist()

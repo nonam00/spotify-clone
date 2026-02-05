@@ -10,7 +10,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Moderators.Commands;
 
-public class ActivateUserCommandHandlerTests : TestBase
+public class ActivateUserCommandHandlerTests : InMemoryTestBase
 {
     [Fact] 
     public async Task Handle_ShouldActivateUser_WhenValid()

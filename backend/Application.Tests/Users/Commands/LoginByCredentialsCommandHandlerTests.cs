@@ -8,7 +8,7 @@ using Application.Users.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class LoginByCredentialsCommandHandlerTests : TestBase
+public class LoginByCredentialsCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldReturnTokenPair_WhenCredentialsAreValid()

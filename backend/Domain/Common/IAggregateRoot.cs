@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Domain.Common;
 
-public interface IAggregateRoot
+internal interface IAggregateRoot
 {
     ReadOnlyCollection<DomainEvent> DomainEvents { get; }
     void CleanDomainEvents();

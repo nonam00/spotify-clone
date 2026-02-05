@@ -3,10 +3,11 @@ using FluentAssertions;
 using Domain.Models;
 using Domain.ValueObjects;
 using Application.Songs.Queries.GetLikedSongListForPlaylistBySearch;
+using Application.Tests.Fixtures;
 
 namespace Application.Tests.Songs.Queries;
 
-public class GetLikedSongListForPlaylistBySearchQueryHandlerTests : TestBaseWithPostgresFixture
+public class GetLikedSongListForPlaylistBySearchQueryHandlerTests : PostgresTestBase
 {
     public GetLikedSongListForPlaylistBySearchQueryHandlerTests(PostgreSqlFixture fixture) : base(fixture) { }
 

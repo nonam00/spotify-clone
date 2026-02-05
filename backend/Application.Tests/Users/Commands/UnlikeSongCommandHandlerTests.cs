@@ -9,7 +9,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class UnlikeSongCommandHandlerTests : TestBase
+public class UnlikeSongCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldUnlikeSong_WhenSongIsLiked()

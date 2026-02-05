@@ -9,7 +9,7 @@ using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
-public class UpdatePasswordCommandHandlerTests : TestBase
+public class UpdatePasswordCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldUpdatePassword_WhenCurrentPasswordIsCorrect()

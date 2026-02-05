@@ -10,7 +10,7 @@ using Domain.ValueObjects;
 
 namespace Application.Tests.Playlists.Commands;
 
-public class AddSongsToPlaylistCommandHandlerTests : TestBase
+public class AddSongsToPlaylistCommandHandlerTests : InMemoryTestBase
 {
     [Fact]
     public async Task Handle_ShouldAddSongToPlaylist_WhenValid()
