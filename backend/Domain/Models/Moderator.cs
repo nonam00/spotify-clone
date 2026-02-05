@@ -177,15 +177,28 @@ public class Moderator : AggregateRoot<Guid>
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
 
-        foreach (var song in songs)
-        {
-            var publishResult = song.Publish();
-            if (publishResult.IsFailure)
+        var publishResults = songs
+            .Select(s => new
             {
-                return publishResult;
+                Song = s,
+                Result = s.Publish(),
+            })
+            .ToList();
+        
+        var failed = publishResults
+            .Where(s => s.Result.IsFailure)
+            .ToList();
+        
+        if (failed.Any())
+        {
+            foreach (var markedForDeletion in publishResults.Except(failed))
+            {
+                markedForDeletion.Song.Unpublish();
             }
-        }
 
+            return failed.First().Result;
+        }
+        
         return Result.Success();
     }
     
@@ -246,13 +259,30 @@ public class Moderator : AggregateRoot<Guid>
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
 
+        var markForDeletionResults = songs
+            .Select(s => new
+            {
+                Song = s,
+                Result = s.MarkForDeletion(),
+            })
+            .ToList();
+        
+        var failed = markForDeletionResults
+            .Where(s => s.Result.IsFailure)
+            .ToList();
+        
+        if (failed.Any())
+        {
+            foreach (var markedForDeletion in markForDeletionResults.Except(failed))
+            {
+                markedForDeletion.Song.CancelMarkForDeletion();
+            }
+
+            return failed.First().Result;
+        }
+        
         foreach (var song in songs)
         {
-            var markingForDeletionResult = song.MarkForDeletion();
-            if (markingForDeletionResult.IsFailure)
-            {
-                return markingForDeletionResult;
-            }
             AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
         }
         

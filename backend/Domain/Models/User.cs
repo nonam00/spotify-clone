@@ -24,7 +24,6 @@ public class User : AggregateRoot<Guid>
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
     public IReadOnlyCollection<LikedSong> UserLikedSongs => _userLikedSongs.AsReadOnly();
     public IReadOnlyCollection<Song> UploadedSongs => _uploadedSongs.AsReadOnly();
-    
 
     private User() { } // For EF Core
     
