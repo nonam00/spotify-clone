@@ -24,4 +24,8 @@ public static class PlaylistDomainErrors
     public static readonly Error NewSongOrderCannotBeEqualToOld = new(
         nameof(NewSongOrderCannotBeEqualToOld),
         "New song order in playlist cannot be equal to old order.");
+
+    public static readonly Error InvalidReorderList = new(
+        nameof(InvalidReorderList),
+        "Reorder list size cannot be not equal song list size.");
 }

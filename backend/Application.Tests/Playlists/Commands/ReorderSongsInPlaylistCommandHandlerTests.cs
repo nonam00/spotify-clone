@@ -136,7 +136,7 @@ public class ReorderSongsInPlaylistCommandHandlerTests : InMemoryTestBase
         
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(PlaylistDomainErrors.DoesntContainSong);
+        result.Error.Should().Be(PlaylistDomainErrors.InvalidReorderList);
     }
 
     [Fact]

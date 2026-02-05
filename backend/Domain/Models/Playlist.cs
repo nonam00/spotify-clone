@@ -24,7 +24,7 @@ public class Playlist : AggregateRoot<Guid>
     
     private Playlist() { } // For EF Core
     
-    public static Result<Playlist> Create(
+    internal static Result<Playlist> Create(
         Guid userId, string title, string? description = null, FilePath? imagePath = null)
     {
         if (string.IsNullOrWhiteSpace(title))
@@ -138,6 +138,11 @@ public class Playlist : AggregateRoot<Guid>
     // Song id index in list dictates what order it will get
     public Result ReorderSongs(List<Guid> songsToReorder)
     {
+        if (_playlistSongs.Count != songsToReorder.Count)
+        {
+            return Result.Failure(PlaylistDomainErrors.InvalidReorderList);
+        }
+        
         for (var i = 0; i < _playlistSongs.Count; i++)
         {
             var songId = songsToReorder[i];
