@@ -52,12 +52,12 @@ const SongUploadModal = () => {
         return;
       }
 
-      const title = formData.get("Title") as string;
-      const author = formData.get("Author") as string;
+      const title = (formData.get("Title") as string).trim();
+      const author = (formData.get("Author") as string).trim();
       const imageFile = formData.get("Image") as File;
       const audioFile = formData.get("Audio") as File;
 
-      if (!title?.trim() || !author?.trim()) {
+      if (!title || !author) {
         toast.error("Title and author are required");
         return;
       }
@@ -98,8 +98,8 @@ const SongUploadModal = () => {
       }
 
       const songData = {
-        title: title.trim(),
-        author: author.trim(),
+        title: title,
+        author: author,
         imageId: presignedUrlImage.file_id,
         audioId: presignedUrlAudio.file_id,
       };

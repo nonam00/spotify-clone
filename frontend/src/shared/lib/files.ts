@@ -34,7 +34,7 @@ const validateSize = (file: File, maxSize: number): string | null => {
 };
 
 const validateType = (file: File, allowedTypes: string[]): string | null => {
-  const extension = file.name.split(".").pop();
+  const extension = file.name.split(".").pop()?.toLowerCase();
 
   if (extension === undefined) {
     return "Invalid file extension.";

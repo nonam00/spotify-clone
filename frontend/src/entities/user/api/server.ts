@@ -1,9 +1,10 @@
 "use server";
 
-import {cookies} from "next/headers";
-import {revalidatePath} from "next/cache";
-import {SERVER_API_URL} from "@/shared/config/api";
-import {UserDetails} from "../model";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+
+import { SERVER_API_URL } from "@/shared/config/api";
+import { UserDetails } from "../model";
 
 export async function getUserInfoServer(): Promise<UserDetails | null> {
   try {

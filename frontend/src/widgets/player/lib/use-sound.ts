@@ -2,6 +2,7 @@
 
 import { Song}  from "@/entities/song";
 import { RefObject, useEffect, useRef, useState } from "react";
+import { isEditableElement } from "./helpers";
 
 type UseSoundReturnType = {
   audioRef: RefObject<HTMLAudioElement | null>;
@@ -170,7 +171,7 @@ export function useSound(
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
+      if (!isEditableElement(event.target as HTMLElement) && event.code === "Space") {
         event.preventDefault();
         togglePlay();
       }

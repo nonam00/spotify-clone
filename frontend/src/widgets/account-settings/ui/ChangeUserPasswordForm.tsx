@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type SubmitEvent } from "react";
 import toast from "react-hot-toast";
 
 import { Input, Button } from "@/shared/ui";
-import {changePassword} from "@/entities/user";
+import { changePassword } from "@/entities/user";
 
 const ChangeUserPasswordForm = () => {
   const [isPending, startTransition] = useTransition();
@@ -20,15 +20,21 @@ const ChangeUserPasswordForm = () => {
   }>({});
 
   const validateForm = () => {
-    const newErrors: typeof errors = {};
+    const newErrors: typeof errors = {}
 
-    if (currentPassword.length < 8) {
+    const trimmedCurrentPassword = currentPassword.trim();
+    const trimmedNewPassword= newPassword.trim();
+
+    if (trimmedCurrentPassword === trimmedNewPassword) {
+      newErrors.newPassword = "New password must be different from current password";
+    }
+    if (trimmedCurrentPassword.length < 8) {
       newErrors.currentPassword = "Password must be at least 8 characters";
     }
-    if (newPassword.length < 8) {
+    if (trimmedNewPassword.length < 8) {
       newErrors.newPassword = "Password must be at least 8 characters";
     }
-    if (confirmPassword !== newPassword) {
+    if (confirmPassword.trim() !== trimmedNewPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -36,7 +42,7 @@ const ChangeUserPasswordForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
 
     startTransition(async () => {
@@ -45,7 +51,10 @@ const ChangeUserPasswordForm = () => {
       }
 
       try {
-        const result = await changePassword(currentPassword, newPassword);
+        const result = await changePassword(
+          currentPassword.trim(),
+          newPassword.trim()
+        );
 
         if (result.success) {
           toast.success("Password changed successfully");

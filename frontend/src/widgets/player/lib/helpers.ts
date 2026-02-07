@@ -8,3 +8,13 @@ export function formatTime(timeInSeconds: number | undefined): string {
 export function calculateProgress(current: number, duration: number): number {
   return duration > 0 ? current / duration : 0;
 }
+
+export function isEditableElement(element: HTMLElement | null): boolean {
+  if (!element) return false;
+
+  const tagName = element.tagName.toLowerCase();
+  const isFormElement = ['input', 'textarea', 'select', 'button'].includes(tagName);
+  const isContentEditable = element.getAttribute('contenteditable') === 'true';
+
+  return isFormElement || isContentEditable;
+}

@@ -57,12 +57,21 @@ const UpdatePlaylistModal = () => {
         return;
       }
 
-      const title = formData.get("Title") as string;
-      const description = formData.get("Description") as string;
+      const title = (formData.get("Title") as string).trim();
+      const description = (formData.get("Description") as string).trim();
       const imageFile = formData.get("Image") as File;
 
-      if (!title?.trim()) {
+      if (!title) {
         toast.error("Title is required");
+        return;
+      }
+
+      if (
+        (description === playlist.description || !description && !playlist.description) &&
+        title === playlist.title &&
+        imageFile.size === 0
+      ) {
+        toast.error("There are no changes");
         return;
       }
 
@@ -96,7 +105,7 @@ const UpdatePlaylistModal = () => {
       }
 
       const playlistData = {
-        title: title.trim(),
+        title: title,
         description: description?.trim() || null,
         imageId: file_id,
       };

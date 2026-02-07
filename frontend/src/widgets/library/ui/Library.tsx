@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { memo } from "react";
+import { useShallow } from "zustand/shallow";
 import { AiOutlinePlus } from "react-icons/ai";
 import { TbPlaylist } from "react-icons/tb";
 
@@ -10,7 +11,6 @@ import { MediaItem } from "@/shared/ui";
 import type { Playlist } from "@/entities/playlist";
 import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { useCreateModalStore } from "../model";
-import {useShallow} from "zustand/shallow";
 
 const Library = memo(function Library({
   playlists,

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useRef, useState, useTransition } from "react";
+import { type ChangeEvent, type SubmitEvent, useRef, useState, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
 import toast from "react-hot-toast";
 import { IoMdCloudUpload } from "react-icons/io";
@@ -51,12 +51,13 @@ const ChangeUserInfoForm = ({
     setPreviewUrl(url);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
 
     const file = fileInputRef.current?.files?.[0];
+    const trimmedFullName = fullName.trim();
 
-    if (fullName === userDetails?.fullName && !file) {
+    if (trimmedFullName === userDetails?.fullName && !file) {
       return;
     }
 
@@ -64,7 +65,7 @@ const ChangeUserInfoForm = ({
       try {
         const newErrors: typeof errors = errors;
 
-        if (fullName.trim().length < 2) {
+        if (trimmedFullName.length < 2) {
           newErrors.name = "Name must be at least 2 characters";
           setErrors(newErrors);
           return;
@@ -96,8 +97,9 @@ const ChangeUserInfoForm = ({
 
         const result = await updateUserInfo({
           avatarId: file_id,
-          fullName: fullName === userDetails?.fullName ? null : fullName,
+          fullName: fullName === userDetails?.fullName ? null : trimmedFullName,
         });
+
         if (result.success) {
           toast.success("User information updated successfully");
           setPreviewUrl(null);
