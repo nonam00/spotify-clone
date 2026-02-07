@@ -21,8 +21,8 @@ const ErrorDisplay = ({ error, className = "" }: ErrorDisplayProps) => {
         ${className}
       `}
     >
-      <MdError size={18} className="text-red-400 hover:text-red-500/10" />
-      <span>{error}</span>
+      <MdError size={18} className="text-red-400 self-start" />
+      <span className="text-center self-center">{error}</span>
     </div>
   );
 };

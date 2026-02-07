@@ -13,8 +13,8 @@ public class LoginByCredentialsCommandValidator : AbstractValidator<LoginByCrede
             .EmailAddress()
             .WithMessage("Invalid email format")
             .WithErrorCode("400")
-            .MaximumLength(254)
-            .WithMessage("Email cannot exceed 254 characters")
+            .MaximumLength(255)
+            .WithMessage("Email cannot exceed 255 characters")
             .WithErrorCode("400");
 
         RuleFor(query => query.Password)

@@ -8,9 +8,9 @@ type AuthStore = {
   error: string | null;
   isAuthenticated: boolean;
   checkAuth: () => Promise<void>;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, fullName: string) => Promise<boolean>;
-  forgotPassword: (email: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  register: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  forgotPassword: (email: string) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   cleanError: () => void;
 }
@@ -65,23 +65,23 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             error: error.detail || "Invalid email or password",
             isLoading: false,
           });
-          return false;
+          return { error: get().error };
         }
         set({
           error: "An error occurred when you tried to log in.",
           isLoading: false,
         });
-        return false;
+        return { error: get().error };
       }
 
       await get().checkAuth();
-      return get().isAuthenticated;
+      return { error: get().error };
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to login",
         isLoading: false,
       });
-      return false;
+      return { error: get().error };
     }
   },
 
@@ -106,26 +106,27 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             error: error.detail || "Failed to register",
             isLoading: false,
           });
-          return false;
+          return { error: get().error };
         }
         set({
           error: "An error occurred when you tried to register your account.",
           isLoading: false,
         });
-        return false;
+        return { error: get().error };
       }
 
       set({
         error: null,
         isLoading: false,
       });
-      return true;
+
+      return { error: get().error };
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to register",
         isLoading: false,
       });
-      return false;
+      return { error: get().error };
     }
   },
 
@@ -143,26 +144,26 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             error: error.detail || "Failed to process password reset",
             isLoading: false,
           });
-          return false;
+          return { error: get().error };
         }
         set({
           error: "An error occurred when processing your request.",
           isLoading: false,
         });
-        return false;
+        return { error: get().error };
       }
 
       set({
         error: null,
         isLoading: false,
       });
-      return true;
+      return { error: get().error };
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "Failed to process password reset",
         isLoading: false,
       });
-      return false;
+      return { error: get().error };
     }
   },
 

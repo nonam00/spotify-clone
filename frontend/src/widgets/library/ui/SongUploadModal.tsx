@@ -60,6 +60,11 @@ const SongUploadModal = () => {
     }
   }, [onClose]);
 
+  if (!isOpen) {
+    onClose();
+    return;
+  }
+
   const validate = () => {
     const result = songFormSchema.safeParse(formData);
     if (result.success) {

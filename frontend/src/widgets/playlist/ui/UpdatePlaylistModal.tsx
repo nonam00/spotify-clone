@@ -64,9 +64,9 @@ const UpdatePlaylistModal = () => {
     }
   }, [onClose]);
 
-  if (!playlist || !isAuthenticated) {
+  if (!playlist || !isAuthenticated || !isOpen) {
     onClose();
-    return null;
+    return;
   }
 
   const formData: PlaylistFormData = {
@@ -74,7 +74,6 @@ const UpdatePlaylistModal = () => {
     ...playlist,
     ...userFormData,
   }
-  console.log(formData);
 
   const validate = () => {
     const result = playlistFormSchema.safeParse(formData);
