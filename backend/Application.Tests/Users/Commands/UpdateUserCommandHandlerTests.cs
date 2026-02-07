@@ -162,7 +162,7 @@ public class UpdateUserCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenFullNameExceedsMaxLength()
     {
         // Arrange
-        var longName = new string('a', 101);
+        var longName = new string('a', 256);
         var command = new UpdateUserCommand(Guid.NewGuid(), longName, null);
 
         // Act
@@ -178,7 +178,7 @@ public class UpdateUserCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenAvatarPathExceedsMaxLength()
     {
         // Arrange
-        var longPath = new string('a', 501);
+        var longPath = new string('a', 256);
         var command = new UpdateUserCommand(Guid.NewGuid(), null, longPath);
 
         // Act

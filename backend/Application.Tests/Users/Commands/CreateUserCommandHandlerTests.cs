@@ -129,7 +129,7 @@ public class CreateUserCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenEmailExceedsMaxLength()
     {
         // Arrange
-        var longEmail = new string('a', 250) + "@example.com";
+        var longEmail = new string('a', 244) + "@example.com";
         var command = new CreateUserCommand(longEmail, "password123", "Test User");
 
         // Act
@@ -191,7 +191,7 @@ public class CreateUserCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenFullNameExceedsMaxLength()
     {
         // Arrange
-        var longName = new string('a', 101);
+        var longName = new string('a', 256);
         var command = new CreateUserCommand("test@example.com", "password123", longName);
 
         // Act
