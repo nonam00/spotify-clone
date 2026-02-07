@@ -6,7 +6,8 @@ import { SearchType } from "@/entities/song";
 
 export function useDebouncedSearch(
   pageUrl: string,
-  minimumLength: number
+  minimumLength: number,
+  maximumLength: number,
 ) {
   const router = useRouter();
 
@@ -20,6 +21,7 @@ export function useDebouncedSearch(
     const query = `?searchString=${debouncedValue}&type=${debouncedType}`;
     if (
       debouncedValue.length >= minimumLength &&
+      debouncedValue.length <= maximumLength &&
       typeof window !== "undefined" &&
       query !== window.location.search
     ) {
