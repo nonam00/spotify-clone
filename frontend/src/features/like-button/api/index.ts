@@ -14,21 +14,24 @@ export async function addLikedSong(songId: string): Promise<boolean> {
 
 export async function checkLikedSong(
   songId: string,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<boolean> {
   try {
     const response = await authFetchClient(`${CLIENT_API_URL}/users/songs/${songId}`, {
       method: "GET",
-      signal: abortController.signal,
+      signal,
     });
 
     if (!response.ok) {
       return false;
     }
 
-    const result: { check: boolean } = await response.json();
-    return result.check;
+    const { check }: { check: boolean } = await response.json();
+    return check;
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw error; // Re-throw abort errors
+    }
     console.error("Error on checking if song liked", error);
     return false;
   }

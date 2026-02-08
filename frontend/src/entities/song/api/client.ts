@@ -20,10 +20,10 @@ export async function createSongRecord(data: {
   }
 }
 
-export async function getSongById(id: string, abortController?: AbortController): Promise<Song | null> {
+export async function getSongById(id: string, signal?: AbortSignal): Promise<Song | null> {
   try {
     const response = await fetch(`${CLIENT_API_URL}/songs/${id}`, {
-      signal: abortController?.signal,
+      signal,
     });
 
     const data = await response.json();
