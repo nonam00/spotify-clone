@@ -6,9 +6,9 @@ public record PasswordHash
 
     public PasswordHash(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length < 8)
+        if (string.IsNullOrWhiteSpace(value))
         {
-            throw new ArgumentException("Password hash must be at least 8 characters", nameof(value));
+            throw new ArgumentException("Password hash cannot be empty", nameof(value));
         }
 
         Value = value;

@@ -8,8 +8,6 @@ public class ModeratorPermissions
     public bool CanViewReports { get; private set; }
     public bool CanManageModerators { get; private set; }
 
-    private ModeratorPermissions() { }
-
     public ModeratorPermissions(bool canManageUsers, bool canManageContent, bool canViewReports, bool canManageModerators)
     {
         CanManageUsers = canManageUsers;
@@ -20,11 +18,19 @@ public class ModeratorPermissions
 
     public static ModeratorPermissions CreateDefault()
     {
-        return new ModeratorPermissions(true, true, true, false);
+        return new ModeratorPermissions(
+            canManageContent: true,
+            canManageUsers: true,
+            canViewReports: true,
+            canManageModerators: false);
     }
 
     public static ModeratorPermissions CreateSuperAdmin()
     {
-        return new ModeratorPermissions(true, true, true, true);
+        return new ModeratorPermissions(
+            canManageContent: true,
+            canManageUsers: true,
+            canViewReports: true,
+            canManageModerators: true);
     }
 }
