@@ -9,6 +9,7 @@ type PlayerStore = {
   activeId?: string;
   volume: number;
   cache: SongCache;
+  isRehydrated: boolean;
   timestamp: number;
   setActiveId: (id: string) => void;
   setIds: (ids: string[]) => void;
@@ -17,6 +18,7 @@ type PlayerStore = {
   removeId: (id: string) => void;
   setVolume: (value: number) => void;
   setCachedSong: (song: Song) => void;
+  setRehydrated: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -29,6 +31,7 @@ export const usePlayerStore = create<PlayerStore>()(
       activeId: undefined,
       volume: 1,
       cache: {},
+      isRehydrated: false,
       timestamp: Date.now(),
       setActiveId: (id: string) => set({ activeId: id, timestamp: Date.now() }),
       setIds: (ids: string[]) => set({ ids, timestamp: Date.now() }),
@@ -60,6 +63,7 @@ export const usePlayerStore = create<PlayerStore>()(
         set((state) => ({
           cache: { ...state.cache, [song.id]: song }
         })),
+      setRehydrated: (value: boolean) => set({ isRehydrated: value }),
       reset: () => set({ ids: [], activeId: undefined, volume: 1, cache: {}, timestamp: Date.now() }),
     }),
     {
@@ -74,6 +78,8 @@ export const usePlayerStore = create<PlayerStore>()(
           if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
             state.reset();
             usePlayerStore.persist.clearStorage();
+          } else {
+            state.setRehydrated(true);
           }
         }
       }

@@ -28,7 +28,6 @@ function AudioPlayer({ song }: { song: Song}) {
     isStalled,
     duration,
     currentTime,
-    togglePlay,
     isSeeking,
   } = useSound(songUrl);
 
@@ -62,13 +61,16 @@ function AudioPlayer({ song }: { song: Song}) {
   }, [isActive, isPlaying, setActiveSongId]);
 
   // Enhanced toggle play that stops other players
-  const handleTogglePlay = useCallback(() => {
-    if (!isPlaying) {
-      // If starting to play, set this as active (will stop others)
+  const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
       setActiveSongId(song.id);
+      audioRef.current.play().catch(console.error);
     }
-    togglePlay();
-  }, [isPlaying, song.id, setActiveSongId, togglePlay]);
+  }, [audioRef, isPlaying, setActiveSongId, song.id]);
+
 
   // Progress slider callback (handling local progress without seeking audio)
   const handleProgressChange = useCallback(
@@ -112,7 +114,7 @@ function AudioPlayer({ song }: { song: Song}) {
       
       {/* Play/Pause button */}
       <button
-        onClick={handleTogglePlay}
+        onClick={togglePlay}
         className="flex items-center justify-center h-12 w-12 rounded-full bg-white hover:opacity-75 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
         aria-label={isPlaying ? "Pause" : "Play"}
       >
