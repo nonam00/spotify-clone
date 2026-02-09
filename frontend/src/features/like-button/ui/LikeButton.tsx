@@ -51,14 +51,14 @@ const LikeButton = ({
     };
   }, [defaultValue, loadLikeStatus, songId]);
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     // Preventing race condition
     if (isLoading) return;
 
     const previousState = isLiked;
 
     // Optimistic update
-    setIsLoading(!isLiked);
+    setIsLiked(!isLiked);
     setIsLoading(true);
 
     try {
@@ -86,7 +86,7 @@ const LikeButton = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLiked, isLoading, songId]);
 
   return (
     <button
