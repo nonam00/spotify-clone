@@ -13,44 +13,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 )
-
-var (
-	metricsOnce sync.Once
-)
-
-func initMetrics() {
-	metricsOnce.Do(func() {
-		// Register default Go metrics only once
-		// Use Register instead of MustRegister to handle AlreadyRegisteredError gracefully
-		goCollector := collectors.NewGoCollector()
-		processCollector := collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
-
-		if err := prometheus.Register(goCollector); err != nil {
-			var alreadyRegisteredError prometheus.AlreadyRegisteredError
-			// Only panic if it's not an AlreadyRegisteredError
-			if !errors.As(err, &alreadyRegisteredError) {
-				panic(err)
-			}
-			// AlreadyRegisteredError is fine, collector is already registered
-		}
-
-		if err := prometheus.Register(processCollector); err != nil {
-			var alreadyRegisteredError prometheus.AlreadyRegisteredError
-			// Only panic if it's not an AlreadyRegisteredError
-			if !errors.As(err, &alreadyRegisteredError) {
-				panic(err)
-			}
-			// AlreadyRegisteredError is fine, collector is already registered
-		}
-	})
-}
 
 func main() {
 	// Load configuration
@@ -61,9 +27,6 @@ func main() {
 
 	// Initialize logger
 	l := logger.New("file-service")
-
-	// Initialize metrics
-	initMetrics()
 
 	// Initialize cache
 	urlCache, err := storage.NewURLCache(&cfg.Cache, l)
