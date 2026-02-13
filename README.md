@@ -83,6 +83,8 @@ The project is built on a microservices architecture and includes:
 - **Prometheus .NET Client** - Metrics exposure for monitoring integration
 - **BCrypt.Net** - Secure password hashing and verification
 - **MailKit 4** - Cross-platform .NET mail client for SMTP communication
+- **xUnit** - Unit test library
+- **Test Containers** - Library for creating docker instances of real dependencies for Unit tests
 
 ### Frontend
 **Shared**:
@@ -90,6 +92,7 @@ The project is built on a microservices architecture and includes:
 - **TypeScript** - Type-safe JavaScript with strict configuration
 - **Tailwind CSS 4** - Utility-first CSS framework with JIT compilation
 - **Zustand** - Minimalist state management with hooks and middleware support
+- **Zod** - Typescript-first validation library
 - **Radix UI** - UI kit for shared common components
 - **React Icons** - Icon library with various icon sets
 
@@ -126,7 +129,6 @@ The project is built on a microservices architecture and includes:
 - [ ] **Automatic Moderation** - AI-powered content verification
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
-- [ ] **CI/CD Pipeline** - GitHub Actions for automated testing and deployment
 - [ ] **Performance Testing** - Load testing with k6 or Locust
 
 ### Completed
