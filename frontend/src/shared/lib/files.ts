@@ -36,26 +36,18 @@ function createFileSchema(type: FileUploadType) {
   const config = FILE_CONFIG[type];
   const maxSizeMB = Math.round(config.maxSize / 1024 / 1024);
 
-  return z
-    .instanceof(File)
-    .refine(
-      (file) => {
+  return z.instanceof(File)
+    .refine((file) => {
         const extension = getFileExtension(file.name);
         return config.allowedTypes.includes(extension);
-      },
+      }, 
       {
         message: `Invalid file type. Allowed types: ${config.allowedTypes.join(", ")}`,
       }
-    )
-    .refine(
-      (file) => file.size > 0,
-      {
+    ).refine((file) => file.size > 0, {
         message: "File is empty."
       }
-    )
-    .refine(
-      (file) => file.size <= config.maxSize,
-      {
+    ).refine((file) => file.size <= config.maxSize, {
         message: `File too large. Maximum size: ${maxSizeMB}MB`,
       }
     );

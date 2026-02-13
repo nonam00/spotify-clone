@@ -1,7 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import {type ChangeEvent, type SubmitEvent, useCallback, useRef, useState, useTransition} from "react";
+import {
+  type DragEvent,
+  type ChangeEvent,
+  type SubmitEvent,
+  useCallback,
+  useRef,
+  useState,
+  useTransition
+} from "react";
 import { useShallow } from "zustand/shallow";
 import { z } from "zod";
 import toast from "react-hot-toast";
@@ -58,9 +66,12 @@ const ChangeUserInfoForm = ({
     return z.flattenError(result.error);
   }, []);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileDrop = (e: DragEvent) => {
+    e.preventDefault();
+    handleFileChange(e.dataTransfer.files[0]);
+  };
 
+  const handleFileChange = (file: File | undefined) => {
     if (!file) {
       return;
     }
@@ -176,11 +187,16 @@ const ChangeUserInfoForm = ({
           <div className="flex flex-col items-center justify-center w-full gap-y-4">
             <div className="flex flex-col w-full gap-y-1">
               <p className="w-full text-left">Upload new avatar:</p>
-              <label className="
-                flex flex-col items-center justify-center w-full h-30
-                bg-neutral-700 border-2 border-neutral-600 rounded-lg cursor-pointer
-                hover:bg-neutral-600 transition
-              ">
+              <label
+                className="
+                  flex flex-col items-center justify-center w-full h-30
+                  bg-neutral-700 border-2 border-neutral-600 rounded-lg cursor-pointer
+                  hover:bg-neutral-600 transition
+                "
+                onDragOver={e => e.preventDefault()}
+                onDragEnter={e => e.preventDefault()}
+                onDrop={handleFileDrop}
+              >
                 {previewUrl ? (
                   <div className="relative w-24 h-24 my-1">
                     <Image
@@ -206,7 +222,7 @@ const ChangeUserInfoForm = ({
                   type="file"
                   accept={FILE_CONFIG.image.allowedTypes.join(", ")}
                   className="hidden"
-                  onChange={handleFileChange}
+                  onChange={(e) => handleFileChange(e.target.files?.[0])}
                   disabled={isPending}
                 />
               </label>

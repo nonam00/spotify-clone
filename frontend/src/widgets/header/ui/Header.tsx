@@ -81,13 +81,13 @@ const Header = ({
         </div>
         <div className="flex md:hidden gap-x-2 items-center">
           <button
-            onClick={() => {router.push("/")}}
+            onClick={() => router.push("/")}
             className="flex items-center justify-center rounded-full p-2 bg-white hover:opacity-75 transition"
           >
             <HiHome className="text-black" size={20} />
           </button>
           <button
-            onClick={() => {router.push("/search")}}
+            onClick={() => router.push("/search")}
             className="flex items-center justify-center rounded-full p-2 bg-white hover:opacity-75 transition"
           >
             <HiSearch className="text-black" size={20} />

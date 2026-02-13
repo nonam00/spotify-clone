@@ -20,6 +20,8 @@ export function MediaItem ({
       flex items-center w-full p-2 rounded-md gap-x-3
       cursor-pointer hover:bg-neutral-800/50 ${selected ? "bg-neutral-800/50" : ""}
     `}
+      title={author ? `${title} — ${author}` : title}
+      aria-label={author ? `${title} — ${author}` : title}
     >
       <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
         <Image
