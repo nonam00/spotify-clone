@@ -1,4 +1,4 @@
-package storage
+package cache
 
 import (
 	"context"
@@ -22,8 +22,7 @@ func newRedisCache(client *redis.Client, keyPrefix string) *RedisCache {
 	}
 }
 
-func (r *RedisCache) Get(key string) (*domain.PresignedURLResponse, bool) {
-	ctx := context.Background()
+func (r *RedisCache) Get(ctx context.Context, key string) (*domain.PresignedURLResponse, bool) {
 	fullKey := r.keyPrefix + key
 
 	val, err := r.client.Get(ctx, fullKey).Result()
@@ -47,8 +46,7 @@ func (r *RedisCache) Get(key string) (*domain.PresignedURLResponse, bool) {
 	return &response, true
 }
 
-func (r *RedisCache) Set(key string, value *domain.PresignedURLResponse, ttl time.Duration) error {
-	ctx := context.Background()
+func (r *RedisCache) Set(ctx context.Context, key string, value *domain.PresignedURLResponse, ttl time.Duration) error {
 	fullKey := r.keyPrefix + key
 
 	data, err := json.Marshal(value)
@@ -59,8 +57,7 @@ func (r *RedisCache) Set(key string, value *domain.PresignedURLResponse, ttl tim
 	return r.client.Set(ctx, fullKey, data, ttl).Err()
 }
 
-func (r *RedisCache) Delete(key string) error {
-	ctx := context.Background()
+func (r *RedisCache) Delete(ctx context.Context, key string) error {
 	fullKey := r.keyPrefix + key
 
 	return r.client.Del(ctx, fullKey).Err()
@@ -69,6 +66,3 @@ func (r *RedisCache) Delete(key string) error {
 func (r *RedisCache) GenerateKey(fileType domain.FileType, fileID string) string {
 	return string(fileType) + ":" + fileID
 }
-
-// Ensure RedisCache implements URLCache interface
-var _ URLCache = (*RedisCache)(nil)

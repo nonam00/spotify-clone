@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"file-service/internal/domain"
-	"file-service/internal/storage"
+	"file-service/internal/storage/minio"
 	"file-service/pkg/logger"
 	"fmt"
 
@@ -18,11 +18,11 @@ type FileService interface {
 }
 
 type fileService struct {
-	storage storage.MinioClient
+	storage minio.MinioClient
 	logger  *logger.Logger
 }
 
-func NewFileService(storage *storage.MinioClient, logger *logger.Logger) FileService {
+func NewFileService(storage *minio.MinioClient, logger *logger.Logger) FileService {
 	return &fileService{
 		storage: *storage,
 		logger:  logger.WithComponent("file_service"),

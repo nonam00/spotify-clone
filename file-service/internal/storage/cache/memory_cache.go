@@ -1,9 +1,11 @@
-package storage
+package cache
 
 import (
-	"file-service/internal/domain"
+	"context"
 	"sync"
 	"time"
+
+	"file-service/internal/domain"
 )
 
 type memoryCacheEntry struct {
@@ -22,7 +24,7 @@ func newMemoryCache() *memoryCache {
 	}
 }
 
-func (c *memoryCache) Get(key string) (*domain.PresignedURLResponse, bool) {
+func (c *memoryCache) Get(_ context.Context, key string) (*domain.PresignedURLResponse, bool) {
 	c.mu.RLock()
 	entry, exists := c.items[key]
 	isExpired := exists && time.Now().After(entry.expiresAt)
@@ -46,7 +48,7 @@ func (c *memoryCache) Get(key string) (*domain.PresignedURLResponse, bool) {
 	return entry.value, true
 }
 
-func (c *memoryCache) Set(key string, value *domain.PresignedURLResponse, ttl time.Duration) error {
+func (c *memoryCache) Set(_ context.Context, key string, value *domain.PresignedURLResponse, ttl time.Duration) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -57,7 +59,7 @@ func (c *memoryCache) Set(key string, value *domain.PresignedURLResponse, ttl ti
 	return nil
 }
 
-func (c *memoryCache) Delete(key string) error {
+func (c *memoryCache) Delete(_ context.Context, key string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -68,6 +70,3 @@ func (c *memoryCache) Delete(key string) error {
 func (c *memoryCache) GenerateKey(fileType domain.FileType, fileID string) string {
 	return string(fileType) + ":" + fileID
 }
-
-// Ensure memoryCache implements URLCache interface
-var _ URLCache = (*memoryCache)(nil)

@@ -6,7 +6,8 @@ import (
 	"file-service/internal/config"
 	"file-service/internal/handler"
 	"file-service/internal/service"
-	"file-service/internal/storage"
+	"file-service/internal/storage/cache"
+	"file-service/internal/storage/minio"
 	"file-service/pkg/logger"
 	"file-service/pkg/middleware"
 	"log"
@@ -29,13 +30,13 @@ func main() {
 	l := logger.New("file-service")
 
 	// Initialize cache
-	urlCache, err := storage.NewURLCache(&cfg.Cache, l)
+	urlCache, err := cache.NewURLCache(&cfg.Cache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize cache")
 	}
 
 	// Initialize Minio client
-	minioClient, err := storage.NewMinioClient(&cfg.Minio, urlCache, l)
+	minioClient, err := minio.NewMinioClient(&cfg.Minio, urlCache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize Minio client")
 	}
@@ -100,7 +101,7 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	})
 
 	// Metrics endpoint
-	router.GET("/metrics", middleware.PrometheusHandler())
+	router.GET("/metrics", handler.PrometheusHandler())
 
 	// API routes
 	api := router.Group("/api/v1")
