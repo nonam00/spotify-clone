@@ -55,12 +55,13 @@ const Library = memo(function Library({
           onClick={() => tryRedirect("/playlist/liked")}
           className="flex items-center p-2 w-full gap-x-3 rounded-md cursor-pointer hover:bg-neutral-800/50"
         >
-          <div className="relative rounded-md min-h-[48px] min-w-[48px] overflow-hidden">
+          <div className="relative rounded-md h-12 w-12 overflow-hidden">
             <Image
               fill
               src="/images/liked.png"
               alt="Media Item"
               className="object-cover"
+              sizes="48px"
             />
           </div>
           <div className="flex flex-col gap-y-1 overflow-hidden">

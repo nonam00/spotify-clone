@@ -26,7 +26,7 @@ const STORAGE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
 export const usePlayerStore = create<PlayerStore>()(
   persist(
-    (set, get) => ({
+    (set, get, store) => ({
       ids: [],
       activeId: undefined,
       volume: 1,
@@ -64,7 +64,10 @@ export const usePlayerStore = create<PlayerStore>()(
           cache: { ...state.cache, [song.id]: song }
         })),
       setRehydrated: (value: boolean) => set({ isRehydrated: value }),
-      reset: () => set({ ids: [], activeId: undefined, volume: 1, cache: {}, timestamp: Date.now() }),
+      reset: () => {
+        set({ ids: [], activeId: undefined, volume: 1, cache: {}, timestamp: Date.now() });
+        store.persist.clearStorage();
+      },
     }),
     {
       name: "player-storage",
@@ -77,7 +80,6 @@ export const usePlayerStore = create<PlayerStore>()(
         if (state) {
           if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
             state.reset();
-            usePlayerStore.persist.clearStorage();
           } else {
             state.setRehydrated(true);
           }

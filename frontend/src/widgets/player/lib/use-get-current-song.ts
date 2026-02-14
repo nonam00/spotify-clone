@@ -18,21 +18,22 @@ export function useGetCurrentSong(): {
     }))
   );
 
-  const [currentSong, setCurrentSong] = useState<Song | undefined>(
-    activeId ? cache[activeId] : undefined
-  );
+  const [currentSong, setCurrentSong] = useState<Song | undefined>(undefined);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const loadCurrentSong = useCallback(async (activeId: string, signal: AbortSignal) => {
-    const song = await getSongById(activeId, signal);
-    if (!song) {
-      setCurrentSong(undefined);
-      removeSongId(activeId);
-    } else {
-      setCurrentSong(song);
-      setCachedSong(song);
-    }
-  }, [removeSongId, setCachedSong])
+  const loadCurrentSong = useCallback(
+    async (activeId: string, signal: AbortSignal) => {
+      const song = await getSongById(activeId, signal);
+      if (!song) {
+        setCurrentSong(undefined);
+        removeSongId(activeId);
+      } else {
+        setCurrentSong(song);
+        setCachedSong(song);
+      }
+    },
+    [removeSongId, setCachedSong]
+  );
 
   // Fetch song data when activeId changes
   useEffect(() => {

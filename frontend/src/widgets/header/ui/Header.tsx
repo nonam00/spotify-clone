@@ -39,6 +39,8 @@ const Header = ({
     })),
   );
 
+  const resetPlayer = usePlayerStore(s => s.reset);
+
   const openLoginModal = useCallback(() => {
     setAuthView("login");
     openAuthModal();
@@ -52,8 +54,7 @@ const Header = ({
   const handleLogout = async () => {
     try {
       await logout();
-
-      usePlayerStore.persist.clearStorage();
+      resetPlayer();
       router.refresh();
 
       toast.error("Logged out");

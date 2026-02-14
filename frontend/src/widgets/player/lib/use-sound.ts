@@ -3,9 +3,9 @@
 import { Song } from "@/entities/song";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
+import { CLIENT_FILES_URL } from "@/shared/config/api";
+import { usePlayerStore } from "../model";
 import { isEditableElement } from "./helpers";
-import { usePlayerStore } from "@/widgets/player";
-import {CLIENT_FILES_URL} from "@/shared/config/api";
 
 type UseSoundReturnType = {
   audioRef: RefObject<HTMLAudioElement | null>;
