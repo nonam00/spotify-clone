@@ -13,8 +13,8 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .EmailAddress()
             .WithMessage("Invalid email format")
             .WithErrorCode("400")
-            .MaximumLength(254)
-            .WithMessage("Email cannot exceed 254 characters")
+            .MaximumLength(255)
+            .WithMessage("Email cannot exceed 255 characters")
             .WithErrorCode("400");
 
         RuleFor(command => command.Password)
@@ -29,8 +29,9 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             .WithErrorCode("400");
         
         RuleFor(command => command.FullName)
-            .MaximumLength(100)
-            .WithMessage("User name cannot exceed 100 characters")
-            .WithErrorCode("400");
+            .Must(name => name is not null &&  name.Length <= 255)
+            .WithMessage("User name cannot exceed 255 characters")
+            .WithErrorCode("400")
+            .When(command => command.FullName is not null);
     }
 }

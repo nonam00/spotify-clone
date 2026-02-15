@@ -9,6 +9,7 @@ type PlayerStore = {
   activeId?: string;
   volume: number;
   cache: SongCache;
+  isRehydrated: boolean;
   timestamp: number;
   setActiveId: (id: string) => void;
   setIds: (ids: string[]) => void;
@@ -17,6 +18,7 @@ type PlayerStore = {
   removeId: (id: string) => void;
   setVolume: (value: number) => void;
   setCachedSong: (song: Song) => void;
+  setRehydrated: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -24,11 +26,12 @@ const STORAGE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
 export const usePlayerStore = create<PlayerStore>()(
   persist(
-    (set, get) => ({
+    (set, get, store) => ({
       ids: [],
       activeId: undefined,
       volume: 1,
       cache: {},
+      isRehydrated: false,
       timestamp: Date.now(),
       setActiveId: (id: string) => set({ activeId: id, timestamp: Date.now() }),
       setIds: (ids: string[]) => set({ ids, timestamp: Date.now() }),
@@ -60,7 +63,11 @@ export const usePlayerStore = create<PlayerStore>()(
         set((state) => ({
           cache: { ...state.cache, [song.id]: song }
         })),
-      reset: () => set({ ids: [], activeId: undefined, volume: 1, cache: {}, timestamp: Date.now() }),
+      setRehydrated: (value: boolean) => set({ isRehydrated: value }),
+      reset: () => {
+        set({ ids: [], activeId: undefined, volume: 1, cache: {}, timestamp: Date.now() });
+        store.persist.clearStorage();
+      },
     }),
     {
       name: "player-storage",
@@ -68,13 +75,19 @@ export const usePlayerStore = create<PlayerStore>()(
         ids: state.ids,
         activeId: state.activeId,
         volume: state.volume,
+        timestamp: state.timestamp,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
-            state.reset();
-            usePlayerStore.persist.clearStorage();
-          }
+        if (!state) return;
+
+        if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
+          state.reset();
+          return;
+        }
+
+        if (state.ids.length !== 0) {
+          state.setRehydrated(true);
+          return;
         }
       }
     }

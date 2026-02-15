@@ -1,4 +1,4 @@
-package storage
+package minio
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"file-service/internal/config"
 	"file-service/internal/domain"
+	"file-service/internal/storage/cache"
 	"file-service/pkg/logger"
 
 	"github.com/minio/minio-go/v7"
@@ -19,10 +20,10 @@ type MinioClient struct {
 	client *minio.Client
 	config *config.MinioConfig
 	logger *logger.Logger
-	cache  URLCache
+	cache  cache.URLCache
 }
 
-func NewMinioClient(cfg *config.MinioConfig, cache URLCache, log *logger.Logger) (*MinioClient, error) {
+func NewMinioClient(cfg *config.MinioConfig, cache cache.URLCache, log *logger.Logger) (*MinioClient, error) {
 	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
 		Secure: cfg.UseSSL,
@@ -82,7 +83,11 @@ func (m *MinioClient) initializeBuckets(ctx context.Context) error {
 	return nil
 }
 
-func (m *MinioClient) GeneratePresignedPutURL(ctx context.Context, req domain.UploadRequest, fileID string) (*domain.PresignedURLResponse, error) {
+func (m *MinioClient) GeneratePresignedPutURL(
+	ctx context.Context,
+	req domain.UploadRequest,
+	fileID string,
+) (*domain.PresignedURLResponse, error) {
 	bucket := m.getBucketByFileType(req.FileType)
 
 	presignedUrl, err := m.client.PresignedPutObject(ctx, bucket, fileID, m.config.PresignExpiry)
@@ -97,10 +102,14 @@ func (m *MinioClient) GeneratePresignedPutURL(ctx context.Context, req domain.Up
 	}, nil
 }
 
-func (m *MinioClient) GeneratePresignedGetURL(ctx context.Context, fileType domain.FileType, fileID string) (*domain.PresignedURLResponse, error) {
+func (m *MinioClient) GeneratePresignedGetURL(
+	ctx context.Context,
+	fileType domain.FileType,
+	fileID string,
+) (*domain.PresignedURLResponse, error) {
 	// Check cache first
 	cacheKey := m.cache.GenerateKey(fileType, fileID)
-	if cached, found := m.cache.Get(cacheKey); found {
+	if cached, found := m.cache.Get(ctx, cacheKey); found {
 		m.logger.Info().
 			Str("file_id", fileID).
 			Str("file_type", string(fileType)).
@@ -125,7 +134,7 @@ func (m *MinioClient) GeneratePresignedGetURL(ctx context.Context, fileType doma
 	}
 
 	// Cache the response with TTL matching the presign expiry
-	if err := m.cache.Set(cacheKey, response, m.config.PresignExpiry); err != nil {
+	if err := m.cache.Set(ctx, cacheKey, response, m.config.PresignExpiry); err != nil {
 		m.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to cache presigned URL")
 	}
 
@@ -160,7 +169,7 @@ func (m *MinioClient) DeleteFile(ctx context.Context, fileType domain.FileType, 
 
 	// Invalidate cache for this file
 	cacheKey := m.cache.GenerateKey(fileType, fileID)
-	if err := m.cache.Delete(cacheKey); err != nil {
+	if err := m.cache.Delete(ctx, cacheKey); err != nil {
 		m.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to invalidate cache")
 	}
 

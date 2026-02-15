@@ -12,7 +12,10 @@ type UpdatePlaylistModalStore = {
 export const useUpdatePlaylistModalStore = create<UpdatePlaylistModalStore>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
+  onClose: () => set({
+    isOpen: false,
+    playlist: undefined,
+  }),
   playlist: undefined,
   setPlaylist: (playlist) => set({ playlist }),
 }));

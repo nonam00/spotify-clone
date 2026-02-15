@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 
 export type FileUploadType = "image" | "audio";
@@ -6,7 +7,6 @@ type PresignedUrlResponse = {
   url: string;
   file_id: string;
 };
-
 
 type FileConfigElementType = {
   allowedTypes: string[],
@@ -26,53 +26,36 @@ export const FILE_CONFIG: FileConfigType = {
   },
 };
 
-const validateSize = (file: File, maxSize: number): string | null => {
-  if (file.size > maxSize) {
-    return `File too large. Maximum size: ${Math.round(maxSize / 1024 / 1024)}MB`;
-  }
-  return null;
-};
-
-const validateType = (file: File, allowedTypes: string[]): string | null => {
-  const extension = file.name.split(".").pop();
-
-  if (extension === undefined) {
-    return "Invalid file extension.";
-  }
-
-  if (!allowedTypes.includes("." + extension)) {
-    return "Invalid file type. Allowed types: " + allowedTypes.join(" ");
-  }
-
-  return null;
+function getFileExtension(fileName: string): string {
+  const parts = fileName.split(".");
+  return parts.length > 1 ? `.${parts.pop()?.toLowerCase()}` : "";
 }
 
-export function validateImage(file: File): string | null {
-  const sizeError = validateSize(file, FILE_CONFIG.image.maxSize);
-  if (sizeError) {
-    return sizeError;
-  }
+// Base Zod schema for file validation
+function createFileSchema(type: FileUploadType) {
+  const config = FILE_CONFIG[type];
+  const maxSizeMB = Math.round(config.maxSize / 1024 / 1024);
 
-  const typeError = validateType(file, FILE_CONFIG.image.allowedTypes);
-  if (typeError) {
-    return typeError;
-  }
-
-  return null;
+  return z.instanceof(File)
+    .refine((file) => {
+        const extension = getFileExtension(file.name);
+        return config.allowedTypes.includes(extension);
+      }, 
+      {
+        message: `Invalid file type. Allowed types: ${config.allowedTypes.join(", ")}`,
+      }
+    ).refine((file) => file.size > 0, {
+        message: "File is empty."
+      }
+    ).refine((file) => file.size <= config.maxSize, {
+        message: `File too large. Maximum size: ${maxSizeMB}MB`,
+      }
+    );
 }
 
-export function validateAudio(file: File): string | null {
-  const sizeError = validateSize(file, FILE_CONFIG.audio.maxSize);
-  if (sizeError) {
-    return sizeError;
-  }
-
-  const typeError = validateType(file, FILE_CONFIG.audio.allowedTypes);
-  if (typeError) {
-    return typeError;
-  }
-  return null;
-}
+// Pre-defined schemas for each file type
+export const imageFileSchema = createFileSchema("image");
+export const audioFileSchema = createFileSchema("audio");
 
 export async function getPresignedUrl(
   type: FileUploadType

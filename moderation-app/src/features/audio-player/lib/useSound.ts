@@ -6,15 +6,10 @@ type UseSoundReturnType = {
   isStalled: boolean;
   duration: number;
   currentTime: number;
-  togglePlay: () => void;
-  setCurrentTime: (time: number) => void;
   isSeeking: boolean;
 };
 
-export function useSound(
-  songUrl: string,
-  volume: number = 1
-): UseSoundReturnType {
+export function useSound(songUrl: string,): UseSoundReturnType {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -28,84 +23,44 @@ export function useSound(
 
     const audio = audioRef.current;
     audio.src = songUrl;
-    audio.volume = volume;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handlePlayEvent = () => setIsPlaying(true);
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleLoadEnd = () => setIsStalled(false);
     const handleWaiting = () => setIsStalled(true);
     const handlePlaying = () => setIsStalled(false);
     const handleSeeking = () => setIsSeeking(true);
-    const handleSeekingEnd = () => setIsSeeking(false);
-
+    const handleSeeked = () => setIsSeeking(false);
     const handleLoadStart = () => {
       setIsPlaying(false);
       setIsStalled(true);
-    }
-
+    };
     const handleError = (e: ErrorEvent) => console.error("Audio error:", e.error);
 
-    audio.addEventListener('play', handlePlayEvent);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
+    // Attach event listeners
+    const events: [string, EventListenerOrEventListenerObject][] = [
+      ["timeupdate", handleTimeUpdate],
+      ["loadedmetadata", handleLoadedMetadata],
+      ["play", handlePlay],
+      ["pause", handlePause],
+      ["loadstart", handleLoadStart],
+      ["loadeddata", handleLoadEnd],
+      ["waiting", handleWaiting],
+      ["playing", handlePlaying],
+      ["seeking", handleSeeking],
+      ["seeked", handleSeeked],
+      ["error", handleError as EventListenerOrEventListenerObject],
+    ];
 
-    audio.addEventListener("loadstart", handleLoadStart);
-    audio.addEventListener("loadeddata", handleLoadEnd);
-    audio.addEventListener("waiting", handleWaiting);
-    audio.addEventListener("playing", handlePlaying);
-
-    audio.addEventListener("seeking", handleSeeking);
-    audio.addEventListener("seeked", handleSeekingEnd);
-
-    audio.addEventListener("error", handleError);
+    events.forEach(([event, handler]) => audio.addEventListener(event, handler));
 
     return () => {
       audio.pause();
-      audio.removeEventListener('play', handlePlayEvent);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-
-      audio.removeEventListener("loadstart", handleLoadStart);
-      audio.removeEventListener("loadeddata", handleLoadEnd);
-      audio.removeEventListener("waiting", handleWaiting);
-      audio.removeEventListener("playing", handlePlaying);
-
-      audio.removeEventListener("seeking", handleSeeking);
-      audio.removeEventListener("seeked", handleSeekingEnd);
-
-      audio.removeEventListener("error", handleError);
+      events.forEach(([event, handler]) => audio.removeEventListener(event, handler));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songUrl]);
-
-  // Handle volume changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(error => {
-        console.error("Play error:", error);
-      });
-    }
-  };
-
-  const setCurrentTimeHandler = (time: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-    }
-  };
 
   return { 
     audioRef, 
@@ -113,8 +68,6 @@ export function useSound(
     isStalled,
     duration,
     currentTime, 
-    togglePlay,
-    setCurrentTime: setCurrentTimeHandler,
-    isSeeking
+    isSeeking,
   };
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 using Persistence;
@@ -38,9 +39,10 @@ public class PostgresDbTestFixture : BaseTestFixture, IAsyncLifetime
         {
             options.UseNpgsql(_postgreSqlFixture.ConnectionString)
                 .UseSnakeCaseNamingConvention()
-                .EnableSensitiveDataLogging();
-            options.ConfigureWarnings(c =>
-                c.Ignore(RelationalEventId.PendingModelChangesWarning));
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .EnableSensitiveDataLogging()
+                .ConfigureWarnings(c =>
+                    c.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
     }
 

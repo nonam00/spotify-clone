@@ -1,58 +1,76 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import {useState, useTransition, type SubmitEvent, useCallback} from "react";
+import { z } from "zod";
 import toast from "react-hot-toast";
 
 import { Input, Button } from "@/shared/ui";
-import {changePassword} from "@/entities/user";
+import { changePassword } from "@/entities/user";
+
+const initialFormState = {
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
+
+const passwordChangeSchema = z.object({
+  currentPassword: z.string()
+    .trim()
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must be less than 100 characters"),
+  newPassword: z.string()
+    .trim()
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must be less than 100 characters"),
+  confirmPassword: z.string()
+    .trim()
+    .min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword !== data.currentPassword, {
+  message: "New password must be different from current password",
+  path: ["newPassword"],
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type PasswordChangeData = z.infer<typeof passwordChangeSchema>;
 
 const ChangeUserPasswordForm = () => {
   const [isPending, startTransition] = useTransition();
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState<PasswordChangeData>({...initialFormState});
+  const [showErrors, setShowErrors] = useState<boolean>(false);
 
-  const [errors, setErrors] = useState<{
-    currentPassword?: string;
-    newPassword?: string;
-    confirmPassword?: string;
-  }>({});
-
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-
-    if (currentPassword.length < 8) {
-      newErrors.currentPassword = "Password must be at least 8 characters";
+  const validate = useCallback((formData: PasswordChangeData) => {
+    const result = passwordChangeSchema.safeParse(formData);
+    if (result.success) {
+      return undefined;
     }
-    if (newPassword.length < 8) {
-      newErrors.newPassword = "Password must be at least 8 characters";
-    }
-    if (confirmPassword !== newPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
+    return z.flattenError(result.error);
+  }, []);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
 
     startTransition(async () => {
-      if (!validateForm()) {
+      const errors = validate(formData);
+
+      if (errors) {
+        setShowErrors(true);
         return;
       }
 
       try {
-        const result = await changePassword(currentPassword, newPassword);
+        const result = await changePassword(
+          formData.currentPassword.trim(),
+          formData.newPassword.trim()
+        );
 
         if (result.success) {
           toast.success("Password changed successfully");
-          setCurrentPassword("");
-          setNewPassword("");
-          setConfirmPassword("");
-          setErrors({});
+          setFormData({...initialFormState});
+          setShowErrors(false);
         } else {
           toast.error(result.error || "Failed to change password");
         }
@@ -63,6 +81,12 @@ const ChangeUserPasswordForm = () => {
     });
   };
 
+  const errors = showErrors ? validate(formData) : undefined;
+
+  const isDisabled =
+    errors !== undefined ||
+    isPending;
+
   return (
     <div className="bg-neutral-800/50 rounded-lg p-6">
       <h3 className="text-lg font-semibold mb-4">Change Password</h3>
@@ -70,49 +94,55 @@ const ChangeUserPasswordForm = () => {
         <label className="flex flex-col gap-y-1">
           Current password:
           <Input
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
+            value={formData.currentPassword}
+            onChange={(e) =>
+              setFormData(prev => ({...prev, currentPassword: e.target.value}))
+            }
             type="password"
-            placeholder="Current password"
+            placeholder="Enter current password..."
             disabled={isPending}
             required
           />
-          <p className={`text-red-500 text-sm mt-1 ${errors.currentPassword ? "visible" : "invisible"}`}>
-            {errors.currentPassword ?? "empty"}
+          <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.currentPassword ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.currentPassword?.join(", ") ?? "empty"}
           </p>
         </label>
 
         <label className="flex flex-col gap-y-1">
           New password:
           <Input
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            value={formData.newPassword}
+            onChange={(e) =>
+              setFormData(prev => ({...prev, newPassword: e.target.value}))
+            }
             type="password"
-            placeholder="New password"
+            placeholder="Enter new password..."
             disabled={isPending}
             required
           />
-          <p className={`text-red-500 text-sm mt-1 ${errors.newPassword ? "visible" : "invisible"}`}>
-            {errors.newPassword ?? "empty"}
+          <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.newPassword  ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.newPassword?.join(", ") ?? "empty"}
           </p>
         </label>
 
         <label className="flex flex-col gap-y-1">
           Repeat new password:
           <Input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={formData.confirmPassword}
+            onChange={(e) =>
+              setFormData(prev => ({...prev, confirmPassword: e.target.value}))
+            }
             type="password"
-            placeholder="Confirm new password"
+            placeholder="Confirm new password..."
             disabled={isPending}
             required
           />
-          <p className={`text-red-500 text-sm mt-1 ${errors.confirmPassword ? "visible" : "invisible"}`}>
-            {errors.confirmPassword ?? "empty"}
+          <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.confirmPassword  ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.confirmPassword?.join(", ") ?? "empty"}
           </p>
         </label>
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isDisabled}>
           {isPending ? "Changing..." : "Change Password"}
         </Button>
       </form>

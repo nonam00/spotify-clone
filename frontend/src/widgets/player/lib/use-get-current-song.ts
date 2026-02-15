@@ -1,14 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useState, useTransition } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useShallow } from "zustand/shallow";
 import { getSongById, Song } from "@/entities/song";
-import { usePlayerStore } from "@/widgets/player/model";
+import { usePlayerStore } from "../model";
 
 // Get song by active id from track list store
 export function useGetCurrentSong(): {
   currentSong: Song | undefined;
-  isLoading: boolean;
 } {
   const { activeId, cache, setCachedSong, removeSongId } = usePlayerStore(
     useShallow((s) => ({
@@ -19,13 +18,25 @@ export function useGetCurrentSong(): {
     }))
   );
 
-  const [currentSong, setCurrentSong] = useState<Song | undefined>(
-    activeId ? cache[activeId] : undefined
+  const [currentSong, setCurrentSong] = useState<Song | undefined>(undefined);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const loadCurrentSong = useCallback(
+    async (activeId: string, signal: AbortSignal) => {
+      const song = await getSongById(activeId, signal);
+      if (!song) {
+        setCurrentSong(undefined);
+        removeSongId(activeId);
+      } else {
+        setCurrentSong(song);
+        setCachedSong(song);
+      }
+    },
+    [removeSongId, setCachedSong]
   );
-  const [isLoading, startTransition] = useTransition();
 
   // Fetch song data when activeId changes
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!activeId) {
       setCurrentSong(undefined);
       return;
@@ -37,23 +48,15 @@ export function useGetCurrentSong(): {
       return;
     }
 
-    const abortController = new AbortController();
+    abortControllerRef.current = new AbortController();
 
-    startTransition(async () => {
-      const song = await getSongById(activeId, abortController);
-      if (!song) {
-        setCurrentSong(undefined);
-        removeSongId(activeId);
-      } else {
-        setCurrentSong(song);
-        setCachedSong(song);
-      }
-    })
+    loadCurrentSong(activeId, abortControllerRef.current.signal).catch(console.error);
 
     return () => {
-      abortController.abort();
-    };
-  }, [activeId, cache, removeSongId, setCachedSong]);
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+    }
+  }, [activeId, cache, loadCurrentSong]);
 
-  return { currentSong, isLoading }
+  return { currentSong };
 }

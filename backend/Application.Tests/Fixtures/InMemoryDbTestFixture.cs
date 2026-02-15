@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 using Application.Shared.Messaging;
@@ -30,9 +32,12 @@ public class InMemoryDbTestFixture : BaseTestFixture, IAsyncLifetime
     {
         Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());
-            options.ConfigureWarnings(w =>
-                w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning));
+            options.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSnakeCaseNamingConvention()
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .EnableSensitiveDataLogging()
+                .ConfigureWarnings(w =>
+                    w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         });
     }
 

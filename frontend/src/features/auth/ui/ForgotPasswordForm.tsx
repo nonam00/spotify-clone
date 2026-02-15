@@ -1,14 +1,22 @@
 "use client";
 
-import Form from "next/form";
-import { useState, useTransition } from "react";
+import { type SubmitEvent, useState, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
+import { z } from "zod";
 import { FiCheckCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 
 import { Button, Input } from "@/shared/ui";
 import { useAuthStore } from "../model";
-import { ErrorDisplay } from "../ui";
+
+const forgotPasswordSchema = z.object({
+  email: z.email("Invalid email address")
+    .trim()
+    .min(1, "Email is required")
+    .max(255, "Email must be less than 255 characters"),
+});
+
+type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 
 type ForgotPasswordFormProps = {
   onSwitchToLogin: () => void;
@@ -17,28 +25,40 @@ type ForgotPasswordFormProps = {
 const ForgotPasswordForm = ({ onSwitchToLogin }: ForgotPasswordFormProps) => {
   const [isPending, startTransition] = useTransition();
 
-  const { forgotPassword, isLoading, error } = useAuthStore(
+  const { forgotPassword, isLoading } = useAuthStore(
     useShallow((s) => ({
       forgotPassword: s.forgotPassword,
       isLoading: s.isLoading,
-      error: s.error,
     }))
   );
 
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<ForgotPasswordData>({
+    email: ""
+  });
+  const [showErrors, setShowErrors] = useState<boolean>(false);
+
+  const validate = () => {
+    const result = forgotPasswordSchema.safeParse(formData);
+    if (result.success) {
+      return undefined;
+    }
+    return z.flattenError(result.error);
+  }
+
   const [emailSent, setEmailSent] = useState(false);
 
-  const onSubmit = async (form: FormData) => {
+  const onSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
     startTransition(async () => {
-      const email = form.get("Email") as string;
-
-      if (!email) {
-        setLocalError("Please enter your email");
-        return;
+      const errors = validate();
+      if (errors) {
+        setShowErrors(true);
       }
 
-      const success = await forgotPassword(email);
-      if (success) {
+      const { error } = await forgotPassword(formData.email);
+      if (error) {
+        toast.error(error);
+      } else {
         setEmailSent(true);
         toast.success("Password reset instructions sent to your email");
       }
@@ -66,30 +86,32 @@ const ForgotPasswordForm = ({ onSwitchToLogin }: ForgotPasswordFormProps) => {
     );
   }
 
-  const displayError = error || localError;
+  const errors = showErrors ? validate() : undefined;
 
   return (
-    <Form
-      action={onSubmit}
+    <form
+      onSubmit={onSubmit}
       className="flex flex-col items-center justify-center gap-y-6"
     >
-      <div className="flex flex-col gap-y-1 w-full">
-        <label className="w-full text-base font-bold">Email:</label>
+      <label className="flex flex-col gap-y-1 w-full text-base font-bold">
+        Email:
         <Input
-          name="Email"
+          value={formData.email}
+          onChange={e =>
+            setFormData({ ...formData, email: e.currentTarget.value })
+          }
           type="email"
-          placeholder="Enter your email address"
+          placeholder="Enter your email..."
           disabled={isPending || isLoading}
           required
+          maxLength={255}
         />
-        <p className="text-sm text-neutral-500 mt-2">
-          Enter the email address associated with your account and we&#39;ll send you instructions to reset your password.
+        <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.email ? "visible" : "invisible"}`}>
+          {errors?.fieldErrors.email?.join(", ") ?? "empty"}
         </p>
-      </div>
+      </label>
 
-      <ErrorDisplay error={displayError} />
-
-      <div className="flex flex-col gap-y-3 w-full">
+      <div className="flex flex-col gap-y-5 w-full">
         <Button
           type="submit"
           disabled={isPending || isLoading}
@@ -106,7 +128,7 @@ const ForgotPasswordForm = ({ onSwitchToLogin }: ForgotPasswordFormProps) => {
           ← Back to Login
         </button>
       </div>
-    </Form>
+    </form>
   );
 };
 

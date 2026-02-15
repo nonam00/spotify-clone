@@ -272,6 +272,27 @@ public class UpdatePlaylistCommandHandlerTests : InMemoryTestBase
     }
     
     [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenTitleExceedsMaxLength()
+    {
+        // Arrange
+        var longTitle = new string('a', 256);
+        var command = new UpdatePlaylistCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            longTitle,
+            null,
+            null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Title");
+    }
+    
+    [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenTitleIsWhiteSpaces()
     {
         // Arrange
@@ -289,5 +310,26 @@ public class UpdatePlaylistCommandHandlerTests : InMemoryTestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
         result.Error.Description.Should().Contain("Title");
+    }
+    
+    [Fact]
+    public async Task Handle_ShouldReturnValidationError_WhenDescriptionExceedsMaxLength()
+    {
+        // Arrange
+        var longDescription = new string('a', 1001);
+        var command = new UpdatePlaylistCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "s",
+            longDescription,
+            null);
+
+        // Act
+        var result = await Mediator.Send(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("ValidationError");
+        result.Error.Description.Should().Contain("Description");
     }
 }

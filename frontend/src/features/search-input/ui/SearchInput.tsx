@@ -5,6 +5,7 @@ import { Input } from "@/shared/ui";
 import {useDebouncedSearch} from "../lib";
 
 const MINIMUM_INPUT_LENGTH = 3;
+const MAXIMUM_INPUT_LENGTH = 100;
 
 const SearchInput = ({
   pageUrl,
@@ -18,7 +19,11 @@ const SearchInput = ({
     setValue,
     searchType,
     setSearchType
-  } = useDebouncedSearch(pageUrl, MINIMUM_INPUT_LENGTH);
+  } = useDebouncedSearch(
+    pageUrl,
+    MINIMUM_INPUT_LENGTH,
+    MAXIMUM_INPUT_LENGTH,
+  );
 
   return (
     <div>

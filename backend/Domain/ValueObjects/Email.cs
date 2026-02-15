@@ -1,9 +1,16 @@
+using System.Text.RegularExpressions;
+
 namespace Domain.ValueObjects;
 
 public record Email
 {
-    public string Value { get; }
+    private const short MaxLength = 255;
+    private static readonly Regex EmailRegex = new(
+        @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    public string Value { get; }
+    
     public Email(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -11,7 +18,12 @@ public record Email
             throw new ArgumentException("Email cannot be empty", nameof(value));
         }
 
-        if (!value.Contains('@'))
+        if (value.Trim().Length > MaxLength)
+        {
+            throw new ArgumentException("Email cannot be longer than 255 characters", nameof(value));
+        }
+
+        if (!EmailRegex.IsMatch(value))
         {
             throw new ArgumentException("Invalid email format", nameof(value));
         }

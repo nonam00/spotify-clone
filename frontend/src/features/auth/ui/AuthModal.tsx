@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { memo, useCallback, useLayoutEffect } from "react";
+import {memo, useCallback, useLayoutEffect} from "react";
 import { useShallow } from "zustand/shallow";
 
 import { Modal } from "@/shared/ui";
@@ -24,7 +24,7 @@ const authViewInfo: Record<AuthView, ViewInfo> = {
   },
   "forgot-password": {
     title: "Reset your password",
-    description: "Enter your email to receive reset instructions"
+    description: "Enter the email address associated with your account and we'll send you instructions to reset your password"
   }
 };
 

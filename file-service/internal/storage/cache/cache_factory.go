@@ -1,4 +1,4 @@
-package storage
+package cache
 
 import (
 	"context"
@@ -18,8 +18,7 @@ func NewURLCache(cfg *config.CacheConfig, log *logger.Logger) (URLCache, error) 
 		})
 
 		// Test connection
-		ctx := context.Background()
-		if err := redisClient.Ping(ctx).Err(); err != nil {
+		if err := redisClient.Ping(context.Background()).Err(); err != nil {
 			return nil, err
 		}
 

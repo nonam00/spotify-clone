@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 using Domain.Models;
@@ -39,7 +40,7 @@ public class PlaylistsRepository : IPlaylistsRepository
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.UpdatedAt)
-            .Select(p => ToVm(p))
+            .Select(ToVmExpression)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         
@@ -52,7 +53,7 @@ public class PlaylistsRepository : IPlaylistsRepository
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.UpdatedAt)
-            .Select(p => ToVm(p))
+            .Select(ToVmExpression)
             .Take(count)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -72,7 +73,7 @@ public class PlaylistsRepository : IPlaylistsRepository
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .Where(p => !playlistWithSong.Contains(p.Id))
-            .Select(p => ToVm(p))
+            .Select(ToVmExpression)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -80,8 +81,7 @@ public class PlaylistsRepository : IPlaylistsRepository
     }
 
     public void Update(Playlist playlist) => _dbContext.Playlists.Update(playlist);
-    
 
-    private static PlaylistVm ToVm(Playlist playlist) =>
-        new (playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath.Value);
+    private static readonly Expression<Func<Playlist, PlaylistVm>> ToVmExpression = playlist =>
+        new PlaylistVm(playlist.Id, playlist.Title, playlist.Description, playlist.ImagePath.Value);
 }

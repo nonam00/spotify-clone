@@ -1,25 +1,45 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Form from "next/form";
-import { useLayoutEffect, useTransition } from "react";
+import {  type SubmitEvent, useCallback, useState, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
+import { z } from "zod";
 import toast from "react-hot-toast";
 
 import {
+  audioFileSchema,
+  imageFileSchema,
   FILE_CONFIG,
   getPresignedUrls,
-  uploadFileToS3,
-  validateAudio,
-  validateImage,
+  uploadFileToS3
 } from "@/shared/lib/files";
 import { Button, Input, Modal } from "@/shared/ui";
 import { createSongRecord } from "@/entities/song";
 import { useAuthStore } from "@/features/auth";
 import { useUploadModalStore } from "../model";
 
+const initialFormData = {
+  title: "",
+  author: "",
+  audioFile: new File([], ""),
+  imageFile: new File([], ""),
+}
+
+const songFormSchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, "Title is required")
+    .max(255, "Title must be less than 255 characters"),
+  author: z.string()
+    .trim()
+    .min(1, "Author is required")
+    .max(255, "Author must be less than 255 characters"),
+  audioFile: audioFileSchema,
+  imageFile: imageFileSchema,
+});
+
+type SongFormData = z.infer<typeof songFormSchema>;
+
 const SongUploadModal = () => {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const { onClose, isOpen } = useUploadModalStore(
@@ -31,51 +51,41 @@ const SongUploadModal = () => {
 
   const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
 
-  useLayoutEffect(() => {
-    if (isOpen && !isAuthenticated) {
-      router.refresh();
-      onClose();
-    }
-  }, [isAuthenticated, router, onClose, isOpen]);
+  const [formData, setFormData] = useState<SongFormData>({...initialFormData});
+  const [showErrors, setShowErrors] = useState<boolean>(false);
 
-  const onChange = (open: boolean) => {
+  const onChange = useCallback((open: boolean) => {
     if (!open) {
       onClose();
     }
-  };
+  }, [onClose]);
 
-  const onSubmit = async (formData: FormData) => {
+  if (!isOpen) {
+    onClose();
+    return;
+  }
+
+  const validate = () => {
+    const result = songFormSchema.safeParse(formData);
+    if (result.success) {
+      return undefined;
+    }
+    return z.flattenError(result.error);
+  }
+
+  const onSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("The user is not authorized!");
+      onClose();
+      return;
+    }
+
     startTransition(async () => {
-      if (!isAuthenticated) {
-        toast.error("The user is not authorized!");
-        onClose();
-        return;
-      }
-
-      const title = formData.get("Title") as string;
-      const author = formData.get("Author") as string;
-      const imageFile = formData.get("Image") as File;
-      const audioFile = formData.get("Audio") as File;
-
-      if (!title?.trim() || !author?.trim()) {
-        toast.error("Title and author are required");
-        return;
-      }
-
-      if (!imageFile || !audioFile) {
-        toast.error("Please select both image and audio files");
-        return;
-      }
-
-      const imageError = validateImage(imageFile);
-      if (imageError) {
-        toast.error(`Image error: ${imageError}`);
-        return;
-      }
-
-      const audioError = validateAudio(audioFile);
-      if (audioError) {
-        toast.error(`Audio error: ${audioError}`);
+      const errors = validate();
+      if (errors) {
+        setShowErrors(true);
         return;
       }
 
@@ -88,8 +98,8 @@ const SongUploadModal = () => {
       const [presignedUrlImage, presignedUrlAudio] = urls;
 
       const [imageUploadSuccess, audioUploadSuccess] = await Promise.all([
-        uploadFileToS3(presignedUrlImage.url, imageFile, "image"),
-        uploadFileToS3(presignedUrlAudio.url, audioFile, "audio"),
+        uploadFileToS3(presignedUrlImage.url, formData.imageFile, "image"),
+        uploadFileToS3(presignedUrlAudio.url, formData.audioFile, "audio"),
       ]);
 
       if (!imageUploadSuccess || !audioUploadSuccess) {
@@ -98,8 +108,8 @@ const SongUploadModal = () => {
       }
 
       const songData = {
-        title: title.trim(),
-        author: author.trim(),
+        title: formData.title.trim(),
+        author: formData.author.trim(),
         imageId: presignedUrlImage.file_id,
         audioId: presignedUrlAudio.file_id,
       };
@@ -110,11 +120,13 @@ const SongUploadModal = () => {
         return;
       }
 
-      router.refresh();
       toast.success("Song uploaded successfully! Waiting for moderation...");
+      setFormData({...initialFormData});
       onClose();
     });
   };
+
+  const errors = showErrors ? validate() : undefined;
 
   return (
     <Modal
@@ -123,36 +135,49 @@ const SongUploadModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <Form action={onSubmit} className="flex flex-col gap-y-4">
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Title:</label>
+      <form onSubmit={onSubmit} className="flex flex-col gap-y-1">
+        <label className="flex flex-col gap-y-1 text-base font-bold">
+          Title:
           <Input
-            id="title"
-            name="Title"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData(prev => ({...prev, title: e.target.value}))
+            }
             type="text"
             disabled={isPending}
-            placeholder="Song Title"
+            placeholder="Enter song title..."
             required
             minLength={1}
           />
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <label className="w-full text-base font-bold">Author:</label>
+          <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.title ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.title?.join(", ") ?? "empty"}
+          </p>
+        </label>
+        <label className="flex flex-col gap-y-1 text-base font-bold">
+          Author:
           <Input
-            id="author"
-            name="Author"
+            value={formData.author}
+            onChange={(e) =>
+              setFormData(prev => ({...prev, author: e.target.value}))
+            }
             type="text"
             disabled={isPending}
-            placeholder="Song Author"
+            placeholder="Enter song author..."
             required
             minLength={1}
           />
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Select a song file:</label>
+          <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.author ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.author?.join(", ") ?? "empty"}
+          </p>
+        </label>
+        <label className="flex flex-col gap-y-1 text-base font-bold">
+          Select a song file:
           <Input
-            id="audio"
-            name="Audio"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                setFormData({...formData, audioFile: e.target.files?.[0]});
+              }
+            }}
             type="file"
             disabled={isPending}
             accept={FILE_CONFIG.audio.allowedTypes.join(", ")}
@@ -160,14 +185,20 @@ const SongUploadModal = () => {
           />
           <p className="text-xs text-gray-500 mt-1">
             Max size: {Math.round(FILE_CONFIG.audio.maxSize / 1024 / 1024)}MB
-            • Supported formats: MP3, WAV, FLAC, M4A, AAC, OGG
+            • Supported formats: {FILE_CONFIG.audio.allowedTypes.join(", ")}
           </p>
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Select an image:</label>
+          <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.audioFile ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.audioFile?.join(", ") ?? "empty"}
+          </p>
+        </label>
+        <label className="flex flex-col gap-y-1 text-base font-bold">
+          Select an image:
           <Input
-            id="image"
-            name="Image"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                setFormData({...formData, imageFile: e.target.files?.[0]});
+              }
+            }}
             type="file"
             disabled={isPending}
             accept={FILE_CONFIG.image.allowedTypes.join(", ")}
@@ -175,13 +206,16 @@ const SongUploadModal = () => {
           />
           <p className="text-xs text-gray-500 mt-1">
             Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB
-            • Supported formats: JPEG, PNG, WebP, HEIF, RAW
+            • Supported formats: {FILE_CONFIG.image.allowedTypes.join(", ")}
           </p>
-        </div>
+          <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.imageFile ? "visible" : "invisible"}`}>
+            {errors?.fieldErrors.imageFile?.join(", ") ?? "empty"}
+          </p>
+        </label>
         <Button disabled={isPending} type="submit" className="my-4">
           {isPending ? "Uploading..." : "Upload"}
         </Button>
-      </Form>
+      </form>
     </Modal>
   );
 };

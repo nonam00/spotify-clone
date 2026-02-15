@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import {
@@ -17,54 +17,83 @@ const LikeButton = ({
   defaultValue?: boolean;
 }) => {
   const [isLiked, setIsLiked] = useState<boolean>(defaultValue ?? false);
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  useLayoutEffect(() => {
+  const loadLikeStatus = useCallback(async (signal: AbortSignal) => {
+    try {
+      const success = await checkLikedSong(songId, signal);
+      if (!signal.aborted) {
+        setIsLiked(success);
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+      console.error("Error checking liked song: ", error);
+    }
+  }, [songId]);
+
+  useEffect(() => {
+    // Dont check if has default value
     if (defaultValue !== undefined) {
       return;
     }
-    const abortController = new AbortController();
 
-    async function loadLike(){
-      const success = await checkLikedSong(songId, abortController);
-      setIsLiked(success);
-    }
-    loadLike();
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    loadLikeStatus(signal);
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
     };
-  }, [defaultValue, songId]);
+  }, [defaultValue, loadLikeStatus, songId]);
 
-  const handleLike = async () => {
-    startTransition(async () => {
-      if (isLiked) {
+  const handleLike = useCallback(async () => {
+    // Preventing race condition
+    if (isLoading) return;
+
+    const previousState = isLiked;
+
+    // Optimistic update
+    setIsLiked(!isLiked);
+    setIsLoading(true);
+
+    try {
+      if (previousState) {
         const success = await deleteLikedSong(songId);
-
-        if (success) {
-          setIsLiked(false);
-          toast.success("Like deleted");
-        } else {
+        if (!success) {
           toast.error("An error occurred while deleting the song from your favorites");
+          setIsLiked(previousState); // Rollback
+        } else {
+          toast.success("Like deleted");
         }
       } else {
         const success = await addLikedSong(songId);
-
-        if (success) {
-          setIsLiked(true);
-          toast.success("Liked");
-        } else {
+        if (!success) {
           toast.error("An error occurred while adding the song to the favorites");
+          setIsLiked(previousState); // Rollback
+        } else {
+          toast.success("Liked");
         }
       }
-    });
-  };
+    } catch (error) {
+      console.error("Error updating like status: ", error);
+      setIsLiked(previousState);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLiked, isLoading, songId]);
 
   return (
     <button
       onClick={handleLike}
-      disabled={isPending}
+      disabled={isLoading}
       className="p-2 hover:opacity-75 transition cursor-pointer"
+      aria-label={isLiked ? "Unliked song" : "Like song"}
     >
       {isLiked ? (
         <AiFillHeart color="#22c55e" size={25} />

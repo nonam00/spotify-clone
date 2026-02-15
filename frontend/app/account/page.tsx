@@ -32,13 +32,16 @@ export default async function AccountPage() {
           <div className="bg-neutral-800/50 rounded-lg p-6 mb-8">
             <div className="flex items-center space-x-4">
               {userDetails.avatarPath ? (
-                <Image
-                  src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${userDetails.avatarPath}`}
-                  alt="Avatar" 
-                  className="w-16 h-16 rounded-full object-cover"
-                  loading="lazy"
-                  unoptimized
-                />
+                <div className="relative w-16 h-16">
+                  <Image
+                    src={`${CLIENT_FILES_URL}/download-url?type=image&file_id=${userDetails.avatarPath}`}
+                    alt="Avatar"
+                    className="object-cover rounded-full"
+                    loading="lazy"
+                    unoptimized
+                    fill
+                  />
+                </div>
               ) : (
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
                   <IoMdPerson className="w-8 h-8 text-black" />

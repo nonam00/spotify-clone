@@ -1,23 +1,47 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Form from "next/form";
-import {useCallback, useLayoutEffect, useTransition} from "react";
+import { type SubmitEvent, useCallback, useState, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
+import { z } from "zod";
 import toast from "react-hot-toast";
 
 import {
   FILE_CONFIG,
+  imageFileSchema,
   getPresignedUrl,
   uploadFileToS3,
-  validateImage,
 } from "@/shared/lib/files";
 import { Button, Input, Modal } from "@/shared/ui";
 import { updatePlaylist } from "@/entities/playlist";
 import { useAuthStore } from "@/features/auth";
 import { useUpdatePlaylistModalStore } from "../model";
 
+const initialFormState = {
+  title: "",
+  description: "",
+  imageFile: null,
+}
+
+const playlistFormSchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, "Title is required")
+    .max(255, "Title must be less than 255 characters"),
+  description: z.string()
+    .trim()
+    .max(1000, "Title must be less than 1000 characters")
+    .optional()
+    .nullable(),
+  imageFile: imageFileSchema.optional().nullable(),
+});
+
+type PlaylistFormData = z.infer<typeof playlistFormSchema>;
+
 const UpdatePlaylistModal = () => {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
   const { playlist, isOpen, onClose, setPlaylist } = useUpdatePlaylistModalStore(
     useShallow((s) => ({
       playlist: s.playlist,
@@ -26,55 +50,67 @@ const UpdatePlaylistModal = () => {
       setPlaylist: s.setPlaylist,
     }))
   );
+
   const isAuthenticated = useAuthStore(useShallow((s) => s.isAuthenticated));
 
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [userFormData, setUserFormData] = useState<Partial<PlaylistFormData>>({});
 
-  useLayoutEffect(() => {
-    if (isOpen && (!isAuthenticated || !playlist)) {
-      router.refresh();
-      onClose();
-    }
-  }, [isAuthenticated, router, onClose, playlist, isOpen]);
+  const [showErrors, setShowErrors] = useState<boolean>(false);
 
   const onChange = useCallback((open: boolean) => {
     if (!open) {
       onClose();
+      setUserFormData({});
     }
   }, [onClose]);
 
-  if (!playlist) {
+  if (!playlist || !isAuthenticated || !isOpen) {
     onClose();
-    return null;
+    return;
   }
 
-  const onSubmit = async (formData: FormData) => {
+  const formData: PlaylistFormData = {
+    ...initialFormState,
+    ...playlist,
+    ...userFormData,
+  }
+
+  const validate = () => {
+    const result = playlistFormSchema.safeParse(formData);
+    if (result.success) {
+      return undefined;
+    }
+    return z.flattenError(result.error);
+  }
+
+  const onSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("The user is not authorized!");
+      onClose();
+      return;
+    }
+
     startTransition(async () => {
-      if (!isAuthenticated) {
-        toast.error("The user is not authorized!");
-        onClose();
+      const errors = validate();
+      if (errors) {
+        setShowErrors(true);
         return;
       }
 
-      const title = formData.get("Title") as string;
-      const description = formData.get("Description") as string;
-      const imageFile = formData.get("Image") as File;
-
-      if (!title?.trim()) {
-        toast.error("Title is required");
+      if (
+        (!formData.description && !playlist.description || formData.description?.trim() === playlist.description) &&
+        formData.title.trim() === playlist.title &&
+        !formData.imageFile
+      ) {
+        toast.error("There are no changes");
         return;
       }
 
-      let file_id = null;
+      let file_id: string | null = null;
 
-      if (imageFile.size !== 0) {
-        const imageError = validateImage(imageFile);
-        if (imageError) {
-          toast.error(`Image error: ${imageError}`);
-          return;
-        }
-
+      if (formData.imageFile) {
         const presignedUrlImage = await getPresignedUrl("image");
         if (!presignedUrlImage) {
           toast.error("Failed to get upload URL");
@@ -83,7 +119,7 @@ const UpdatePlaylistModal = () => {
 
         const imageUploadSuccess = await uploadFileToS3(
           presignedUrlImage.url,
-          imageFile,
+          formData.imageFile,
           "image"
         );
 
@@ -96,8 +132,8 @@ const UpdatePlaylistModal = () => {
       }
 
       const playlistData = {
-        title: title.trim(),
-        description: description?.trim() || null,
+        title: formData.title.trim(),
+        description: formData.description?.trim() || null,
         imageId: file_id,
       };
 
@@ -111,8 +147,11 @@ const UpdatePlaylistModal = () => {
       toast.success("Playlist information saved!");
       onClose();
       setPlaylist(undefined);
+      setUserFormData({});
     });
   };
+
+  const errors = showErrors ? validate() : undefined;
 
   return (
     <Modal
@@ -121,48 +160,67 @@ const UpdatePlaylistModal = () => {
       isOpen={isOpen}
       onChange={onChange}
     >
-      <Form action={onSubmit} className="flex flex-col gap-y-4">
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Title:</label>
-          <Input
-            id="title"
-            name="Title"
-            type="text"
-            disabled={isPending}
-            placeholder="Playlist Title"
-            defaultValue={playlist.title}
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Description:</label>
-          <Input
-            id="description"
-            name="Description"
-            type="text"
-            disabled={isPending}
-            placeholder="Playlist Description"
-            defaultValue={playlist.description}
-          />
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <label className="text-base font-bold">Select an image:</label>
-          <Input
-            id="image"
-            name="Image"
-            type="file"
-            disabled={isPending}
-            accept="image/*"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB
-            • Supported formats: JPEG, PNG, WebP, HEIF, RAW
-          </p>
+      <form onSubmit={onSubmit} className="flex flex-col gap-y-1">
+        <div>
+          <label className="flex flex-col gap-y-1 text-base font-bold">
+            Title:
+            <Input
+              value={formData.title}
+              onChange={(e) =>
+                setUserFormData(prev => ({...prev, title: e.target.value}))
+              }
+              type="text"
+              disabled={isPending}
+              placeholder="Enter playlist title..."
+              required
+              minLength={1}
+              maxLength={255}
+            />
+            <p className={`text-red-500 text-sm mt-1 ${errors?.fieldErrors.title ? "visible" : "invisible"}`}>
+              {errors?.fieldErrors.title?.join(", ") ?? "empty"}
+            </p>
+          </label>
+          <label className="flex flex-col gap-y-1 text-base font-bold">
+            Description:
+            <Input
+              value={formData.description ?? ""}
+              onChange={(e) =>
+                setUserFormData(prev => ({...prev, description: e.target.value}))
+              }
+              type="text"
+              disabled={isPending}
+              placeholder="Enter playlist description..."
+              maxLength={1000}
+            />
+            <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.description ? "visible" : "invisible"}`}>
+              {errors?.fieldErrors.description?.join(", ") ?? "empty"}
+            </p>
+          </label>
+          <label className="flex flex-col gap-y-1 text-base font-bold">
+            Select playlist cover:
+            <Input
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  setUserFormData({...formData, imageFile: e.target.files?.[0]});
+                }
+              }}
+              type="file"
+              disabled={isPending}
+              accept={FILE_CONFIG.image.allowedTypes.join(", ")}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Max size: {Math.round(FILE_CONFIG.image.maxSize / 1024 / 1024)}MB
+              • Supported formats: {FILE_CONFIG.image.allowedTypes.join(", ")}
+            </p>
+            <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.imageFile ? "visible" : "invisible"}`}>
+              {errors?.fieldErrors.imageFile?.join(", ") ?? "empty"}
+            </p>
+          </label>
         </div>
         <Button disabled={isPending} type="submit">
           {isPending ? "Saving..." : "Save changes"}
         </Button>
-      </Form>
+      </form>
     </Modal>
   );
 };

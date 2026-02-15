@@ -19,7 +19,7 @@ const SongListItem = ({
   }
   return (
     <div key={song.id} className="flex items-center gap-x-4 w-full">
-      <div onClick={onClick} className="flex-1">
+      <div onClick={onClick} className="flex-1 min-w-0">
         <MediaItem
           title={song.title}
           author={song.author}

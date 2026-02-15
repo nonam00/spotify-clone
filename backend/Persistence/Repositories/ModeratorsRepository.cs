@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 using Domain.Models;
@@ -41,7 +42,7 @@ public class ModeratorsRepository : IModeratorsRepository
         var moderators = await _dbContext.Moderators
             .AsNoTracking()
             .OrderByDescending(m => m.CreatedAt)
-            .Select(m => ToVm(m))
+            .Select(ToVmExpression)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         
@@ -49,9 +50,8 @@ public class ModeratorsRepository : IModeratorsRepository
     }
     public void Update(Moderator moderator) => _dbContext.Moderators.Update(moderator);
 
-    private static ModeratorVm ToVm(Moderator moderator)
-    {
-        return new ModeratorVm(
+    private static readonly Expression<Func<Moderator, ModeratorVm >> ToVmExpression = moderator =>
+        new ModeratorVm(
             moderator.Id,
             moderator.Email,
             moderator.FullName ?? "",
@@ -62,5 +62,4 @@ public class ModeratorsRepository : IModeratorsRepository
                 moderator.Permissions.CanManageContent,
                 moderator.Permissions.CanViewReports,
                 moderator.Permissions.CanManageModerators));
-    }
 }

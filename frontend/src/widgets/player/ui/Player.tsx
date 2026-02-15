@@ -25,100 +25,73 @@ const Player = () => {
     }))
   );
 
-  const { currentSong, isLoading } = useGetCurrentSong();
+  const { currentSong } = useGetCurrentSong();
 
   const songUrl = useMemo(() => {
     if (!currentSong) return undefined;
     return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.songPath}`;
   }, [currentSong]);
 
-  const { audioRef, duration, currentTime, isPlaying, isStalled, isSeeking } = useSound(
-    currentSong,
+  const { audioRef, duration, currentTime, isPlaying, isStalled, isSeeking } = useSound({
+    song: currentSong,
     songUrl,
-    volume,
-    setNextId,
-    setPreviousId
-  );
+  });
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragProgress, setDragProgress] = useState(0);
 
-  const pause = useCallback(
-    () => {
-      if (!audioRef.current) return;
-      audioRef.current.pause();
-    },
-    [audioRef]
-  );
-
-  const play = useCallback(
-    () => {
-      if (!audioRef.current) return;
-      audioRef.current.play().catch((error: unknown) => {
-        console.error("Player error:", error);
-      });
-    },
-    [audioRef]
-  )
-
   // Play/pause button handler
   const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
+
     if (isPlaying) {
-      pause();
+      audioRef.current.pause();
     } else {
-      play()
+      audioRef.current.play().catch(console.error);
     }
-  }, [isPlaying, pause, play]);
+  }, [audioRef, isPlaying]);
 
   // Progress slider callback (handling local progress without seeking audio)
-  const handleProgressChange = useCallback((values: number[]) => {
-    setDragProgress(values[0]);
-  }, []);
+  const handleProgressChange = useCallback(
+    (values: number[]) => setDragProgress(values[0]),
+    []
+  );
 
   const handleProgressCommit = useCallback((values: number[]) => {
       if (!audioRef.current) return;
+
       const value = values[0];
 
+      audioRef.current.currentTime = value * audioRef.current.duration;
+
       if (value === 1) {
-        audioRef.current.currentTime = audioRef.current.duration - 1;
-      } else {
-        audioRef.current.currentTime = value * audioRef.current.duration;
+        audioRef.current.currentTime -= 0.1;
       }
+
       setIsDragging(false);
   }, [audioRef]);
 
   const handleDragStart = useCallback(() => {
     if (!audioRef.current) return;
+
     setIsDragging(true);
     setDragProgress(calculateProgress(audioRef.current.currentTime, audioRef.current.duration));
   }, [audioRef]);
 
   // Next button handler
-  const handleNext = useCallback(
-    () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setNextId();
-    },
-    [audioRef, setNextId]
-  );
+  const handleNext = useCallback(() => {
+    audioRef.current?.pause();
+    setNextId();
+  }, [audioRef, setNextId]);
 
-  const handlePrevious = useCallback(
-    () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setPreviousId();
-    },
-    [audioRef, setPreviousId]
-  )
+  const handlePrevious = useCallback(() => {
+    audioRef.current?.pause();
+    setPreviousId();
+  }, [audioRef, setPreviousId]);
 
   // Volume slider callback
   const handleVolumeChange = useCallback(
-    (values: number[]) => {
-      setVolume(values[0]);
-    },
+    (values: number[]) => setVolume(values[0]),
     [setVolume]
   );
 
@@ -142,7 +115,7 @@ const Player = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 h-full">
         {/* Media info section */}
         <div className="flex items-center px-2 w-[300px]">
-          {!isLoading && currentSong && (
+          {currentSong && (
             <SongListItem song={currentSong}>
               <LikeButton songId={currentSong.id} />
             </SongListItem>
@@ -154,7 +127,7 @@ const Player = () => {
           <button
             onClick={togglePlay}
             className="flex items-center justify-center h-10 w-10 rounded-full bg-white cursor-pointer"
-            disabled={!currentSong || isLoading}
+            disabled={!currentSong}
           >
             <Icon size={30} className="text-black" />
           </button>
@@ -174,7 +147,7 @@ const Player = () => {
               onClick={togglePlay}
               className="flex items-center justify-center h-8 w-8 rounded-full bg-white cursor-pointer disabled:opacity-50"
               aria-label={isPlaying ? "Pause" : "Play"}
-              disabled={!currentSong || isLoading}
+              disabled={!currentSong}
             >
               <Icon size={24} className="text-black" />
             </button>
@@ -198,8 +171,8 @@ const Player = () => {
                 onValueChange={handleProgressChange}
                 onValueCommit={handleProgressCommit}
                 onDragStart={handleDragStart}
-                isLoading={isLoading || isStalled || isSeeking}
-                disabled={!currentSong || isLoading || isStalled}
+                isLoading={isStalled || isSeeking}
+                disabled={!currentSong || isStalled}
               />
             </div>
             <span className="text-sm text-left tabular-nums text-neutral-400 w-12">
@@ -215,14 +188,14 @@ const Player = () => {
               onClick={toggleMute}
               className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
               aria-label={volume === 0 ? "Unmute" : "Mute"}
-              disabled={!currentSong || isLoading || isStalled}
+              disabled={!currentSong || isStalled}
             >
               <VolumeIcon size={20} />
             </button>
             <Slider
               value={volume}
               onValueChange={handleVolumeChange}
-              disabled={!currentSong || isLoading || isStalled}
+              disabled={!currentSong || isStalled}
             />
           </div>
         </div>

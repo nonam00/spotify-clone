@@ -165,7 +165,7 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenTitleExceedsMaxLength()
     {
         // Arrange
-        var longTitle = new string('a', 201);
+        var longTitle = new string('a', 256);
         var command = new UploadSongCommand(
             Guid.NewGuid(),
             longTitle,
@@ -206,7 +206,7 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
     public async Task Handle_ShouldReturnValidationError_WhenAuthorExceedsMaxLength()
     {
         // Arrange
-        var longAuthor = new string('a', 201);
+        var longAuthor = new string('a', 256);
         var command = new UploadSongCommand(
             Guid.NewGuid(),
             "Test Song",
@@ -240,14 +240,14 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("SongPath");
+        result.Error.Description.Should().Contain("Song path");
     }
 
     [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenSongPathExceedsMaxLength()
     {
         // Arrange
-        var longPath = new string('a', 501);
+        var longPath = new string('a', 256);
         var command = new UploadSongCommand(
             Guid.NewGuid(),
             "Test Song",
@@ -261,7 +261,7 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("SongPath");
+        result.Error.Description.Should().Contain("Song path");
     }
 
     [Fact]
@@ -281,14 +281,14 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("ImagePath");
+        result.Error.Description.Should().Contain("Image path");
     }
 
     [Fact]
     public async Task Handle_ShouldReturnValidationError_WhenImagePathExceedsMaxLength()
     {
         // Arrange
-        var longPath = new string('a', 501);
+        var longPath = new string('a', 256);
         var command = new UploadSongCommand(
             Guid.NewGuid(),
             "Test Song",
@@ -302,6 +302,6 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("ImagePath");
+        result.Error.Description.Should().Contain("Image path");
     }
 }

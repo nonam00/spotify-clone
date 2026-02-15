@@ -1,13 +1,29 @@
 "use client";
 
-import Form from "next/form";
-import {useCallback, useState, useTransition} from "react";
+import { type SubmitEvent, useState, useTransition } from "react";
 import { useShallow } from "zustand/shallow";
+import { z } from "zod";
 import toast from "react-hot-toast";
 
 import { Button, Input } from "@/shared/ui";
 import { useAuthStore } from "../model";
-import { ErrorDisplay } from "../ui";
+
+const registerFormSchema = z.object({
+  email: z.email("Invalid email address")
+    .trim()
+    .min(1, "Email is required")
+    .max(255, "Email must be less than 255 characters"),
+  password: z.string()
+    .trim()
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must be less than 100 characters"),
+  fullName: z.string()
+    .trim()
+    .min(1, "Full name is required")
+    .max(255, "Full name must be less than 100 characters"),
+});
+
+type RegisterFormData = z.infer<typeof registerFormSchema>;
 
 const RegisterForm = ({
   onSwitchToLogin
@@ -16,42 +32,43 @@ const RegisterForm = ({
 }) => {
   const [isPending, startTransition] = useTransition();
 
-  const { register, isLoading, error } = useAuthStore(
+  const { register, isLoading } = useAuthStore(
     useShallow((s) => ({
       register: s.register,
       isLoading: s.isLoading,
-      error: s.error,
     }))
   );
 
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<RegisterFormData>({
+    email: "",
+    password: "",
+    fullName: "",
+  });
+  const [showErrors, setShowErrors] = useState<boolean>(false);
 
-  const validatePassword = useCallback((password: string) => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long";
+  const validate = () => {
+    const result = registerFormSchema.safeParse(formData);
+    if (result.success) {
+      return undefined;
     }
-    return null;
-  }, []);
+    return z.flattenError(result.error);
+  }
 
-  const onSubmit = async (form: FormData) => {
+  const onSubmit = async (e: SubmitEvent) => {
+    console.log(e);
+    e.preventDefault();
+
     startTransition(async () => {
-      const email = form.get("Email") as string;
-      const password = form.get("Password") as string;
-      const fullName = form.get("FullName") as string;
-
-      if (!email || !password || !fullName) {
-        setLocalError("Please fill in all fields");
+      const errors = validate();
+      if (errors) {
+        setShowErrors(true);
         return;
       }
 
-      const passwordError = validatePassword(password);
-      if (passwordError) {
-        setLocalError(passwordError);
-        return;
-      }
-
-      const success = await register(email, password, fullName);
-      if (success) {
+      const { error } = await register(formData.email, formData.password, formData.fullName);
+      if (error) {
+        toast.error(error);
+      } else {
         toast.success(
           "The confirmation code has been sent to your email. Activate your account and then login."
         );
@@ -60,48 +77,63 @@ const RegisterForm = ({
     });
   };
 
-  const displayError = error || localError;
-
+  const errors = showErrors ? validate() : undefined;
   return (
-    <Form
-      action={onSubmit}
-      className="flex flex-col items-center justify-center gap-y-4"
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col items-center justify-center gap-y-1"
     >
-      <div className="flex flex-col gap-y-1 w-full">
-        <label className="w-full text-base font-bold">Full Name:</label>
+      <label className="flex flex-col gap-y-1 w-full text-base font-bold">
+        Full name:
         <Input
-          name="FullName"
-          type="text"
-          placeholder="Full Name"
+          value={formData.fullName}
+          onChange={e =>
+            setFormData({ ...formData, fullName: e.currentTarget.value })
+          }
+          placeholder="Enter your full name..."
           disabled={isPending || isLoading}
           required
+          maxLength={255}
         />
-      </div>
-
-      <div className="flex flex-col gap-y-1 w-full">
-        <label className="w-full text-base font-bold">Email:</label>
+        <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.fullName ? "visible" : "invisible"}`}>
+          {errors?.fieldErrors.fullName?.join(", ") ?? "empty"}
+        </p>
+      </label>
+      <label className="flex flex-col gap-y-1 w-full text-base font-bold">
+        Email:
         <Input
-          name="Email"
+          value={formData.email}
+          onChange={e =>
+            setFormData({ ...formData, email: e.currentTarget.value })
+          }
           type="email"
-          placeholder="Email"
+          placeholder="Enter your email..."
           disabled={isPending || isLoading}
           required
+          maxLength={255}
         />
-      </div>
-
-      <div className="flex flex-col gap-y-1 w-full">
-        <label className="w-full font-bold">Password:</label>
+        <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.email ? "visible" : "invisible"}`}>
+          {errors?.fieldErrors.email?.join(", ") ?? "empty"}
+        </p>
+      </label>
+      <label className="flex flex-col gap-y-1 w-full font-bold">
+        Password:
         <Input
-          name="Password"
+          value={formData.password}
+          onChange={e =>
+            setFormData({ ...formData, password: e.currentTarget.value })
+          }
           type="password"
-          placeholder="***********"
+          placeholder="Enter your password..."
           disabled={isPending || isLoading}
           required
           minLength={8}
+          maxLength={255}
         />
-      </div>
-
-      <ErrorDisplay error={displayError} className="my-1" />
+        <p className={`text-red-500 text-xs mt-1 ${errors?.fieldErrors.password ? "visible" : "invisible"}`}>
+          {errors?.fieldErrors.password?.join(", ") ?? "empty"}
+        </p>
+      </label>
 
       <div className="flex flex-col gap-y-5 w-full mt-2">
         <Button
@@ -123,7 +155,7 @@ const RegisterForm = ({
           </button>
         </div>
       </div>
-    </Form>
+    </form>
   );
 };
 
