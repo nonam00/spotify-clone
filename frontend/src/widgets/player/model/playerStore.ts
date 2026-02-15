@@ -75,14 +75,19 @@ export const usePlayerStore = create<PlayerStore>()(
         ids: state.ids,
         activeId: state.activeId,
         volume: state.volume,
+        timestamp: state.timestamp,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
-            state.reset();
-          } else {
-            state.setRehydrated(true);
-          }
+        if (!state) return;
+
+        if (Date.now() - (state.timestamp ?? 0) > STORAGE_TTL) {
+          state.reset();
+          return;
+        }
+
+        if (state.ids.length !== 0) {
+          state.setRehydrated(true);
+          return;
         }
       }
     }
