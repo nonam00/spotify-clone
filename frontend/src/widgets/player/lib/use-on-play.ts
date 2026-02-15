@@ -13,10 +13,7 @@ export function useOnPlay(songs: Song[]) {
 
   return useCallback(
     (id: string) => {
-      if (!isAuthenticated) {
-        return openAuthModal();
-      }
-
+      if (!isAuthenticated) return openAuthModal();
       setActiveId(id);
       setIds(songs.map((song) => song.id));
     },

@@ -41,64 +41,53 @@ const Player = () => {
   const [dragProgress, setDragProgress] = useState(0);
 
   // Play/pause button handler
-  const togglePlay = useCallback(
-    () => {
-      if (!audioRef.current) return;
+  const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
 
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play().catch(console.error);
-      }
-    },
-    [audioRef, isPlaying]
-  );
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(console.error);
+    }
+  }, [audioRef, isPlaying]);
 
   // Progress slider callback (handling local progress without seeking audio)
-  const handleProgressChange = useCallback((values: number[]) => {
-    setDragProgress(values[0]);
-  }, []);
+  const handleProgressChange = useCallback(
+    (values: number[]) => setDragProgress(values[0]),
+    []
+  );
 
   const handleProgressCommit = useCallback((values: number[]) => {
       if (!audioRef.current) return;
 
       const value = values[0];
 
+      audioRef.current.currentTime = value * audioRef.current.duration;
+
       if (value === 1) {
-        audioRef.current.currentTime = audioRef.current.duration - 1;
-      } else {
-        audioRef.current.currentTime = value * audioRef.current.duration;
+        audioRef.current.currentTime -= 0.1;
       }
 
       setIsDragging(false);
   }, [audioRef]);
 
-  const handleDragStart = useCallback(
-    () => {
-      if (!audioRef.current) return;
+  const handleDragStart = useCallback(() => {
+    if (!audioRef.current) return;
 
-      setIsDragging(true);
-      setDragProgress(calculateProgress(audioRef.current.currentTime, audioRef.current.duration));
-    },
-    [audioRef]
-  );
+    setIsDragging(true);
+    setDragProgress(calculateProgress(audioRef.current.currentTime, audioRef.current.duration));
+  }, [audioRef]);
 
   // Next button handler
-  const handleNext = useCallback(
-    () => {
-      audioRef.current?.pause();
-      setNextId();
-    },
-    [audioRef, setNextId]
-  );
+  const handleNext = useCallback(() => {
+    audioRef.current?.pause();
+    setNextId();
+  }, [audioRef, setNextId]);
 
-  const handlePrevious = useCallback(
-    () => {
-      audioRef.current?.pause();
-      setPreviousId();
-    },
-    [audioRef, setPreviousId]
-  )
+  const handlePrevious = useCallback(() => {
+    audioRef.current?.pause();
+    setPreviousId();
+  }, [audioRef, setPreviousId]);
 
   // Volume slider callback
   const handleVolumeChange = useCallback(

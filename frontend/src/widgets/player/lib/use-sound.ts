@@ -81,19 +81,18 @@ export function useSound({ song, songUrl }: UseSoundProps): UseSoundReturnType {
     const handleCanPlay = () => isActive && setIsStalled(false);
     const handleWaiting = () => isActive && setIsStalled(true);
     const handleSeeking = () => isActive && setIsSeeking(true);
-    const handleSeeked = () => isActive && setIsSeeking(false);
+    const handleSeeked = () => isActive && (setIsSeeking(false), setCurrentTime(audio.currentTime));
     const handleError = (e: ErrorEvent) => console.error("Audio error:", e.error);
 
     // Try autoplay when audio can play (song file was loaded)
     const handleCanPlayThrough = () => {
       // If player storage was rehydrated autoplay on player render is not allowed
       if (isActive && audio.paused && !isRehydrated) {
-        audio.play()
-          .catch((error) => {
-            // Autoplay failed (e.g., browser policy, user hasn't interacted)
-            console.log("Autoplay prevented:", error);
-            setIsPlaying(false);
-          });
+        audio.play().catch((error) => {
+          // Autoplay failed (e.g., browser policy, user hasn't interacted)
+          console.log("Autoplay prevented:", error);
+          setIsPlaying(false);
+        });
       }
     };
 
