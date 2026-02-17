@@ -19,7 +19,7 @@ public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDel
         _logger = logger;
     }
 
-    public async Task HandleAsync(ModeratorDeletedSongEvent @event, CancellationToken cancellationToken = default)
+    public Task HandleAsync(ModeratorDeletedSongEvent @event, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Handling song {SongId} deleted event.", @event.SongId);
         
@@ -28,7 +28,7 @@ public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDel
         
         _logger.LogDebug("Deleting song {SongId} audio {AudioPath}.", @event.SongId, @event.Audio.Value);
         var deleteAudioTask = _fileServiceClient.DeleteAsync(@event.Audio, "audio", cancellationToken);
-        
-        await Task.WhenAll(deleteImageTask, deleteAudioTask).ConfigureAwait(false);
+
+        return Task.WhenAll(deleteImageTask, deleteAudioTask);
     }
 }

@@ -17,19 +17,20 @@ public class PlaylistDeletedEventHandler : IDomainEventHandler<PlaylistDeletedEv
         _logger = logger;
     }
 
-    public async Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
+    public Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Handling playlist {PlaylistId} deleted event", @event.PlaylistId);
 
-        if (!string.IsNullOrWhiteSpace(@event.ImagePath))
+        if (string.IsNullOrWhiteSpace(@event.ImagePath))
         {
-            _logger.LogDebug(
-                "Deleting playlist {PlaylistId} cover image {ImagePath}",
-                @event.PlaylistId, @event.ImagePath);
-            
-            await _fileServiceClient
-                .DeleteAsync(@event.ImagePath, "image", cancellationToken)
-                .ConfigureAwait(false);   
+            return Task.CompletedTask;
         }
+        
+        _logger.LogDebug(
+            "Deleting playlist {PlaylistId} cover image {ImagePath}",
+            @event.PlaylistId, @event.ImagePath);
+
+        return _fileServiceClient.DeleteAsync(@event.ImagePath, "image", cancellationToken);
+
     }
 }

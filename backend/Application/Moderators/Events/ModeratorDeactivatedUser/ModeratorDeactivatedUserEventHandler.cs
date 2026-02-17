@@ -19,19 +19,19 @@ public class ModeratorDeactivatedUserEventHandler : IDomainEventHandler<Moderato
         _logger = logger;
     }
 
-    public async Task HandleAsync(ModeratorDeactivatedUserEvent @event, CancellationToken cancellationToken = default)
+    public Task HandleAsync(ModeratorDeactivatedUserEvent @event, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Handling user {UserId} deactivated event.", @event.UserId);
 
-        if (!string.IsNullOrWhiteSpace(@event.AvatarPath.Value))
+        if (string.IsNullOrWhiteSpace(@event.AvatarPath.Value))
         {
-            _logger.LogDebug(
-                "Deleting user {UserId} avatar image {AvatarImagePath}.",
-                @event.UserId, @event.AvatarPath.Value);
-            
-            await _fileServiceClient
-                .DeleteAsync(@event.AvatarPath.Value, "image", cancellationToken)
-                .ConfigureAwait(false);;
+            return Task.CompletedTask;
         }
+        
+        _logger.LogDebug(
+            "Deleting user {UserId} avatar image {AvatarImagePath}.",
+            @event.UserId, @event.AvatarPath.Value);
+
+        return _fileServiceClient.DeleteAsync(@event.AvatarPath.Value, "image", cancellationToken);
     }
 }

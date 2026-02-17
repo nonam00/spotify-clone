@@ -1,8 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using FluentValidation;
-using Application.Shared.Errors;
+
 using Domain.Common;
+using Application.Shared.Errors;
 
 namespace Application.Shared.Messaging;
 

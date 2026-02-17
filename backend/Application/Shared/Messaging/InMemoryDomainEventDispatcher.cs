@@ -47,13 +47,10 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
         }
     }
 
-    public async Task DispatchAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
+    public Task DispatchAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(domainEvents);
-
-        foreach (var domainEvent in domainEvents)
-        {
-            await DispatchAsync(domainEvent, cancellationToken).ConfigureAwait(false);
-        }
+        var tasks = domainEvents.Select(domainEvent => DispatchAsync(domainEvent, cancellationToken));
+        return Task.WhenAll(tasks);
     }
 }
