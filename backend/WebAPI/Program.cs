@@ -8,6 +8,7 @@ using System.Reflection;
 
 using Application;
 using Infrastructure;
+using Infrastructure.Messaging;
 using Persistence;
 using WebAPI;
 using WebAPI.Middleware;
@@ -58,10 +59,17 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
+// Define rabbitmq infrastructure 
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var rabbitMqProvider = scope.ServiceProvider.GetRequiredService<RabbitMqConnectionProvider>();
+    await rabbitMqProvider.InitializeInfrastructureAsync();
+}
+
 // Performing migrations if not applied
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await dbContext.Database.MigrateAsync();
 }
 

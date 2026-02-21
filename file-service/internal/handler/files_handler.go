@@ -81,37 +81,3 @@ func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, response.URL)
 }
-
-func (h *FileHandler) DeleteFile(c *gin.Context) {
-	ctx := c.Request.Context()
-
-	fileType := domain.FileType(c.Query("type"))
-	fileID := c.Query("file_id")
-
-	if fileType == "" || fileID == "" {
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Missing required parameters: type, file_id",
-		})
-		return
-	}
-
-	if fileType != domain.FileTypeImage && fileType != domain.FileTypeAudio {
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Invalid file type. Must be 'image' or 'audio'",
-		})
-		return
-	}
-
-	if err := h.service.DeleteFile(ctx, fileType, fileID); err != nil {
-		h.logger.Error().Err(err).
-			Str("file_id", fileID).
-			Str("file_type", string(fileType)).
-			Msg("Failed to delete file")
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{
-			Error: "Failed to delete file",
-		})
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}

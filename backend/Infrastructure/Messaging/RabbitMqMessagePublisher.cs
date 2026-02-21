@@ -1,0 +1,51 @@
+using System.Text.Json;
+using RabbitMQ.Client;
+
+using Application.Shared.Messaging;
+
+namespace Infrastructure.Messaging;
+
+public class RabbitMqMessagePublisher : IMessagePublisher, IAsyncDisposable
+{
+    private readonly RabbitMqConnectionProvider _connectionProvider;
+
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
+    
+    public RabbitMqMessagePublisher(RabbitMqConnectionProvider connectionProvider)
+    {
+        _connectionProvider = connectionProvider;
+    }
+
+    public async Task PublishAsync<T>(T message, string exchange, string routingKey, CancellationToken cancellationToken = default)
+    {
+        await using var connection = await _connectionProvider.GetConnectionAsync();
+        
+        // Cheap init operation
+        await using var channel = await connection.CreateChannelAsync(null, cancellationToken);
+        
+        var jsonBody = JsonSerializer.SerializeToUtf8Bytes(message, JsonSerializerOptions);
+        
+        var properties = new BasicProperties
+        {
+            Persistent = true,
+            ContentType = "application/json"
+        };
+        
+        await channel.BasicPublishAsync(
+            exchange: exchange,
+            routingKey: routingKey,
+            mandatory: false,
+            basicProperties: properties,
+            body: jsonBody,
+            cancellationToken: cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _connectionProvider.DisposeAsync();
+        GC.SuppressFinalize(this);
+    }
+}

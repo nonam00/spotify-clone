@@ -11,6 +11,12 @@ type Config struct {
 	Minio    MinioConfig
 	Cache    CacheConfig
 	Security SecurityConfig
+	RabbitMQ RabbitMQConfig
+}
+
+type RabbitMQConfig struct {
+	URL             string
+	DeleteFileQueue string
 }
 
 type ServerConfig struct {
@@ -44,7 +50,6 @@ type RedisConfig struct {
 
 type SecurityConfig struct {
 	CORSAllowedOrigins []string
-	APIKey             string
 }
 
 // Load function loads config from environment or sets default values
@@ -65,7 +70,8 @@ func Load() (*Config, error) {
 	viper.SetDefault("REDIS_DB", 0)
 	viper.SetDefault("REDIS_KEY_PREFIX", "file-service:presigned-url:")
 	viper.SetDefault("SECURITY_CORS_ALLOWED_ORIGINS", []string{"*"})
-	viper.SetDefault("SECURITY_API_KEY", "")
+	viper.SetDefault("RABBITMQ_URL", "amqp://myuser:mypassword@localhost:5672/")
+	viper.SetDefault("RABBITMQ_DELETE_FILE_QUEUE", "file-service.delete-file")
 
 	viper.AutomaticEnv()
 
@@ -95,7 +101,10 @@ func Load() (*Config, error) {
 		},
 		Security: SecurityConfig{
 			CORSAllowedOrigins: viper.GetStringSlice("SECURITY_CORS_ALLOWED_ORIGINS"),
-			APIKey:             viper.GetString("SECURITY_API_KEY"),
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL:             viper.GetString("RABBITMQ_URL"),
+			DeleteFileQueue: viper.GetString("RABBITMQ_DELETE_FILE_QUEUE"),
 		},
 	}
 

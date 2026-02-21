@@ -113,7 +113,7 @@ func (s *fileService) DeleteFile(ctx context.Context, fileType domain.FileType, 
 			Str("file_id", fileID).
 			Str("file_type", string(fileType)).
 			Msg("File not found")
-		return fmt.Errorf("file not found")
+		return domain.ErrFileNotFound
 	}
 
 	if err := s.storage.DeleteFile(ctx, fileType, fileID); err != nil {

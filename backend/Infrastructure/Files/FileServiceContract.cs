@@ -1,0 +1,10 @@
+namespace Infrastructure.Files;
+
+public static class FileServiceMessaging
+{
+    public const string FileExchange = "file-service-exchange";
+    public const string DeleteRoutingKey = "file-service.delete-file";
+    public const string DeleteFileQueue = "file-service.delete-file";
+}
+
+public record DeleteFileMessage(string FileType, string FileId);

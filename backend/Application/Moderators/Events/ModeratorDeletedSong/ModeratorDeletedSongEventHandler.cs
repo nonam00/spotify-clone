@@ -1,34 +1,25 @@
-using Microsoft.Extensions.Logging;
-
+using Application.Shared.Integration;
 using Domain.Events;
-using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 
 namespace Application.Moderators.Events.ModeratorDeletedSong;
 
 public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
 {
-    private readonly IFileServiceClient _fileServiceClient;
-    private readonly ILogger<ModeratorDeletedSongEventHandler> _logger;
+    private readonly IFileServicePublisher _fileServicePublisher;
 
-    public ModeratorDeletedSongEventHandler(
-        IFileServiceClient fileServiceClient,
-        ILogger<ModeratorDeletedSongEventHandler> logger)
+    public ModeratorDeletedSongEventHandler(IFileServicePublisher fileServicePublisher)
     {
-        _fileServiceClient = fileServiceClient;
-        _logger = logger;
+        _fileServicePublisher = fileServicePublisher;
     }
 
     public Task HandleAsync(ModeratorDeletedSongEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling song {SongId} deleted event.", @event.SongId);
-        
-        _logger.LogDebug("Deleting song {SongId} image {ImagePath}.", @event.SongId, @event.Image.Value);
-        var deleteImageTask = _fileServiceClient.DeleteAsync(@event.Image, "image", cancellationToken);
-        
-        _logger.LogDebug("Deleting song {SongId} audio {AudioPath}.", @event.SongId, @event.Audio.Value);
-        var deleteAudioTask = _fileServiceClient.DeleteAsync(@event.Audio, "audio", cancellationToken);
-
-        return Task.WhenAll(deleteImageTask, deleteAudioTask);
+        List<Task> tasks =
+        [
+            _fileServicePublisher.PublishDeleteFileAsync(@event.Image, "image", cancellationToken),
+            _fileServicePublisher.PublishDeleteFileAsync(@event.Audio, "audio", cancellationToken)
+        ];
+        return Task.WhenAll(tasks);
     }
 }

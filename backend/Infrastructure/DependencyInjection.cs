@@ -1,11 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
+using Application.Shared.Integration;
 using Application.Shared.Interfaces;
+using Application.Shared.Messaging;
 using Application.Users.Interfaces;
+
 using Infrastructure.Auth;
 using Infrastructure.Email;
 using Infrastructure.Files;
+using Infrastructure.Messaging;
 
 namespace Infrastructure;
 
@@ -17,8 +21,8 @@ public static class DependencyInjection
         {
             services.AddAuthServices(configuration)
                 .AddEmailServices(configuration)
-                .AddFilesServices(configuration);
-        
+                .AddMessagingServices(configuration);
+
             return services;
         }
 
@@ -38,10 +42,14 @@ public static class DependencyInjection
             return services;
         }
 
-        private IServiceCollection AddFilesServices(IConfiguration configuration)
+        private IServiceCollection AddMessagingServices(IConfiguration configuration)
         {
-            services.Configure<FileServiceOptions>(configuration.GetRequiredSection(nameof(FileServiceOptions)));
-            services.AddScoped<IFileServiceClient, FileServiceClient>();
+            services.Configure<RabbitMqOptions>(configuration.GetRequiredSection(nameof(RabbitMqOptions)));
+            services.AddSingleton<RabbitMqConnectionProvider>();
+            services.AddScoped<IMessagePublisher, RabbitMqMessagePublisher>();
+            
+            services.AddScoped<IFileServicePublisher, FileServicePublisher>();
+            
             return services;
         }
     }

@@ -3,24 +3,26 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"file-service/internal/config"
+	"file-service/internal/consumer"
 	"file-service/internal/handler"
 	"file-service/internal/service"
 	"file-service/internal/storage/cache"
 	"file-service/internal/storage/minio"
 	"file-service/pkg/logger"
 	"file-service/pkg/middleware"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
@@ -29,31 +31,35 @@ func main() {
 	// Initialize logger
 	l := logger.New("file-service")
 
-	// Initialize cache
+	// Initialize dependencies
 	urlCache, err := cache.NewURLCache(&cfg.Cache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize cache")
 	}
 
-	// Initialize Minio client
 	minioClient, err := minio.NewMinioClient(&cfg.Minio, urlCache, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize Minio client")
 	}
 
-	// Initialize services
 	fileService := service.NewFileService(minioClient, l)
-
-	// Initialize handlers
 	fileHandler := handler.NewFileHandler(fileService, l)
 
-	// Setup router
-	router := setupRouter(fileHandler, cfg, l)
+	// Initialize and start RabbitMQ delete file consumer
+	ctx, stopConsumer := context.WithCancel(context.Background())
+	deleteFileConsumer := consumer.NewDeleteFileConsumer(&cfg.RabbitMQ, fileService, l)
+	go func() {
+		if err := deleteFileConsumer.Run(ctx); err != nil {
+			l.Error().Err(err).Msg("Delete file consumer exited with error")
+		}
+	}()
 
 	// Create server
 	srv := &http.Server{
-		Addr:    ":" + cfg.Server.Port,
-		Handler: router,
+		Addr:         ":" + cfg.Server.Port,
+		Handler:      setupRouter(fileHandler, cfg, l),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	// Start server in a goroutine
@@ -64,19 +70,21 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server
+	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	l.Info().Msg("Shutting down server...")
+	l.Info().Msg("Initiating graceful shutdown...")
 
-	// The context is used to inform the server it has 30 seconds to finish
-	// the request it is currently handling
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
-	defer cancel()
+	// Stop consumers first to stop processing new messages
+	stopConsumer()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	// Shutdown HTTP server with timeout
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		l.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 
@@ -87,20 +95,15 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	router := gin.New()
 
 	// Global middleware
-	router.Use(gin.Recovery())
-	router.Use(middleware.LoggerMiddleware(log))
-	router.Use(middleware.PrometheusMiddleware())
-	router.Use(middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins))
+	router.Use(
+		gin.Recovery(),
+		middleware.LoggerMiddleware(log),
+		middleware.PrometheusMiddleware(),
+		middleware.CORSMiddleware(cfg.Security.CORSAllowedOrigins),
+	)
 
-	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "healthy",
-			"service": "file-service",
-		})
-	})
-
-	// Metrics endpoint
+	// System routes
+	router.GET("/health", healthCheck)
 	router.GET("/metrics", handler.PrometheusHandler())
 
 	// API routes
@@ -108,9 +111,11 @@ func setupRouter(fileHandler *handler.FileHandler, cfg *config.Config, log *logg
 	{
 		api.POST("/upload-url", fileHandler.GenerateUploadURL)
 		api.GET("/download-url", fileHandler.GenerateDownloadURL)
-		// Защищенный эндпоинт удаления файлов - требует API ключ
-		api.DELETE("", middleware.APIKeyMiddleware(cfg.Security.APIKey), fileHandler.DeleteFile)
 	}
 
 	return router
+}
+
+func healthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "healthy", "service": "file-service"})
 }

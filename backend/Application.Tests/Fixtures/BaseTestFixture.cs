@@ -7,11 +7,11 @@ using Domain.Common;
 using Application.Moderators.Interfaces;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
+using Application.Shared.Integration;
 using Application.Shared.Interfaces;
 using Application.Shared.Messaging;
 using Application.Songs.Interfaces;
 using Application.Users.Interfaces;
-
 using Persistence;
 using Persistence.Repositories;
 
@@ -28,7 +28,7 @@ public class BaseTestFixture
     
     public Mock<IPasswordHasher> PasswordHasherMock { get; private set; } = null!;
     public Mock<IJwtProvider> JwtProviderMock { get; private set; } = null!;
-    public Mock<IFileServiceClient> FileServiceClientMock { get; private set; } = null!;
+    public Mock<IFileServicePublisher> FileServicePublisher { get; private set; } = null!;
     public Mock<ICodesClient> CodesClientMock { get; private set; } = null!;
 
     protected BaseTestFixture()
@@ -45,7 +45,7 @@ public class BaseTestFixture
     {
         PasswordHasherMock = new Mock<IPasswordHasher>();
         JwtProviderMock = new Mock<IJwtProvider>();
-        FileServiceClientMock = new Mock<IFileServiceClient>();
+        FileServicePublisher = new Mock<IFileServicePublisher>();
         CodesClientMock = new Mock<ICodesClient>();
         
         SetupPasswordHasherMocks();
@@ -84,7 +84,7 @@ public class BaseTestFixture
         Services.AddSingleton(PasswordHasherMock.Object);
         Services.AddSingleton(JwtProviderMock.Object);
         Services.AddSingleton(CodesClientMock.Object);
-        Services.AddSingleton(FileServiceClientMock.Object);
+        Services.AddSingleton(FileServicePublisher.Object);
         
         Services.AddScoped(typeof(ILoggerFactory), typeof(LoggerFactory));
         Services.AddScoped(typeof(ILogger<>), typeof(Logger<>));

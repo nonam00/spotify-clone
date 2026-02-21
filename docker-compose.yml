@@ -35,8 +35,9 @@ services:
       db:
         condition: service_healthy
         restart: true
-      minio:
+      rabbitmq:
         condition: service_healthy
+        restart: true
       backend-redis:
         condition: service_healthy
       mailhog:
@@ -99,9 +100,12 @@ services:
       - REDIS_ENDPOINT=file-service-redis:6379
       - REDIS_PASSWORD=$REDIS_PASSWORD
       - REDIS_DB=0
-      - SECURITY_API_KEY=${FILE_SERVICE_SECURITY_API_KEY}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     depends_on:
       minio:
+        condition: service_healthy
+        restart: true
+      rabbitmq:
         condition: service_healthy
         restart: true
       file-service-redis:
@@ -193,6 +197,25 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    container_name: rabbitmq-server
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser
+      RABBITMQ_DEFAULT_PASS: mypassword
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
       
   mailhog:
     container_name: mailhog
@@ -292,3 +315,5 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
+  rabbitmq_data:
+  rabbitmq_log:
