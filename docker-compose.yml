@@ -40,8 +40,6 @@ services:
         restart: true
       backend-redis:
         condition: service_healthy
-      mailhog:
-        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -216,6 +214,30 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_log:/var/log/rabbitmq/
+        
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "7855:7855"
+    environment:
+      - GIN_MODE=release
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      mailhog:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7855/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
       
   mailhog:
     container_name: mailhog

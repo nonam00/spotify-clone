@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const DeleteFileQueue = "file-service.delete-file"
+
 var ErrFileNotFound = errors.New("file not found")
 
 type FileType string

@@ -29,7 +29,7 @@ public class BaseTestFixture
     public Mock<IPasswordHasher> PasswordHasherMock { get; private set; } = null!;
     public Mock<IJwtProvider> JwtProviderMock { get; private set; } = null!;
     public Mock<IFileServicePublisher> FileServicePublisher { get; private set; } = null!;
-    public Mock<ICodesClient> CodesClientMock { get; private set; } = null!;
+    public Mock<IEmailServicePublisher> EmailServicePublisher { get; private set; } = null!;
 
     protected BaseTestFixture()
     {
@@ -46,11 +46,10 @@ public class BaseTestFixture
         PasswordHasherMock = new Mock<IPasswordHasher>();
         JwtProviderMock = new Mock<IJwtProvider>();
         FileServicePublisher = new Mock<IFileServicePublisher>();
-        CodesClientMock = new Mock<ICodesClient>();
+        EmailServicePublisher = new Mock<IEmailServicePublisher>();
         
         SetupPasswordHasherMocks();
         SetupJwtProviderMocks();
-        SetupCodesClientMocks();
     }
 
     private void SetupPasswordHasherMocks()
@@ -68,22 +67,12 @@ public class BaseTestFixture
         JwtProviderMock.Setup(x => x.GenerateModeratorToken(It.IsAny<Domain.Models.Moderator>()))
             .Returns("mock_moderator_token");
     }
-
-    private void SetupCodesClientMocks()
-    {
-        CodesClientMock.Setup(x => x.VerifyConfirmationCodeAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(false);
-        CodesClientMock.Setup(x => x.VerifyRestoreTokenAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(false);
-        CodesClientMock.Setup(x => x.GenerateCode(It.IsAny<int>()))
-            .Returns("123456");
-    }
-
+    
     private void ConfigureCommonServices()
     {
         Services.AddSingleton(PasswordHasherMock.Object);
         Services.AddSingleton(JwtProviderMock.Object);
-        Services.AddSingleton(CodesClientMock.Object);
+        Services.AddSingleton(EmailServicePublisher.Object);
         Services.AddSingleton(FileServicePublisher.Object);
         
         Services.AddScoped(typeof(ILoggerFactory), typeof(LoggerFactory));
@@ -97,6 +86,10 @@ public class BaseTestFixture
         Services.AddScoped<IPlaylistsRepository, PlaylistsRepository>();
         Services.AddScoped<IModeratorsRepository, ModeratorsRepository>();
         Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+        
+        // Mocked redis repository
+        var codesRepositoryMock = new Mock<ICodesRepository>();
+        Services.AddSingleton(codesRepositoryMock.Object);
     }
 
     private void ConfigureApplicationServices()

@@ -15,7 +15,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// DeleteFileConsumer — consumer для очереди удаления файлов
 type DeleteFileConsumer struct {
 	cfg         *config.RabbitMQConfig
 	fileService service.FileService
@@ -24,7 +23,6 @@ type DeleteFileConsumer struct {
 	ch          *amqp.Channel
 }
 
-// NewDeleteFileConsumer создаёт consumer для удаления файлов
 func NewDeleteFileConsumer(cfg *config.RabbitMQConfig, fileService service.FileService, l *logger.Logger) *DeleteFileConsumer {
 	return &DeleteFileConsumer{
 		cfg:         cfg,
@@ -56,7 +54,7 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 	}
 
 	queue, err := ch.QueueDeclare(
-		c.cfg.DeleteFileQueue,
+		domain.DeleteFileQueue,
 		true,
 		false,
 		false,
@@ -64,7 +62,7 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to declare queue %s: %w", c.cfg.DeleteFileQueue, err)
+		return fmt.Errorf("failed to declare queue %s: %w", domain.DeleteFileQueue, err)
 	}
 
 	deliveries, err := ch.Consume(
@@ -162,7 +160,7 @@ func (c *DeleteFileConsumer) handleMessage(ctx context.Context, d amqp.Delivery)
 			Str("file_type", string(msg.FileType)).
 			Msg("Failed to delete file")
 
-		// Note: Consider a Dead Letter Queue (DLQ) or retry limit here to prevent infinite loops.
+		// Needs a DLR or retry limit here to prevent infinite loops.
 		nack(true)
 		return
 	}

@@ -15,8 +15,7 @@ type Config struct {
 }
 
 type RabbitMQConfig struct {
-	URL             string
-	DeleteFileQueue string
+	URL string
 }
 
 type ServerConfig struct {
@@ -71,7 +70,6 @@ func Load() (*Config, error) {
 	viper.SetDefault("REDIS_KEY_PREFIX", "file-service:presigned-url:")
 	viper.SetDefault("SECURITY_CORS_ALLOWED_ORIGINS", []string{"*"})
 	viper.SetDefault("RABBITMQ_URL", "amqp://myuser:mypassword@localhost:5672/")
-	viper.SetDefault("RABBITMQ_DELETE_FILE_QUEUE", "file-service.delete-file")
 
 	viper.AutomaticEnv()
 
@@ -103,8 +101,7 @@ func Load() (*Config, error) {
 			CORSAllowedOrigins: viper.GetStringSlice("SECURITY_CORS_ALLOWED_ORIGINS"),
 		},
 		RabbitMQ: RabbitMQConfig{
-			URL:             viper.GetString("RABBITMQ_URL"),
-			DeleteFileQueue: viper.GetString("RABBITMQ_DELETE_FILE_QUEUE"),
+			URL: viper.GetString("RABBITMQ_URL"),
 		},
 	}
 

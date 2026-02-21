@@ -14,19 +14,19 @@ public class ActivateUserByConfirmationCodeCommandHandler
     : ICommandHandler<ActivateUserByConfirmationCodeCommand, Result<TokenPair>>
 {
     private readonly IUsersRepository _usersRepository;
-    private readonly ICodesClient _codesClient;
+    private readonly ICodesRepository _codesRepository;
     private readonly IJwtProvider _jwtProvider;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ActivateUserByConfirmationCodeCommandHandler> _logger;
     
     public ActivateUserByConfirmationCodeCommandHandler(
         IUsersRepository usersRepository,
-        ICodesClient codesClient,
+        ICodesRepository codesRepository,
         IJwtProvider jwtProvider,
         IUnitOfWork unitOfWork,
         ILogger<ActivateUserByConfirmationCodeCommandHandler> logger)
     {
-        _codesClient = codesClient;
+        _codesRepository = codesRepository;
         _usersRepository = usersRepository;
         _unitOfWork = unitOfWork;
         _jwtProvider = jwtProvider;
@@ -36,11 +36,8 @@ public class ActivateUserByConfirmationCodeCommandHandler
     public async Task<Result<TokenPair>> Handle(
         ActivateUserByConfirmationCodeCommand request, CancellationToken cancellationToken)
     {
-        var codeVerificationStatus = await _codesClient
-            .VerifyConfirmationCodeAsync(request.Email, request.ConfirmationCode)
-            .ConfigureAwait(false);
-        
-        if (!codeVerificationStatus)
+        var confirmationCode = await _codesRepository.GetConfirmationCode(request.Email);
+        if (request.ConfirmationCode != confirmationCode)
         {
             _logger.LogInformation(
                 "Someone tried to activate user account with email {Email} using invalid confirmation code.",

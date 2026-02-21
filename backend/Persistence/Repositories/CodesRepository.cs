@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using Infrastructure.Email;
+using Application.Users.Interfaces;
 
 namespace Persistence.Repositories;
 

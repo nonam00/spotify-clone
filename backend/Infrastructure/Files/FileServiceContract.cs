@@ -7,4 +7,4 @@ public static class FileServiceMessaging
     public const string DeleteFileQueue = "file-service.delete-file";
 }
 
-public record DeleteFileMessage(string FileType, string FileId);
+internal record DeleteFileMessage(string FileType, string FileId);

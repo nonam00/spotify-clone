@@ -1,6 +1,8 @@
-using Infrastructure.Files;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+
+using Infrastructure.Email;
+using Infrastructure.Files;
 
 namespace Infrastructure.Messaging;
 
@@ -50,7 +52,18 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
     {
         await using var connection = await GetConnectionAsync();
         await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-        
+
+        List<Task> tasks =
+        [
+            DeclareFileServiceInfrastructureAsync(channel, cancellationToken),
+            DeclareEmailServiceInfrastructureAsync(channel, cancellationToken),
+        ];
+        await Task.WhenAll(tasks);
+    }
+
+    private static async Task DeclareFileServiceInfrastructureAsync(
+        IChannel channel, CancellationToken cancellationToken = default)
+    {
         await channel.ExchangeDeclareAsync(
             exchange: FileServiceMessaging.FileExchange, 
             type: ExchangeType.Topic, 
@@ -58,8 +71,14 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             autoDelete: false, 
             cancellationToken: cancellationToken);
 
-        await channel.QueueDeclarePassiveAsync(
+        // Queues must be declared in consumer service
+        await channel.QueueDeclareAsync(
             queue: FileServiceMessaging.DeleteFileQueue,
+            durable: true,
+            autoDelete: false,
+            exclusive: false,
+            noWait: false,
+            arguments: null,
             cancellationToken: cancellationToken);
         
         await channel.QueueBindAsync(
@@ -69,6 +88,51 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             arguments: null,
             cancellationToken: cancellationToken);
     }
+
+    private static async Task DeclareEmailServiceInfrastructureAsync(
+        IChannel channel, CancellationToken cancellationToken = default)
+    {
+        await channel.ExchangeDeclareAsync(
+            exchange: EmailServiceContract.EmailExchange, 
+            type: ExchangeType.Topic, 
+            durable: true, 
+            autoDelete: false, 
+            cancellationToken: cancellationToken);
+
+        // Queues must be declared in consumer service
+        await channel.QueueDeclareAsync(
+            queue: EmailServiceContract.SendConfirmEmailQueue,
+            durable: true,
+            autoDelete: false,
+            exclusive: false,
+            noWait: false,
+            arguments: null,
+            cancellationToken: cancellationToken);
+        
+        await channel.QueueDeclareAsync(
+            queue: EmailServiceContract.SendRestoreEmailQueue,
+            durable: true,
+            autoDelete: false,
+            exclusive: false,
+            noWait: false,
+            arguments: null,
+            cancellationToken: cancellationToken);
+        
+        await channel.QueueBindAsync(
+            queue: EmailServiceContract.SendConfirmEmailQueue,
+            exchange: EmailServiceContract.EmailExchange,
+            routingKey: EmailServiceContract.SendConfirmEmailRoutingKey,
+            arguments: null,
+            cancellationToken: cancellationToken);
+        
+        await channel.QueueBindAsync(
+            queue: EmailServiceContract.SendRestoreEmailQueue,
+            exchange: EmailServiceContract.EmailExchange,
+            routingKey: EmailServiceContract.SendRestoreEmailRoutingKey,
+            arguments: null,
+            cancellationToken: cancellationToken);
+    }
+    
     public async ValueTask DisposeAsync()
     {
         if (_connection != null)

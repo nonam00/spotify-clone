@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Logging;
-
 using Domain.Events;
+using Domain.ValueObjects;
+using Application.Shared.Integration;
 using Application.Shared.Messaging;
 using Application.Users.Interfaces;
 
@@ -8,25 +8,20 @@ namespace Application.Users.Events.UserRegistered;
 
 public class UserRegisteredEventHandler : IDomainEventHandler<UserRegisteredEvent>
 {
-    private readonly ICodesClient _codesClient;
-    private readonly ILogger<UserRegisteredEvent> _logger;
+    private readonly IEmailServicePublisher _emailServicePublisher;
+    private readonly ICodesRepository _codesRepository;
 
-    public UserRegisteredEventHandler(ICodesClient codesClient, ILogger<UserRegisteredEvent> logger)
+    public UserRegisteredEventHandler(IEmailServicePublisher emailServicePublisher, ICodesRepository codesRepository)
     {
-        _logger = logger;
-        _codesClient = codesClient;
+        _emailServicePublisher = emailServicePublisher;
+        _codesRepository = codesRepository;
     }
 
     public Task HandleAsync(UserRegisteredEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling user {userId} registered event",  @event.UserId);
-        
-        var verificationCode = _codesClient.GenerateCode();
-        _logger.LogDebug("Saving verification code {verificationCode} to storage", verificationCode);
-        var storeTask = _codesClient.StoreConfirmationCodeAsync(@event.Email, verificationCode);
-        
-        var sendTask = _codesClient.SendConfirmationCodeAsync(@event.Email, verificationCode, cancellationToken);
-        _logger.LogDebug("Sending verification code {code} to email {email}", verificationCode, @event.Email);
+        var code = new UserCode();
+        var storeTask = _codesRepository.SetConfirmationCode(@event.Email, code, code.CodeExpiry);
+        var sendTask = _emailServicePublisher.PublishSendConfirmEmail(@event.Email, code, cancellationToken);
 
         return Task.WhenAll(storeTask, sendTask);
     }
