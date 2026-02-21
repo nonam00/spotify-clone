@@ -1,6 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using FluentValidation;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
+using Microsoft.Extensions.DependencyInjection;
 
 using Domain.Common;
 using Application.Shared.Errors;
@@ -10,140 +11,101 @@ namespace Application.Shared.Messaging;
 public class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<Mediator> _logger;
 
-    public Mediator(IServiceProvider serviceProvider, ILogger<Mediator> logger)
+    private static readonly ConcurrentDictionary<Type, Func<object, object, CancellationToken, Task>> HandlerInvokers = new();
+    private static readonly ConcurrentDictionary<Type, Func<Error, object>> FailureFactories = new();
+    private static readonly ConcurrentDictionary<Type, Func<IServiceProvider, object, CancellationToken, Task<Error?>>> ValidationInvokers = new();
+
+    public Mediator(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _logger = logger;
     }
 
-    public async Task<TResponse> Send<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken = default)
+    public Task<TResponse> Send<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken = default)
+        => ProcessRequest<TResponse>(command, cancellationToken);
+
+    public Task<TResponse> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default)
+        => ProcessRequest<TResponse>(query, cancellationToken);
+
+    private async Task<TResponse> ProcessRequest<TResponse>(object request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Sending command {command}", command);
-        var validationError = await ValidateCommand(command, cancellationToken).ConfigureAwait(false);
+        var requestType = request.GetType();
+
+        // Validation
+        var validationInvoker = ValidationInvokers.GetOrAdd(requestType, CreateValidationInvoker);
+        var validationError = await validationInvoker(_serviceProvider, request, cancellationToken).ConfigureAwait(false);
         
         if (validationError != null)
         {
-            return HandleValidationError<TResponse>(validationError);
+            var failureFactory = FailureFactories.GetOrAdd(typeof(TResponse), CreateFailureFactory);
+            return (TResponse)failureFactory(validationError);
         }
+
+        // Handling
+        var invoker = HandlerInvokers.GetOrAdd(requestType, t => CreateHandlerInvoker(t, typeof(TResponse)));
         
-        var handlerType = typeof(ICommandHandler<,>).MakeGenericType(command.GetType(), typeof(TResponse));
+        var handlerType = GetHandlerInterface(requestType, typeof(TResponse));
         var handler = _serviceProvider.GetRequiredService(handlerType);
         
-        var method = handlerType.GetMethod("Handle") 
-            ?? throw new InvalidOperationException($"No handler found for {command.GetType()}");
-        
-        _logger.LogDebug("Handling command {command}", command);
-        var result = method.Invoke(handler, [command, cancellationToken]);
-        
-        if (result is not Task<TResponse> task)
-        {
-            throw new InvalidOperationException($"Command handler {command.GetType()} did not return task");
-        }
-        
-        return await task.ConfigureAwait(false);
+        return await ((Task<TResponse>)invoker(handler, request, cancellationToken)).ConfigureAwait(false);
     }
 
-    public async Task<TResponse> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default)
+    private static Func<object, object, CancellationToken, Task> CreateHandlerInvoker(Type requestType, Type responseType)
     {
-        _logger.LogDebug("Sending query {query}", query);
-        
-        var validationError = await ValidateQuery(query, cancellationToken).ConfigureAwait(false);
-        
-        if (validationError != null)
-        {
-            return HandleValidationError<TResponse>(validationError);
-        }
-        
-        var handlerType = typeof(IQueryHandler<,>).MakeGenericType(query.GetType(), typeof(TResponse));
-        var handler = _serviceProvider.GetRequiredService(handlerType);
-        
-        var method = handlerType.GetMethod("Handle")
-            ?? throw new InvalidOperationException($"No handler found for {query.GetType()}");
-        
-        _logger.LogDebug("Handling query {query}", query);
-        var result = method.Invoke(handler, [query, cancellationToken]);
+        var handlerInterface = GetHandlerInterface(requestType, responseType);
+        var method = handlerInterface.GetMethod("Handle")!;
 
-        if (result is not Task<TResponse> task)
-        {
-            throw new InvalidOperationException($"Query handler {query.GetType()} did not return task");
-        }
+        var handlerParam = Expression.Parameter(typeof(object), "h");
+        var requestParam = Expression.Parameter(typeof(object), "r");
+        var ctParam = Expression.Parameter(typeof(CancellationToken), "ct");
+
+        var castHandler = Expression.Convert(handlerParam, handlerInterface);
+        var castRequest = Expression.Convert(requestParam, requestType);
         
-        return await task.ConfigureAwait(false);
+        var call = Expression.Call(castHandler, method, castRequest, ctParam);
+        
+        return Expression.Lambda<Func<object, object, CancellationToken, Task>>(call, handlerParam, requestParam, ctParam).Compile();
     }
-    
-    
-    private async Task<Error?> ValidateCommand<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken)
-    {
-        _logger.LogDebug("Validating command {command}", command.GetType().Name);
-        
-        var validatorType = typeof(IValidator<>).MakeGenericType(command.GetType());
-        var validatorObject = _serviceProvider.GetService(validatorType);
 
-        if (validatorObject is not IValidator validator) 
+    private static Func<IServiceProvider, object, CancellationToken, Task<Error?>> CreateValidationInvoker(Type requestType)
+    {
+        return async (sp, req, ct) =>
         {
-            return null;
-        }
-        
-        var validationResult = await validator
-            .ValidateAsync(new ValidationContext<object>(command), cancellationToken)
-            .ConfigureAwait(false);
-        
-        return !validationResult.IsValid
-            ? ValidationErrors.CreateFromFluentValidation(validationResult)
-            : null;
-    }
-    
-    private async Task<Error?> ValidateQuery<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken)
-    {
-        _logger.LogDebug("Validating query {command}", query.GetType().Name);
-        var validatorType = typeof(IValidator<>).MakeGenericType(query.GetType());
-        var validatorObject = _serviceProvider.GetService(validatorType);
+            var validatorType = typeof(IValidator<>).MakeGenericType(requestType);
+            var validator = (IValidator?)sp.GetService(validatorType);
+            if (validator == null) return null;
 
-        if (validatorObject is not IValidator validator) 
-        {
-            return null;
-        }
-
-        var validationResult = await validator.ValidateAsync(new ValidationContext<object>(query), cancellationToken).ConfigureAwait(false);
-        
-        return !validationResult.IsValid ?
-            ValidationErrors.CreateFromFluentValidation(validationResult)
-            : null;
+            var context = new ValidationContext<object>(req);
+            var result = await validator.ValidateAsync(context, ct).ConfigureAwait(false);
+            return result.IsValid ? null : ValidationErrors.CreateFromFluentValidation(result);
+        };
     }
-    
-    private static TResponse HandleValidationError<TResponse>(Error validationError)
+
+    private static Func<Error, object> CreateFailureFactory(Type responseType)
     {
-        var responseType = typeof(TResponse);
-        
-        // Check if TResponse is Result
         if (responseType == typeof(Result))
         {
-            return (TResponse)(object)Result.Failure(validationError);
+            return Result.Failure;
         }
-        
-        // Check if TResponse is Result<T>
+
         if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
         {
-            var valueType = responseType.GetGenericArguments()[0];
-            var genericResultType = typeof(Result<>).MakeGenericType(valueType);
+            var method = responseType.GetMethod("Failure", [typeof(Error)])!;
             
-            // Get the Failure method from the generic Result<T> type
-            var failureMethod = genericResultType.GetMethod(
-                "Failure", 
-                System.Reflection.BindingFlags.Public | 
-                System.Reflection.BindingFlags.Static | 
-                System.Reflection.BindingFlags.DeclaredOnly);
+            var errParam = Expression.Parameter(typeof(Error), "e");
+            var call = Expression.Call(null, method, errParam);
             
-            if (failureMethod != null)
-            {
-                var result = failureMethod.Invoke(null, [validationError]);
-                return (TResponse)(result ?? throw new InvalidOperationException("Failed to create Result.Failure"));
-            }
+            return Expression.Lambda<Func<Error, object>>(call, errParam).Compile();
         }
-        
-        // If TResponse is not Result or Result<T>, throw exception for backward compatibility
-        throw new ValidationException($"Validation failed: {validationError.Description}");
+
+        return err => throw new ValidationException($"Validation failed: {err.Description}");
+    }
+
+    private static Type GetHandlerInterface(Type requestType, Type responseType)
+    {
+        // Checking if it's query or command handler
+        return typeof(ICommand<>).MakeGenericType(responseType).IsAssignableFrom(requestType) 
+            ? typeof(ICommandHandler<,>).MakeGenericType(requestType, responseType)
+            : typeof(IQueryHandler<,>).MakeGenericType(requestType, responseType);
     }
 }
