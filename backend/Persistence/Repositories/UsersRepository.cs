@@ -109,7 +109,8 @@ public class UsersRepository : IUsersRepository
     {
         var nonActiveUsers = await _dbContext.Users
             .AsNoTracking()
-            .Where(u => !u.IsActive && u.CreatedAt.AddHours(48) < DateTime.UtcNow)
+            .Where(u => !u.IsActive && u.CreatedAt.AddHours(24) < DateTime.UtcNow)
+            .Include(u => u.Playlists)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
             
