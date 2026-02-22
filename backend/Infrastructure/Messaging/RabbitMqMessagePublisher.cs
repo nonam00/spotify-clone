@@ -5,7 +5,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Messaging;
 
-public class RabbitMqMessagePublisher : IMessagePublisher, IAsyncDisposable
+public class RabbitMqMessagePublisher : IMessagePublisher
 {
     private readonly RabbitMqConnectionProvider _connectionProvider;
 
@@ -41,11 +41,5 @@ public class RabbitMqMessagePublisher : IMessagePublisher, IAsyncDisposable
             basicProperties: properties,
             body: jsonBody,
             cancellationToken: cancellationToken);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _connectionProvider.DisposeAsync();
-        GC.SuppressFinalize(this);
     }
 }

@@ -3,7 +3,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Email;
 
-public class EmailServicePublisher : IEmailServicePublisher, IAsyncDisposable
+public class EmailServicePublisher : IEmailServicePublisher
 {
     private readonly IMessagePublisher _publisher;
     
@@ -28,14 +28,5 @@ public class EmailServicePublisher : IEmailServicePublisher, IAsyncDisposable
             EmailServiceContract.EmailExchange,
             EmailServiceContract.SendEmailRoutingKey,
             cancellationToken);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_publisher is IAsyncDisposable disposablePublisher)
-        {
-            await disposablePublisher.DisposeAsync();
-        }
-        GC.SuppressFinalize(this);
     }
 }

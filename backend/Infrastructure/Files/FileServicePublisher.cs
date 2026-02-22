@@ -3,7 +3,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Files;
 
-public class FileServicePublisher : IFileServicePublisher, IAsyncDisposable
+public class FileServicePublisher : IFileServicePublisher
 {
     private readonly IMessagePublisher _publisher;
     
@@ -19,14 +19,5 @@ public class FileServicePublisher : IFileServicePublisher, IAsyncDisposable
             FileServiceMessaging.FileExchange,
             FileServiceMessaging.DeleteRoutingKey,
             cancellationToken);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_publisher is IAsyncDisposable disposablePublisher)
-        {
-            await disposablePublisher.DisposeAsync();
-        }
-        GC.SuppressFinalize(this);
     }
 }

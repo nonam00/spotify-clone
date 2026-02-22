@@ -124,6 +124,7 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             await _connection.CloseAsync();
             await _connection.DisposeAsync();
         }
+        _semaphoreSlim.Dispose();
         GC.SuppressFinalize(this);
     }
 }
