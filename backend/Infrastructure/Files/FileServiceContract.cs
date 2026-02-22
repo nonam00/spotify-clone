@@ -1,6 +1,6 @@
 namespace Infrastructure.Files;
 
-public static class FileServiceMessaging
+internal static class FileServiceMessaging
 {
     public const string FileExchange = "file-service-exchange";
     public const string DeleteRoutingKey = "file-service.delete-file";

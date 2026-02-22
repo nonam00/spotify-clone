@@ -15,18 +15,18 @@ public class EmailServicePublisher : IEmailServicePublisher, IAsyncDisposable
     public Task PublishSendConfirmEmail(string email, string code, CancellationToken cancellationToken = default)
     {
         return _publisher.PublishAsync(
-            new SendEmailMessage(email, code),
+            new SendEmailMessage(email, code, EmailTopicType.Confirm),
             EmailServiceContract.EmailExchange,
-            EmailServiceContract.SendConfirmEmailRoutingKey,
+            EmailServiceContract.SendEmailRoutingKey,
             cancellationToken);
     }
     
     public Task PublishSendRestoreEmail(string email, string code, CancellationToken cancellationToken = default)
     {
         return _publisher.PublishAsync(
-            new SendEmailMessage(email, code),
+            new SendEmailMessage(email, code, EmailTopicType.Restore),
             EmailServiceContract.EmailExchange,
-            EmailServiceContract.SendRestoreEmailRoutingKey,
+            EmailServiceContract.SendEmailRoutingKey,
             cancellationToken);
     }
 

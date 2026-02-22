@@ -19,8 +19,6 @@ type DeleteFileConsumer struct {
 	cfg         *config.RabbitMQConfig
 	fileService service.FileService
 	logger      *logger.Logger
-	conn        *amqp.Connection
-	ch          *amqp.Channel
 }
 
 func NewDeleteFileConsumer(cfg *config.RabbitMQConfig, fileService service.FileService, l *logger.Logger) *DeleteFileConsumer {
@@ -36,14 +34,12 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to RabbitMQ: %w", err)
 	}
-	c.conn = conn
 	defer conn.Close()
 
 	ch, err := conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
-	c.ch = ch
 	defer ch.Close()
 
 	// Setting QoS (Prefetch Count) to prevent OOM
@@ -53,7 +49,7 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to set QoS: %w", err)
 	}
 
-	queue, err := ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		domain.DeleteFileQueue,
 		true,
 		false,
@@ -66,7 +62,7 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 	}
 
 	deliveries, err := ch.Consume(
-		queue.Name,
+		domain.DeleteFileQueue,
 		"file-service-delete-consumer",
 		false,
 		false,
@@ -79,13 +75,11 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 	}
 
 	c.logger.Info().
-		Str("queue", queue.Name).
+		Str("queue", domain.DeleteFileQueue).
 		Msg("Delete file consumer started")
 
 	var wg sync.WaitGroup
-
-	maxWorkers := prefetchCount
-	sem := make(chan struct{}, maxWorkers)
+	sem := make(chan struct{}, prefetchCount)
 
 	for {
 		select {

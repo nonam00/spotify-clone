@@ -101,16 +101,7 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
 
         // Queues must be declared in consumer service
         await channel.QueueDeclareAsync(
-            queue: EmailServiceContract.SendConfirmEmailQueue,
-            durable: true,
-            autoDelete: false,
-            exclusive: false,
-            noWait: false,
-            arguments: null,
-            cancellationToken: cancellationToken);
-        
-        await channel.QueueDeclareAsync(
-            queue: EmailServiceContract.SendRestoreEmailQueue,
+            queue: EmailServiceContract.SendEmailQueue,
             durable: true,
             autoDelete: false,
             exclusive: false,
@@ -119,16 +110,9 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             cancellationToken: cancellationToken);
         
         await channel.QueueBindAsync(
-            queue: EmailServiceContract.SendConfirmEmailQueue,
+            queue: EmailServiceContract.SendEmailQueue,
             exchange: EmailServiceContract.EmailExchange,
-            routingKey: EmailServiceContract.SendConfirmEmailRoutingKey,
-            arguments: null,
-            cancellationToken: cancellationToken);
-        
-        await channel.QueueBindAsync(
-            queue: EmailServiceContract.SendRestoreEmailQueue,
-            exchange: EmailServiceContract.EmailExchange,
-            routingKey: EmailServiceContract.SendRestoreEmailRoutingKey,
+            routingKey: EmailServiceContract.SendEmailRoutingKey,
             arguments: null,
             cancellationToken: cancellationToken);
     }

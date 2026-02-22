@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"email-service/internal/consumer"
-	"email-service/internal/domain"
-	"email-service/internal/handler"
 	"errors"
 	"log"
 	"net/http"
@@ -14,6 +11,8 @@ import (
 	"time"
 
 	"email-service/internal/config"
+	"email-service/internal/consumer"
+	"email-service/internal/handler"
 	"email-service/internal/service"
 	"email-service/pkg/logger"
 
@@ -30,23 +29,13 @@ func main() {
 	l := logger.New("email-service")
 
 	// Initialize dependencies
-	emailSvc := service.NewEmailService(&cfg.Email, l)
+	emailService := service.NewEmailService(&cfg.Email, l)
 
-	ctx, stopConsumers := context.WithCancel(context.Background())
-
-	// Initialize two consumers for the two different queues
-	confirmConsumer := consumer.NewEmailConsumer(&cfg.RabbitMQ, emailSvc, l, domain.SendConfirmEmailQueue, "confirm")
-	restoreConsumer := consumer.NewEmailConsumer(&cfg.RabbitMQ, emailSvc, l, domain.SendRestoreEmailQueue, "restore")
-
-	// Run Consumers
+	ctx, stopConsumer := context.WithCancel(context.Background())
+	confirmConsumer := consumer.NewEmailConsumer(&cfg.RabbitMQ, emailService, l)
 	go func() {
 		if err := confirmConsumer.Run(ctx); err != nil {
-			l.Error().Err(err).Msg("Confirm consumer failed")
-		}
-	}()
-	go func() {
-		if err := restoreConsumer.Run(ctx); err != nil {
-			l.Error().Err(err).Msg("Restore consumer failed")
+			l.Error().Err(err).Msg("Send email consumer exited with error")
 		}
 	}()
 
@@ -57,18 +46,21 @@ func main() {
 	}
 
 	go func() {
+		l.Info().Str("port", cfg.Server.Port).Msg("Starting server")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			l.Fatal().Err(err).Msg("Server failed")
 		}
 	}()
 
-	// Graceful Shutdown
+	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	l.Info().Msg("Shutting down...")
-	stopConsumers() // Signal consumers to finish current work
+
+	// Stop consumers first to stop processing new messages
+	stopConsumer()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

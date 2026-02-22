@@ -1,9 +1,10 @@
 package service
 
 import (
+	"fmt"
+
 	"email-service/internal/config"
 	"email-service/pkg/logger"
-	"fmt"
 
 	"gopkg.in/mail.v2"
 )

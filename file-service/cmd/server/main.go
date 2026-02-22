@@ -80,7 +80,6 @@ func main() {
 	// Stop consumers first to stop processing new messages
 	stopConsumer()
 
-	// Shutdown HTTP server with timeout
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
 	defer shutdownCancel()
 

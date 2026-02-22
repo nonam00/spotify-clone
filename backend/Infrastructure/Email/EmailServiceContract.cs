@@ -1,14 +1,16 @@
 namespace Infrastructure.Email;
 
-public static class EmailServiceContract
+internal static class EmailServiceContract
 {
     public const string EmailExchange = "email-service-exchange";
-    
-    public const string SendConfirmEmailRoutingKey = "email-service.send-confirm-email";
-    public const string SendConfirmEmailQueue = "email-service.send-confirm-email";
-    
-    public const string SendRestoreEmailRoutingKey = "email-service.send-restore-email";
-    public const string SendRestoreEmailQueue = "email-service.send-restore-email";
+    public const string SendEmailRoutingKey = "email-service.send-email";
+    public const string SendEmailQueue = "email-service.send-email";
 }
 
-internal record SendEmailMessage(string Email, string Code);
+internal enum EmailTopicType
+{
+    Confirm = 1,
+    Restore = 2
+}
+
+internal record SendEmailMessage(string Email, string Code, EmailTopicType Topic);
