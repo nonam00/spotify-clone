@@ -66,7 +66,9 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
         
         var methodCall = Expression.Call(castHandler, method, castEvent, ctParam);
 
-        return Expression.Lambda<Func<object, IDomainEvent, CancellationToken, Task>>(
-            methodCall, handlerParam, eventParam, ctParam).Compile();
+        return Expression
+            .Lambda<Func<object, IDomainEvent, CancellationToken, Task>>(
+                methodCall, handlerParam, eventParam, ctParam)
+            .Compile();
     }
 }

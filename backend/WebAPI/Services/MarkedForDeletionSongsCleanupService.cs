@@ -33,7 +33,7 @@ public class MarkedForDeletionSongsCleanupService : BackgroundService
     {
         _logger.LogInformation("Starting marked for deletion songs cleanup");
         
-        using var scope = _scopeFactory.CreateScope();
+        await using var scope = _scopeFactory.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         await mediator.Send(new DeleteMarkedForDeletionSongsCommand());

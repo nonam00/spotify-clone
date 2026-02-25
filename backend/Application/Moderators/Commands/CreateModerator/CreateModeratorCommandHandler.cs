@@ -32,7 +32,9 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
 
     public async Task<Result> Handle(CreateModeratorCommand command, CancellationToken cancellationToken)
     {
-        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+        var managingModerator = await _moderatorsRepository
+            .GetById(command.ManagingModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (managingModerator is null)
         {
@@ -58,7 +60,9 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
         
-        var checkModerator = await _moderatorsRepository.GetByEmail(command.Email, cancellationToken);
+        var checkModerator = await _moderatorsRepository
+            .GetByEmail(command.Email, cancellationToken)
+            .ConfigureAwait(false);
         
         if (checkModerator is not null)
         {
@@ -94,8 +98,8 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
             return createModeratorResult;
         }
         
-        await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken).ConfigureAwait(false);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "Managing moderator {ManagingModeratorId} successfully created new moderator {CreatedModeratorId}.",

@@ -19,85 +19,68 @@ public class SongsRepository : ISongsRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Song?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public Task<Song?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var song = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
-        
-        return song;
     }
 
-    public async Task<List<Song>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken = default)
+    public Task<List<Song>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => ids.Contains(s.Id))
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return songs;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Song>> GetMarkedForDeletion(CancellationToken cancellationToken = default)
+    public Task<List<Song>> GetMarkedForDeletion(CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => s.MarkedForDeletion)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return songs;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> GetList(CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> GetList(CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => s.IsPublished)
             .OrderByDescending(s => s.CreatedAt)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return songs;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> TakeNewestList(int count = 100, CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> TakeNewestList(int count = 100, CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => s.IsPublished)
             .OrderByDescending(s => s.CreatedAt)
             .Select(ToVmExpression)
             .Take(count)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return songs;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default)
     {
-        var songsInPlaylist = await _dbContext.PlaylistSongs
+        return _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.PlaylistId == playlistId && ps.Song.IsPublished)
             .OrderByDescending(ps => ps.Order)
             .Include(ps => ps.Song)
             .Select(ps => ps.Song)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return songsInPlaylist;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> GetSearchList(
+    public Task<List<SongVm>> GetSearchList(
         string searchString, SearchCriteria searchCriteria, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(searchString) || searchString.Length < 3)
         {
-            return [];
+            throw new ArgumentException("Search string length must be greater than 3", nameof(searchString));
         }
         
         // To make search not sensitive to string register
@@ -117,57 +100,48 @@ public class SongsRepository : ISongsRepository
             SearchCriteria.Any    => SearchQueryFilters.ApplyAnyFilter(baseQuery, normalizedSearch, similarityThreshold),
             _ => throw new ArgumentOutOfRangeException(nameof(searchCriteria), searchCriteria, "Invalid criteria")
         };
-        
-        var result = await filteredQuery
+
+        return filteredQuery
             .Take(50)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return result;
+            .ToListAsync(cancellationToken);
     }
     
-    public async Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default)
     {
-        var liked = await _dbContext.LikedSongs
+        return _dbContext.LikedSongs
             .AsNoTracking()
             .Where(ls => ls.UserId == userId && ls.Song.IsPublished)
             .OrderByDescending(ls => ls.CreatedAt)
             .Include(ls => ls.Song)
             .Select(ls => ls.Song)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-            
-        return liked;
+            .ToListAsync(cancellationToken);
     }
     
-    public async Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(
+    public Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(
         Guid userId, Guid playlistId, CancellationToken cancellationToken = default)
     {
         var songsInPlaylist = _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.PlaylistId == playlistId && ps.Song.IsPublished);
-        
-        var result = await _dbContext.LikedSongs
+
+        return _dbContext.LikedSongs
             .AsNoTracking()
             .Include(ls => ls.Song)
             .Where(ls => ls.UserId == userId && !songsInPlaylist.Any(ps => ps.SongId == ls.SongId))
             .OrderByDescending(ls => ls.CreatedAt)
             .Select(ls => ls.Song)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return result;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> GetSearchLikedByUserIdExcludeInPlaylist(
+    public Task<List<SongVm>> GetSearchLikedByUserIdExcludeInPlaylist(
         Guid userId, Guid playlistId, string searchString, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(searchString) || searchString.Length < 2)
+        if (string.IsNullOrWhiteSpace(searchString) || searchString.Length < 3)
         {
-            return [];
+            throw new ArgumentException("Search string length must be greater than 3", nameof(searchString));
         }
         
         // To make search not sensitive to string register
@@ -186,52 +160,37 @@ public class SongsRepository : ISongsRepository
             .Where(ls => ls.UserId == userId && ls.Song.IsPublished && !songsInPlaylist.Contains(ls.SongId))
             .Select(ls => ls.Song);
             
-       var filteredQuery = SearchQueryFilters.ApplyAnyFilter(baseQuery, lowerSearch, similarityThreshold); 
-       
-       var result = await filteredQuery
+       var filteredQuery = SearchQueryFilters.ApplyAnyFilter(baseQuery, lowerSearch, similarityThreshold);
+
+       return filteredQuery
            .Take(50)
            .Select(ToVmExpression)
-           .ToListAsync(cancellationToken)
-           .ConfigureAwait(false);
-       
-        return result;
+           .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<SongVm>> GetUnpublishedList(CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> GetUnpublishedList(CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => !s.IsPublished && !s.MarkedForDeletion)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return songs;
+            .ToListAsync(cancellationToken);
     }
     
-    public async Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default)
+    public Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default)
     {
-        var songs = await _dbContext.Songs
+        return _dbContext.Songs
             .AsNoTracking()
             .Where(s => s.UploaderId == userId)
             .OrderByDescending(s => s.CreatedAt)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return songs;
-    }
-
-    public async Task Add(Song song, CancellationToken cancellationToken = default)
-    {
-        await _dbContext.Songs.AddAsync(song, cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 
     public void Update(Song song) => _dbContext.Songs.Update(song);
+    
     public void UpdateRange(IEnumerable<Song> songs) => _dbContext.Songs.UpdateRange(songs);
-
-    public void Delete(Song song) => _dbContext.Songs.Remove(song);
-
+    
     public void DeleteRange(IEnumerable<Song> songs) => _dbContext.Songs.RemoveRange(songs);
 
     private static string RemoveDiacritics(string text)

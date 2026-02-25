@@ -21,10 +21,10 @@ public class RabbitMqMessagePublisher : IMessagePublisher
 
     public async Task PublishAsync<T>(T message, string exchange, string routingKey, CancellationToken cancellationToken = default)
     {
-        await using var connection = await _connectionProvider.GetConnectionAsync();
-        
-        // Cheap init operation
-        await using var channel = await connection.CreateChannelAsync(null, cancellationToken);
+        await using var connection = await _connectionProvider.GetConnectionAsync().ConfigureAwait(false);
+        await using var channel = await connection
+            .CreateChannelAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         
         var jsonBody = JsonSerializer.SerializeToUtf8Bytes(message, JsonSerializerOptions);
         
@@ -40,6 +40,7 @@ public class RabbitMqMessagePublisher : IMessagePublisher
             mandatory: false,
             basicProperties: properties,
             body: jsonBody,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

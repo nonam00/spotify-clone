@@ -28,7 +28,9 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
 
     public async Task<Result> Handle(UpdateModeratorPermissionsCommand command, CancellationToken cancellationToken)
     {
-        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+        var managingModerator = await _moderatorsRepository
+            .GetById(command.ManagingModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (managingModerator is null)
         {
@@ -58,7 +60,9 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
         
-        var moderatorToUpdate = await _moderatorsRepository.GetById(command.ModeratorToUpdatePermissionsId, cancellationToken);
+        var moderatorToUpdate = await _moderatorsRepository
+            .GetById(command.ModeratorToUpdatePermissionsId, cancellationToken)
+            .ConfigureAwait(false);
         
         if (moderatorToUpdate is null)
         {
@@ -89,7 +93,7 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
         }
         
         _moderatorsRepository.Update(moderatorToUpdate);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
             "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}.",

@@ -64,7 +64,10 @@ public class Mediator : IMediator
         
         var call = Expression.Call(castHandler, method, castRequest, ctParam);
         
-        return Expression.Lambda<Func<object, object, CancellationToken, Task>>(call, handlerParam, requestParam, ctParam).Compile();
+        return Expression
+            .Lambda<Func<object, object, CancellationToken, Task>>(
+                call, handlerParam, requestParam, ctParam)
+            .Compile();
     }
 
     private static Func<IServiceProvider, object, CancellationToken, Task<Error?>> CreateValidationInvoker(Type requestType)

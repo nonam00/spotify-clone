@@ -28,7 +28,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Resul
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetById(request.UserId, cancellationToken);
+        var user = await _usersRepository.GetById(request.UserId, cancellationToken).ConfigureAwait(false);
 
         if (user is null)
         {
@@ -56,7 +56,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Resul
         }
         
         _usersRepository.Update(user);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("User {UserId} successfully updated profile", request.UserId);
         

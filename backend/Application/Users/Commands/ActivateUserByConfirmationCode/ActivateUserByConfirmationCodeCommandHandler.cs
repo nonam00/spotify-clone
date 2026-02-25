@@ -36,7 +36,10 @@ public class ActivateUserByConfirmationCodeCommandHandler
     public async Task<Result<TokenPair>> Handle(
         ActivateUserByConfirmationCodeCommand request, CancellationToken cancellationToken)
     {
-        var confirmationCode = await _codesRepository.GetConfirmationCode(request.Email);
+        var confirmationCode = await _codesRepository
+            .GetConfirmationCode(request.Email)
+            .ConfigureAwait(false);
+        
         if (request.ConfirmationCode != confirmationCode)
         {
             _logger.LogInformation(
@@ -45,7 +48,7 @@ public class ActivateUserByConfirmationCodeCommandHandler
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
 
-        var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
+        var user = await _usersRepository.GetByEmail(request.Email, cancellationToken).ConfigureAwait(false);
 
         if (user is null)
         {
@@ -68,7 +71,7 @@ public class ActivateUserByConfirmationCodeCommandHandler
 
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully activated their account with confirmation code.", user.Id);
         

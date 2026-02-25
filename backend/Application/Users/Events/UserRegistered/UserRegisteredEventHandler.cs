@@ -17,12 +17,16 @@ public class UserRegisteredEventHandler : IDomainEventHandler<UserRegisteredEven
         _codesRepository = codesRepository;
     }
 
-    public Task HandleAsync(UserRegisteredEvent @event, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(UserRegisteredEvent @event, CancellationToken cancellationToken = default)
     {
         var code = new UserCode();
-        var storeTask = _codesRepository.SetConfirmationCode(@event.Email, code, code.CodeExpiry);
-        var sendTask = _emailServicePublisher.PublishSendConfirmEmail(@event.Email, code, cancellationToken);
-
-        return Task.WhenAll(storeTask, sendTask);
+        
+        await _codesRepository
+            .SetConfirmationCode(@event.Email, code, code.CodeExpiry)
+            .ConfigureAwait(false);
+        
+        await _emailServicePublisher
+            .PublishSendConfirmEmail(@event.Email, code, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

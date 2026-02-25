@@ -32,7 +32,9 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
 
     public async Task<Result<TokenPair>> Handle(LoginByRefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByRefreshTokenValue(request.RefreshToken, cancellationToken);
+        var user = await _usersRepository
+            .GetByRefreshTokenValue(request.RefreshToken, cancellationToken)
+            .ConfigureAwait(false);
         
         if (user is null)
         {
@@ -62,7 +64,7 @@ public class LoginByRefreshTokenCommandHandler : IQueryHandler<LoginByRefreshTok
         
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully used refresh token to generate token pair.", user.Id);
         

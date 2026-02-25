@@ -10,9 +10,9 @@ namespace WebAPI;
 
 public static class DependencyInjection
 {
-    // Setting CORS policy for local responds
     extension(IServiceCollection services)
     {
+        // Setting CORS policy for local responds
         public IServiceCollection AddLocalCorsPolicy()
         {
             services.AddCors(options =>

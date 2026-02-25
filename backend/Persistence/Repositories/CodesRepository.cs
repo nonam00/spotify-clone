@@ -14,25 +14,17 @@ public class CodesRepository : ICodesRepository
         _redisDb = redisDb.GetDatabase(0);
     }
 
-    public async Task SetConfirmationCode(string email, string code, TimeSpan expiry)
-    {
-        await _redisDb.StringSetAsync($"{ConfirmationPrefix}:{email}", code, expiry).ConfigureAwait(false);
-    }
+    public Task<bool> SetConfirmationCode(string email, string code, TimeSpan expiry) 
+        => _redisDb.StringSetAsync($"{ConfirmationPrefix}:{email}", code, expiry);
 
-    public async Task<string?> GetConfirmationCode(string email)
-    {
-        var code = await _redisDb.StringGetAsync($"{ConfirmationPrefix}:{email}").ConfigureAwait(false);
-        return code;
-    }
+    public Task<string> GetConfirmationCode(string email)
+        => _redisDb.StringGetAsync($"{ConfirmationPrefix}:{email}")
+            .ContinueWith(t => t.Result.ToString());
 
-    public async Task SetRestoreCode(string email, string code, TimeSpan expiry)
-    {
-        await _redisDb.StringSetAsync($"{RestorePrefix}:{email}", code, expiry).ConfigureAwait(false);
-    }
+    public Task<bool> SetRestoreCode(string email, string code, TimeSpan expiry)
+        => _redisDb.StringSetAsync($"{RestorePrefix}:{email}", code, expiry);
 
-    public async Task<string?> GetRestoreCode(string email)
-    {
-        var code = await _redisDb.StringGetAsync($"{RestorePrefix}:{email}").ConfigureAwait(false);
-        return code;
-    }
+    public Task<string> GetRestoreCode(string email)
+        => _redisDb.StringGetAsync($"{RestorePrefix}:{email}")
+            .ContinueWith(t => t.Result.ToString());
 }

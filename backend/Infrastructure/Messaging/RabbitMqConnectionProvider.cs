@@ -23,14 +23,14 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
         };
     }
 
-    public async Task<IConnection> GetConnectionAsync()
+    public async ValueTask<IConnection> GetConnectionAsync()
     {
         if (_connection is { IsOpen: true })
         {
             return _connection;
         }
 
-        await _semaphoreSlim.WaitAsync();
+        await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
         try
         {
             // Double-Check Locking
@@ -39,7 +39,7 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
                 return _connection;
             }
 
-            _connection = await _factory.CreateConnectionAsync();
+            _connection = await _factory.CreateConnectionAsync().ConfigureAwait(false);
             return _connection;
         }
         finally
@@ -50,15 +50,17 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
     
     public async Task InitializeInfrastructureAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = await GetConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+        await using var connection = await GetConnectionAsync().ConfigureAwait(false);
+        await using var channel = await connection
+            .CreateChannelAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-        List<Task> tasks =
+        IEnumerable<Task> tasks =
         [
             DeclareFileServiceInfrastructureAsync(channel, cancellationToken),
-            DeclareEmailServiceInfrastructureAsync(channel, cancellationToken),
+            DeclareEmailServiceInfrastructureAsync(channel, cancellationToken)
         ];
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
     private static async Task DeclareFileServiceInfrastructureAsync(
@@ -69,7 +71,8 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             type: ExchangeType.Topic, 
             durable: true, 
             autoDelete: false, 
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         // Queues must be declared in consumer service
         await channel.QueueDeclareAsync(
@@ -79,14 +82,16 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             exclusive: false,
             noWait: false,
             arguments: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         
         await channel.QueueBindAsync(
             queue: FileServiceMessaging.DeleteFileQueue,
             exchange: FileServiceMessaging.FileExchange,
             routingKey: FileServiceMessaging.DeleteRoutingKey,
             arguments: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static async Task DeclareEmailServiceInfrastructureAsync(
@@ -97,7 +102,8 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             type: ExchangeType.Topic, 
             durable: true, 
             autoDelete: false, 
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         // Queues must be declared in consumer service
         await channel.QueueDeclareAsync(
@@ -107,22 +113,24 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             exclusive: false,
             noWait: false,
             arguments: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         
         await channel.QueueBindAsync(
             queue: EmailServiceContract.SendEmailQueue,
             exchange: EmailServiceContract.EmailExchange,
             routingKey: EmailServiceContract.SendEmailRoutingKey,
             arguments: null,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
     
     public async ValueTask DisposeAsync()
     {
         if (_connection != null)
         {
-            await _connection.CloseAsync();
-            await _connection.DisposeAsync();
+            await _connection.CloseAsync().ConfigureAwait(false);
+            await _connection.DisposeAsync().ConfigureAwait(false);
         }
         _semaphoreSlim.Dispose();
         GC.SuppressFinalize(this);

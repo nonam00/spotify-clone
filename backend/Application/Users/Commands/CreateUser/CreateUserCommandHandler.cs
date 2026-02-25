@@ -32,7 +32,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
 
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var checkUser = await _usersRepository.GetByEmail(request.Email, cancellationToken);
+        var checkUser = await _usersRepository.GetByEmail(request.Email, cancellationToken).ConfigureAwait(false);
         
         if (checkUser != null)
         {
@@ -55,8 +55,8 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Resul
         
         var user = User.Create(email, passwordHash, request.FullName);
         
-        await _usersRepository.Add(user, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _usersRepository.Add(user, cancellationToken).ConfigureAwait(false);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("Successfully created new user {UserId}.", user.Id);
         

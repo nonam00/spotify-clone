@@ -26,7 +26,7 @@ public class DeleteMarkedForDeletionSongsCommandHandler : ICommandHandler<Delete
         if (markedForDeletion.Count != 0)
         {
             _songsRepository.DeleteRange(markedForDeletion);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         return Result.Success();

@@ -52,12 +52,14 @@ public class SendRestoreTokenCommandHandler : ICommandHandler<SendRestoreTokenCo
         var restoreCode = new UserCode();
         
         _logger.LogDebug("Saving restore code for {UserId} to storage.", user.Id);
-        var storeTask = _codesRepository.SetRestoreCode(user.Email, restoreCode, restoreCode.CodeExpiry);
+        await _codesRepository
+            .SetRestoreCode(user.Email, restoreCode, restoreCode.CodeExpiry)
+            .ConfigureAwait(false);
         
         _logger.LogDebug("Sending restore code for {UserId} to email {Email}.", user.Id, user.Email);
-        var sendTask = _emailServicePublisher.PublishSendRestoreEmail(user.Email, restoreCode, cancellationToken);
-        
-        await Task.WhenAll(storeTask, sendTask).ConfigureAwait(false);
+        await _emailServicePublisher
+            .PublishSendRestoreEmail(user.Email, restoreCode, cancellationToken)
+            .ConfigureAwait(false);
         
         _logger.LogInformation("Successfully sent restore code for {UserId} to email {Email}.", user.Id, user.Email);
         

@@ -32,7 +32,9 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
 
     public async Task<Result> Handle(AddSongsToPlaylistCommand request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
+        var playlist = await _playlistsRepository
+            .GetByIdWithSongs(request.PlaylistId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (playlist is null)
         {
@@ -50,7 +52,9 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
             return Result.Failure(PlaylistErrors.OwnershipError);
         }
         
-        var songs = await _songsRepository.GetListByIds(request.SongIds, cancellationToken);
+        var songs = await _songsRepository
+            .GetListByIds(request.SongIds, cancellationToken)
+            .ConfigureAwait(false);
 
         if (songs.Count != request.SongIds.Count)
         {
@@ -86,7 +90,7 @@ public class AddSongToPlaylistCommandHandler : ICommandHandler<AddSongsToPlaylis
             return addSongsResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully added {SongsCount} songs to playlist {PlaylistId}.",

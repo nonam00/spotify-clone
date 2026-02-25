@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     {
         var domainEvents = CollectAndCleanDomainEvents();
         
-        var result = await _dbContext.SaveChangesAsync(cancellationToken);
+        var result = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         // Dispatch domain events after successful save
         await DispatchDomainEventsAsync(domainEvents, cancellationToken).ConfigureAwait(false);

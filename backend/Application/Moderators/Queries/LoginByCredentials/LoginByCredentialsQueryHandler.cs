@@ -29,7 +29,7 @@ public class LoginByCredentialsQueryHandler : IQueryHandler<LoginByCredentialsQu
 
     public async Task<Result<string>> Handle(LoginByCredentialsQuery request, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetByEmail(request.Email, cancellationToken);
+        var moderator = await _moderatorsRepository.GetByEmail(request.Email, cancellationToken).ConfigureAwait(false);
 
         if (moderator == null)
         {

@@ -24,7 +24,9 @@ public class CreatePlaylistCommandHandler : ICommandHandler<CreatePlaylistComman
 
     public async Task<Result<Guid>> Handle(CreatePlaylistCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithPlaylists(request.UserId, cancellationToken);
+        var user = await _usersRepository
+            .GetByIdWithPlaylists(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (user is null)
         {
@@ -49,7 +51,7 @@ public class CreatePlaylistCommandHandler : ICommandHandler<CreatePlaylistComman
             return Result<Guid>.Failure(createPlaylistResult.Error);
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully created playlist {PlaylistId}.",

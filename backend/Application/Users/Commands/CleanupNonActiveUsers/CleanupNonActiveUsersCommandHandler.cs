@@ -24,12 +24,14 @@ public class CleanupNonActiveUsersCommandHandler : ICommandHandler<CleanupNonAct
 
     public async Task<Result> Handle(CleanupNonActiveUsersCommand command, CancellationToken cancellationToken)
     {
-        var nonActiveUsers = await _usersRepository.GetNonActiveList(cancellationToken);
+        var nonActiveUsers = await _usersRepository
+            .GetNonActiveList(cancellationToken)
+            .ConfigureAwait(false);
         
         if (nonActiveUsers.Count != 0)
         {
             _usersRepository.DeleteRange(nonActiveUsers);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             
             var tasks = nonActiveUsers
                 .SelectMany(u => u.Playlists)

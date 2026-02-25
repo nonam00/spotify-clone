@@ -27,7 +27,9 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
 
     public async Task<Result> Handle(ActivateModeratorCommand command, CancellationToken cancellationToken)
     {
-        var managingModerator = await _moderatorsRepository.GetById(command.ManagingModeratorId, cancellationToken);
+        var managingModerator = await _moderatorsRepository
+            .GetById(command.ManagingModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (managingModerator is null)
         {
@@ -56,7 +58,9 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
 
-        var moderatorToActivate = await _moderatorsRepository.GetById(command.ModeratorToActivateId, cancellationToken);
+        var moderatorToActivate = await _moderatorsRepository
+            .GetById(command.ModeratorToActivateId, cancellationToken)
+            .ConfigureAwait(false);
         
         if (moderatorToActivate is null)
         {
@@ -79,7 +83,7 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
         }
         
         _moderatorsRepository.Update(moderatorToActivate);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.",

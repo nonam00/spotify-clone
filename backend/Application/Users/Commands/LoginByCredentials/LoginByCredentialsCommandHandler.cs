@@ -32,7 +32,9 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
 
     public async Task<Result<TokenPair>> Handle(LoginByCredentialsCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByEmailWithRefreshTokens(request.Email, cancellationToken);
+        var user = await _usersRepository
+            .GetByEmailWithRefreshTokens(request.Email, cancellationToken)
+            .ConfigureAwait(false);
 
         if (user is null)
         {
@@ -64,7 +66,7 @@ public class LoginByCredentialsCommandHandler : IQueryHandler<LoginByCredentials
         
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("Successfully generated token pair for user {userId}.", user.Id);
 

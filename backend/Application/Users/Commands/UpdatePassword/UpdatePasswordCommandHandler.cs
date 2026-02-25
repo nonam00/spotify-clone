@@ -32,7 +32,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
 
     public async Task<Result> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetById(request.UserId, cancellationToken);
+        var user = await _usersRepository.GetById(request.UserId, cancellationToken).ConfigureAwait(false);
 
         if (user is null)
         {
@@ -68,7 +68,7 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         }
         
         _usersRepository.Update(user);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully changed password.", request.UserId);
         

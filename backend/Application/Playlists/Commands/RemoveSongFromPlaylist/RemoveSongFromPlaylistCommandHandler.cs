@@ -27,7 +27,9 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
 
     public async Task<Result> Handle(RemoveSongFromPlaylistCommand request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetByIdWithSongs(request.PlaylistId, cancellationToken);
+        var playlist = await _playlistsRepository
+            .GetByIdWithSongs(request.PlaylistId, cancellationToken)
+            .ConfigureAwait(false);
         
         if (playlist is null)
         {
@@ -64,7 +66,7 @@ public class RemoveSongFromPlaylistCommandHandler: ICommandHandler<RemoveSongFro
             return removeSongsResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         return Result.Success();
     }

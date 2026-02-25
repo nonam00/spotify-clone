@@ -27,7 +27,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
 
     public async Task<Result> Handle(UpdatePlaylistCommand request, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken);
+        var playlist = await _playlistsRepository.GetById(request.PlaylistId, cancellationToken).ConfigureAwait(false);
         
         if (playlist is null)
         {
@@ -64,7 +64,7 @@ public class UpdatePlaylistCommandHandler : ICommandHandler<UpdatePlaylistComman
         
         _playlistsRepository.Update(playlist);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully updated playlist {PlaylistId} details.",

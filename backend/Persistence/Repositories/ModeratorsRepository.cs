@@ -16,38 +16,30 @@ public class ModeratorsRepository : IModeratorsRepository
         _dbContext = dbContext;
     }
 
-    public async Task Add(Moderator moderator, CancellationToken cancellationToken = default)
+    public async ValueTask Add(Moderator moderator, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Moderators.AddAsync(moderator, cancellationToken);
+        await _dbContext.Moderators.AddAsync(moderator, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<Moderator?> GetById(Guid id, CancellationToken cancellationToken = default)
-    {
-        var moderator = await _dbContext.Moderators.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
-        
-        return moderator;
-    }
+    public Task<Moderator?> GetById(Guid id, CancellationToken cancellationToken = default)
+        => _dbContext.Moderators.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
     public Task<Moderator?> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
-        var moderator = _dbContext.Moderators
+        return _dbContext.Moderators
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
-        
-        return moderator;
     }
     
-    public async Task<List<ModeratorVm>> GetList(CancellationToken cancellationToken = default)
+    public Task<List<ModeratorVm>> GetList(CancellationToken cancellationToken = default)
     {
-        var moderators = await _dbContext.Moderators
+        return _dbContext.Moderators
             .AsNoTracking()
             .OrderByDescending(m => m.CreatedAt)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return moderators;
+            .ToListAsync(cancellationToken);
     }
+    
     public void Update(Moderator moderator) => _dbContext.Moderators.Update(moderator);
 
     private static readonly Expression<Func<Moderator, ModeratorVm >> ToVmExpression = moderator =>

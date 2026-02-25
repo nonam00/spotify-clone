@@ -39,7 +39,7 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
 
     public async Task<Result<TokenPair>> Handle(RestoreUserAccessCommand request, CancellationToken cancellationToken)
     {
-        var restoreCode = await _codesRepository.GetRestoreCode(request.Email);
+        var restoreCode = await _codesRepository.GetRestoreCode(request.Email).ConfigureAwait(false);
         if (request.RestoreCode != restoreCode)
         {
             _logger.LogInformation(
@@ -48,7 +48,7 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
             return Result<TokenPair>.Failure(UserErrors.InvalidVerificationCode);
         }
         
-        var user = await _usersRepository.GetByEmail(request.Email, cancellationToken);
+        var user = await _usersRepository.GetByEmail(request.Email, cancellationToken).ConfigureAwait(false);
 
         if (user is null)
         {
@@ -84,7 +84,7 @@ public class RestoreUserAccessCommandHandler : ICommandHandler<RestoreUserAccess
         
         var accessToken = _jwtProvider.GenerateUserToken(user);
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully restored access to account using restore code.", user.Id);
         

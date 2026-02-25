@@ -32,7 +32,9 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
 
     public async Task<Result> Handle(UnpublishSongCommand command, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(command.ModeratorId, cancellationToken);
+        var moderator = await _moderatorsRepository
+            .GetById(command.ModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (moderator is null)
         {
@@ -59,7 +61,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
         
-        var song = await _songsRepository.GetById(command.SongId, cancellationToken);
+        var song = await _songsRepository.GetById(command.SongId, cancellationToken).ConfigureAwait(false);
         
         if (song is null)
         {
@@ -80,7 +82,7 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
         }
         
         _songsRepository.Update(song);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "Moderator {ModeratorId} successfully unpublished song {SongId}.",

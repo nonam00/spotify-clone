@@ -78,5 +78,6 @@ func setupRouter() *gin.Engine {
 	// System routes
 	router.GET("/health", handler.HealthCheck)
 	router.GET("/metrics", handler.PrometheusHandler())
+
 	return router
 }
