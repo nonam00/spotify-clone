@@ -1,31 +1,24 @@
-using Microsoft.Extensions.Logging;
-
 using Domain.Events;
-using Application.Shared.Interfaces;
+using Application.Shared.Integration;
 using Application.Shared.Messaging;
 
 namespace Application.Users.Events.UserAvatarChanged;
 
 public class UserAvatarChangedEventHandler : IDomainEventHandler<UserAvatarChangedEvent>
 { 
-    private readonly IFileServiceClient _fileServiceClient;
-    private readonly ILogger<UserAvatarChangedEventHandler> _logger;
+    private readonly IFileServicePublisher _fileServicePublisher;
 
-    public UserAvatarChangedEventHandler(IFileServiceClient fileServiceClient, ILogger<UserAvatarChangedEventHandler> logger)
+    public UserAvatarChangedEventHandler(IFileServicePublisher fileServicePublisher)
     {
-        _fileServiceClient = fileServiceClient;
-        _logger = logger;
+        _fileServicePublisher = fileServicePublisher;
     }
 
-    public async Task HandleAsync(UserAvatarChangedEvent @event, CancellationToken cancellationToken = default)
+    public Task HandleAsync(UserAvatarChangedEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling user {userId} profile updated event", @event.UserId);
-        
-        _logger.LogDebug("Deleting user {userId} old avatar image {imagePath}",
-            @event.UserId, @event.OldAvatarPath.Value);
-        
-        await _fileServiceClient
-            .DeleteAsync(@event.OldAvatarPath, "image", cancellationToken)
-            .ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(@event.OldAvatarPath))
+        {
+            return Task.CompletedTask;
+        }
+        return _fileServicePublisher.PublishDeleteFileAsync(@event.OldAvatarPath, "image", cancellationToken);
     }
 }

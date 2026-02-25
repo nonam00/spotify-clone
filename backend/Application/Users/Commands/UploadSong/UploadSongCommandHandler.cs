@@ -28,7 +28,9 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
 
     public async Task<Result> Handle(UploadSongCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithUploadedSongs(request.UserId, cancellationToken);
+        var user = await _usersRepository
+            .GetByIdWithUploadedSongs(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
         
         if (user is null)
         {
@@ -54,7 +56,7 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
             return uploadSongResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully uploaded song {SongId}.",

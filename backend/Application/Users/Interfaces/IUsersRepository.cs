@@ -5,7 +5,7 @@ namespace Application.Users.Interfaces;
 
 public interface IUsersRepository
 {
-    Task Add(User user, CancellationToken cancellationToken = default);
+    ValueTask Add(User user, CancellationToken cancellationToken = default);
     Task<User?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByIdWithRefreshTokens(Guid id, CancellationToken cancellationToken = default);
     Task<User?> GetByIdWithUploadedSongs(Guid id, CancellationToken cancellationToken = default);

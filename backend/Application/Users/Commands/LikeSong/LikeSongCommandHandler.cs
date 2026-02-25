@@ -32,7 +32,9 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
 
     public async Task<Result> Handle(LikeSongCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithLikedSongs(request.UserId, cancellationToken);
+        var user = await _usersRepository
+            .GetByIdWithLikedSongs(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (user is null)
         {
@@ -50,7 +52,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
             return Result.Failure(UserDomainErrors.NotActive);
         }
         
-        var song = await _songsRepository.GetById(request.SongId, cancellationToken);
+        var song = await _songsRepository.GetById(request.SongId, cancellationToken).ConfigureAwait(false);
 
         if (song is null)
         {
@@ -80,7 +82,7 @@ public class LikeSongCommandHandler : ICommandHandler<LikeSongCommand, Result>
             return  Result.Failure(likeSongResult.Error);
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully liked song {SongId}.", request.UserId, request.SongId);
         

@@ -27,7 +27,9 @@ public class CleanUserRefreshTokensCommandHandler : ICommandHandler<CleanUserRef
 
     public async Task<Result> Handle(CleanUserRefreshTokensCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithRefreshTokens(request.UserId, cancellationToken);
+        var user = await _usersRepository
+            .GetByIdWithRefreshTokens(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (user is null)
         {
@@ -52,7 +54,7 @@ public class CleanUserRefreshTokensCommandHandler : ICommandHandler<CleanUserRef
             return cleanRefreshTokensResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation("User {UserId} successfully cleaned their refresh tokens.", request.UserId);
         

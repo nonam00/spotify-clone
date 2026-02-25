@@ -1,5 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 using Domain.Common;
 
@@ -9,6 +11,8 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<InMemoryDomainEventDispatcher> _logger;
+    
+    private static readonly ConcurrentDictionary<Type, Func<object, IDomainEvent, CancellationToken, Task>> InvokerCache = new();
 
     public InMemoryDomainEventDispatcher(
         IServiceProvider serviceProvider,
@@ -22,38 +26,49 @@ public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
     {
         var eventType = domainEvent.GetType();
         var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(eventType);
-
+        var handler = _serviceProvider.GetRequiredService(handlerType);
+        
+        var invoker = InvokerCache.GetOrAdd(eventType, CreateCompiledInvoker);
+        
         try
         {
-            var handlers = _serviceProvider.GetServices(handlerType);
-            
-            foreach (var handler in handlers)
-            {
-                _logger.LogDebug("Dispatching domain event {EventType} to handler {HandlerType}", 
-                    eventType.Name, handler?.GetType().Name);
-
-                var handleMethod = handlerType.GetMethod("HandleAsync");
-                if (handleMethod != null)
-                {
-                    var task = (Task)handleMethod.Invoke(handler, [domainEvent, cancellationToken])!;
-                    await task.ConfigureAwait(false);
-                }
-            }
+            await invoker(handler, domainEvent, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error dispatching domain event {EventType}", eventType.Name);
+            _logger.LogError(
+                ex, "Error in {HandlerType} while handling {EventType}",
+                handler.GetType().Name, eventType.Name);
             throw;
         }
     }
 
-    public async Task DispatchAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
+    public Task DispatchAsync(IEnumerable<IDomainEvent> domainEvents, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(domainEvents);
+        var tasks = domainEvents.Select(domainEvent => DispatchAsync(domainEvent, cancellationToken));
+        return Task.WhenAll(tasks);
+    }
+    
+    // Creates a cached invoker
+    private static Func<object, IDomainEvent, CancellationToken, Task> CreateCompiledInvoker(Type eventType)
+    {
+        var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(eventType);
+        var method = handlerType.GetMethod("HandleAsync")!;
+        
+        // Delegate params: (object handler, IDomainEvent event, CancellationToken ct)
+        var handlerParam = Expression.Parameter(typeof(object), "handler");
+        var eventParam = Expression.Parameter(typeof(IDomainEvent), "event");
+        var ctParam = Expression.Parameter(typeof(CancellationToken), "ct");
 
-        foreach (var domainEvent in domainEvents)
-        {
-            await DispatchAsync(domainEvent, cancellationToken).ConfigureAwait(false);
-        }
+        // Type case: ((IDomainEventHandler<T>)handler).HandleAsync((T)event, ct)
+        var castHandler = Expression.Convert(handlerParam, handlerType);
+        var castEvent = Expression.Convert(eventParam, eventType);
+        
+        var methodCall = Expression.Call(castHandler, method, castEvent, ctParam);
+
+        return Expression
+            .Lambda<Func<object, IDomainEvent, CancellationToken, Task>>(
+                methodCall, handlerParam, eventParam, ctParam)
+            .Compile();
     }
 }

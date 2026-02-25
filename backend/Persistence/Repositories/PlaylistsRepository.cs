@@ -16,68 +16,55 @@ public class PlaylistsRepository : IPlaylistsRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Playlist?> GetById(Guid playlistId, CancellationToken cancellationToken = default)
+    public Task<Playlist?> GetById(Guid playlistId, CancellationToken cancellationToken = default)
     {
-        var playlist = await _dbContext.Playlists
+        return _dbContext.Playlists
             .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken);
-        
-        return playlist;
+            .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken); 
     }
 
-    public async Task<Playlist?> GetByIdWithSongs(Guid playlistId, CancellationToken cancellationToken = default)
+    public Task<Playlist?> GetByIdWithSongs(Guid playlistId, CancellationToken cancellationToken = default)
     {
-        var playlist = await _dbContext.Playlists
+        return _dbContext.Playlists
             .Include(p => p.PlaylistSongs)
             .SingleOrDefaultAsync(p => p.Id == playlistId, cancellationToken);
-        
-        return playlist;
     }
 
-    public async Task<List<PlaylistVm>> GetList(Guid userId, CancellationToken cancellationToken = default)
+    public Task<List<PlaylistVm>> GetList(Guid userId, CancellationToken cancellationToken = default)
     {
-        var playlists = await _dbContext.Playlists
+        return _dbContext.Playlists
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.UpdatedAt)
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return playlists;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<PlaylistVm>> TakeList(Guid userId, int count, CancellationToken cancellationToken = default)
+    public Task<List<PlaylistVm>> TakeList(Guid userId, int count, CancellationToken cancellationToken = default)
     {
-        var playlists = await _dbContext.Playlists
+        return _dbContext.Playlists
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.UpdatedAt)
             .Select(ToVmExpression)
             .Take(count)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return playlists;
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<PlaylistVm>> GetListWithoutSong(
+    public Task<List<PlaylistVm>> GetListWithoutSong(
         Guid userId, Guid songId, CancellationToken cancellationToken = default)
     {
         var playlistWithSong = _dbContext.PlaylistSongs
             .AsNoTracking()
             .Where(ps => ps.SongId == songId)
             .Select(ps => ps.PlaylistId);
-        
-        var playlists = await _dbContext.Playlists
+
+        return _dbContext.Playlists
             .AsNoTracking()
             .Where(p => p.UserId == userId)
             .Where(p => !playlistWithSong.Contains(p.Id))
             .Select(ToVmExpression)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return playlists;
+            .ToListAsync(cancellationToken);
     }
 
     public void Update(Playlist playlist) => _dbContext.Playlists.Update(playlist);

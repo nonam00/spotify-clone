@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+const DeleteFileQueue = "file-service.delete-file"
+
+var ErrFileNotFound = errors.New("file not found")
 
 type FileType string
 
@@ -22,4 +29,10 @@ type UploadRequest struct {
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`
+}
+
+// DeleteFileMessage - сообщение для удаления файла через RabbitMQ
+type DeleteFileMessage struct {
+	FileType FileType `json:"file_type"`
+	FileID   string   `json:"file_id"`
 }

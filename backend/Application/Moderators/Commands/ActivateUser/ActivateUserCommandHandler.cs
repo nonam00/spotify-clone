@@ -32,7 +32,9 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
 
     public async Task<Result> Handle(ActivateUserCommand command, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(command.ModeratorId, cancellationToken);
+        var moderator = await _moderatorsRepository
+            .GetById(command.ModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (moderator is null)
         {
@@ -59,7 +61,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
             return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
         }
         
-        var user = await _usersRepository.GetById(command.UserId, cancellationToken);
+        var user = await _usersRepository.GetById(command.UserId, cancellationToken).ConfigureAwait(false);
         
         if (user is null)
         {
@@ -80,7 +82,7 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         }
         
         _usersRepository.Update(user);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "Moderator {ModeratorId} successfully activated user {UserId}.",

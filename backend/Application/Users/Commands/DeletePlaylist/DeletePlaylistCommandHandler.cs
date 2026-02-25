@@ -27,7 +27,9 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
 
     public async Task<Result> Handle(DeletePlaylistCommand request, CancellationToken cancellationToken)
     {
-        var user = await _usersRepository.GetByIdWithPlaylists(request.UserId, cancellationToken);
+        var user = await _usersRepository
+            .GetByIdWithPlaylists(request.UserId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (user is null)
         {
@@ -55,7 +57,7 @@ public class DeletePlaylistCommandHandler : ICommandHandler<DeletePlaylistComman
             return removePlaylistResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully deleted playlist {PlaylistId}.", 

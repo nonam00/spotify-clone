@@ -1,7 +1,7 @@
+using Domain.Common;
 using Application.Playlists.Interfaces;
 using Application.Playlists.Models;
 using Application.Shared.Messaging;
-using Domain.Common;
 
 namespace Application.Playlists.Queries.GetPlaylistListWithoutSong;
 

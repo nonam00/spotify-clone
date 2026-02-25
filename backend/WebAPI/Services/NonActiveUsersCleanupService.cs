@@ -32,8 +32,8 @@ public class NonActiveUsersCleanupService : BackgroundService
     private async Task DoWork()
     {
         _logger.LogInformation("Starting non-active users cleanup");
-        
-        using var scope = _scopeFactory.CreateScope();
+
+        await using var scope = _scopeFactory.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         await mediator.Send(new CleanupNonActiveUsersCommand());

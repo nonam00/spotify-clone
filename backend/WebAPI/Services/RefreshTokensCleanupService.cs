@@ -31,7 +31,7 @@ public class RefreshTokensCleanupService : BackgroundService
     {
         _logger.LogInformation("Starting refresh tokens cleanup");
         
-        using var scope = _scopeFactory.CreateScope();
+        await using var scope = _scopeFactory.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         await mediator.Send(new CleanupExpiredRefreshTokensCommand());

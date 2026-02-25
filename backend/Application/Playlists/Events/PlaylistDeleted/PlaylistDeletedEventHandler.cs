@@ -1,35 +1,24 @@
-using Microsoft.Extensions.Logging;
-
 using Domain.Events;
-using Application.Shared.Interfaces;
+using Application.Shared.Integration;
 using Application.Shared.Messaging;
 
 namespace Application.Playlists.Events.PlaylistDeleted;
 
 public class PlaylistDeletedEventHandler : IDomainEventHandler<PlaylistDeletedEvent>
 {
-    private readonly IFileServiceClient _fileServiceClient;
-    private readonly ILogger<PlaylistDeletedEventHandler> _logger;
+    private readonly IFileServicePublisher _fileServicePublisher;
 
-    public PlaylistDeletedEventHandler(IFileServiceClient fileServiceClient, ILogger<PlaylistDeletedEventHandler> logger)
+    public PlaylistDeletedEventHandler(IFileServicePublisher fileServicePublisher) 
     {
-        _fileServiceClient = fileServiceClient;
-        _logger = logger;
+        _fileServicePublisher = fileServicePublisher;
     }
 
-    public async Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
+    public Task HandleAsync(PlaylistDeletedEvent @event, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Handling playlist {PlaylistId} deleted event", @event.PlaylistId);
-
-        if (!string.IsNullOrWhiteSpace(@event.ImagePath))
+        if (string.IsNullOrWhiteSpace(@event.ImagePath))
         {
-            _logger.LogDebug(
-                "Deleting playlist {PlaylistId} cover image {ImagePath}",
-                @event.PlaylistId, @event.ImagePath);
-            
-            await _fileServiceClient
-                .DeleteAsync(@event.ImagePath, "image", cancellationToken)
-                .ConfigureAwait(false);   
+            return Task.CompletedTask;
         }
+        return _fileServicePublisher.PublishDeleteFileAsync(@event.ImagePath, "image", cancellationToken);
     }
 }

@@ -14,15 +14,12 @@ public class RefreshTokensRepository : IRefreshTokensRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<RefreshToken>> GetExpiredList(CancellationToken cancellationToken = default)
+    public Task<List<RefreshToken>> GetExpiredList(CancellationToken cancellationToken = default)
     {
-        var expiredTokens = await _dbContext.RefreshTokens
+        return _dbContext.RefreshTokens
             .AsNoTracking()
             .Where(rf => rf.Expires < DateTime.UtcNow)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        
-        return expiredTokens;
+            .ToListAsync(cancellationToken);
     }
 
     public void DeleteRange(IEnumerable<RefreshToken> refreshTokens) =>

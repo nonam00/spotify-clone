@@ -26,7 +26,9 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
 
     public async Task<Result> Handle(ReorderSongsInPlaylistCommand command, CancellationToken cancellationToken)
     {
-        var playlist = await _playlistsRepository.GetByIdWithSongs(command.PlaylistId, cancellationToken);
+        var playlist = await _playlistsRepository
+            .GetByIdWithSongs(command.PlaylistId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (playlist is null)
         {
@@ -54,7 +56,7 @@ public class ReorderSongsInPlaylistCommandHandler : ICommandHandler<ReorderSongs
             return reorderSongsResult;
         }
         
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "User {UserId} successfully reordered songs in playlist {PlaylistId}.",

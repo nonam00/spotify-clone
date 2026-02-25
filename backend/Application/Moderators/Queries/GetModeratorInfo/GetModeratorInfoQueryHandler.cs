@@ -23,7 +23,9 @@ public class GetModeratorInfoQueryHandler : IQueryHandler<GetModeratorInfoQuery,
 
     public async Task<Result<ModeratorInfo>> Handle(GetModeratorInfoQuery request, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(request.ModeratorId, cancellationToken);
+        var moderator = await _moderatorsRepository
+            .GetById(request.ModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (moderator != null)
         {

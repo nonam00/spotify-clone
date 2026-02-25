@@ -44,6 +44,17 @@ scrape_configs:
     static_configs:
       - targets: ['file-service:8005']
         labels:
+          instance: 'file-service'
           service: 'file-service'
+          language: 'go'
+    metrics_path: '/metrics'
+    
+  # Email Service metrics (Go)
+  - job_name: 'email-service'
+    static_configs:
+      - targets: [ 'email-service:7855' ]
+        labels:
+          instance: 'email-service'
+          service: 'email-service'
           language: 'go'
     metrics_path: '/metrics'

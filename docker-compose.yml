@@ -2,7 +2,7 @@
 services:
   db:
     container_name: postgresql_db
-    image: postgres:18.0-alpine
+    image: postgres:18.1-alpine
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -14,7 +14,7 @@ services:
       - POSTGRES_DB=$POSTGRES_DB
     volumes:
       - ./architecture/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - db_data:/var/lib/postgresql/18/main
+      - db_data:/var/lib/postgresql/18/docker
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -35,12 +35,11 @@ services:
       db:
         condition: service_healthy
         restart: true
-      minio:
+      rabbitmq:
         condition: service_healthy
+        restart: true
       backend-redis:
         condition: service_healthy
-      mailhog:
-        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"]
       interval: 10s
@@ -99,9 +98,12 @@ services:
       - REDIS_ENDPOINT=file-service-redis:6379
       - REDIS_PASSWORD=$REDIS_PASSWORD
       - REDIS_DB=0
-      - SECURITY_API_KEY=${FILE_SERVICE_SECURITY_API_KEY}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
     depends_on:
       minio:
+        condition: service_healthy
+        restart: true
+      rabbitmq:
         condition: service_healthy
         restart: true
       file-service-redis:
@@ -136,7 +138,7 @@ services:
       
   nginx:
     container_name: nginx
-    image: nginx:1.29.4-alpine
+    image: nginx:1.29.5-alpine
     ports:
       - "80:80"
     volumes:
@@ -156,7 +158,7 @@ services:
 
   backend-redis:
     container_name: backend_redis
-    image: redis:8.4-alpine
+    image: redis:8.6.1-alpine
     restart: unless-stopped
     command: >
       redis-server --requirepass ${REDIS_PASSWORD} --appendfsync everysec
@@ -176,7 +178,7 @@ services:
       
   file-service-redis:
     container_name: file_service_redis
-    image: redis:8.4-alpine
+    image: redis:8.6.1-alpine
     restart: unless-stopped
     command: >
       redis-server --requirepass ${REDIS_PASSWORD} --appendfsync everysec
@@ -193,6 +195,49 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      
+  rabbitmq:
+    image: rabbitmq:4.2.4-management-alpine
+    container_name: rabbitmq-server
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser
+      RABBITMQ_DEFAULT_PASS: mypassword
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
+        
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "7855:7855"
+    environment:
+      - GIN_MODE=release
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      mailhog:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7855/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
       
   mailhog:
     container_name: mailhog
@@ -217,7 +262,7 @@ services:
 
   backend-redis-exporter:
     container_name: backend_redis_exporter
-    image: oliver006/redis_exporter:v1.80.1-alpine
+    image: oliver006/redis_exporter:v1.81.0-alpine
     restart: unless-stopped
     environment:
       REDIS_ADDR: "redis://backend-redis:6379"
@@ -230,7 +275,7 @@ services:
         
   file-service-redis-exporter:
     container_name: file_service_redis_exporter
-    image: oliver006/redis_exporter:v1.80.1-alpine
+    image: oliver006/redis_exporter:v1.81.0-alpine
     restart: unless-stopped
     environment:
       REDIS_ADDR: "redis://file-service-redis:6379"
@@ -243,7 +288,7 @@ services:
 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v3.8.0
+    image: prom/prometheus:v3.9.1
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -270,7 +315,7 @@ services:
 
   grafana:
     container_name: grafana
-    image: grafana/grafana:12.4.0-20151846001
+    image: grafana/grafana:12.4.0
     restart: unless-stopped
     ports:
       - "3001:3000"
@@ -292,3 +337,5 @@ volumes:
   redis_data:
   prometheus_data:
   grafana_data:
+  rabbitmq_data:
+  rabbitmq_log:

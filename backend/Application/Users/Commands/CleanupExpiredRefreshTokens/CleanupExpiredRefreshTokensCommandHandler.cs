@@ -20,12 +20,14 @@ public class CleanupExpiredRefreshTokensCommandHandler : ICommandHandler<Cleanup
 
     public async Task<Result> Handle(CleanupExpiredRefreshTokensCommand request, CancellationToken cancellationToken)
     {
-        var expired = await _refreshTokensRepository.GetExpiredList(cancellationToken);
+        var expired = await _refreshTokensRepository
+            .GetExpiredList(cancellationToken)
+            .ConfigureAwait(false);
         
         if (expired.Count != 0)
         {
             _refreshTokensRepository.DeleteRange(expired);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         
         return Result.Success();

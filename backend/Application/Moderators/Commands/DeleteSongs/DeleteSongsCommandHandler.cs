@@ -32,7 +32,9 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
 
     public async Task<Result> Handle(DeleteSongsCommand command, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(command.ModeratorId, cancellationToken);
+        var moderator = await _moderatorsRepository
+            .GetById(command.ModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (moderator is null)
         {
@@ -54,7 +56,9 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
 
-        var songs = await _songsRepository.GetListByIds(command.SongIds, cancellationToken);
+        var songs = await _songsRepository
+            .GetListByIds(command.SongIds, cancellationToken)
+            .ConfigureAwait(false);
 
         if (songs.Count != command.SongIds.Count)
         {
@@ -71,7 +75,7 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
         }
 
         _songsRepository.UpdateRange(songs);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
             "{SongsCount} songs were successfully marked for deletion by moderator {ModeratorId}.",

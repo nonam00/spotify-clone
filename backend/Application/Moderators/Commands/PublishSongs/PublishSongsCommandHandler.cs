@@ -32,7 +32,9 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
 
     public async Task<Result> Handle(PublishSongsCommand command, CancellationToken cancellationToken)
     {
-        var moderator = await _moderatorsRepository.GetById(command.ModeratorId, cancellationToken);
+        var moderator = await _moderatorsRepository
+            .GetById(command.ModeratorId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (moderator is null)
         {
@@ -54,7 +56,9 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
 
-        var songs = await _songsRepository.GetListByIds(command.SongIds, cancellationToken);
+        var songs = await _songsRepository
+            .GetListByIds(command.SongIds, cancellationToken)
+            .ConfigureAwait(false);
 
         if (songs.Count != command.SongIds.Count)
         {
@@ -71,7 +75,7 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
         }
 
         _songsRepository.UpdateRange(songs);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
         _logger.LogInformation(
             "{SongCount} songs were successfully published by moderator {ModeratorId}.",
