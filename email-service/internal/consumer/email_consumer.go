@@ -51,13 +51,18 @@ func (c *EmailConsumer) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to set QoS: %w", err)
 	}
 
+	args := amqp.Table{
+		"x-dead-letter-exchange":    "system.dlx",
+		"x-dead-letter-routing-key": domain.SendEmailQueue + ".dlq",
+	}
+
 	_, err = ch.QueueDeclare(
 		domain.SendEmailQueue,
 		true,
 		false,
 		false,
 		false,
-		nil,
+		args,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue %s: %w", domain.SendEmailQueue, err)
@@ -106,7 +111,6 @@ func (c *EmailConsumer) Run(ctx context.Context) error {
 }
 
 func (c *EmailConsumer) handleMessage(d amqp.Delivery) {
-	// Helper to DRY up nack logic
 	nack := func(requeue bool) {
 		if err := d.Nack(false, requeue); err != nil {
 			c.logger.Error().Err(err).Msg("Failed to nack message")
@@ -156,8 +160,8 @@ func (c *EmailConsumer) handleMessage(d amqp.Delivery) {
 			Str("email", msg.Email).
 			Msg("Failed to send email")
 
-		// Needs a DLR or retry limit here to prevent infinite loops.
-		nack(true)
+		// TODO: Create retry mechanism
+		nack(false)
 		return
 	}
 

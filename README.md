@@ -31,11 +31,11 @@ The project is built on a microservices architecture and includes:
 - Using distributed cache based on Redis for better performance on getting files
 
 ### Infrastructure
+- **RabbitMQ** - Message broker
 - **PostgreSQL** - Main database for primary data
 - **Redis** - Storage for tokens and distributed cache
 - **MinIO** - Object storage for audio and image files
 - **Nginx** - Reverse proxy and load balancer
-- **MailHog** - Test SMTP server for development
 - **Prometheus** - Metrics collection and storage
 - **Grafana** - Metrics visualization and dashboards
 
@@ -82,7 +82,6 @@ The project is built on a microservices architecture and includes:
 - **JWT Bearer Authentication** - Secure token-based authentication with refresh token support
 - **Prometheus .NET Client** - Metrics exposure for monitoring integration
 - **BCrypt.Net** - Secure password hashing and verification
-- **MailKit 4** - Cross-platform .NET mail client for SMTP communication
 - **xUnit** - Unit test library
 - **Test Containers** - Library for creating docker instances of real dependencies for Unit tests
 
@@ -105,14 +104,21 @@ The project is built on a microservices architecture and includes:
 - **Vite** - Modern frontend build tool
 - **React Router DOM** - Declarative routing for React single-page applications
 
-### File Service
-- **Go 1.25** - High-performance language 
+### Go Microservices
+**Shared**:
+- **Go 1.25** - High-performance language
 - **Gin Web Framework** - Lightweight and efficient HTTP web framework
-- **MinIO Go SDK** - S3-compatible object storage client for file management
-- **Redis Go Client** - Redis integration for caching and temporary storage
+- **AMQP 0.9.1** - Library for consuming RabbitMQ messages
 - **Zerolog** - High-performance, structured logging
 - **Viper** - Configuration management with support for multiple formats
 - **Prometheus Go Client** - Metrics exposure for monitoring integration
+
+**File Service**:
+- **MinIO Go SDK** - S3-compatible object storage client for file management
+- **Redis Go Client** - Redis integration for caching and temporary storage
+
+**Email Service**
+- **Gomail** - SMTP mail client
 
 ### DevOps & Infrastructure
 - **Docker & Docker Compose** - Containerization and basic orchestration

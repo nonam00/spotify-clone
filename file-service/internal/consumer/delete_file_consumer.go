@@ -49,13 +49,18 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to set QoS: %w", err)
 	}
 
+	args := amqp.Table{
+		"x-dead-letter-exchange":    "system.dlx",
+		"x-dead-letter-routing-key": domain.DeleteFileQueue + ".dlq",
+	}
+
 	_, err = ch.QueueDeclare(
 		domain.DeleteFileQueue,
 		true,
 		false,
 		false,
 		false,
-		nil,
+		args,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue %s: %w", domain.DeleteFileQueue, err)
@@ -107,7 +112,6 @@ func (c *DeleteFileConsumer) Run(ctx context.Context) error {
 }
 
 func (c *DeleteFileConsumer) handleMessage(ctx context.Context, d amqp.Delivery) {
-	// Helper to DRY up nack logic
 	nack := func(requeue bool) {
 		if err := d.Nack(false, requeue); err != nil {
 			c.logger.Error().Err(err).Msg("Failed to nack message")
@@ -154,8 +158,8 @@ func (c *DeleteFileConsumer) handleMessage(ctx context.Context, d amqp.Delivery)
 			Str("file_type", string(msg.FileType)).
 			Msg("Failed to delete file")
 
-		// Needs a DLR or retry limit here to prevent infinite loops.
-		nack(true)
+		// TODO: Create retry mechanism
+		nack(false)
 		return
 	}
 
