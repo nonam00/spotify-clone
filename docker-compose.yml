@@ -56,7 +56,6 @@ services:
     environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - SERVER_API_URL=${SERVER_API_URL}
-      - FILE_SERVER_URL=${FILE_SERVER_URL}
     ports:
       - "3000:3000"
     extra_hosts:
@@ -115,6 +114,24 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+      
+  ai-moderation-service:
+    container_name: ai_moderation_service
+    build:
+      context: ./ai-moderation-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "8020:8000"
+    environment:
+      - FILE_SERVICE_URL=$FILE_SERVICE_URL
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   minio:
     container_name: minio_s3
