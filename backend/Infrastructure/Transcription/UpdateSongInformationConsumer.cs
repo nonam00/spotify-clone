@@ -1,13 +1,14 @@
 using System.Text;
 using System.Text.Json;
-using Application.Shared.Messaging;
-using Application.Songs.Commands.UpdateTranscribeInformation;
-using Infrastructure.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+
+using Application.Shared.Messaging;
+using Application.Songs.Commands.UpdateTranscribeInformation;
+using Infrastructure.Messaging;
 
 namespace Infrastructure.Transcription;
 
@@ -67,23 +68,35 @@ public class UpdateSongInformationConsumer : BackgroundService
 
     private async Task OnMessageReceivedAsync(object sender, BasicDeliverEventArgs @event)
     {
+        _logger.LogDebug("Handling rabbitmq message received");
         await using var scope = _scopeFactory.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         var deliveryTag = @event.DeliveryTag;
         
         var body = Encoding.UTF8.GetString(@event.Body.Span);
-        var message = JsonSerializer.Deserialize<UpdateSongInformationMessage>(body);
-        
-        if (message is null)
+        try
         {
-            _logger.LogWarning("Received null or malformed message. DeliveryTag: {DeliveryTag}", deliveryTag);
-            await _channel!.BasicRejectAsync(deliveryTag, requeue: false).ConfigureAwait(false);
-            return;
-        }
+            var message = JsonSerializer.Deserialize<UpdateSongInformationMessage>(body, JsonSerializerOptions);
+        
+            if (message is null)
+            {
+                _logger.LogWarning("Received null or malformed message. DeliveryTag: {DeliveryTag}", deliveryTag);
+                await _channel!.BasicRejectAsync(deliveryTag, requeue: false).ConfigureAwait(false);
+                return;
+            }
 
-        await mediator.Send(new UpdateTranscribeInformationCommand(message.SongId, message.ContainsExplicitContent));
-        await _channel!.BasicAckAsync(deliveryTag, multiple: false).ConfigureAwait(false);
+            _logger.LogDebug(
+                "Deserialized update song information message: Song ID: {SongId}, Explicit: {ContainsExplicitContent}",
+                message.SongId, message.ContainsExplicitContent);
+        
+            await mediator.Send(new UpdateTranscribeInformationCommand(message.SongId, message.ContainsExplicitContent));
+            await _channel!.BasicAckAsync(deliveryTag, multiple: false).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error while handling rabbitmq message: {ex}", ex);
+        }
     }
     
     public override async Task StopAsync(CancellationToken cancellationToken)

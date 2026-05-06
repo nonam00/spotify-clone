@@ -2,11 +2,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure.Messaging;
 
-public class RabbitMqTopologyInitializedHostedService : IHostedService
+public class RabbitMqTopologyInitializerHostedService : IHostedService
 {
     private readonly RabbitMqTopologyInitializer _initializer;
 
-    public RabbitMqTopologyInitializedHostedService(RabbitMqTopologyInitializer initializer)
+    public RabbitMqTopologyInitializerHostedService(RabbitMqTopologyInitializer initializer)
     {
         _initializer = initializer;
     }
