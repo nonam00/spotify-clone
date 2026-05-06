@@ -25,8 +25,8 @@
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
     "typescript": "^5.9.3",
-    "zod": "^4.3.6",
-    "zustand": "^5.0.12"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
@@ -38,7 +38,7 @@
     "eslint-config-next": "^15.5.15",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-boundaries": "^6.0.2",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.14",
     "tailwindcss": "^4.1.16"
   }
 }

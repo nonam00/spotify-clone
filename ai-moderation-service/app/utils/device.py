@@ -13,7 +13,7 @@ from pynvml import (
     NVMLError,
 )
 
-from models.healthcheck_response import GpuInfo
+from models.healthcheck import GpuInfo
 
 logger = logging.getLogger(__name__)
 

@@ -42,7 +42,7 @@ class FilesConfig:
 
 @dataclass(frozen=True)
 class RabbitMqConfig:
-    url: str = "amqp://myuser:mypassword@localhost:5672//"
+    url: str = "amqp://myuser:mypassword@localhost:5672/"
 
     exchange: str = "transcription-service-exchange"
 
@@ -62,4 +62,4 @@ class Config:
     transcribe_config: TranscribeConfig
     files_config: FilesConfig
     rabbit_mq_config: RabbitMqConfig
-    num_workers: int
+    max_concurrent_transcriptions: int

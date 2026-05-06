@@ -5,33 +5,33 @@ import numpy as np
 from faster_whisper import WhisperModel
 
 from config import ModelConfig, TranscribeConfig
-from models.transcribe_result import TranscribeResult, MiniSegment
+from models.transcription import TranscribeResult, MiniSegment
 
 logger = logging.getLogger(__name__)
 
 class WhisperService:
     def __init__(self, config: ModelConfig, transcribe_config: TranscribeConfig):
-        self.model_config = config
-        self.transcribe_config = transcribe_config
-        self.model = self._load_model()
+        self._model_config = config
+        self._transcribe_config = transcribe_config
+        self._model = self._load_model()
 
     def _load_model(self):
         compute_type = (
             "float16"
-            if self.model_config.device == "cuda" and self.model_config.use_fp16
+            if self._model_config.device == "cuda" and self._model_config.use_fp16
             else "float32"
         )
 
         logger.info(
             "Loading model %s on %s (compute type: %s)...",
-            self.model_config.model_size.upper(),
-            self.model_config.device.upper(),
+            self._model_config.model_size.upper(),
+            self._model_config.device.upper(),
             compute_type
         )
 
         model = WhisperModel(
-            self.model_config.model_size,
-            device=self.model_config.device,
+            self._model_config.model_size,
+            device=self._model_config.device,
             compute_type=compute_type,
         )
 
@@ -39,9 +39,9 @@ class WhisperService:
 
     def run_transcribe(self, file_path: str) -> TranscribeResult:
         # Converting transcribe config object into dictionary to pass into then function
-        options = asdict(self.transcribe_config)
+        options = asdict(self._transcribe_config)
 
-        segments_generator, info = self.model.transcribe(
+        segments_generator, info = self._model.transcribe(
             audio=file_path,
             **options,
         )

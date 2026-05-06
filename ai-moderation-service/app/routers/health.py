@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from config import Config
 from dependencies import get_config
-from models.healthcheck_response import HealthCheckResponse
+from models.healthcheck import HealthCheckResponse
 from utils.device import get_cpu_info, get_cuda_version
 
 router = APIRouter()

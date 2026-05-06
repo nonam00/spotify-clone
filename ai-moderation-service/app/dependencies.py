@@ -23,20 +23,20 @@ files_api_url = os.getenv(
 )
 files_config = FilesConfig(api_url=files_api_url, temp_dir=tempfile.mkdtemp())
 
-num_workers = 2 if model_config.device == "gpu" else 1
+num_workers = 4 if model_config.device == "gpu" else 1
 config = Config(
     model_config=model_config,
     transcribe_config=transcribe_config,
     files_config=files_config,
     rabbit_mq_config=rabbit_mq_config,
-    num_workers=num_workers
+    max_concurrent_transcriptions=num_workers
 )
 
 def get_config() -> Config:
     return config
 
 whisper_service = WhisperService(config.model_config, config.transcribe_config)
-executor = ThreadPoolExecutor(max_workers=config.num_workers)
+executor = ThreadPoolExecutor(max_workers=config.max_concurrent_transcriptions)
 file_service_client = FileServiceClient(files_config)
 rabbitmq_connection_manager = RabbitMqConnectionManager(rabbit_mq_config)
 
