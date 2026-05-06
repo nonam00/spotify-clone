@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { memo } from "react";
 
 import { CLIENT_FILES_URL } from "@/shared/config/api";
-import { PlayButton } from "@/shared/ui";
+import { ExplicitBadge, PlayButton } from "@/shared/ui";
 import type { Song } from "../model";
 
 const SongGridItem = memo(function SongItem({
@@ -36,9 +36,13 @@ const SongGridItem = memo(function SongItem({
       </div>
       <div className="flex flex-col items-start w-full pt-4 gap-y-1">
         <p className="font-semibold truncate w-full">{song.title}</p>
-        <p className="text-neutral-400 text-sm pb-4 w-full truncate">
-          By {song.author}
-        </p>
+        <div className="flex items-center gap-x-1.5 pb-4 w-full min-w-0">
+          {song.containsExplicitContent && <ExplicitBadge />}
+          <p className="text-neutral-400 text-sm truncate">
+            By {song.author}
+          </p>
+        </div>
+
       </div>
       <div className="absolute bottom-24 right-5">
         <PlayButton />

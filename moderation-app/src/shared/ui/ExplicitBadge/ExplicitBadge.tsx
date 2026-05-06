@@ -1,7 +1,16 @@
-const ExplicitBadge = () => (
-  <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-white text-black text-[10px] font-bold leading-none select-none">
-    E
-  </span>
-);
+function ExplicitBadge() {
+  return (
+    <span
+      className="
+        flex shrink-0 items-center justify-center w-4 h-4
+        bg-neutral-400 text-neutral-900 text-xs font-bold rounded-xs
+      "
+      title="Explicit Content"
+      aria-label="Explicit Content"
+    >
+      E
+    </span>
+  );
+}
 
 export default ExplicitBadge;

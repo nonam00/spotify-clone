@@ -1,5 +1,6 @@
 import { CLIENT_FILES_URL } from "@/shared/config/api";
 import type { Song } from "../model";
+import { ExplicitBadge } from "@/shared/ui";
 
 const SongItem = ({
   song,
@@ -14,7 +15,7 @@ const SongItem = ({
       cursor-pointer transition-all duration-200
       hover:bg-neutral-800/30 ${selected ? "bg-neutral-800/40" : ""}
     `}>
-      <div className="relative rounded-lg h-[56px] w-[56px] shrink-0 overflow-hidden shadow-md ring-2 ring-neutral-700/30">
+      <div className="relative rounded-lg h-14 w-14 shrink-0 overflow-hidden shadow-md ring-2 ring-neutral-700/30">
         <img
           src={song.imagePath ?
             `${CLIENT_FILES_URL}/download-url?type=image&file_id=${song.imagePath}`
@@ -23,13 +24,16 @@ const SongItem = ({
           className="object-cover w-full h-full"
         />
       </div>
-      <div className="flex flex-col gap-y-1 overflow-hidden flex-1">
+      <div className="flex flex-col gap-y-1 overflow-hidden w-full">
         <p className="text-white font-medium truncate">
           {song.title}
         </p>
-        <p className="text-neutral-400 text-sm truncate">
-          {song.author}
-        </p>
+        {(song.author || song.containsExplicitContent) && (
+          <div className="flex items-center gap-x-1.5 w-full min-w-0">
+            {song.containsExplicitContent && <ExplicitBadge />}
+            {song.author && (<p className="text-neutral-400 text-sm truncate">{song.author}</p>)}
+          </div>
+        )}
       </div>
     </div>
   );
