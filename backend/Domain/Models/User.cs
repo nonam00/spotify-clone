@@ -150,7 +150,7 @@ public class User : AggregateRoot<Guid>
         var createSongResult = Song.Create(
             title: title,
             author: author,
-            songPath: audioPath,
+            audioPath: audioPath,
             imagePath: imagePath,
             uploaderId: Id);
 
@@ -160,6 +160,8 @@ public class User : AggregateRoot<Guid>
         }
         
         _uploadedSongs.Add(createSongResult.Value);
+        
+        AddDomainEvent(new UserUploadedSongEvent(createSongResult.Value.Id, createSongResult.Value.AudioPath));
         
         return Result<Song>.Success(createSongResult.Value);
     }

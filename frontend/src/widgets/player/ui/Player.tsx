@@ -29,7 +29,7 @@ const Player = () => {
 
   const songUrl = useMemo(() => {
     if (!currentSong) return undefined;
-    return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.songPath}`;
+    return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.audioPath}`;
   }, [currentSong]);
 
   const { audioRef, duration, currentTime, isPlaying, isStalled, isSeeking } = useSound({

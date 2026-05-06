@@ -1,11 +1,11 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 
+using Domain.Errors;
 using Domain.Models;
 using Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
 using Application.Users.Commands.UploadSong;
 using Application.Users.Errors;
-using Domain.Errors;
 
 namespace Application.Tests.Users.Commands;
 
@@ -224,7 +224,7 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnValidationError_WhenSongPathIsEmpty()
+    public async Task Handle_ShouldReturnValidationError_WhenAudioPathIsEmpty()
     {
         // Arrange
         var command = new UploadSongCommand(
@@ -240,11 +240,11 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("Song path");
+        result.Error.Description.Should().Contain("Audio path");
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnValidationError_WhenSongPathExceedsMaxLength()
+    public async Task Handle_ShouldReturnValidationError_WhenAudioPathExceedsMaxLength()
     {
         // Arrange
         var longPath = new string('a', 256);
@@ -261,7 +261,7 @@ public class UploadSongCommandHandlerTests : InMemoryTestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("ValidationError");
-        result.Error.Description.Should().Contain("Song path");
+        result.Error.Description.Should().Contain("Audio path");
     }
 
     [Fact]

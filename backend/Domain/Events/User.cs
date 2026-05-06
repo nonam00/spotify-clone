@@ -14,3 +14,9 @@ public class UserAvatarChangedEvent(Guid userId, FilePath oldAvatarPath) : Domai
     public Guid UserId { get; } = userId;
     public FilePath OldAvatarPath { get; } = oldAvatarPath;
 }
+
+public class UserUploadedSongEvent(Guid songId, FilePath audioPath) : DomainEvent
+{
+    public Guid SongId { get; } = songId;
+    public FilePath AudioPath { get; } = audioPath;
+}

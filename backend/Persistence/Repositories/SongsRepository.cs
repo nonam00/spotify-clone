@@ -215,8 +215,9 @@ public class SongsRepository : ISongsRepository
             Id: song.Id, 
             Title: song.Title,
             Author: song.Author,
-            SongPath: song.SongPath,
+            AudioPath: song.AudioPath,
             ImagePath: song.ImagePath,
+            ContainsExplicitContent: song.ContainsExplicitContent,
             IsPublished: song.IsPublished,
             CreatedAt: song.CreatedAt);
 }

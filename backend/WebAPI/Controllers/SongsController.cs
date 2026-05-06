@@ -122,7 +122,7 @@ public class SongsController : BaseController
             UserId: UserId,
             Title: uploadSongDto.Title,
             Author: uploadSongDto.Author,
-            SongPath: uploadSongDto.AudioId.ToString(),
+            AudioPath: uploadSongDto.AudioId.ToString(),
             ImagePath: uploadSongDto.ImageId.ToString()
         );
         var result = await Mediator.Send(command, cancellationToken);

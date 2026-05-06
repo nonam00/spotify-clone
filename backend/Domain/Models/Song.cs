@@ -9,8 +9,10 @@ public class Song : AggregateRoot<Guid>
 {
     public string Title { get; private set; } = null!;
     public string Author { get; private set; } = null!;
-    public FilePath SongPath { get; private init; } = null!;
+    public FilePath AudioPath { get; private init; } = null!;
     public FilePath ImagePath { get; private init; } = null!;
+    public bool ContainsExplicitContent { get; private set; }
+
     public Guid? UploaderId { get; private set; }
     public bool IsPublished { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -23,7 +25,7 @@ public class Song : AggregateRoot<Guid>
     
     // Cannot make internal because of the tests
     internal static Result<Song> Create(
-        string title, string author, FilePath songPath, FilePath imagePath, Guid? uploaderId = null)
+        string title, string author, FilePath audioPath, FilePath imagePath, Guid? uploaderId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -40,10 +42,11 @@ public class Song : AggregateRoot<Guid>
             Id = Guid.NewGuid(),
             Title = title.Trim(),
             Author = author.Trim(),
-            SongPath = songPath,
+            AudioPath = audioPath,
             ImagePath = imagePath,
             UploaderId = uploaderId,
             IsPublished = false,
+            ContainsExplicitContent =  false,
             MarkedForDeletion = false,
             CreatedAt = DateTime.UtcNow,
         };
@@ -75,6 +78,11 @@ public class Song : AggregateRoot<Guid>
         }
         IsPublished = false;
         return Result.Success();
+    }
+
+    public void UpdateTranscribeInformation(bool containsExplicitContent)
+    {
+        ContainsExplicitContent = containsExplicitContent;
     }
 
     internal Result MarkForDeletion()

@@ -10,7 +10,7 @@ namespace Domain.Tests.Songs;
 public class SongTests
 {
     private readonly Guid _uploaderId = Guid.NewGuid();
-    private readonly FilePath _testSongPath = new("test.mp3");
+    private readonly FilePath _testAudioPath = new("test.mp3");
     private readonly FilePath _testImagePath = new("test.jpg");
 
     [Fact]
@@ -21,7 +21,7 @@ public class SongTests
         const string author = "Test Artist";
 
         // Act
-        var result = Song.Create(title, author, _testSongPath, _testImagePath, _uploaderId);
+        var result = Song.Create(title, author, _testAudioPath, _testImagePath, _uploaderId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -30,7 +30,7 @@ public class SongTests
         song.Id.Should().NotBe(Guid.Empty);
         song.Title.Should().Be(title);
         song.Author.Should().Be(author);
-        song.SongPath.Should().Be(_testSongPath);
+        song.AudioPath.Should().Be(_testAudioPath);
         song.ImagePath.Should().Be(_testImagePath);
         song.UploaderId.Should().Be(_uploaderId);
         song.IsPublished.Should().BeFalse();
@@ -45,7 +45,7 @@ public class SongTests
     public void Create_WithEmptyTitle_ShouldReturnFailure(string? title)
     {
         // Act
-        var result = Song.Create(title, "Artist", _testSongPath, _testImagePath);
+        var result = Song.Create(title, "Artist", _testAudioPath, _testImagePath);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -59,7 +59,7 @@ public class SongTests
     public void Create_WithEmptyAuthor_ShouldReturnFailure(string? author)
     {
         // Act
-        var result = Song.Create("Title", author, _testSongPath, _testImagePath);
+        var result = Song.Create("Title", author, _testAudioPath, _testImagePath);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -74,7 +74,7 @@ public class SongTests
         const string author = "  Test Artist  ";
 
         // Act
-        var result = Song.Create(title, author, _testSongPath, _testImagePath);
+        var result = Song.Create(title, author, _testAudioPath, _testImagePath);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -87,7 +87,7 @@ public class SongTests
     public void Create_WithNullUploaderId_ShouldBeAllowed()
     {
         // Act
-        var result = Song.Create("Title", "Artist", _testSongPath, _testImagePath);
+        var result = Song.Create("Title", "Artist", _testAudioPath, _testImagePath);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

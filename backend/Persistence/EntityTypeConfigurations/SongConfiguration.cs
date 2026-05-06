@@ -37,7 +37,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
             .HasMethod("gin")
             .HasOperators("gin_trgm_ops");
         
-        builder.Property(s => s.SongPath)
+        builder.Property(s => s.AudioPath)
             .HasConversion(
                 path => path.Value,
                 value => new FilePath(value))

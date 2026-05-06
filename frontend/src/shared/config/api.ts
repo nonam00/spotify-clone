@@ -2,7 +2,6 @@ export const CLIENT_API_URL = "http://localhost/api/1";
 export const CLIENT_FILES_URL = "http://localhost/files/api/v1";
 
 export const SERVER_API_URL = process.env.SERVER_API_URL;
-export const SERVER_FILES_URL = process.env.FILE_SERVER_URL;
 
 const refreshClient = async (url: string): Promise<boolean> => {
   const response = await fetch(`${url}/auth/refresh`, {
