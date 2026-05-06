@@ -1,6 +1,6 @@
+using Domain.Common;
+using Application.Shared.Messaging;
+
 namespace Application.Songs.Commands.UpdateTranscribeInformation;
 
-public class UpdateTranscribeInformationCommand
-{
-    
-}
+public record UpdateTranscribeInformationCommand(Guid SongId, bool ContainsExplicitContent) : ICommand<Result>;
