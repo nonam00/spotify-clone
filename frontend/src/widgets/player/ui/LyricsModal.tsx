@@ -72,7 +72,6 @@ export function LyricsModal({
 
   const setActiveRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
-      console.log('render');
       node.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, []);

@@ -14,7 +14,10 @@ public interface ISongsRepository
     Task<List<SongVm>> GetList(CancellationToken cancellationToken = default);
     Task<List<SongVm>> TakeNewestList(int count = 100, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default);
-    Task<List<SongVm>> GetSearchList(string searchString, SearchCriteria searchCriteria,
+    Task<List<SongVm>> GetSearchList(
+        string searchString,
+        SearchCriteria searchCriteria,
+        bool searchInLyrics,
         CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(Guid userId, Guid playlistId,

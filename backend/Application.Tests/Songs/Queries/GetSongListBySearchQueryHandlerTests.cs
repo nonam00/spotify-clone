@@ -267,35 +267,6 @@ public class GetSongListBySearchQueryHandlerTests : PostgresTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnSongs_WhenSearchMatchesByTrigramSimilarity_ShortQueryTitle()
-    {
-        // Arrange: "Sng" vs "Song" - trigram similarity should exceed 0.1
-        var user = User.Create(new Email("user@email.com"), new PasswordHash("password_hash"));
-        user.Activate();
-
-        var song = user.UploadSong(
-            "Song",
-            "Author",
-            new FilePath("song.mp3"),
-            new FilePath("img.jpg")).Value;
-        
-        var moderator = Moderator.Create(new Email("mod@e.com"), new PasswordHash("hashed_password"), "Mod");
-        moderator.PublishSong(song);
-
-        await Context.Users.AddAsync(user);
-        await Context.SaveChangesAsync();
-
-        var query = new GetSongListBySearchQuery("Sng", SearchCriteria.Title);
-
-        // Act
-        var result = await Mediator.Send(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Songs.Should().ContainSingle(s => s.Title == "Song");
-    }
-
-    [Fact]
     public async Task Handle_ShouldReturnSongs_WhenSearchMatchesByTrigramSimilarity_ByAuthor()
     {
         // Arrange: typo in author name

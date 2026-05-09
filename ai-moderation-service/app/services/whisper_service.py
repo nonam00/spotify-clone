@@ -66,7 +66,7 @@ class WhisperService:
             exp_sum += np.exp(segment.avg_logprob)
             size += 1
 
-        confidence = exp_sum / size
+        confidence = exp_sum / size if size != 0 else 0.0
 
         return TranscribeResult(
             language = info.language,

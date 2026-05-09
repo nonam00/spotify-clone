@@ -4,10 +4,10 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 using Domain.Models;
+using Domain.ValueObjects;
 using Application.Songs.Enums;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
-using Domain.ValueObjects;
 
 namespace Persistence.Repositories;
 
@@ -84,30 +84,39 @@ public sealed class SongsRepository : ISongsRepository
     }
 
     public Task<List<SongVm>> GetSearchList(
-        string searchString, SearchCriteria searchCriteria, CancellationToken cancellationToken = default)
+        string searchString,
+        SearchCriteria searchCriteria,
+        bool searchInLyrics = false,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(searchString) || searchString.Length < 3)
         {
             throw new ArgumentException("Search string length must be greater than 3", nameof(searchString));
         }
-        
+
         // To make search not sensitive to string register
         var normalizedSearch = RemoveDiacritics(searchString.Trim().ToLower());
 
-        // Dynamic similarity threshold
-        var similarityThreshold = CalculateSimilarityThreshold(searchString.Length);
-        
         var baseQuery = _dbContext.Songs
             .AsNoTracking()
             .Where(s => s.IsPublished);
 
-        var filteredQuery = searchCriteria switch
+        IQueryable<Song> filteredQuery;
+        if (searchInLyrics)
         {
-            SearchCriteria.Title  => SearchQueryFilters.ApplyTitleFilter(baseQuery, normalizedSearch, similarityThreshold),
-            SearchCriteria.Author => SearchQueryFilters.ApplyAuthorFilter(baseQuery, normalizedSearch, similarityThreshold),
-            SearchCriteria.Any    => SearchQueryFilters.ApplyAnyFilter(baseQuery, normalizedSearch, similarityThreshold),
-            _ => throw new ArgumentOutOfRangeException(nameof(searchCriteria), searchCriteria, "Invalid criteria")
-        };
+            filteredQuery = SearchQueryFilters.ApplyLyricsFilter(baseQuery, normalizedSearch);
+        }
+        else
+        {
+            filteredQuery = searchCriteria switch
+            {
+                SearchCriteria.Title => SearchQueryFilters.ApplyTitleFilter(baseQuery, normalizedSearch),
+                SearchCriteria.Author => SearchQueryFilters.ApplyAuthorFilter(baseQuery, normalizedSearch),
+                SearchCriteria.Any => SearchQueryFilters.ApplyAnyFilter(baseQuery, normalizedSearch),
+                _ => throw new ArgumentOutOfRangeException(nameof(searchCriteria), searchCriteria,
+                    "Invalid criteria")
+            };
+        }
 
         return filteredQuery
             .Take(50)
@@ -154,9 +163,6 @@ public sealed class SongsRepository : ISongsRepository
         
         // To make search not sensitive to string register
         var lowerSearch = RemoveDiacritics(searchString.Trim().ToLower());
-
-        // Dynamic similarity threshold
-        var similarityThreshold = CalculateSimilarityThreshold(searchString.Length);
         
         var songsInPlaylist = _dbContext.PlaylistSongs
             .AsNoTracking()
@@ -168,7 +174,7 @@ public sealed class SongsRepository : ISongsRepository
             .Where(ls => ls.UserId == userId && ls.Song.IsPublished && !songsInPlaylist.Contains(ls.SongId))
             .Select(ls => ls.Song);
             
-       var filteredQuery = SearchQueryFilters.ApplyAnyFilter(baseQuery, lowerSearch, similarityThreshold);
+       var filteredQuery = SearchQueryFilters.ApplyAnyFilter(baseQuery, lowerSearch);
 
        return filteredQuery
            .Take(50)
@@ -225,8 +231,6 @@ public sealed class SongsRepository : ISongsRepository
         return new string(chars);
     }
     
-    private static double CalculateSimilarityThreshold(int length) => length > 6 ? 0.2 : 0.1;
-    
     private static readonly Expression<Func<Song, SongVm>> ToVmExpression = song =>
         new SongVm(
             Id: song.Id, 
@@ -239,59 +243,89 @@ public sealed class SongsRepository : ISongsRepository
             CreatedAt: song.CreatedAt);
 }
 
+// Default similarity threshold is 0.3
 internal static class SearchQueryFilters
 {
-    internal static IQueryable<Song> ApplyTitleFilter(IQueryable<Song> query, string search, double threshold)
+    private const double TitleAuthorWeight = 1.2;
+    private const double LyricsWeight = 0.9; 
+    
+    internal static IQueryable<Song> ApplyTitleFilter(IQueryable<Song> query, string search)
     {
-        return query
+        var filtered = query
             .Where(s =>
-                EF.Property<string>(s, "TitleLower").Contains(search) ||
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "TitleLower"),
-                    search) > threshold)
-            .OrderByDescending(s => EF.Property<string>(s, "TitleLower").Contains(search))
-            .ThenByDescending(s => 
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "TitleLower"),
-                    search))
-            .ThenByDescending(s => s.CreatedAt);
-    }
-
-    internal static IQueryable<Song> ApplyAuthorFilter(IQueryable<Song> query, string search, double threshold)
-    {
-        return query
-            .Where(s =>
-                EF.Property<string>(s, "AuthorLower").Contains(search) ||
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "AuthorLower"),
-                    search) > threshold)
-            .OrderByDescending(s => EF.Property<string>(s, "AuthorLower").Contains(search))
-            .ThenByDescending(s => 
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "AuthorLower"),
-                    search))
-            .ThenByDescending(s => s.CreatedAt);
-    }
-
-    internal static IQueryable<Song> ApplyAnyFilter(IQueryable<Song> query, string search, double threshold)
-    {
-        return query
-            .Where(s =>
-                EF.Property<string>(s, "TitleLower").Contains(search) ||
-                EF.Property<string>(s, "AuthorLower").Contains(search) ||
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "TitleLower"),
-                    search) > threshold ||
-                EF.Functions.TrigramsSimilarity(
-                    EF.Property<string>(s, "AuthorLower"),
-                    search) > threshold)
+                EF.Functions.TrigramsAreSimilar(EF.Property<string>(s, "TitleLower"), search))
             .OrderByDescending(s =>
-                (EF.Property<string>(s, "TitleLower").Contains(search) ? 1 : 0) +
-                (EF.Property<string>(s, "AuthorLower").Contains(search) ? 1 : 0))
-            .ThenByDescending(s =>
+                EF.Functions.TrigramsSimilarity(EF.Property<string>(s, "TitleLower"), search))
+            .ThenByDescending(s => s.CreatedAt);
+
+        return filtered;
+        
+    }
+
+    internal static IQueryable<Song> ApplyAuthorFilter(IQueryable<Song> query, string search)
+    {
+        var filtered = query
+            .Where(s =>
+                EF.Functions.TrigramsAreSimilar(EF.Property<string>(s, "AuthorLower"), search))
+            .OrderByDescending(s =>
+                EF.Functions.TrigramsSimilarity(EF.Property<string>(s, "AuthorLower"), search))
+            .ThenByDescending(s => s.CreatedAt);
+
+        return filtered;
+    }
+
+    internal static IQueryable<Song> ApplyAnyFilter(IQueryable<Song> query, string search)
+    {
+        var filtered = query
+            .Where(s =>
+                EF.Functions.TrigramsAreSimilar(EF.Property<string>(s, "TitleLower"), search) ||
+                EF.Functions.TrigramsAreSimilar(EF.Property<string>(s, "AuthorLower"), search)) 
+            .OrderByDescending(s =>
                 Math.Max(
                     EF.Functions.TrigramsSimilarity(EF.Property<string>(s, "TitleLower"), search),
                     EF.Functions.TrigramsSimilarity(EF.Property<string>(s, "AuthorLower"), search)))
             .ThenByDescending(s => s.CreatedAt);
+
+        return filtered;
+    }
+
+    internal static IQueryable<Song> ApplyLyricsFilter(IQueryable<Song> query, string search)
+    { 
+        var rankedSongs = query
+            .Select(s => new
+            {
+                Song = s,
+                
+                TitleSim = EF.Functions.TrigramsSimilarity(
+                    EF.Property<string>(s, "TitleLower"), search),
+                AuthorSim = EF.Functions.TrigramsSimilarity(
+                    EF.Property<string>(s, "AuthorLower"), search),
+                
+                MaxLyricsSim = s.LyricsSegments
+                    .Select(l => EF.Functions.TrigramsSimilarity(
+                        EF.Property<string>(l, "NormalizedText"), search))
+                    .OrderByDescending(sim => sim)
+                    .FirstOrDefault()
+            })
+            .Where(x => 
+                EF.Functions.TrigramsAreSimilar(
+                    EF.Property<string>(x.Song, "TitleLower"), search) ||
+                EF.Functions.TrigramsAreSimilar(
+                    EF.Property<string>(x.Song, "AuthorLower"), search) ||
+                x.Song.LyricsSegments.Any(l => 
+                    EF.Functions.TrigramsAreSimilar(
+                        EF.Property<string>(l, "NormalizedText"), search)))
+            .Select(x => new
+            {
+                x.Song,
+                Relevance = Math.Max(
+                    Math.Max(x.TitleSim, x.AuthorSim) * TitleAuthorWeight,
+                    x.MaxLyricsSim * LyricsWeight)
+            })
+            .OrderByDescending(x => x.Relevance)
+            .ThenByDescending(x => x.Song.CreatedAt)
+            .Select(x => x.Song);
+
+        return rankedSongs;
     }
 }
