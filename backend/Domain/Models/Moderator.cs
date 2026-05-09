@@ -162,7 +162,7 @@ public class Moderator : AggregateRoot<Guid>
 
     public Result PublishSongs(List<Song> songs)
     {
-        if (!songs.Any())
+        if (songs.Count == 0)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);    
         }
@@ -244,7 +244,7 @@ public class Moderator : AggregateRoot<Guid>
 
     public Result DeleteSongs(List<Song> songs)
     {
-        if (!songs.Any())
+        if (songs.Count == 0)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);
         }

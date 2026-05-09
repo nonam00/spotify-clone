@@ -162,10 +162,10 @@ public class DeactivateUserCommandHandlerTests : InMemoryTestBase
         var moderator = Moderator.Create(new Email("mod@mail.com"), new PasswordHash("hashed_password"), "Mod");
         
         var permissions = new ModeratorPermissions(
-            canManageContent: true,
-            canManageUsers: false,
-            canViewReports: false,
-            canManageModerators: false);
+            CanManageContent: true,
+            CanManageUsers: false,
+            CanViewReports: false,
+            CanManageModerators: false);
         
         var admin = Moderator.Create(
             new Email("admin@example.com"),

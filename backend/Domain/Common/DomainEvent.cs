@@ -1,6 +1,6 @@
 namespace Domain.Common;
 
-public class DomainEvent : IDomainEvent
+public record DomainEvent : IDomainEvent
 {
     public Guid EventId { get; }
     public DateTime OccurredOn{ get; }

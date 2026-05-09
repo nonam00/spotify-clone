@@ -1,6 +1,6 @@
 namespace Domain.ValueObjects;
 
-public record FilePath
+public sealed record FilePath
 {
     public string Value { get; }
 

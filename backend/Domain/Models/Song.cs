@@ -12,13 +12,12 @@ public class Song : AggregateRoot<Guid>
     public FilePath AudioPath { get; private init; } = null!;
     public FilePath ImagePath { get; private init; } = null!;
     public bool ContainsExplicitContent { get; private set; }
-
     public Guid? UploaderId { get; private set; }
     public bool IsPublished { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public bool MarkedForDeletion { get; private set; }
 
-    // Navigation properties for EF Core (not part of domain logic)
+    public IReadOnlyList<LyricsSegment> LyricsSegments { get; private set; } = [];
     public virtual User? Uploader { get; private set; }
 
     private Song() { } // For EF Core
@@ -46,7 +45,7 @@ public class Song : AggregateRoot<Guid>
             ImagePath = imagePath,
             UploaderId = uploaderId,
             IsPublished = false,
-            ContainsExplicitContent =  false,
+            ContainsExplicitContent = false,
             MarkedForDeletion = false,
             CreatedAt = DateTime.UtcNow,
         };
@@ -80,11 +79,20 @@ public class Song : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public void UpdateTranscribeInformation(bool containsExplicitContent)
+    public void UpdateTranscribeInformation(bool containsExplicitContent, IReadOnlyList<LyricsSegmentData> lyricsSegmentsData)
     {
         ContainsExplicitContent = containsExplicitContent;
+        
+        var lyricsSegments = lyricsSegmentsData
+            .Select(lsd => new LyricsSegment(
+                songId: Id, 
+                lyricsSegmentData: lsd
+            ))
+            .ToList();
+        
+        LyricsSegments = lyricsSegments;
     }
-
+    
     internal Result MarkForDeletion()
     {
         if (IsPublished)

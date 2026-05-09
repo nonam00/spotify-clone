@@ -92,7 +92,7 @@ public class Playlist : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Result AddSongs(List<Song> songs)
+    public Result AddSongs(IReadOnlyList<Song> songs)
     {
         if (ContainsSongs(songs.Select(s => s.Id)))
         {
@@ -136,7 +136,7 @@ public class Playlist : AggregateRoot<Guid>
     }
     
     // Song id index in list dictates what order it will get
-    public Result ReorderSongs(List<Guid> songsToReorder)
+    public Result ReorderSongs(IReadOnlyList<Guid> songsToReorder)
     {
         if (_playlistSongs.Count != songsToReorder.Count)
         {

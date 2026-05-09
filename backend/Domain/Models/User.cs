@@ -57,7 +57,7 @@ public class User : AggregateRoot<Guid>
         
         if (!string.IsNullOrEmpty(oldAvatarPath) && oldAvatarPath != avatarPath)
         {
-            AddDomainEvent(new UserAvatarChangedEvent(Id, oldAvatarPath: oldAvatarPath));
+            AddDomainEvent(new UserAvatarChangedEvent(Id, OldAvatarPath: oldAvatarPath));
         }
 
         return Result.Success();
