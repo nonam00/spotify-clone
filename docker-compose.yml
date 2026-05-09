@@ -125,6 +125,9 @@ services:
     environment:
       - FILE_SERVICE_URL=$FILE_SERVICE_URL
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+    depends_on:
+      nginx:
+        condition: service_healthy
 
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health"]

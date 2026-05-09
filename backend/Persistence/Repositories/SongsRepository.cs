@@ -7,10 +7,11 @@ using Domain.Models;
 using Application.Songs.Enums;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
+using Domain.ValueObjects;
 
 namespace Persistence.Repositories;
 
-public class SongsRepository : ISongsRepository
+public sealed class SongsRepository : ISongsRepository
 {
     private readonly AppDbContext _dbContext;
 
@@ -23,6 +24,13 @@ public class SongsRepository : ISongsRepository
     {
         return _dbContext.Songs
             .AsNoTracking()
+            .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
+    public Task<Song?> GetByIdWithLyricsSegments(Guid id, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Songs
+            .Include(s => s.LyricsSegments)
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
@@ -184,6 +192,15 @@ public class SongsRepository : ISongsRepository
             .Where(s => s.UploaderId == userId)
             .OrderByDescending(s => s.CreatedAt)
             .Select(ToVmExpression)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<List<LyricsSegmentData>> GetLyricsBySongId(Guid songId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.LyricsSegments
+            .AsNoTracking()
+            .Where(ls => ls.SongId == songId)
+            .Select(ls => ls.LyricsSegmentData)
             .ToListAsync(cancellationToken);
     }
 

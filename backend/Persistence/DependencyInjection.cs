@@ -9,7 +9,6 @@ using Application.Shared.Data;
 using Application.Songs.Interfaces;
 using Application.Users.Interfaces;
 using Application.Moderators.Interfaces;
-using Infrastructure.Email;
 using Persistence.Repositories;
 
 namespace Persistence;

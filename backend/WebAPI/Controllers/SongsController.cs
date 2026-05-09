@@ -7,8 +7,9 @@ using Application.Songs.Queries.GetAllSongs;
 using Application.Songs.Queries.GetNewestSongList;
 using Application.Songs.Queries.GetSongById;
 using Application.Songs.Queries.GetSongListBySearch;
+using Application.Songs.Queries.GetSongLyricsById;
 using Application.Users.Commands.UploadSong;
-
+using Domain.ValueObjects;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -133,5 +134,21 @@ public class SongsController : BaseController
         }
         
         throw new Exception(result.Error.Description);
+    }
+
+    [HttpGet("{songId:guid}/lyrics"), Authorize(Policy = AuthorizationPolicies.UserOnly)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<LyricsSegmentData>>> GetLyrics(Guid songId, CancellationToken cancellationToken)
+    {
+        var query = new GetSongLyricsByIdQuery(songId);
+        var result = await Mediator.Send(query, cancellationToken);
+        
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+        
+        return BadRequest(new { Detail = result.Error.Description });
     }
 }

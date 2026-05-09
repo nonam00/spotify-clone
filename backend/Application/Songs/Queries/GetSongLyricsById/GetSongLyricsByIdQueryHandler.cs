@@ -5,22 +5,22 @@ using Application.Songs.Interfaces;
 
 namespace Application.Songs.Queries.GetSongLyricsById;
 
-public class GetSongLyricsByIdCommandHandler : ICommandHandler<GetSongLyricsByIdQuery, Result<IReadOnlyList<LyricsSegmentData>>>
+public class GetSongLyricsByIdQueryHandler : ICommandHandler<GetSongLyricsByIdQuery, Result<List<LyricsSegmentData>>>
 {
     private readonly ISongsRepository _songsRepository;
 
-    public GetSongLyricsByIdCommandHandler(ISongsRepository songsRepository)
+    public GetSongLyricsByIdQueryHandler(ISongsRepository songsRepository)
     {
         _songsRepository = songsRepository;
     }
 
-    public async Task<Result<IReadOnlyList<LyricsSegmentData>>> Handle(
+    public async Task<Result<List<LyricsSegmentData>>> Handle(
         GetSongLyricsByIdQuery query, CancellationToken cancellationToken)
     {
         var lyrics = await _songsRepository
             .GetLyricsBySongId(query.SongId, cancellationToken)
             .ConfigureAwait(false);
         
-        return Result<IReadOnlyList<LyricsSegmentData>>.Success(lyrics);
+        return Result<List<LyricsSegmentData>>.Success(lyrics);
     }
 }

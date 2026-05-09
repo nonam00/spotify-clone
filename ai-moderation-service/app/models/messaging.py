@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic.dataclasses import dataclass
 
+from models.transcription import LyricsSegment
+
 
 @dataclass(frozen=True)
 class TranscribeSongMessage:
@@ -12,3 +14,4 @@ class TranscribeSongMessage:
 class UpdateSongInformationMessage:
     song_id: UUID
     contains_explicit_content: bool
+    lyrics_segments: list[LyricsSegment]

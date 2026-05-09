@@ -7,7 +7,7 @@ using Application.Playlists.Models;
 
 namespace Persistence.Repositories;
 
-public class PlaylistsRepository : IPlaylistsRepository
+public sealed class PlaylistsRepository : IPlaylistsRepository
 {
     private readonly AppDbContext _dbContext;
     

@@ -5,7 +5,7 @@ using Application.Users.Interfaces;
 
 namespace Persistence.Repositories;
 
-public class RefreshTokensRepository : IRefreshTokensRepository
+public sealed class RefreshTokensRepository : IRefreshTokensRepository
 {
     private readonly AppDbContext _dbContext;
     

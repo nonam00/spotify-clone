@@ -69,9 +69,11 @@ func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {
 		return
 	}
 
-	if fileType != domain.FileTypeImage && fileType != domain.FileTypeAudio {
+	switch fileType {
+	case domain.FileTypeImage, domain.FileTypeAudio:
+	default:
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Invalid file type. Must be 'image' or 'audio'",
+			Error: "Invalid file type",
 		})
 		return
 	}

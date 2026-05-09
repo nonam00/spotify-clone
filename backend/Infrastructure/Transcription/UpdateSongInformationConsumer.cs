@@ -68,7 +68,6 @@ public class UpdateSongInformationConsumer : BackgroundService
 
     private async Task OnMessageReceivedAsync(object sender, BasicDeliverEventArgs @event)
     {
-        _logger.LogDebug("Handling rabbitmq message received");
         await using var scope = _scopeFactory.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
@@ -86,11 +85,13 @@ public class UpdateSongInformationConsumer : BackgroundService
                 return;
             }
 
-            _logger.LogDebug(
-                "Deserialized update song information message: Song ID: {SongId}, Explicit: {ContainsExplicitContent}",
-                message.SongId, message.ContainsExplicitContent);
-        
-            await mediator.Send(new UpdateTranscribeInformationCommand(message.SongId, message.ContainsExplicitContent));
+            var command = new UpdateTranscribeInformationCommand(
+                message.SongId,
+                message.ContainsExplicitContent,
+                message.LyricsSegments);
+            
+            await mediator.Send(command);
+            
             await _channel!.BasicAckAsync(deliveryTag, multiple: false).ConfigureAwait(false);
         }
         catch (Exception ex)

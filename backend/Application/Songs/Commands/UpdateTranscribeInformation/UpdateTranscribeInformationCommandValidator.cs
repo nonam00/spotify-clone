@@ -6,6 +6,9 @@ public class UpdateTranscribeInformationCommandValidator : AbstractValidator<Upd
 {
     public UpdateTranscribeInformationCommandValidator()
     {
-        RuleFor(x => x.SongId).NotEqual(Guid.Empty);
+        RuleFor(command => command.SongId)
+            .NotEqual(Guid.Empty)
+            .WithMessage("Song ID is required")
+            .WithErrorCode("400");
     }
 }

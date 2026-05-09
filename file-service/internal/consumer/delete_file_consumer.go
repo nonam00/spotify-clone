@@ -136,7 +136,9 @@ func (c *DeleteFileConsumer) handleMessage(ctx context.Context, d amqp.Delivery)
 		return
 	}
 
-	if msg.FileType != domain.FileTypeImage && msg.FileType != domain.FileTypeAudio {
+	switch msg.FileType {
+	case domain.FileTypeImage, domain.FileTypeAudio:
+	default:
 		c.logger.Warn().
 			Str("file_type", string(msg.FileType)).
 			Msg("Invalid file type")

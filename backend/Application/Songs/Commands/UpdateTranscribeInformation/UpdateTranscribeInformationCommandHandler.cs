@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Logging;
+
+using Domain.Common;
 using Application.Shared.Data;
 using Application.Shared.Messaging;
 using Application.Songs.Errors;
 using Application.Songs.Interfaces;
-using Domain.Common;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Songs.Commands.UpdateTranscribeInformation;
 
@@ -25,14 +26,14 @@ public partial class UpdateTranscribeInformationCommandHandler : ICommandHandler
 
     public async Task<Result> Handle(UpdateTranscribeInformationCommand command, CancellationToken cancellationToken)
     {
-        var song = await _songsRepository.GetById(command.SongId, cancellationToken);
+        var song = await _songsRepository.GetByIdWithLyricsSegments(command.SongId, cancellationToken);
         if (song is null)
         {
+            _logger.LogError("Tried to get song {songId} but it does not exist", command.SongId); 
             return Result.Failure(SongErrors.SongsNotFound);
         }
         
-        song.UpdateTranscribeInformation(command.ContainsExplicitContent);
-        _songsRepository.Update(song);
+        song.UpdateTranscribeInformation(command.ContainsExplicitContent, command.LyricsSegments);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         

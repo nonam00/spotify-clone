@@ -3,7 +3,7 @@ using Application.Users.Interfaces;
 
 namespace Persistence.Repositories;
 
-public class CodesRepository : ICodesRepository
+public sealed class CodesRepository : ICodesRepository
 {
     private readonly IDatabaseAsync _redisDb;
     private const string ConfirmationPrefix = "confirmation";

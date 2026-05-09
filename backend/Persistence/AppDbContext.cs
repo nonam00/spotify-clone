@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Common;
 using Domain.Models;
+using Domain.ValueObjects;
 
 namespace Persistence;
 
@@ -10,9 +11,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Song> Songs { get; set; } = null!;
     public DbSet<Playlist> Playlists { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<Moderator> Moderators { get; set; } = null!;
+    
+    // Sub entities db sets
     internal DbSet<LikedSong> LikedSongs => Set<LikedSong>();
     internal DbSet<PlaylistSong> PlaylistSongs => Set<PlaylistSong>();
-    public DbSet<Moderator> Moderators { get; set; } = null!;
+    internal DbSet<LyricsSegment> LyricsSegments => Set<LyricsSegment>();
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

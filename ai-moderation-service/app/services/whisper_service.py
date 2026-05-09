@@ -5,7 +5,7 @@ import numpy as np
 from faster_whisper import WhisperModel
 
 from config import ModelConfig, TranscribeConfig
-from models.transcription import TranscribeResult, MiniSegment
+from models.transcription import TranscribeResult, LyricsSegment
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +51,15 @@ class WhisperService:
         size = 0
 
         # Partial segments objects for response
-        segments: list[MiniSegment] = []
+        segments: list[LyricsSegment] = []
         for segment in segments_generator:
             logger.info(f"[{segment.start:.2f}s -> {segment.end:.2f}s] {segment.text}")
 
-            segments.append(MiniSegment(
+            segments.append(LyricsSegment(
                 start = segment.start,
                 end = segment.end,
                 text = segment.text,
+                order = size + 1,
             ))
 
             # Exponential function used to convert logarithmic probability back to normal value between 0 and 1
@@ -69,7 +70,7 @@ class WhisperService:
 
         return TranscribeResult(
             language = info.language,
-            segments = segments,
+            lyrics_segments= segments,
             confidence = confidence,
             duration = info.duration,
         )

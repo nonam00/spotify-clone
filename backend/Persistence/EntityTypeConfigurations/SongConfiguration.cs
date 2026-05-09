@@ -51,6 +51,15 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
             .IsRequired()
             .HasMaxLength(255);
         
+        builder.HasMany(s => s.LyricsSegments)
+            .WithOne()
+            .HasForeignKey(s => s.SongId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Property(s => s.ContainsExplicitContent)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
         builder.Property(s => s.IsPublished)
             .IsRequired()
             .HasDefaultValue(false);

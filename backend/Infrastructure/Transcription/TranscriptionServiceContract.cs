@@ -1,3 +1,5 @@
+using Domain.ValueObjects;
+
 namespace Infrastructure.Transcription;
 
 internal static class TranscriptionServiceMessaging
@@ -10,4 +12,7 @@ internal static class TranscriptionServiceMessaging
 }
 
 public record TranscribeSongMessage(Guid SongId, string AudioPath);
-public record UpdateSongInformationMessage(Guid SongId, bool ContainsExplicitContent);
+public record UpdateSongInformationMessage(
+    Guid SongId,
+    bool ContainsExplicitContent,
+    IReadOnlyList<LyricsSegmentData> LyricsSegments);

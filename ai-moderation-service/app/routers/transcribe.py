@@ -89,7 +89,7 @@ async def handle_transcribe_message(
         )
 
         # Getting full text from segments
-        full_text = " ".join(segment.text for segment in result.segments)
+        full_text = " ".join(segment.text for segment in result.lyrics_segments)
 
         is_explicit = check_text_for_explicit_content(full_text)
 
@@ -98,7 +98,8 @@ async def handle_transcribe_message(
 
         await transcription_publisher.publish_update_song_info(
             song_id=message.song_id,
-            contains_explicit=is_explicit
+            contains_explicit=is_explicit,
+            lyrics_segments=result.lyrics_segments,
         )
     finally:
         asyncio.get_running_loop().run_in_executor(

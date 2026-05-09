@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class MiniSegment:
+class LyricsSegment:
     start: float
     end: float
     text: str
+    order: int
 
 @dataclass(frozen=True)
 class TranscribeResult:
     language: str | None
-    segments: list[MiniSegment]
+    lyrics_segments: list[LyricsSegment]
     confidence: float
     duration: float

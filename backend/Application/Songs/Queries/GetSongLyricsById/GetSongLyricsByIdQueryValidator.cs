@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace Application.Songs.Queries.GetSongLyricsById;
 
-public class GetSongLyricsByIdCommandValidator : AbstractValidator<GetSongLyricsByIdQuery>
+public class GetSongLyricsByIdQueryValidator : AbstractValidator<GetSongLyricsByIdQuery>
 {
-    public GetSongLyricsByIdCommandValidator()
+    public GetSongLyricsByIdQueryValidator()
     {
         RuleFor(command => command.SongId)
             .NotEqual(Guid.Empty)
