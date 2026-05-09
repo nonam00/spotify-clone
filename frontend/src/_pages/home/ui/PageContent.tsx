@@ -21,7 +21,7 @@ const PageContent = memo(function PageContent({ songs }: { songs: Song[] }) {
       {songs.map((item) => (
         <SongGridItem
           key={item.id}
-          onClick={(id: string) => onPlay(id)}
+          onClick={async (id: string) => await onPlay(id)}
           song={item}
         />
       ))}

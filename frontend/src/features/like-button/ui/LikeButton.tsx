@@ -92,13 +92,13 @@ const LikeButton = ({
     <button
       onClick={handleLike}
       disabled={isLoading}
-      className="p-2 hover:opacity-75 transition cursor-pointer"
+      className="p-2 transition cursor-pointer"
       aria-label={isLiked ? "Unliked song" : "Like song"}
     >
       {isLiked ? (
-        <AiFillHeart color="#22c55e" size={25} />
+        <AiFillHeart className="text-green-500 hover:text-green-500/75 transition-colors" size={25} />
       ) : (
-        <AiOutlineHeart color="white" size={25} />
+        <AiOutlineHeart className="text-neutral-400 hover:text-white transition-colors" size={25} />
       )}
     </button>
   );
