@@ -104,8 +104,9 @@ namespace Persistence.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     title = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     author = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    song_path = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    audio_path = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     image_path = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    contains_explicit_content = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     uploader_id = table.Column<Guid>(type: "uuid", nullable: true),
                     is_published = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -150,6 +151,29 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "lyrics_segments",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    song_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    start = table.Column<double>(type: "double precision", nullable: false),
+                    end = table.Column<double>(type: "double precision", nullable: false),
+                    text = table.Column<string>(type: "text", nullable: false),
+                    order = table.Column<int>(type: "integer", nullable: false),
+                    normalized_text = table.Column<string>(type: "text", nullable: true, computedColumnSql: "lower(f_unaccent(trim(\"text\")))", stored: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lyrics_segments", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_lyrics_segments_songs_song_id",
+                        column: x => x.song_id,
+                        principalTable: "songs",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "playlist_songs",
                 columns: table => new
                 {
@@ -187,6 +211,18 @@ namespace Persistence.Migrations
                 column: "song_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_lyrics_segments_normalized_text",
+                table: "lyrics_segments",
+                column: "normalized_text")
+                .Annotation("Npgsql:IndexMethod", "gin")
+                .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_lyrics_segments_song_id",
+                table: "lyrics_segments",
+                column: "song_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_moderators_email",
                 table: "moderators",
                 column: "email",
@@ -221,14 +257,21 @@ namespace Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_songs_author_lower",
                 table: "songs",
-                column: "author_lower")
+                column: "author_lower",
+                filter: "\"is_published\" = true")
                 .Annotation("Npgsql:IndexMethod", "gin")
                 .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_songs_is_published",
+                table: "songs",
+                column: "is_published");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_songs_title_lower",
                 table: "songs",
-                column: "title_lower")
+                column: "title_lower",
+                filter: "\"is_published\" = true")
                 .Annotation("Npgsql:IndexMethod", "gin")
                 .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
 
@@ -249,6 +292,9 @@ namespace Persistence.Migrations
         {
             migrationBuilder.DropTable(
                 name: "liked_songs");
+
+            migrationBuilder.DropTable(
+                name: "lyrics_segments");
 
             migrationBuilder.DropTable(
                 name: "moderators");

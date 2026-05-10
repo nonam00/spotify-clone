@@ -11,7 +11,7 @@ using Application.Users.Errors;
 
 namespace Application.Users.Commands.UpdatePassword;
 
-public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand, Result>
+public partial class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
@@ -70,8 +70,11 @@ public class UpdatePasswordCommandHandler : ICommandHandler<UpdatePasswordComman
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation("User {UserId} successfully changed password.", request.UserId);
+        LogUserSuccessfullyChangedPassword(_logger, request.UserId);
         
         return Result.Success();
     }
+
+    [LoggerMessage(LogLevel.Trace, "User {UserId} successfully changed password.")]
+    private static partial void LogUserSuccessfullyChangedPassword(ILogger logger, Guid userId);
 }

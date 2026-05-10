@@ -17,8 +17,8 @@ public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDel
     {
         IEnumerable<Task> tasks =
         [
-            _fileServicePublisher.PublishDeleteFileAsync(@event.Image, "image", cancellationToken),
-            _fileServicePublisher.PublishDeleteFileAsync(@event.Audio, "audio", cancellationToken)
+            _fileServicePublisher.PublishDeleteFileAsync(@event.ImagePath, "image", cancellationToken),
+            _fileServicePublisher.PublishDeleteFileAsync(@event.AudioPath, "audio", cancellationToken)
         ];
         return Task.WhenAll(tasks);
     }

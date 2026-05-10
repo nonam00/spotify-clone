@@ -1,23 +1,31 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Song } from "@/entities/song";
-
-type SongCache = Record<string, Song>;
+import { getSongById, Song } from "@/entities/song";
+import { LyricsSegment, SongCache } from "./types";
+import { getLyricsBySongId } from "../api";
 
 type PlayerStore = {
   ids: string[];
   activeId?: string;
-  volume: number;
+  currentSong: Song | undefined;
+  currentLyrics: LyricsSegment[];
   cache: SongCache;
+  volume: number;
+
   isRehydrated: boolean;
   timestamp: number;
+
   setActiveId: (id: string) => void;
   setIds: (ids: string[]) => void;
+  fetchCurrentSong: (signal?: AbortSignal) => Promise<void>;
+  fetchCurrentSongLyrics: (signal?: AbortSignal) => Promise<void>;
+
   setNextId: () => void;
   setPreviousId: () => void;
-  removeId: (id: string) => void;
+
   setVolume: (value: number) => void;
   setCachedSong: (song: Song) => void;
+
   setRehydrated: (value: boolean) => void;
   reset: () => void;
 }
@@ -29,19 +37,64 @@ export const usePlayerStore = create<PlayerStore>()(
     (set, get, store) => ({
       ids: [],
       activeId: undefined,
-      volume: 1,
       cache: {},
+      currentSong: undefined,
+      currentLyrics: [],
+      volume: 1,
       isRehydrated: false,
       timestamp: Date.now(),
-      setActiveId: (id: string) => set({ activeId: id, timestamp: Date.now() }),
+
+      setActiveId: (id: string) => set({
+        activeId: id,
+        currentSong: undefined,
+        currentLyrics: [],
+        timestamp: Date.now()
+      }),
       setIds: (ids: string[]) => set({ ids, timestamp: Date.now() }),
+      fetchCurrentSong: async (signal?: AbortSignal) => {
+        const state = get();
+        if (!state.activeId) {
+          set({currentSong: undefined});
+          return;
+        }
+
+        // Check cache first
+        if (state.cache[state.activeId]) {
+          set({currentSong: state.cache[state.activeId]});
+          return;
+        }
+
+        try {
+          const song = await getSongById(state.activeId, signal);
+          if (!song) {
+            set({currentSong: undefined});
+            return;
+          }
+          set({currentSong: song});
+          state.setCachedSong(song);
+        } catch (error) {
+          console.error(error);
+        }
+      },
+      fetchCurrentSongLyrics: async (signal?: AbortSignal) => {
+        const state = get();
+        if (!state.activeId) {
+          return;
+        }
+        const lyrics = await getLyricsBySongId(state.activeId, signal);
+        if (!lyrics) {
+          set({currentLyrics: []});
+          return;
+        }
+        set({currentLyrics: lyrics});
+      },
       setNextId: () => {
         const state = get();
         if (state.ids.length === 0) return;
 
         const currentIndex = state.ids.findIndex((id) => id === state.activeId);
         const nextId = state.ids[currentIndex + 1];
-        set({ activeId: nextId ?? state.ids[0], timestamp: Date.now() });
+        state.setActiveId(nextId ?? state.ids[0]);
       },
       setPreviousId: () => {
         const state = get();
@@ -49,14 +102,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
         const currentIndex = state.ids.findIndex((id) => id === state.activeId);
         const previousId = state.ids[currentIndex - 1];
-        set({ activeId: previousId ?? state.ids[state.ids.length - 1], timestamp: Date.now() });
-      },
-      removeId: (id: string) => {
-        const state = get();
-        if (id === state.activeId) {
-          set({ activeId: undefined });
-        }
-        set({ ids: state.ids.filter((id) => id !== state.activeId), timestamp: Date.now() });
+        state.setActiveId(previousId ?? state.ids[state.ids.length - 1]);
       },
       setVolume: (value: number) => set({ volume: value, timestamp: Date.now() }),
       setCachedSong: (song: Song) =>

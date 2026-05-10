@@ -9,6 +9,7 @@ using Infrastructure.Auth;
 using Infrastructure.Email;
 using Infrastructure.Files;
 using Infrastructure.Messaging;
+using Infrastructure.Transcription;
 
 namespace Infrastructure;
 
@@ -36,10 +37,16 @@ public static class DependencyInjection
         {
             services.Configure<RabbitMqOptions>(configuration.GetRequiredSection(nameof(RabbitMqOptions)));
             services.AddSingleton<RabbitMqConnectionProvider>();
+            services.AddSingleton<RabbitMqTopologyInitializer>();
+            services.AddHostedService<RabbitMqTopologyInitializerHostedService>();
+            
             services.AddScoped<IMessagePublisher, RabbitMqMessagePublisher>();
             
             services.AddScoped<IFileServicePublisher, FileServicePublisher>();
             services.AddScoped<IEmailServicePublisher, EmailServicePublisher>();
+            services.AddScoped<ITranscriptionServicePublisher, TranscriptionServicePublisher>();
+            
+            services.AddHostedService<UpdateSongInformationConsumer>();
         }
     }
 }

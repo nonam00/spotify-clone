@@ -2,17 +2,18 @@ package service
 
 import (
 	"context"
+	"fmt"
+
 	"file-service/internal/domain"
 	"file-service/internal/storage/minio"
 	"file-service/pkg/logger"
-	"fmt"
 
 	"github.com/google/uuid"
 )
 
 type FileService interface {
 	GenerateUploadURL(ctx context.Context, req domain.UploadRequest) (*domain.PresignedURLResponse, error)
-	GenerateDownloadURL(ctx context.Context, fileType domain.FileType, fileID string) (*domain.PresignedURLResponse, error)
+	GenerateDownloadURL(ctx context.Context, fileType domain.FileType, fileID string, isInternalRequest bool) (*domain.PresignedURLResponse, error)
 	CheckFileExists(ctx context.Context, fileType domain.FileType, fileID string) (bool, error)
 	DeleteFile(ctx context.Context, fileType domain.FileType, fileID string) error
 }
@@ -48,7 +49,12 @@ func (s *fileService) GenerateUploadURL(ctx context.Context, req domain.UploadRe
 	return presignedURL, nil
 }
 
-func (s *fileService) GenerateDownloadURL(ctx context.Context, fileType domain.FileType, fileID string) (*domain.PresignedURLResponse, error) {
+func (s *fileService) GenerateDownloadURL(
+	ctx context.Context,
+	fileType domain.FileType,
+	fileID string,
+	isInternalRequest bool,
+) (*domain.PresignedURLResponse, error) {
 	exists, err := s.storage.CheckFileExists(ctx, fileType, fileID)
 
 	if err != nil {
@@ -67,7 +73,7 @@ func (s *fileService) GenerateDownloadURL(ctx context.Context, fileType domain.F
 		return nil, fmt.Errorf("file not found")
 	}
 
-	presignedURL, err := s.storage.GeneratePresignedGetURL(ctx, fileType, fileID)
+	presignedURL, err := s.storage.GeneratePresignedGetURL(ctx, fileType, fileID, isInternalRequest)
 
 	if err != nil {
 		s.logger.Error().Err(err).

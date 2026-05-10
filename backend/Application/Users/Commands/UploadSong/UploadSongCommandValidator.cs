@@ -27,12 +27,12 @@ public class UploadSongCommandValidator : AbstractValidator<UploadSongCommand>
             .WithMessage("Author cannot exceed 200 characters")
             .WithErrorCode("400");
 
-        RuleFor(command => command.SongPath.Trim())
+        RuleFor(command => command.AudioPath.Trim())
             .Must(image => !string.IsNullOrWhiteSpace(image))
-            .WithMessage("Song path is required")
+            .WithMessage("Audio path is required")
             .WithErrorCode("400")
             .MaximumLength(255)
-            .WithMessage("Song path cannot exceed 255 characters")
+            .WithMessage("Audio path cannot exceed 255 characters")
             .WithErrorCode("400");
 
         RuleFor(command => command.ImagePath.Trim())

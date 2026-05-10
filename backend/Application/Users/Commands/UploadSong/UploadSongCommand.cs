@@ -7,6 +7,6 @@ public record UploadSongCommand(
     Guid UserId,
     string Title,
     string Author,
-    string SongPath,
+    string AudioPath,
     string ImagePath)
     : ICommand<Result>;

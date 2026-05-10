@@ -21,7 +21,7 @@ function calculateProgress(current: number, duration: number): number {
 }
 
 function AudioPlayer({ song }: { song: Song}) {
-  const songUrl = `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${song.songPath}`;
+  const songUrl = `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${song.audioPath}`;
   const {
     audioRef,
     isPlaying,

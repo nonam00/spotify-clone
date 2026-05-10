@@ -1,6 +1,6 @@
 namespace Domain.ValueObjects;
 
-public record PasswordHash
+public sealed record PasswordHash
 {
     public string Value { get; }
 

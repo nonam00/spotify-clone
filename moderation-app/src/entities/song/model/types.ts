@@ -2,9 +2,10 @@ export type Song = {
   id: string;
   author: string;
   title: string;
-  songPath: string;
+  audioPath: string;
   imagePath: string;
   isPublished: boolean;
+  containsExplicitContent: boolean;
   createdAt: string;
 }
 

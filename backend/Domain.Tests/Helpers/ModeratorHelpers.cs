@@ -16,10 +16,10 @@ public static class ModeratorHelpers
         var passwordHash = new PasswordHash("TestPassword123!");
             
         var permissions = new ModeratorPermissions(
-            canManageModerators: false,
-            canManageContent: canManageContent,
-            canManageUsers: canManageUsers,
-            canViewReports: canViewReports);
+            CanManageModerators: false,
+            CanManageContent: canManageContent,
+            CanManageUsers: canManageUsers,
+            CanViewReports: canViewReports);
 
         var moderator = Moderator.Create(email, passwordHash, "Test Moderator", permissions);
             

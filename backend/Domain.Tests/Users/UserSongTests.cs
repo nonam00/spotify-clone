@@ -53,7 +53,7 @@ public class UserSongTests
             
         uploadedSong.Title.Should().Be(title);
         uploadedSong.Author.Should().Be(author);
-        uploadedSong.SongPath.Should().Be(audioPath);
+        uploadedSong.AudioPath.Should().Be(audioPath);
         uploadedSong.ImagePath.Should().Be(imagePath);
         uploadedSong.UploaderId.Should().Be(_activeUser.Id);
         uploadedSong.IsPublished.Should().BeFalse();

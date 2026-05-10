@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Domain.Common;
+using Domain.Errors;
 using Domain.ValueObjects;
 using Application.Shared.Data;
 using Application.Users.Interfaces;
 using Application.Shared.Messaging;
 using Application.Users.Errors;
-using Domain.Errors;
 
 namespace Application.Users.Commands.UpdateUser;
 
-public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result>
+public partial class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -58,8 +58,11 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Resul
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("User {UserId} successfully updated profile", request.UserId);
+        LogUserSuccessfullyUpdatedProfile(_logger, request.UserId);
         
         return Result.Success();
     }
+
+    [LoggerMessage(LogLevel.Trace, "User {UserId} successfully updated profile")]
+    private static partial void LogUserSuccessfullyUpdatedProfile(ILogger logger, Guid userId);
 }

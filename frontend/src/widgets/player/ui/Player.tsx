@@ -4,6 +4,7 @@ import { useMemo, useCallback, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import { AiFillStepBackward, AiFillStepForward } from "react-icons/ai";
 import { BsPauseFill, BsPlayFill } from "react-icons/bs";
+import { TbMicrophone2} from "react-icons/tb";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 
 import { CLIENT_FILES_URL } from "@/shared/config/api";
@@ -12,6 +13,7 @@ import { SongListItem } from "@/entities/song";
 import { LikeButton } from "@/features/like-button";
 import { usePlayerStore } from "../model";
 import { useSound, useGetCurrentSong, formatTime, calculateProgress } from "../lib";
+import { LyricsModal } from "./LyricsModal";
 
 const Player = () => {
   const { activeId, ids, volume, setNextId, setPreviousId, setVolume } = usePlayerStore(
@@ -29,7 +31,7 @@ const Player = () => {
 
   const songUrl = useMemo(() => {
     if (!currentSong) return undefined;
-    return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.songPath}`;
+    return `${CLIENT_FILES_URL}/download-url?type=audio&file_id=${currentSong.audioPath}`;
   }, [currentSong]);
 
   const { audioRef, duration, currentTime, isPlaying, isStalled, isSeeking } = useSound({
@@ -39,6 +41,8 @@ const Player = () => {
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragProgress, setDragProgress] = useState(0);
+
+  const [isLyricsOpen, setIsLyricsOpen] = useState(false);
 
   // Play/pause button handler
   const togglePlay = useCallback(() => {
@@ -93,6 +97,16 @@ const Player = () => {
   const handleVolumeChange = useCallback(
     (values: number[]) => setVolume(values[0]),
     [setVolume]
+  );
+
+  // Seek function for lyrics
+  const handleSeekTo = useCallback(
+    (time: number) => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = time;
+      }
+    },
+    [audioRef]
   );
 
   // Don't show player if no activeId and no ids
@@ -182,7 +196,14 @@ const Player = () => {
         </div>
 
         {/* Volume controls */}
-        <div className="hidden md:flex items-center justify-end pr-4">
+        <div className="hidden md:flex items-center gap-x-5 justify-end pr-4">
+          <button
+            onClick={() => setIsLyricsOpen(true)}
+            className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Open lyrics"
+          >
+            <TbMicrophone2 size={20} />
+          </button>
           <div className="flex items-center gap-2 w-32">
             <button
               onClick={toggleMute}
@@ -200,6 +221,17 @@ const Player = () => {
           </div>
         </div>
       </div>
+
+      {/* Lyrics Modal */}
+      {isLyricsOpen && currentSong && (
+        <LyricsModal
+          currentTime={currentTime}
+          duration={duration}
+          onSeekTo={handleSeekTo}
+          isOpen={isLyricsOpen}
+          onClose={() => setIsLyricsOpen(false)}
+        />
+      )}
     </div>
   );
 };

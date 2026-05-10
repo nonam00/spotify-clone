@@ -1,18 +1,23 @@
 ﻿using Domain.Models;
 using Application.Songs.Enums;
 using Application.Songs.Models;
+using Domain.ValueObjects;
 
 namespace Application.Songs.Interfaces;
 
 public interface ISongsRepository
 {
     Task<Song?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<Song?> GetByIdWithLyricsSegments(Guid id, CancellationToken cancellationToken = default);
     Task<List<Song>> GetListByIds(List<Guid> ids, CancellationToken cancellationToken = default);
     Task<List<Song>> GetMarkedForDeletion(CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetList(CancellationToken cancellationToken = default);
     Task<List<SongVm>> TakeNewestList(int count = 100, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetListByPlaylistId(Guid playlistId, CancellationToken cancellationToken = default);
-    Task<List<SongVm>> GetSearchList(string searchString, SearchCriteria searchCriteria,
+    Task<List<SongVm>> GetSearchList(
+        string searchString,
+        SearchCriteria searchCriteria,
+        bool searchInLyrics,
         CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetLikedByUserId(Guid userId, CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetLikedByUserIdExcludeInPlaylist(Guid userId, Guid playlistId,
@@ -21,6 +26,7 @@ public interface ISongsRepository
         CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetUnpublishedList(CancellationToken cancellationToken = default);
     Task<List<SongVm>> GetUploadedByUserId(Guid userId, CancellationToken cancellationToken = default);
+    Task<List<LyricsSegmentData>> GetLyricsBySongId(Guid songId, CancellationToken cancellationToken = default);
     void Update(Song song);
     void UpdateRange(IEnumerable<Song> songs);
     void DeleteRange(IEnumerable<Song> songs);

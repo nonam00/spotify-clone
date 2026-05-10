@@ -31,7 +31,6 @@ type ErrorResponse struct {
 	Details string `json:"details,omitempty"`
 }
 
-// DeleteFileMessage - сообщение для удаления файла через RabbitMQ
 type DeleteFileMessage struct {
 	FileType FileType `json:"file_type"`
 	FileID   string   `json:"file_id"`

@@ -1,5 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { IoMdClose } from "react-icons/io";
+import { twMerge } from "tailwind-merge";
 
 type ModalProps = {
   isOpen: boolean;
@@ -7,15 +8,18 @@ type ModalProps = {
   title: string;
   description: string;
   children: React.ReactNode;
+  className?: string;
+  overlayClassName?: string
 };
 
-export function Modal({isOpen, onChange, title, description, children }: ModalProps) {
+export function Modal({isOpen, onChange, title, description, children, className, overlayClassName }: ModalProps) {
   return (
     <Dialog.Root open={isOpen} defaultOpen={isOpen} onOpenChange={onChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="bg-neutral-900/90 backdrop-blur-sm fixed inset-0" />
+        <Dialog.Overlay
+          className={twMerge(`bg-black/70 backdrop-blur-md fixed inset-0`, overlayClassName)} />
         <Dialog.Content
-          className="
+          className={twMerge(`
             fixed
             drop-shadow-md
             border border-neutral-700
@@ -23,13 +27,14 @@ export function Modal({isOpen, onChange, title, description, children }: ModalPr
             max-h-full h-full
             md:h-auto md:max-h-[85vh]
             w-full
-            md:w-[90vw] md:max-w-[450px]
+            md:w-[450px] md:max-w-[90vw]
             translate-x-[-50%] translate-y-[-50%]
             rounded-md
-            bg-neutral-800
+            bg-neutral-900
             p-[25px]
             focus:outline-none
-          "
+          `, className)
+          }
         >
           <Dialog.Title className="text-xl text-center font-bold mb-4">
             {title}

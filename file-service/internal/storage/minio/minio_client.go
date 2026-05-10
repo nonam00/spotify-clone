@@ -96,7 +96,7 @@ func (m *MinioClient) GeneratePresignedPutURL(
 	}
 
 	return &domain.PresignedURLResponse{
-		URL:       m.fixProxyDomain(presignedUrl.String()),
+		URL:       m.fixProxyDomain(presignedUrl.String(), false),
 		ExpiresAt: time.Now().Add(m.config.PresignExpiry),
 		FileID:    fileID,
 	}, nil
@@ -106,6 +106,7 @@ func (m *MinioClient) GeneratePresignedGetURL(
 	ctx context.Context,
 	fileType domain.FileType,
 	fileID string,
+	isInternalRequest bool,
 ) (*domain.PresignedURLResponse, error) {
 	// Check cache first
 	cacheKey := m.cache.GenerateKey(fileType, fileID)
@@ -128,7 +129,7 @@ func (m *MinioClient) GeneratePresignedGetURL(
 	}
 
 	response := &domain.PresignedURLResponse{
-		URL:       m.fixProxyDomain(presignedUrl.String()),
+		URL:       m.fixProxyDomain(presignedUrl.String(), isInternalRequest),
 		ExpiresAt: time.Now().Add(m.config.PresignExpiry),
 		FileID:    fileID,
 	}
@@ -194,6 +195,12 @@ func (m *MinioClient) getBucketByFileType(fileType domain.FileType) string {
 }
 
 // Hardcoded: changing domain for localhost nginx proxy
-func (m *MinioClient) fixProxyDomain(url string) string {
-	return strings.Replace(url, m.config.Endpoint, "localhost/s3", 1)
+func (m *MinioClient) fixProxyDomain(url string, isInternalRequest bool) string {
+	var newDomain string
+	if isInternalRequest {
+		newDomain = "nginx/s3"
+	} else {
+		newDomain = "localhost/s3"
+	}
+	return strings.Replace(url, m.config.Endpoint, newDomain, 1)
 }

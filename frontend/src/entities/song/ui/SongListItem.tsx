@@ -19,13 +19,16 @@ const SongListItem = ({
   }
   return (
     <div key={song.id} className="flex items-center gap-x-4 w-full">
-      <div onClick={onClick} className="flex-1 min-w-0">
-        <MediaItem
-          title={song.title}
-          author={song.author}
-          imagePath={song.imagePath}
-          selected={selected}
-        />
+      <div className="flex-1 min-w-0 flex items-center gap-x-2">
+        <div onClick={onClick} className="flex-1 min-w-0">
+          <MediaItem
+            title={song.title}
+            author={song.author}
+            isExplicit={song.containsExplicitContent}
+            imagePath={song.imagePath}
+            selected={selected}
+          />
+        </div>
       </div>
       <div className="flex flex-row gap-x-6">
         {children}

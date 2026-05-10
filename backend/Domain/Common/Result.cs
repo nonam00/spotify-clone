@@ -23,7 +23,7 @@ public class Result
     public static Result Failure(Error error) => new(false, error);
 }
 
-public class Result<T> : Result
+public sealed class Result<T> : Result
 {
     public T Value => IsSuccess 
         ? field 

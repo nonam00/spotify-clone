@@ -46,9 +46,9 @@ const PlaylistContent = ({
     })
   );
 
-  const onPlayClick = useCallback(() => {
+  const onPlayClick = useCallback(async () => {
     if (songs.length === 0) return;
-    onPlay(songs[0].id);
+    await onPlay(songs[0].id);
   }, [onPlay, songs]);
 
   const onRemoveClick = useCallback((songId: string) => {

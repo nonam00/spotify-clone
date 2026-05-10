@@ -31,13 +31,15 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         // Gin indexes for trigram searching
         builder.HasIndex("TitleLower")
             .HasMethod("gin")
-            .HasOperators("gin_trgm_ops");
-            
+            .HasOperators("gin_trgm_ops")
+            .HasFilter("\"is_published\" = true");
+        
         builder.HasIndex("AuthorLower")
             .HasMethod("gin")
-            .HasOperators("gin_trgm_ops");
+            .HasOperators("gin_trgm_ops")
+            .HasFilter("\"is_published\" = true");
         
-        builder.Property(s => s.SongPath)
+        builder.Property(s => s.AudioPath)
             .HasConversion(
                 path => path.Value,
                 value => new FilePath(value))
@@ -51,9 +53,20 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
             .IsRequired()
             .HasMaxLength(255);
         
+        builder.HasMany(s => s.LyricsSegments)
+            .WithOne()
+            .HasForeignKey(s => s.SongId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Property(s => s.ContainsExplicitContent)
+            .IsRequired()
+            .HasDefaultValue(false);
+        
         builder.Property(s => s.IsPublished)
             .IsRequired()
             .HasDefaultValue(false);
+
+        builder.HasIndex(s => s.IsPublished);
         
         builder.Property(s => s.MarkedForDeletion)
             .IsRequired()

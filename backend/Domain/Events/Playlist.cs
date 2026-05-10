@@ -3,14 +3,6 @@ using Domain.ValueObjects;
 
 namespace Domain.Events;
 
-public class PlaylistImageChangedEvent(Guid playlistId, FilePath oldImagePath) : DomainEvent
-{
-    public Guid PlaylistId { get; } = playlistId;
-    public FilePath OldImagePath { get; } = oldImagePath;
-}
+public record PlaylistImageChangedEvent(Guid PlaylistId, FilePath OldImagePath) : DomainEvent;
 
-public class PlaylistDeletedEvent(Guid playlistId, FilePath imagePath) : DomainEvent
-{
-    public Guid PlaylistId { get; } = playlistId;
-    public FilePath ImagePath { get; } = imagePath;
-}
+public record PlaylistDeletedEvent(Guid PlaylistId, FilePath ImagePath) : DomainEvent;

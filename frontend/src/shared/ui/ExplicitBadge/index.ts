@@ -1,0 +1,1 @@
+export { default as ExplicitBadge } from './ExplicitBadge';

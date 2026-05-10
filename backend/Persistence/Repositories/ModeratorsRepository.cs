@@ -7,7 +7,7 @@ using Application.Moderators.Models;
 
 namespace Persistence.Repositories;
 
-public class ModeratorsRepository : IModeratorsRepository
+public sealed class ModeratorsRepository : IModeratorsRepository
 {
     private readonly AppDbContext _dbContext;
 

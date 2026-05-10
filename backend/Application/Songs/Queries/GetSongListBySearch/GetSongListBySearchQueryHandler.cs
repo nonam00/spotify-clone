@@ -1,7 +1,8 @@
-﻿using Application.Shared.Messaging;
+﻿using Domain.Common;
+using Application.Shared.Messaging;
+using Application.Songs.Enums;
 using Application.Songs.Interfaces;
 using Application.Songs.Models;
-using Domain.Common;
 
 namespace Application.Songs.Queries.GetSongListBySearch;
 
@@ -16,8 +17,13 @@ public class GetSongListBySearchQueryHandler : IQueryHandler<GetSongListBySearch
 
     public async Task<Result<SongListVm>> Handle(GetSongListBySearchQuery request, CancellationToken cancellationToken)
     {
+        var searchInLyrics = request is { SearchCriteria: SearchCriteria.Any, SearchString.Length: >= 20 };
         var songs = await _songsRepository
-            .GetSearchList(request.SearchString, request.SearchCriteria, cancellationToken)
+            .GetSearchList(
+                request.SearchString,
+                request.SearchCriteria,
+                searchInLyrics,
+                cancellationToken)
             .ConfigureAwait(false);
         
         return Result<SongListVm>.Success(new SongListVm(songs));

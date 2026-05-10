@@ -98,10 +98,10 @@ public class PublishSongCommandHandlerTests : InMemoryTestBase
     {
         // Arrange
         var permissions = new ModeratorPermissions(
-            canManageContent: false,
-            canManageModerators: false,
-            canManageUsers: true,
-            canViewReports: true);
+            CanManageContent: false,
+            CanManageModerators: false,
+            CanManageUsers: true,
+            CanViewReports: true);
         
         var moderator = Moderator.Create(
             new Email("moderator@example.com"),

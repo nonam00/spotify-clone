@@ -30,8 +30,9 @@ public class GetSongByIdQueryHandler : IQueryHandler<GetSongByIdQuery, Result<So
                     song.Id,
                     song.Title,
                     song.Author,
-                    song.SongPath,
+                    song.AudioPath,
                     song.ImagePath,
+                    song.ContainsExplicitContent,
                     song.IsPublished,
                     song.CreatedAt));
         }

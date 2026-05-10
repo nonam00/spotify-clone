@@ -6,7 +6,7 @@ using Application.Users.Models;
 
 namespace Persistence.Repositories;
 
-public class UsersRepository : IUsersRepository
+public sealed class UsersRepository : IUsersRepository
 {
     private readonly AppDbContext _dbContext;
 

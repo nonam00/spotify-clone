@@ -2,12 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace Domain.ValueObjects;
 
-public record Email
+public partial record Email
 {
     private const short MaxLength = 255;
-    private static readonly Regex EmailRegex = new(
-        @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    private static partial Regex EmailRegex { get; }
 
     public string Value { get; }
     

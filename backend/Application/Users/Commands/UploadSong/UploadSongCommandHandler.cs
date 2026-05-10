@@ -10,7 +10,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.UploadSong;
 
-public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Result>
+public partial class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -44,7 +44,7 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
             return Result.Failure(UserDomainErrors.NotActive);
         }
         
-        var audioPath = new FilePath(request.SongPath);
+        var audioPath = new FilePath(request.AudioPath);
         var imagePath = new FilePath(request.ImagePath);
         
         var uploadSongResult = user.UploadSong(request.Title.Trim(), request.Author.Trim(), audioPath, imagePath);
@@ -58,10 +58,11 @@ public class UploadSongCommandHandler : ICommandHandler<UploadSongCommand, Resul
         
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation(
-            "User {UserId} successfully uploaded song {SongId}.",
-            request.UserId, uploadSongResult.Value.Id);
+        LogSuccessfullyUploadedSong(_logger, request.UserId, uploadSongResult.Value.Id);
         
         return Result.Success();
     }
+
+    [LoggerMessage(LogLevel.Trace, "User {UserId} successfully uploaded song {SongId}.")]
+    private static partial void LogSuccessfullyUploadedSong(ILogger logger, Guid userId, Guid songId);
 }

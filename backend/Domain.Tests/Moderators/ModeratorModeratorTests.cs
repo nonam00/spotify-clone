@@ -90,10 +90,10 @@ public class ModeratorModeratorTests
         // Arrange
         var moderatorToUpdate = ModeratorHelpers.CreateModerator();
         var newPermissions = new ModeratorPermissions(
-            canManageModerators: false,
-            canManageContent: true,
-            canManageUsers: false,
-            canViewReports: true);
+            CanManageModerators: false,
+            CanManageContent: true,
+            CanManageUsers: false,
+            CanViewReports: true);
 
         // Act
         var result = _activeModerator.UpdateModeratorPermissions(moderatorToUpdate, newPermissions);

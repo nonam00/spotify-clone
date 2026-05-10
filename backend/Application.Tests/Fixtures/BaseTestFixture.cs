@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Domain.Common;
-
 using Application.Moderators.Interfaces;
 using Application.Playlists.Interfaces;
 using Application.Shared.Data;
@@ -30,6 +29,7 @@ public class BaseTestFixture
     public Mock<IJwtProvider> JwtProviderMock { get; private set; } = null!;
     public Mock<IFileServicePublisher> FileServicePublisher { get; private set; } = null!;
     public Mock<IEmailServicePublisher> EmailServicePublisher { get; private set; } = null!;
+    public Mock<ITranscriptionServicePublisher> TranscriptionServicePublisher { get; private set; } = null!;
 
     protected BaseTestFixture()
     {
@@ -47,6 +47,7 @@ public class BaseTestFixture
         JwtProviderMock = new Mock<IJwtProvider>();
         FileServicePublisher = new Mock<IFileServicePublisher>();
         EmailServicePublisher = new Mock<IEmailServicePublisher>();
+        TranscriptionServicePublisher = new Mock<ITranscriptionServicePublisher>();
         
         SetupPasswordHasherMocks();
         SetupJwtProviderMocks();
@@ -74,8 +75,9 @@ public class BaseTestFixture
         Services.AddSingleton(JwtProviderMock.Object);
         Services.AddSingleton(EmailServicePublisher.Object);
         Services.AddSingleton(FileServicePublisher.Object);
-        
-        Services.AddScoped(typeof(ILoggerFactory), typeof(LoggerFactory));
+        Services.AddSingleton(TranscriptionServicePublisher.Object);
+
+        Services.AddScoped<ILoggerFactory, LoggerFactory>();
         Services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
     }
 

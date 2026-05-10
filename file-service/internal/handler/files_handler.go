@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"file-service/internal/domain"
 	"file-service/internal/service"
@@ -52,6 +53,15 @@ func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {
 	fileType := domain.FileType(c.Query("type"))
 	fileID := c.Query("file_id")
 
+	var isInternalRequest bool
+	isInternalParam := c.Query("is_internal")
+	isInternalParsed, err := strconv.ParseBool(isInternalParam)
+	if err != nil {
+		isInternalRequest = false
+	} else {
+		isInternalRequest = isInternalParsed
+	}
+
 	if fileType == "" || fileID == "" {
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
 			Error: "Missing required parameters: type, file_id",
@@ -59,14 +69,16 @@ func (h *FileHandler) GenerateDownloadURL(c *gin.Context) {
 		return
 	}
 
-	if fileType != domain.FileTypeImage && fileType != domain.FileTypeAudio {
+	switch fileType {
+	case domain.FileTypeImage, domain.FileTypeAudio:
+	default:
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
-			Error: "Invalid file type. Must be 'image' or 'audio'",
+			Error: "Invalid file type",
 		})
 		return
 	}
 
-	response, err := h.service.GenerateDownloadURL(ctx, fileType, fileID)
+	response, err := h.service.GenerateDownloadURL(ctx, fileType, fileID, isInternalRequest)
 
 	if err != nil {
 		h.logger.Error().Err(err).

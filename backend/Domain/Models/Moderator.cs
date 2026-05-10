@@ -162,7 +162,7 @@ public class Moderator : AggregateRoot<Guid>
 
     public Result PublishSongs(List<Song> songs)
     {
-        if (!songs.Any())
+        if (songs.Count == 0)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);    
         }
@@ -237,14 +237,14 @@ public class Moderator : AggregateRoot<Guid>
             return deleteResult;
         }
         
-        AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
+        AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.AudioPath));
         
         return Result.Success();
     }
 
     public Result DeleteSongs(List<Song> songs)
     {
-        if (!songs.Any())
+        if (songs.Count == 0)
         {
             return Result.Failure(ModeratorDomainErrors.CannotManageEmptySongList);
         }
@@ -271,7 +271,7 @@ public class Moderator : AggregateRoot<Guid>
             .Where(s => s.Result.IsFailure)
             .ToList();
         
-        if (failed.Any())
+        if (failed.Count != 0)
         {
             foreach (var markedForDeletion in markForDeletionResults.Except(failed))
             {
@@ -283,7 +283,7 @@ public class Moderator : AggregateRoot<Guid>
         
         foreach (var song in songs)
         {
-            AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.SongPath));
+            AddDomainEvent(new ModeratorDeletedSongEvent(song.Id, song.ImagePath, song.AudioPath));
         }
         
         return Result.Success();

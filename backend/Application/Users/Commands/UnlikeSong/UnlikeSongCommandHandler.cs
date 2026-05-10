@@ -9,7 +9,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Users.Commands.UnlikeSong;
 
-public class UnlikeSongCommandHandler : ICommandHandler<UnlikeSongCommand, Result>
+public partial class UnlikeSongCommandHandler : ICommandHandler<UnlikeSongCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -69,8 +69,11 @@ public class UnlikeSongCommandHandler : ICommandHandler<UnlikeSongCommand, Resul
         
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation("User {UserId} successfully unliked song {SongId}.", request.UserId, request.SongId);
+        LogUserSuccessfullyUnlikedSong(_logger, request.UserId, request.SongId);
         
         return Result.Success();
     }
+
+    [LoggerMessage(LogLevel.Trace, "User {UserId} successfully unliked song {SongId}.")]
+    private static partial void LogUserSuccessfullyUnlikedSong(ILogger logger, Guid userId, Guid songId);
 }
