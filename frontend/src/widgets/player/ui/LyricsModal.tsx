@@ -40,17 +40,17 @@ export function LyricsModal({
   isOpen,
   onClose,
 }: LyricsModalProps) {
-  const { songId, lyrics, fetchLyrics } = usePlayerStore(useShallow((s) => ({
-    songId: s.activeId,
+  const { song, lyrics, fetchLyrics } = usePlayerStore(useShallow((s) => ({
+    song: s.currentSong,
     lyrics: s.currentLyrics,
     fetchLyrics: s.fetchCurrentSongLyrics,
   })));
 
   // Fetch lyrics when songId changes
   useEffect(() => {
-    if (!songId) return;
+    if (!song) return;
     fetchLyrics().catch(console.error);
-  }, [fetchLyrics, songId]);
+  }, [fetchLyrics, song]);
 
   // Find active segment based on currentTime
   const activeIndex = useMemo(() => {
@@ -81,11 +81,10 @@ export function LyricsModal({
       isOpen={isOpen}
       onChange={onChange}
       title="Lyrics"
-      description=""
+      description={`${song?.title} - ${song?.author}`}
       className="md:w-[75vw] text-xl"
     >
-      <div className="h-[75vh] overflow-y-scroll space-y-5 scrollbar-thin scrollbar-thumb-neutral-600">
-
+      <div className="h-[75vh] overflow-y-scroll space-y-5 scrollbar-thin scrollbar-thumb-neutral-600 pb-5">
         {(lyrics.length === 0) ? (
           <p className="text-gray-500 text-3xl text-center">
             No lyrics available

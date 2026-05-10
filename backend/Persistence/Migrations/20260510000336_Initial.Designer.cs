@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260508151840_Lyrics")]
-    partial class Lyrics
+    [Migration("20260510000336_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,37 @@ namespace Persistence.Migrations
                         .HasDatabaseName("ix_liked_songs_song_id");
 
                     b.ToTable("liked_songs", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.LyricsSegment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("NormalizedText")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("text")
+                        .HasColumnName("normalized_text")
+                        .HasComputedColumnSql("lower(f_unaccent(trim(\"text\")))", true);
+
+                    b.Property<Guid>("SongId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("song_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lyrics_segments");
+
+                    b.HasIndex("NormalizedText")
+                        .HasDatabaseName("ix_lyrics_segments_normalized_text");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("NormalizedText"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("NormalizedText"), new[] { "gin_trgm_ops" });
+
+                    b.HasIndex("SongId")
+                        .HasDatabaseName("ix_lyrics_segments_song_id");
+
+                    b.ToTable("lyrics_segments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Moderator", b =>
@@ -289,13 +320,18 @@ namespace Persistence.Migrations
                         .HasName("pk_songs");
 
                     b.HasIndex("AuthorLower")
-                        .HasDatabaseName("ix_songs_author_lower");
+                        .HasDatabaseName("ix_songs_author_lower")
+                        .HasFilter("\"is_published\" = true");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("AuthorLower"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("AuthorLower"), new[] { "gin_trgm_ops" });
 
+                    b.HasIndex("IsPublished")
+                        .HasDatabaseName("ix_songs_is_published");
+
                     b.HasIndex("TitleLower")
-                        .HasDatabaseName("ix_songs_title_lower");
+                        .HasDatabaseName("ix_songs_title_lower")
+                        .HasFilter("\"is_published\" = true");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("TitleLower"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("TitleLower"), new[] { "gin_trgm_ops" });
@@ -355,37 +391,6 @@ namespace Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.ValueObjects.LyricsSegment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("NormalizedText")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("text")
-                        .HasColumnName("normalized_text")
-                        .HasComputedColumnSql("lower(f_unaccent(trim(\"text\")))", true);
-
-                    b.Property<Guid>("SongId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("song_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_lyrics_segments");
-
-                    b.HasIndex("NormalizedText")
-                        .HasDatabaseName("ix_lyrics_segments_normalized_text");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("NormalizedText"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("NormalizedText"), new[] { "gin_trgm_ops" });
-
-                    b.HasIndex("SongId")
-                        .HasDatabaseName("ix_lyrics_segments_song_id");
-
-                    b.ToTable("lyrics_segments", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Models.LikedSong", b =>
                 {
                     b.HasOne("Domain.Models.Song", "Song")
@@ -405,6 +410,51 @@ namespace Persistence.Migrations
                     b.Navigation("Song");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Models.LyricsSegment", b =>
+                {
+                    b.HasOne("Domain.Models.Song", null)
+                        .WithMany("LyricsSegments")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lyrics_segments_songs_song_id");
+
+                    b.OwnsOne("Domain.ValueObjects.LyricsSegmentData", "LyricsSegmentData", b1 =>
+                        {
+                            b1.Property<Guid>("LyricsSegmentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<double>("End")
+                                .HasColumnType("double precision")
+                                .HasColumnName("end");
+
+                            b1.Property<int>("Order")
+                                .HasColumnType("integer")
+                                .HasColumnName("order");
+
+                            b1.Property<double>("Start")
+                                .HasColumnType("double precision")
+                                .HasColumnName("start");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("text");
+
+                            b1.HasKey("LyricsSegmentId");
+
+                            b1.ToTable("lyrics_segments");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LyricsSegmentId")
+                                .HasConstraintName("fk_lyrics_segments_lyrics_segments_id");
+                        });
+
+                    b.Navigation("LyricsSegmentData")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.Moderator", b =>
@@ -508,51 +558,6 @@ namespace Persistence.Migrations
                         .HasConstraintName("fk_songs_users_uploader_id");
 
                     b.Navigation("Uploader");
-                });
-
-            modelBuilder.Entity("Domain.ValueObjects.LyricsSegment", b =>
-                {
-                    b.HasOne("Domain.Models.Song", null)
-                        .WithMany("LyricsSegments")
-                        .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lyrics_segments_songs_song_id");
-
-                    b.OwnsOne("Domain.ValueObjects.LyricsSegmentData", "LyricsSegmentData", b1 =>
-                        {
-                            b1.Property<Guid>("LyricsSegmentId")
-                                .HasColumnType("uuid")
-                                .HasColumnName("id");
-
-                            b1.Property<double>("End")
-                                .HasColumnType("double precision")
-                                .HasColumnName("end");
-
-                            b1.Property<int>("Order")
-                                .HasColumnType("integer")
-                                .HasColumnName("order");
-
-                            b1.Property<double>("Start")
-                                .HasColumnType("double precision")
-                                .HasColumnName("start");
-
-                            b1.Property<string>("Text")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("text");
-
-                            b1.HasKey("LyricsSegmentId");
-
-                            b1.ToTable("lyrics_segments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LyricsSegmentId")
-                                .HasConstraintName("fk_lyrics_segments_lyrics_segments_id");
-                        });
-
-                    b.Navigation("LyricsSegmentData")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.Playlist", b =>
