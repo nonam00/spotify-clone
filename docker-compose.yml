@@ -115,10 +115,10 @@ services:
       retries: 3
       start_period: 5s
       
-  ai-moderation-service:
-    container_name: ai_moderation_service
+  ai-transcription-service:
+    container_name: ai_transcription_service
     build:
-      context: ./ai-moderation-service
+      context: ./ai-transcription-service
       dockerfile: ./Dockerfile
     ports:
       - "8020:8000"

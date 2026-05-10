@@ -34,7 +34,7 @@ async def lifespan(_: FastAPI):
     await rabbitmq_connection_manager.close()
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Whisper ASR microservice", lifespan=lifespan)
+    app = FastAPI(lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
