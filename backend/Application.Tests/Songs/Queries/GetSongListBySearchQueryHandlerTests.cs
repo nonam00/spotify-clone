@@ -152,7 +152,7 @@ public class GetSongListBySearchQueryHandlerTests : PostgresTestBase
         await Context.Users.AddAsync(user);
         await Context.SaveChangesAsync();
 
-        var query = new GetSongListBySearchQuery("Song", SearchCriteria.Any);
+        var query = new GetSongListBySearchQuery("Author", SearchCriteria.Any);
 
         // Act
         var result = await Mediator.Send(query, CancellationToken.None);
