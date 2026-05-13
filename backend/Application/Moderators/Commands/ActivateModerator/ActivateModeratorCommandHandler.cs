@@ -9,7 +9,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.ActivateModerator;
 
-public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModeratorCommand, Result>
+public sealed class ActivateModeratorCommandHandler : ICommandHandler<ActivateModeratorCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -85,10 +85,19 @@ public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModerator
         _moderatorsRepository.Update(moderatorToActivate);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation(
-            "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.",
-            command.ModeratorToActivateId, command.ManagingModeratorId);
+        Log.LogModeratorWasSuccessfullyActivatedByManagingModerator(_logger, command.ModeratorToActivateId, command.ManagingModeratorId);
         
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.")]
+    internal static partial void LogModeratorWasSuccessfullyActivatedByManagingModerator(
+        ILogger logger,
+        Guid moderatorToActivateId,
+        Guid managingModeratorId);   
 }

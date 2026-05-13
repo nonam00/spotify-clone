@@ -125,6 +125,11 @@ services:
     environment:
       - FILE_SERVICE_URL=$FILE_SERVICE_URL
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - HF_HOME=/app/.cache/huggingface
+      - HF_HUB_CACHE=/app/.cache/huggingface/hub
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface/hub
+    volumes:  
+      - hf_models_cache:/app/.cache/huggingface
     depends_on:
       nginx:
         condition: service_healthy
@@ -359,3 +364,4 @@ volumes:
   grafana_data:
   rabbitmq_data:
   rabbitmq_log:
+  hf_models_cache:

@@ -30,6 +30,11 @@ The project is built on a microservices architecture and includes:
 - Integration with MinIO (S3-compatible storage)
 - Using distributed cache based on Redis for better performance on getting files
 
+### AI Transcription & Moderation Service
+– Converts uploaded audio tracks to text using **Faster Whisper** for high-speed, accurate speech-to-text.
+– Scans transcriptions for inappropriate content with **better-profanity**
+- Integrates with RabbitMQ using **aio-pika** for event-driven processing of newly uploaded tracks.
+
 ### Infrastructure
 - **RabbitMQ** - Message broker
 - **PostgreSQL** - Main database for primary data
@@ -64,6 +69,7 @@ The project is built on a microservices architecture and includes:
 - **Moderator Accounts Management** - view and manage moderator accounts, give or revoke permissions if you are super-moderator
 - **Bulk Operations** - publish or delete multiple songs at once
 - **Audio Preview** - listen to songs before moderation decisions
+- **Automatic Explicit Moderation ** – AI-powered content verification
 
 ### 📊 Monitoring & Observability
 - **Real-time Metrics** - track application performance and health
@@ -120,6 +126,12 @@ The project is built on a microservices architecture and includes:
 **Email Service**
 - **Gomail** - SMTP mail client
 
+### AI Transcription & Moderation Service
+- **FastAPI** – Modern, high-performance async web framework
+- **Faster Whisper** – CTranslate2-based Whisper implementation for rapid audio transcription
+- **better-profanity** – Profanity detection and content filtering
+- **aio-pika** – Async RabbitMQ client for messaging
+
 ### DevOps & Infrastructure
 - **Docker & Docker Compose** - Containerization and basic orchestration
 - **PostgreSQL** - Advanced relational database
@@ -132,7 +144,6 @@ The project is built on a microservices architecture and includes:
 ## 📋 Development Plans
 
 ### Plans
-- [ ] **Automatic Moderation** - AI-powered content verification
 - [ ] **Recommender System** - Algorithms for music suggestions
 - [ ] **Social Features** - Subscriptions, comments, ratings
 - [ ] **Performance Testing** - Load testing with k6 or Locust
@@ -141,6 +152,8 @@ The project is built on a microservices architecture and includes:
 - [x] **Monitoring Stack** - Prometheus and Grafana integration
 - [x] **Moderation Service** - Manual content moderation interface
 - [x] **Email Confirmation** - Account Verification System
+- [x] **Automatic Moderation** - AI-powered content verification
+- [x] **Live Lyrics** - Sing along with synced text  
 
 ## 🛠️ Installation and Launch
 
@@ -180,7 +193,6 @@ The application requires the following environment variables to be configured:
 
 #### Next SSR endpoints
 - `SERVER_API_URL` - endpoint for web api (if running in container use host.docker.internal)
-- `FILE_SERVER_URL` - endpoint for file service (if running in container use host.docker.internal)
 *endpoints for client side request are hardcoded because of the way how next.js operates with env variables*
 
 ### 📝 Important Notes

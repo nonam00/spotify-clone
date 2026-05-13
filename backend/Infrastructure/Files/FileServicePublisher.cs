@@ -3,7 +3,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Files;
 
-public class FileServicePublisher : IFileServicePublisher
+public sealed class FileServicePublisher : IFileServicePublisher
 {
     private readonly IMessagePublisher _publisher;
     

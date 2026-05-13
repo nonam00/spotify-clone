@@ -8,7 +8,7 @@ using Application.Shared.Errors;
 
 namespace Application.Shared.Messaging;
 
-public class Mediator : IMediator
+public sealed class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
 

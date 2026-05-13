@@ -31,14 +31,12 @@ def setup_device() -> tuple[str, str, bool]:
             logger.info("GPU: %s (%.1f GB)", gpu_name, gpu_memory_gb)
 
             # Determine model size based on VRAM
-            if gpu_memory_gb >= 8:
-                model_size = "large"
-            elif gpu_memory_gb >= 6:
-                model_size = "medium"
+            if gpu_memory_gb >= 6:
+                model_size = "large-v3"
             elif gpu_memory_gb >= 4:
-                model_size = "small"
+                model_size = "large-v3-turbo"
             else:
-                model_size = "base"
+                model_size = "medium"
 
             nvmlShutdown()
             return "cuda", model_size, True
@@ -49,7 +47,7 @@ def setup_device() -> tuple[str, str, bool]:
     # Check for Apple MPS (Apple Silicon macOS)
     if sys.platform == "darwin" and platform.machine() == "arm64":
         logger.info("Device: Apple MPS")
-        return "mps", "medium", False
+        return "mps", "large-v3-turbo", False
 
     # Fallback to CPU
     logger.info("Device: CPU")

@@ -7,7 +7,7 @@ using Domain.Common;
 
 namespace Application.Shared.Messaging;
 
-public class InMemoryDomainEventDispatcher : IDomainEventDispatcher
+public sealed class InMemoryDomainEventDispatcher : IDomainEventDispatcher
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<InMemoryDomainEventDispatcher> _logger;

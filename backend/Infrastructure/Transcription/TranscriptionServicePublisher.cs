@@ -3,7 +3,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Transcription;
 
-public class TranscriptionServicePublisher : ITranscriptionServicePublisher
+public sealed class TranscriptionServicePublisher : ITranscriptionServicePublisher
 {
     private readonly IMessagePublisher _publisher;
     

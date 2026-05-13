@@ -3,10 +3,10 @@ namespace Domain.ValueObjects;
 // Time code measures in fractions of second 
 public sealed record LyricsSegmentData
 {
-    public double Start { get; private init; }
-    public double End { get; private init; }
-    public string Text { get; private init; }
-    public int Order { get; private init; }
+    public double Start { get; }
+    public double End { get; }
+    public string Text { get; }
+    public int Order { get; }
     
     public LyricsSegmentData(double start, double end, string text, int order)
     {

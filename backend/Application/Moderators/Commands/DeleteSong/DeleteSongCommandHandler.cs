@@ -59,7 +59,7 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
-        
+
         var song = await _songsRepository.GetById(command.SongId, cancellationToken).ConfigureAwait(false);
 
         if (song is null)
@@ -69,24 +69,32 @@ public class DeleteSongCommandHandler : ICommandHandler<DeleteSongCommand, Resul
                 command.ModeratorId, command.SongId);
             return Result.Failure(SongErrors.NotFound);
         }
-        
+
         var deletionResult = moderator.DeleteSong(song);
         if (deletionResult.IsFailure)
-        {  
+        {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to delete song {SongId}" +
                 " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, deletionResult.Error.Description);
             return deletionResult;
         }
-        
+
         _songsRepository.Update(song);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Moderator {ModeratorId} successfully marked song {SongId} for deletion.",
-            command.SongId, command.ModeratorId);
-        
+
+        Log.LogModeratorSuccessfullyMarkedSongForDeletion(_logger, command.SongId, command.ModeratorId);
+
         return Result.Success();
     }
 }
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorId} successfully marked song {SongId} for deletion.")]
+    internal static partial void LogModeratorSuccessfullyMarkedSongForDeletion(
+        ILogger logger, Guid moderatorId, Guid songId);
+}
+

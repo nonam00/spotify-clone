@@ -3,7 +3,7 @@ using Domain.Common;
 
 namespace Application.Moderators.Commands.CreateModerator;
 
-public record CreateModeratorCommand(
+public sealed record CreateModeratorCommand(
     Guid ManagingModeratorId,
     string Email,
     string FullName,

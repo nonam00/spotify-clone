@@ -11,7 +11,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Moderators.Commands.ActivateUser;
 
-public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, Result>
+public sealed class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUsersRepository _usersRepository;
@@ -84,10 +84,17 @@ public class ActivateUserCommandHandler : ICommandHandler<ActivateUserCommand, R
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation(
-            "Moderator {ModeratorId} successfully activated user {UserId}.",
-            command.ModeratorId, command.UserId);
+        Log.LogModeratorSuccessfullyActivatedUser(_logger, command.ModeratorId, command.UserId);
 
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorId} successfully activated user {UserId}.")]
+    internal static partial void LogModeratorSuccessfullyActivatedUser(
+        ILogger logger, Guid moderatorId, Guid userId);
 }

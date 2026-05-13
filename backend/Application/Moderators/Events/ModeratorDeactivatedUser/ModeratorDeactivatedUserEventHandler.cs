@@ -4,7 +4,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Events.ModeratorDeactivatedUser;
 
-public class ModeratorDeactivatedUserEventHandler : IDomainEventHandler<ModeratorDeactivatedUserEvent>
+public sealed class ModeratorDeactivatedUserEventHandler : IDomainEventHandler<ModeratorDeactivatedUserEvent>
 {
     private readonly IFileServicePublisher _fileServicePublisher;
     

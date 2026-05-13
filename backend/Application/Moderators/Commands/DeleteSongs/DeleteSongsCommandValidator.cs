@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Moderators.Commands.DeleteSongs;
 
-public class DeleteSongsCommandValidator : AbstractValidator<DeleteSongsCommand>
+public sealed class DeleteSongsCommandValidator : AbstractValidator<DeleteSongsCommand>
 {
     public DeleteSongsCommandValidator()
     {

@@ -11,7 +11,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.CreateModerator;
 
-public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorCommand, Result>
+public sealed class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -51,7 +51,7 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
                 command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
-        
+
         if (!managingModerator.Permissions.CanManageModerators)
         {
             _logger.LogWarning(
@@ -59,33 +59,33 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
                 command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
-        
+
         var checkModerator = await _moderatorsRepository
             .GetByEmail(command.Email, cancellationToken)
             .ConfigureAwait(false);
-        
+
         if (checkModerator is not null)
         {
             if (!checkModerator.IsActive)
             {
-                _logger.LogInformation(               
+                _logger.LogInformation(
                     "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
                     " but moderator {ExistingModeratorWithEmailId} with this email already exists but not active.",
                     command.ManagingModeratorId, command.Email, checkModerator.Id);
                 return Result.Failure(ModeratorErrors.AlreadyExistButNotActive);
             }
-            
+
             _logger.LogInformation(
                 "Managing moderator {ManagingModeratorId} tried to create moderator with email {Email}" +
                 " but moderator {ExistingModeratorWithEmailId} with this email already exists.",
                 command.ManagingModeratorId, command.Email, checkModerator.Id);
-            
+
             return Result.Failure(ModeratorErrors.AlreadyExist);
         }
 
         var email = new Email(command.Email);
         var passwordHash = new PasswordHash(_passwordHasher.Generate(command.Password));
-        
+
         var createModeratorResult = managingModerator.CreateModerator(
             email, passwordHash, command.FullName, command.IsSuper);
 
@@ -97,14 +97,21 @@ public class CreateModeratorCommandHandler : ICommandHandler<CreateModeratorComm
                 command.ManagingModeratorId, createModeratorResult.Error.Description);
             return createModeratorResult;
         }
-        
+
         await _moderatorsRepository.Add(createModeratorResult.Value, cancellationToken).ConfigureAwait(false);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Managing moderator {ManagingModeratorId} successfully created new moderator {CreatedModeratorId}.",
-            command.ManagingModeratorId, createModeratorResult.Value.Id);
-        
+
+        Log.LogSuccessfullyCreatedNewModerator(_logger, command.ManagingModeratorId, createModeratorResult.Value.Id);
+
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Managing moderator {ManagingModeratorId} successfully created new moderator {CreatedModeratorId}.")]
+    internal static partial void LogSuccessfullyCreatedNewModerator(
+        ILogger logger, Guid managingModeratorId, Guid createdModeratorId);
 }

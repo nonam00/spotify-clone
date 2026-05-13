@@ -11,7 +11,7 @@ namespace Application.Tests.Fixtures;
 /// <summary>
 /// Configures in-memory db context for base test fixture 
 /// </summary>
-public class InMemoryDbTestFixture : BaseTestFixture, IAsyncLifetime
+public sealed class InMemoryDbTestFixture : BaseTestFixture, IAsyncLifetime
 {
     private readonly ServiceProvider _serviceProvider;
 
@@ -48,7 +48,5 @@ public class InMemoryDbTestFixture : BaseTestFixture, IAsyncLifetime
         await Context.Database.EnsureDeletedAsync();
         await Context.DisposeAsync();
         await _serviceProvider.DisposeAsync();
-        
-        GC.SuppressFinalize(this);
     }
 }

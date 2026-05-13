@@ -1,6 +1,6 @@
 namespace Application.Moderators.Models;
 
-public record ModeratorInfo(
+public sealed record ModeratorInfo(
     Guid Id,
     string Email,
     string FullName,

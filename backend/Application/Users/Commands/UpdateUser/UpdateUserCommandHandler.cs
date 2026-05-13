@@ -10,7 +10,7 @@ using Application.Users.Errors;
 
 namespace Application.Users.Commands.UpdateUser;
 
-public partial class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result>
+public sealed partial class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, Result>
 {
     private readonly IUsersRepository _usersRepository;
     private readonly IUnitOfWork _unitOfWork;

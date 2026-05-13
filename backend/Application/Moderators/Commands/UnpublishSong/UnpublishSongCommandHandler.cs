@@ -11,7 +11,7 @@ using Application.Songs.Interfaces;
 
 namespace Application.Moderators.Commands.UnpublishSong;
 
-public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand, Result>
+public sealed class UnpublishSongCommandHandler : ICommandHandler<UnpublishSongCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly ISongsRepository _songsRepository;
@@ -60,9 +60,9 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
-        
+
         var song = await _songsRepository.GetById(command.SongId, cancellationToken).ConfigureAwait(false);
-        
+
         if (song is null)
         {
             _logger.LogError(
@@ -70,24 +70,30 @@ public class UnpublishSongCommandHandler :  ICommandHandler<UnpublishSongCommand
                 command.ModeratorId, command.SongId);
             return Result.Failure(SongErrors.NotFound);
         }
-        
+
         var publishSongResult = moderator.UnpublishSong(song);
         if (publishSongResult.IsFailure)
-        {  
+        {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to unpublish song {SongId}" +
                 " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, publishSongResult.Error.Description);
             return publishSongResult;
         }
-        
+
         _songsRepository.Update(song);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Moderator {ModeratorId} successfully unpublished song {SongId}.",
-            command.SongId, command.ModeratorId);
-        
+
+        Log.LogModeratorSuccessfullyUnpublishedSong(_logger, command.SongId, command.ModeratorId);
+
         return Result.Success();
     }
+}
+
+internal static partial class Log 
+{
+    [LoggerMessage(
+        LogLevel.Trace, 
+        "Moderator {ModeratorId} successfully unpublished song {SongId}.")]
+    public static partial void LogModeratorSuccessfullyUnpublishedSong(ILogger logger, Guid moderatorId, Guid songId);
 }

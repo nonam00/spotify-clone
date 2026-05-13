@@ -5,7 +5,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Messaging;
 
-public class RabbitMqMessagePublisher : IMessagePublisher
+public sealed class RabbitMqMessagePublisher : IMessagePublisher
 {
     private readonly RabbitMqConnectionProvider _connectionProvider;
 

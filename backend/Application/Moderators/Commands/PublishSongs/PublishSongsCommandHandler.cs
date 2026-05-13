@@ -11,7 +11,7 @@ using Application.Songs.Interfaces;
 
 namespace Application.Moderators.Commands.PublishSongs;
 
-public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, Result>
+public sealed class PublishSongsCommandHandler : ICommandHandler<PublishSongsCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly ISongsRepository _songsRepository;
@@ -76,11 +76,18 @@ public class PublishSongsCommandHandler :  ICommandHandler<PublishSongsCommand, 
 
         _songsRepository.UpdateRange(songs);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "{SongCount} songs were successfully published by moderator {ModeratorId}.",
-            command.SongIds.Count, command.ModeratorId);
+
+        Log.LogSongsWereSuccessfullyPublishedByModerator(_logger, command.SongIds.Count, command.ModeratorId);
 
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "{SongCount} songs were successfully published by moderator {ModeratorId}.")]
+    internal static partial void LogSongsWereSuccessfullyPublishedByModerator(
+        ILogger logger, int songCount, Guid moderatorId);
 }
