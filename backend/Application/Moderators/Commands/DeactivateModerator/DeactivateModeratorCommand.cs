@@ -3,4 +3,4 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.DeactivateModerator;
 
-public record DeactivateModeratorCommand(Guid ManagingModeratorId, Guid ModeratorToDeactivateId) : ICommand<Result>;
+public sealed record DeactivateModeratorCommand(Guid ManagingModeratorId, Guid ModeratorToDeactivateId) : ICommand<Result>;

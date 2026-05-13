@@ -11,7 +11,7 @@ using Application.Songs.Interfaces;
 
 namespace Application.Moderators.Commands.DeleteSongs;
 
-public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Result>
+public sealed class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly ISongsRepository _songsRepository;
@@ -27,7 +27,7 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
         _moderatorsRepository = moderatorsRepository;
         _songsRepository = songsRepository;
         _unitOfWork = unitOfWork;
-        _logger =  logger;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(DeleteSongsCommand command, CancellationToken cancellationToken)
@@ -77,10 +77,17 @@ public class DeleteSongsCommandHandler : ICommandHandler<DeleteSongsCommand, Res
         _songsRepository.UpdateRange(songs);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation(
-            "{SongsCount} songs were successfully marked for deletion by moderator {ModeratorId}.",
-            command.SongIds.Count, command.ModeratorId);
-        
+        Log.LogSongsWereSuccessfullyMarkedForDeletionByModerator(_logger, command.SongIds.Count, command.ModeratorId);
+
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace, 
+        "{SongsCount} songs were successfully marked for deletion by moderator {ModeratorId}.")]
+    internal static partial void LogSongsWereSuccessfullyMarkedForDeletionByModerator(
+        ILogger logger, int songsCount, Guid moderatorId);
 }

@@ -3,4 +3,4 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.PublishSongs;
 
-public record PublishSongsCommand(Guid ModeratorId, List<Guid> SongIds) : ICommand<Result>;
+public sealed record PublishSongsCommand(Guid ModeratorId, List<Guid> SongIds) : ICommand<Result>;

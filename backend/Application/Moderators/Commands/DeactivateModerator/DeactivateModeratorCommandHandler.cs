@@ -10,7 +10,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.DeactivateModerator;
 
-public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModeratorCommand, Result>
+public sealed class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModeratorCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -49,7 +49,7 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
                 command.ModeratorToDeactivateId, command.ManagingModeratorId);
             return Result.Failure(ModeratorDomainErrors.NotActive);
         }
-        
+
         if (!managingModerator.Permissions.CanManageModerators)
         {
             _logger.LogWarning(
@@ -62,7 +62,7 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
         var moderatorToDeactivate = await _moderatorsRepository
             .GetById(command.ModeratorToDeactivateId, cancellationToken)
             .ConfigureAwait(false);
-        
+
         if (moderatorToDeactivate == null)
         {
             _logger.LogError(
@@ -71,7 +71,7 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
                 command.ManagingModeratorId, command.ModeratorToDeactivateId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
-        
+
         var deactivationResult = managingModerator.DeactivateModerator(moderatorToDeactivate);
 
         if (deactivationResult.IsFailure)
@@ -82,14 +82,21 @@ public class DeactivateModeratorCommandHandler : ICommandHandler<DeactivateModer
                 command.ManagingModeratorId, command.ModeratorToDeactivateId, deactivationResult.Error);
             return deactivationResult;
         }
-        
+
         _moderatorsRepository.Update(moderatorToDeactivate);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Managing moderator {ManagingModeratorId} successfully deactivated moderator {ModeratorToDeactivateId}.",
-            command.ManagingModeratorId, command.ModeratorToDeactivateId);
-        
+
+        Log.LogSuccessfullyDeactivatedModerator(_logger, command.ManagingModeratorId, command.ModeratorToDeactivateId);
+
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Managing moderator {ManagingModeratorId} successfully deactivated moderator {ModeratorToDeactivateId}.")]
+    internal static partial void LogSuccessfullyDeactivatedModerator(
+        ILogger logger, Guid managingModeratorId, Guid moderatorToDeactivateId);
 }

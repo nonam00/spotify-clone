@@ -11,7 +11,7 @@ using Application.Songs.Interfaces;
 
 namespace Application.Moderators.Commands.PublishSong;
 
-public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Result>
+public sealed class PublishSongCommandHandler : ICommandHandler<PublishSongCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly ISongsRepository _songsRepository;
@@ -21,7 +21,7 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
     public PublishSongCommandHandler(
         IModeratorsRepository moderatorsRepository,
         ISongsRepository songsRepository,
-        IUnitOfWork unitOfWork, 
+        IUnitOfWork unitOfWork,
         ILogger<PublishSongCommandHandler> logger)
     {
         _moderatorsRepository = moderatorsRepository;
@@ -59,9 +59,9 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
                 command.ModeratorId, command.SongId);
             return Result.Failure(ModeratorDomainErrors.CannotManageContent);
         }
-        
+
         var song = await _songsRepository.GetById(command.SongId, cancellationToken).ConfigureAwait(false);
-        
+
         if (song is null)
         {
             _logger.LogError(
@@ -69,24 +69,31 @@ public class PublishSongCommandHandler :  ICommandHandler<PublishSongCommand, Re
                 command.ModeratorId, command.SongId);
             return Result.Failure(SongErrors.NotFound);
         }
-        
+
         var publishSongResult = moderator.PublishSong(song);
         if (publishSongResult.IsFailure)
-        {  
+        {
             _logger.LogError(
                 "Moderator {ModeratorId} tried to publish song {SongId}" +
                 " but domain error occurred:\n{DomainErrorDescription}",
                 command.ModeratorId, command.SongId, publishSongResult.Error.Description);
             return publishSongResult;
         }
-        
+
         _songsRepository.Update(song);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Moderator {ModeratorId} successfully published song {SongId}.",
-            command.SongId, command.ModeratorId);
-        
+
+        Log.LogModeratorSuccessfullyPublishedSong(_logger, command.SongId, command.ModeratorId);
+
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorId} successfully published song {SongId}.")]
+    internal static partial void LogModeratorSuccessfullyPublishedSong(
+        ILogger logger, Guid moderatorId, Guid songId);
 }

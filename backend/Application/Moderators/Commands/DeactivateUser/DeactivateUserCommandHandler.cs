@@ -12,7 +12,7 @@ using Application.Users.Interfaces;
 
 namespace Application.Moderators.Commands.DeactivateUser;
 
-public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserCommand, Result>
+public sealed class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUsersRepository _usersRepository;
@@ -61,11 +61,11 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
                 command.ModeratorId, command.UserId);
             return Result.Failure(ModeratorDomainErrors.CannotManageUsers);
         }
-        
+
         var user = await _usersRepository
             .GetByIdWithRefreshTokens(command.UserId, cancellationToken)
             .ConfigureAwait(false);
-        
+
         if (user is null)
         {
             _logger.LogError(
@@ -73,7 +73,7 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
                 command.ModeratorId, command.UserId);
             return Result.Failure(UserErrors.NotFound);
         }
-        
+
         var activateUserResult = moderator.DeactivateUser(user);
         if (activateUserResult.IsFailure)
         {
@@ -83,14 +83,19 @@ public class DeactivateUserCommandHandler : ICommandHandler<DeactivateUserComman
                 command.ModeratorId, command.UserId, activateUserResult.Error.Description);
             return activateUserResult;
         }
-        
+
         _usersRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        _logger.LogInformation(
-            "Moderator {ModeratorId} successfully deactivated User {UserId}.",
-            command.ModeratorId, command.UserId);
+
+        Log.LogModeratorSuccessfullyDeactivatedUser(_logger, command.ModeratorId, command.UserId);
 
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(LogLevel.Trace, "Moderator {ModeratorId} successfully deactivated User {UserId}.")]
+    internal static partial void LogModeratorSuccessfullyDeactivatedUser(
+        ILogger logger, Guid moderatorId, Guid userId);
 }

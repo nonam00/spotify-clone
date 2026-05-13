@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Moderators.Commands.UnpublishSong;
 
-public class UnpublishSongCommandValidator : AbstractValidator<UnpublishSongCommand>
+public sealed class UnpublishSongCommandValidator : AbstractValidator<UnpublishSongCommand>
 {
     public UnpublishSongCommandValidator()
     {

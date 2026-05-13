@@ -10,7 +10,8 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.UpdateModeratorPermissions;
 
-public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateModeratorPermissionsCommand, Result>
+public sealed class UpdateModeratorPermissionsCommandHandler
+    : ICommandHandler<UpdateModeratorPermissionsCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -40,7 +41,7 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
                 command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
             return Result.Failure(ModeratorErrors.NotFound);
         }
-        
+
         if (!managingModerator.IsActive)
         {
             _logger.LogError(
@@ -59,11 +60,11 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
                 command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId);
             return Result.Failure(ModeratorDomainErrors.CannotManageModerators);
         }
-        
+
         var moderatorToUpdate = await _moderatorsRepository
             .GetById(command.ModeratorToUpdatePermissionsId, cancellationToken)
             .ConfigureAwait(false);
-        
+
         if (moderatorToUpdate is null)
         {
             _logger.LogError(
@@ -91,14 +92,22 @@ public class UpdateModeratorPermissionsCommandHandler : ICommandHandler<UpdateMo
                 command.ManagingModeratorId, command.ModeratorToUpdatePermissionsId, updateResult.Error.Description);
             return Result.Failure(updateResult.Error);
         }
-        
+
         _moderatorsRepository.Update(moderatorToUpdate);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation(
-            "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}.",
-            command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
+        Log.LogModeratorPermissionsWereUpdatedByManagingModerator(
+            _logger, command.ModeratorToUpdatePermissionsId, command.ManagingModeratorId);
 
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorToUpdateId} permissions were updated by managing moderator {ManagingModeratorId}.")]
+    public static partial void LogModeratorPermissionsWereUpdatedByManagingModerator(
+        ILogger logger, Guid moderatorToUpdateId, Guid managingModeratorId);
 }

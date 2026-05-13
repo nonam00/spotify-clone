@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Moderators.Commands.ActivateModerator;
 
-public class ActivateModeratorCommandValidator : AbstractValidator<ActivateModeratorCommand>
+public sealed class ActivateModeratorCommandValidator : AbstractValidator<ActivateModeratorCommand>
 {
     public ActivateModeratorCommandValidator()
     {

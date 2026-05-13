@@ -1,6 +1,6 @@
 namespace Application.Moderators.Models;
 
-public record ModeratorVm(
+public sealed record ModeratorVm(
     Guid Id,
     string Email,
     string FullName,

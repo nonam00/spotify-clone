@@ -85,10 +85,19 @@ public sealed class ActivateModeratorCommandHandler : ICommandHandler<ActivateMo
         _moderatorsRepository.Update(moderatorToActivate);
         await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         
-        _logger.LogInformation(
-            "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.",
-            command.ModeratorToActivateId, command.ManagingModeratorId);
+        Log.LogModeratorWasSuccessfullyActivatedByManagingModerator(_logger, command.ModeratorToActivateId, command.ManagingModeratorId);
         
         return Result.Success();
     }
+}
+
+internal static partial class Log
+{
+    [LoggerMessage(
+        LogLevel.Trace,
+        "Moderator {ModeratorToActivateId} was successfully activated by managing moderator {ManagingModeratorId}.")]
+    internal static partial void LogModeratorWasSuccessfullyActivatedByManagingModerator(
+        ILogger logger,
+        Guid moderatorToActivateId,
+        Guid managingModeratorId);   
 }

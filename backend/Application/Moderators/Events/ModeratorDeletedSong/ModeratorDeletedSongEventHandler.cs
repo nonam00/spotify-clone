@@ -4,7 +4,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Events.ModeratorDeletedSong;
 
-public class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
+public sealed class ModeratorDeletedSongEventHandler : IDomainEventHandler<ModeratorDeletedSongEvent>
 {
     private readonly IFileServicePublisher _fileServicePublisher;
 

@@ -17,7 +17,8 @@ public class Song : AggregateRoot<Guid>
     public DateTime CreatedAt { get; private set; }
     public bool MarkedForDeletion { get; private set; }
 
-    public IReadOnlyList<LyricsSegment> LyricsSegments { get; private set; } = [];
+    private List<LyricsSegment> _lyricsSegments = [];
+    public IReadOnlyList<LyricsSegment> LyricsSegments => _lyricsSegments.AsReadOnly();
     public virtual User? Uploader { get; private set; }
 
     private Song() { } // For EF Core
@@ -83,6 +84,8 @@ public class Song : AggregateRoot<Guid>
     {
         ContainsExplicitContent = containsExplicitContent;
         
+        _lyricsSegments.Clear();
+        
         var lyricsSegments = lyricsSegmentsData
             .Select(lsd => new LyricsSegment(
                 songId: Id, 
@@ -90,7 +93,7 @@ public class Song : AggregateRoot<Guid>
             ))
             .ToList();
         
-        LyricsSegments = lyricsSegments;
+        _lyricsSegments.AddRange(lyricsSegments);
     }
     
     internal Result MarkForDeletion()

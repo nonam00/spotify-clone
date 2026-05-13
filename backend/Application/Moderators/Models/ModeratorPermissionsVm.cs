@@ -1,6 +1,6 @@
 namespace Application.Moderators.Models;
 
-public record ModeratorPermissionsVm(
+public sealed record ModeratorPermissionsVm(
     bool CanManageUsers,
     bool CanManageContent,
     bool CanViewReports,
