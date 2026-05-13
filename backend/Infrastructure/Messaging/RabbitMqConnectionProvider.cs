@@ -3,7 +3,7 @@ using RabbitMQ.Client;
 
 namespace Infrastructure.Messaging;
 
-public class RabbitMqConnectionProvider : IAsyncDisposable
+public sealed class RabbitMqConnectionProvider : IAsyncDisposable
 {
     private readonly ConnectionFactory _factory;
     private IConnection? _connection;
@@ -63,6 +63,5 @@ public class RabbitMqConnectionProvider : IAsyncDisposable
             await _connection.DisposeAsync().ConfigureAwait(false);
         }
         _semaphoreSlim.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

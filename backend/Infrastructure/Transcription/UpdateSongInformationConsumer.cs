@@ -12,7 +12,7 @@ using Infrastructure.Messaging;
 
 namespace Infrastructure.Transcription;
 
-public class UpdateSongInformationConsumer : BackgroundService
+public sealed class UpdateSongInformationConsumer : BackgroundService
 {
     private readonly RabbitMqConnectionProvider _connectionProvider;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -117,7 +117,6 @@ public class UpdateSongInformationConsumer : BackgroundService
     {
         _channel?.Dispose();
         _connection?.Dispose();
-        GC.SuppressFinalize(this);
         base.Dispose();
     }
 }

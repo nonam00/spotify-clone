@@ -3,7 +3,7 @@ using Application.Shared.Messaging;
 
 namespace Infrastructure.Email;
 
-public class EmailServicePublisher : IEmailServicePublisher
+public sealed class EmailServicePublisher : IEmailServicePublisher
 {
     private readonly IMessagePublisher _publisher;
     

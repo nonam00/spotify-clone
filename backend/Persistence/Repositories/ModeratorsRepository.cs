@@ -42,7 +42,7 @@ public sealed class ModeratorsRepository : IModeratorsRepository
     
     public void Update(Moderator moderator) => _dbContext.Moderators.Update(moderator);
 
-    private static readonly Expression<Func<Moderator, ModeratorVm >> ToVmExpression = moderator =>
+    private static readonly Expression<Func<Moderator, ModeratorVm>> ToVmExpression = moderator =>
         new ModeratorVm(
             moderator.Id,
             moderator.Email,

@@ -5,7 +5,7 @@ using Application.Shared.Data;
 
 namespace Persistence;
 
-public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
+public sealed class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
 {
     private readonly AppDbContext _dbContext;
     private readonly IDomainEventDispatcher _domainEventDispatcher;
@@ -65,12 +65,10 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     public void Dispose()
     {
         _dbContext.Dispose();
-        GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
     {
         await _dbContext.DisposeAsync();
-        GC.SuppressFinalize(this);
     }
 }

@@ -7,7 +7,7 @@ using Infrastructure.Transcription;
 
 namespace Infrastructure.Messaging;
 
-public class RabbitMqTopologyInitializer
+public sealed class RabbitMqTopologyInitializer
 {
     private readonly RabbitMqConnectionProvider _connectionProvider;
     private readonly ILogger<RabbitMqTopologyInitializer> _logger;

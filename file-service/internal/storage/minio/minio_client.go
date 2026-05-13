@@ -108,19 +108,20 @@ func (m *MinioClient) GeneratePresignedGetURL(
 	fileID string,
 	isInternalRequest bool,
 ) (*domain.PresignedURLResponse, error) {
-	// Check cache first
-	cacheKey := m.cache.GenerateKey(fileType, fileID)
-	if cached, found := m.cache.Get(ctx, cacheKey); found {
-		m.logger.Info().
-			Str("file_id", fileID).
-			Str("file_type", string(fileType)).
-			Msg("Presigned GET URL retrieved from cache")
-		return cached, nil
+	// Check cache first for external requests
+	if !isInternalRequest {
+		cacheKey := m.cache.GenerateKey(fileType, fileID)
+		if cached, found := m.cache.Get(ctx, cacheKey); found {
+			m.logger.Info().
+				Str("file_id", fileID).
+				Str("file_type", string(fileType)).
+				Msg("Presigned GET URL retrieved from cache")
+			return cached, nil
+		}
 	}
 
 	// Generate new presigned URL
 	bucket := m.getBucketByFileType(fileType)
-
 	reqParams := make(url.Values)
 
 	presignedUrl, err := m.client.PresignedGetObject(ctx, bucket, fileID, m.config.PresignExpiry, reqParams)
@@ -134,9 +135,12 @@ func (m *MinioClient) GeneratePresignedGetURL(
 		FileID:    fileID,
 	}
 
-	// Cache the response with TTL matching the presign expiry
-	if err := m.cache.Set(ctx, cacheKey, response, m.config.PresignExpiry); err != nil {
-		m.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to cache presigned URL")
+	// Cache the response with TTL matching the presign expiry for external requests
+	if !isInternalRequest {
+		cacheKey := m.cache.GenerateKey(fileType, fileID)
+		if err := m.cache.Set(ctx, cacheKey, response, m.config.PresignExpiry); err != nil {
+			m.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to cache presigned URL")
+		}
 	}
 
 	m.logger.Info().

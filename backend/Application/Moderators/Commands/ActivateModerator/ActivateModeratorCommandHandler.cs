@@ -9,7 +9,7 @@ using Application.Shared.Messaging;
 
 namespace Application.Moderators.Commands.ActivateModerator;
 
-public class ActivateModeratorCommandHandler : ICommandHandler<ActivateModeratorCommand, Result>
+public sealed class ActivateModeratorCommandHandler : ICommandHandler<ActivateModeratorCommand, Result>
 {
     private readonly IModeratorsRepository _moderatorsRepository;
     private readonly IUnitOfWork _unitOfWork;
