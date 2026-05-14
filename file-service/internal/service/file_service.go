@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"file-service/internal/storage/cache"
 	"fmt"
+	"time"
 
 	"file-service/internal/domain"
 	"file-service/internal/storage/minio"
@@ -19,13 +21,15 @@ type FileService interface {
 }
 
 type fileService struct {
-	storage minio.MinioClient
+	storage *minio.MinioClient
+	cache   cache.URLCache
 	logger  *logger.Logger
 }
 
-func NewFileService(storage *minio.MinioClient, logger *logger.Logger) FileService {
+func NewFileService(storage *minio.MinioClient, cache cache.URLCache, logger *logger.Logger) FileService {
 	return &fileService{
-		storage: *storage,
+		storage: storage,
+		cache:   cache,
 		logger:  logger.WithComponent("file_service"),
 	}
 }
@@ -55,6 +59,18 @@ func (s *fileService) GenerateDownloadURL(
 	fileID string,
 	isInternalRequest bool,
 ) (*domain.PresignedURLResponse, error) {
+	// Check cache first for external requests
+	if !isInternalRequest {
+		cacheKey := s.cache.GenerateKey(fileType, fileID)
+		if cached, found := s.cache.Get(ctx, cacheKey); found {
+			s.logger.Info().
+				Str("file_id", fileID).
+				Str("file_type", string(fileType)).
+				Msg("Presigned GET URL retrieved from cache")
+			return cached, nil
+		}
+	}
+
 	exists, err := s.storage.CheckFileExists(ctx, fileType, fileID)
 
 	if err != nil {
@@ -81,6 +97,14 @@ func (s *fileService) GenerateDownloadURL(
 			Str("file_type", string(fileType)).
 			Msg("Failed to generate download URL")
 		return nil, fmt.Errorf("failed to generate download URL: %w", err)
+	}
+
+	// Cache the response with TTL matching the presign expiry for external requests
+	if !isInternalRequest {
+		cacheKey := s.cache.GenerateKey(fileType, fileID)
+		if err := s.cache.Set(ctx, cacheKey, presignedURL, time.Until(presignedURL.ExpiresAt)); err != nil {
+			s.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to cache presigned URL")
+		}
 	}
 
 	s.logger.Info().
@@ -128,6 +152,12 @@ func (s *fileService) DeleteFile(ctx context.Context, fileType domain.FileType, 
 			Str("file_type", string(fileType)).
 			Msg("Failed to delete file")
 		return fmt.Errorf("failed to delete file: %w", err)
+	}
+
+	// Invalidate cache for this file
+	cacheKey := s.cache.GenerateKey(fileType, fileID)
+	if err := s.cache.Delete(ctx, cacheKey); err != nil {
+		s.logger.Warn().Err(err).Str("file_id", fileID).Msg("Failed to invalidate cache")
 	}
 
 	s.logger.Info().

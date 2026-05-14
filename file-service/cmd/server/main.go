@@ -37,12 +37,12 @@ func main() {
 		l.Fatal().Err(err).Msg("Failed to initialize cache")
 	}
 
-	minioClient, err := minio.NewMinioClient(&cfg.Minio, urlCache, l)
+	minioClient, err := minio.NewMinioClient(&cfg.Minio, l)
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to initialize Minio client")
 	}
 
-	fileService := service.NewFileService(minioClient, l)
+	fileService := service.NewFileService(minioClient, urlCache, l)
 	fileHandler := handler.NewFileHandler(fileService, l)
 
 	// Initialize and start RabbitMQ delete file consumer

@@ -21,7 +21,11 @@ type DeleteFileConsumer struct {
 	logger      *logger.Logger
 }
 
-func NewDeleteFileConsumer(cfg *config.RabbitMQConfig, fileService service.FileService, l *logger.Logger) *DeleteFileConsumer {
+func NewDeleteFileConsumer(
+	cfg *config.RabbitMQConfig,
+	fileService service.FileService,
+	l *logger.Logger,
+) *DeleteFileConsumer {
 	return &DeleteFileConsumer{
 		cfg:         cfg,
 		fileService: fileService,

@@ -31,8 +31,8 @@ The project is built on a microservices architecture and includes:
 - Using distributed cache based on Redis for better performance on getting files
 
 ### AI Transcription & Moderation Service
-– Converts uploaded audio tracks to text using **Faster Whisper** for high-speed, accurate speech-to-text.
-– Scans transcriptions for inappropriate content with **better-profanity**
+- Converts uploaded audio tracks to text using **Faster Whisper** for high-speed, accurate speech-to-text.
+- Scans transcriptions for inappropriate content with **better-profanity**
 - Integrates with RabbitMQ using **aio-pika** for event-driven processing of newly uploaded tracks.
 
 ### Infrastructure
@@ -69,7 +69,7 @@ The project is built on a microservices architecture and includes:
 - **Moderator Accounts Management** - view and manage moderator accounts, give or revoke permissions if you are super-moderator
 - **Bulk Operations** - publish or delete multiple songs at once
 - **Audio Preview** - listen to songs before moderation decisions
-- **Automatic Explicit Moderation ** – AI-powered content verification
+- **Automatic Explicit Moderation** – AI-powered content verification
 
 ### 📊 Monitoring & Observability
 - **Real-time Metrics** - track application performance and health
